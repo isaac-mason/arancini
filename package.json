@@ -1,0 +1,16 @@
+{
+  "name": "root",
+  "packageManager": "yarn@3.2.1",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "(cd packages/core && yarn build) && (cd packages/react && yarn build)",
+    "change": "yarn changeset",
+    "version": "yarn changeset version",
+    "release": "yarn build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.23.0"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "name": "@recs/core",
+  "packageManager": "yarn@3.2.1",
+  "license": "MIT",
+  "version": "0.0.0",
+  "scripts": {
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@jest/globals": "^28.1.2",
+    "@types/jest": "^28.1.4",
+    "@types/ramda": "^0.28.14",
+    "@types/uuid": "^8.3.4",
+    "@typescript-eslint/eslint-plugin": "^5.7.0",
+    "@typescript-eslint/parser": "^5.7.0",
+    "eslint": "^8.5.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-import-resolver-typescript": "^2.4.0",
+    "eslint-plugin-es": "^4.1.0",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "eslint-plugin-storybook": "^0.5.1",
+    "eslint-plugin-typescript-enum": "^2.1.0",
+    "jest": "^28.1.2",
+    "prettier": "^2.3.2",
+    "ts-jest": "^28.0.5",
+    "typescript": "^4.5.4",
+    "vite": "^2.9.9",
+    "vite-plugin-dts": "^1.2.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.umd.js",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.umd.js"
+    }
+  },
+  "dependencies": {
+    "ramda": "^0.28.0",
+    "uuid": "^8.3.2"
+  }
+}
