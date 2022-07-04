@@ -10,13 +10,13 @@ export class ComponentPool {
   /**
    * The a map of component names to object pools
    */
-  _objectPools: Map<ComponentClass, ObjectPool<Component>> = new Map();
+  private objectPools: Map<ComponentClass, ObjectPool<Component>> = new Map();
 
   /**
    * The total number of component pools
    */
   get totalPools(): number {
-    return this._objectPools.size;
+    return this.objectPools.size;
   }
 
   /**
@@ -24,7 +24,7 @@ export class ComponentPool {
    */
   get totalSize(): number {
     let total = 0;
-    this._objectPools.forEach((p) => {
+    this.objectPools.forEach((p) => {
       total += p.totalSize;
     });
     return total;
@@ -35,7 +35,7 @@ export class ComponentPool {
    */
   get totalFree(): number {
     let total = 0;
-    this._objectPools.forEach((p) => {
+    this.objectPools.forEach((p) => {
       total += p.totalFree;
     });
     return total;
@@ -46,7 +46,7 @@ export class ComponentPool {
    */
   get totalUsed(): number {
     let total = 0;
-    this._objectPools.forEach((p) => {
+    this.objectPools.forEach((p) => {
       total += p.totalUsed;
     });
     return total;
@@ -57,7 +57,7 @@ export class ComponentPool {
    * @param component the component to release
    */
   release(component: Component): void {
-    const pool = this._objectPools.get(component.class);
+    const pool = this.objectPools.get(component.class);
 
     if (pool !== undefined) {
       pool.release(component);
@@ -68,7 +68,7 @@ export class ComponentPool {
    * Requests a component from the component pool
    */
   request<T extends Component>(clazz: ComponentClass<T>): T {
-    let pool = this._objectPools.get(clazz);
+    let pool = this.objectPools.get(clazz);
 
     if (pool === undefined) {
       pool = new ObjectPool<T>(() => {
@@ -80,7 +80,7 @@ export class ComponentPool {
 
         return component;
       });
-      this._objectPools.set(clazz, pool);
+      this.objectPools.set(clazz, pool);
     }
 
     return pool.request() as T;

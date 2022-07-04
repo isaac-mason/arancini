@@ -63,7 +63,7 @@ export class EntityManager {
   addComponentToEntity<T extends Component>(
     entity: Entity,
     clazz: ComponentClass<T>,
-    ...args: Parameters<T['construct']>
+    args: Parameters<T['construct']>
   ): T {
     // request a component from the component pool
     const component = this.componentPool.request(clazz);

@@ -107,7 +107,7 @@ export class Entity {
     const component = this.recs.entityManager.addComponentToEntity(
       this,
       clazz,
-      ...args
+      args
     );
 
     return component;

@@ -26,10 +26,10 @@ export class QueryManager {
 
   private entityRemovalsBuffer: EntityRemovedEvent[] = [];
 
-  private entityCompositionChangesBuffer: Map<Entity, ComponentClass[]> =
+  private entityCompositionChangesBufferGreen: Map<Entity, ComponentClass[]> =
     new Map();
 
-  private entityCompositionChangesBufferTemp: Map<Entity, ComponentClass[]> =
+  private entityCompositionChangesBufferBlue: Map<Entity, ComponentClass[]> =
     new Map();
 
   private world: World;
@@ -84,12 +84,13 @@ export class QueryManager {
    * @param component the component added to the query
    */
   onEntityComponentAdded(entity: Entity, component: Component): void {
-    const compositionChange = this.entityCompositionChangesBuffer.get(entity);
+    const compositionChanges =
+      this.entityCompositionChangesBufferGreen.get(entity);
 
-    if (!compositionChange) {
-      this.entityCompositionChangesBuffer.set(entity, [component.class]);
+    if (!compositionChanges) {
+      this.entityCompositionChangesBufferGreen.set(entity, [component.class]);
     } else {
-      compositionChange.push(component.class);
+      compositionChanges.push(component.class);
     }
   }
 
@@ -99,12 +100,13 @@ export class QueryManager {
    * @param component the component added to the query
    */
   onEntityComponentRemoved(entity: Entity, component: Component): void {
-    const compositionChange = this.entityCompositionChangesBuffer.get(entity);
+    const compositionChanges =
+      this.entityCompositionChangesBufferGreen.get(entity);
 
-    if (!compositionChange) {
-      this.entityCompositionChangesBuffer.set(entity, [component.class]);
+    if (!compositionChanges) {
+      this.entityCompositionChangesBufferGreen.set(entity, [component.class]);
     } else {
-      compositionChange.push(component.class);
+      compositionChanges.push(component.class);
     }
   }
 
@@ -176,15 +178,14 @@ export class QueryManager {
       }
 
       // do not process component composition updates as the entity will be removed from all queries
-      this.entityCompositionChangesBuffer.delete(event.entity);
+      this.entityCompositionChangesBufferGreen.delete(event.entity);
     }
 
-    const entityCompositionChanges = this.entityCompositionChangesBuffer;
-
-    // swap the references for the entity composition changes buffers
-    this.entityCompositionChangesBuffer =
-      this.entityCompositionChangesBufferTemp;
-    this.entityCompositionChangesBufferTemp = entityCompositionChanges;
+    // swap the blue and green entity composition change buffers
+    const entityCompositionChanges = this.entityCompositionChangesBufferGreen;
+    this.entityCompositionChangesBufferGreen =
+      this.entityCompositionChangesBufferBlue;
+    this.entityCompositionChangesBufferBlue = entityCompositionChanges;
 
     for (const [entity, components] of entityCompositionChanges) {
       for (const query of this.queries.values()) {
@@ -217,7 +218,7 @@ export class QueryManager {
     }
 
     // clear the entity composition changes map
-    this.entityCompositionChangesBufferTemp.clear();
+    this.entityCompositionChangesBufferBlue.clear();
   }
 
   private evaluateQuery(
