@@ -3,8 +3,7 @@ import type { Component, ComponentClass } from '../component';
 import type { Entity } from '../entity';
 import type { World } from '../world';
 import type { Space } from '../space';
-import { ComponentPool } from './component-pool';
-import { EntityPool } from './entity-pool';
+import { ComponentPool, EntityPool } from '../pools';
 
 /**
  * EntityManager that manages Spaces that contain Entities, Entities themselves, and Components

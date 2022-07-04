@@ -1,8 +1,8 @@
 import { uuid } from './utils';
 import { Entity } from './entity';
-import { EntityManager } from './internals/entity-manager';
-import { QueryManager } from './internals/query-manager';
-import { SystemManager } from './internals/system-manager';
+import { EntityManager } from './managers/entity-manager';
+import { QueryManager } from './managers/query-manager';
+import { SystemManager } from './managers/system-manager';
 import { Query, QueryDescription } from './query';
 import { Space, SpaceParams } from './space';
 import { System } from './system';
