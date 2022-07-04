@@ -131,7 +131,7 @@ export abstract class Component {
    * ```
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-function, class-methods-use-this
-  construct(..._args: any[]) {}
+  construct(..._args: any[] | []) {}
 
   /**
    * Destruction logic
