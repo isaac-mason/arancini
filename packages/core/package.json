@@ -1,8 +1,13 @@
 {
   "name": "@recs/core",
   "packageManager": "yarn@3.2.1",
+  "author": "Isaac Mason <isaac@isaacmason.com>",
   "license": "MIT",
-  "version": "0.0.0",
+  "version": "0.0.1",
+  "homepage": "https://github.com/isaac-mason/recs",
+  "bugs": {
+    "url": "https://github.com/isaac-mason/recs/issues"
+  },
   "scripts": {
     "test": "jest --coverage",
     "test:watch": "jest --watch",

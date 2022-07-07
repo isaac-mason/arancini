@@ -5,10 +5,11 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "(cd packages/core && yarn build) && (cd packages/react && yarn build)",
+    "build": "(cd packages/core && yarn build) && (cd packages/react-three && yarn build)",
+    "test": "(cd packages/core && yarn test)",
     "change": "yarn changeset",
     "version": "yarn changeset version",
-    "release": "yarn build && changeset publish"
+    "release": "yarn build && yarn test && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.23.0"
