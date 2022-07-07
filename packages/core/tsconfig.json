@@ -17,5 +17,5 @@
     "skipLibCheck": true,
     "baseUrl": "./"
   },
-  "include": ["src"]
+  "include": ["src", ".storybook/stories"]
 }

@@ -6,11 +6,16 @@ import type { Space } from '../space';
 import { ComponentPool, EntityPool } from '../pools';
 
 /**
- * EntityManager that manages Spaces that contain Entities, Entities themselves, and Components
+ * SpaceManager that manages Spaces that contain Entities, Entities themselves, and Components
  *
  * @private used internally, do not use directly
  */
-export class EntityManager {
+export class SpaceManager {
+  /**
+   * Spaces in the SpaceManager
+   */
+  spaces: Map<string, Space> = new Map();
+
   /**
    * An object pool of components
    */
@@ -48,10 +53,19 @@ export class EntityManager {
 
   /**
    * Constructs a new EntityManager
-   * @param world the RECS instance the entity manager is part of
+   * @param world the World the entity manager is part of
    */
   constructor(world: World) {
     this.world = world;
+  }
+
+  /**
+   * Initialise all spaces
+   */
+  init(): void {
+    for (const space of this.spaces.values()) {
+      this.initialiseSpace(space);
+    }
   }
 
   /**
@@ -103,7 +117,7 @@ export class EntityManager {
     space.entities.set(entity.id, entity);
 
     if (space.initialised) {
-      this.world.entityManager.initialiseEntity(entity);
+      this.world.spaceManager.initialiseEntity(entity);
     }
 
     return entity;
@@ -114,6 +128,7 @@ export class EntityManager {
    * @param space the space to destroy
    */
   destroySpace(space: Space): void {
+    this.spaces.delete(space.id);
     for (const entity of space.entities.values()) {
       this.removeEntity(entity, space);
     }
@@ -278,12 +293,44 @@ export class EntityManager {
 
   /**
    * Steps entity event systems for all entities
-   *
-   * @param timeElapsed the time elapsed in seconds
    */
   updateEntities(): void {
     for (const entity of this.entitiesToUpdate.values()) {
       entity.events.tick();
+    }
+  }
+
+  /**
+   * Steps space event systems for all spaces
+   */
+  updateSpaces(): void {
+    for (const space of this.spaces.values()) {
+      space.events.tick();
+    }
+  }
+
+  cleanUpDeadEntitiesAndComponents(): void {
+    // update entities in spaces - checks if entities are alive and releases them if they are dead
+    for (const space of this.spaces.values()) {
+      const dead: Entity[] = [];
+
+      for (const entity of space.entities.values()) {
+        if (!entity.alive) {
+          dead.push(entity);
+        } else {
+          // if the entity is still alive, clean up components
+          for (const component of entity.componentsToRemove.splice(
+            0,
+            entity.componentsToRemove.length
+          )) {
+            this.removeComponentFromEntity(entity, component, true);
+          }
+        }
+      }
+
+      for (const d of dead) {
+        space.remove(d);
+      }
     }
   }
 

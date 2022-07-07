@@ -70,12 +70,12 @@ describe('Spaces', () => {
     expect(space.world).toBe(world);
 
     const entity = space.create.entity();
-    expect(world.spaces.size).toBe(1);
+    expect(world.spaceManager.spaces.size).toBe(1);
     expect(entity.space).toBe(space);
 
     space.destroy();
 
     expect(entity.alive).toBeFalsy();
-    expect(world.spaces.size).toBe(0);
+    expect(world.spaceManager.spaces.size).toBe(0);
   });
 });

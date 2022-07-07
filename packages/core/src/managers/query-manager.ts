@@ -254,7 +254,7 @@ export class QueryManager {
 
   private getQueryResults(queryDescription: QueryDescription): Entity[] {
     const matches: Entity[] = [];
-    for (const space of this.world.spaces.values()) {
+    for (const space of this.world.spaceManager.spaces.values()) {
       for (const entity of space.entities.values()) {
         if (this.evaluateQuery(queryDescription, entity)) {
           matches.push(entity);

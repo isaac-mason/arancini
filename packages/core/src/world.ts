@@ -1,6 +1,6 @@
 import { uuid } from './utils';
 import { Entity } from './entity';
-import { EntityManager } from './managers/entity-manager';
+import { SpaceManager } from './managers/space-manager';
 import { QueryManager } from './managers/query-manager';
 import { SystemManager } from './managers/system-manager';
 import { Query, QueryDescription } from './query';
@@ -29,32 +29,27 @@ import { System } from './system';
  */
 export class World {
   /**
-   * The EntityManager for the RECS instance that manages entities and their components
-   */
-  entityManager: EntityManager;
-
-  /**
-   * A unique id for the RECS instance
+   * A unique id for the World
    */
   id = uuid();
 
   /**
-   * Whether the RECS instance has been initialised
+   * Whether the World has been initialised
    */
   initialised = false;
 
   /**
-   * The query manager for the RECS instance
+   * The SpaceManager for the World that manages spaces, entities and components
+   */
+  spaceManager: SpaceManager;
+
+  /**
+   * The query manager for the World
    */
   queryManager: QueryManager;
 
   /**
-   * Spaces in the RECS instance
-   */
-  spaces: Map<string, Space> = new Map();
-
-  /**
-   * The system manager for the RECS instance
+   * The system manager for the World
    */
   systemManager: SystemManager;
 
@@ -64,10 +59,10 @@ export class World {
   private time = 0;
 
   /**
-   * Constructor for a RECS instance
+   * Constructor for a World
    */
   constructor() {
-    this.entityManager = new EntityManager(this);
+    this.spaceManager = new SpaceManager(this);
     this.queryManager = new QueryManager(this);
     this.systemManager = new SystemManager(this);
   }
@@ -86,10 +81,10 @@ export class World {
     return {
       space: (params?: SpaceParams): Space => {
         const space = new Space(this, params);
-        this.spaces.set(space.id, space);
+        this.spaceManager.spaces.set(space.id, space);
 
         if (this.initialised) {
-          this.entityManager.initialiseSpace(space);
+          this.spaceManager.initialiseSpace(space);
         }
 
         return space;
@@ -107,17 +102,17 @@ export class World {
   }
 
   /**
-   * Destroys the RECS instance
+   * Destroys the World
    */
   destroy(): void {
     this.systemManager.destroy();
-    for (const space of this.spaces.values()) {
-      this.entityManager.destroySpace(space);
+    for (const space of this.spaceManager.spaces.values()) {
+      this.spaceManager.destroySpace(space);
     }
   }
 
   /**
-   * Initialises the RECS instance
+   * Initialises the World
    */
   init(): void {
     // Set the RECS to be initialised
@@ -127,9 +122,7 @@ export class World {
     this.systemManager.init();
 
     // Initialise spaces
-    for (const space of this.spaces.values()) {
-      this.entityManager.initialiseSpace(space);
-    }
+    this.spaceManager.init();
   }
 
   /**
@@ -166,15 +159,14 @@ export class World {
   }
 
   /**
-   * Removes from the RECS instance
+   * Removes from the World
    * @param value the value to remove
    */
   remove(value: System | Space | Query): void {
     if (value instanceof System) {
       this.systemManager.removeSystem(value);
     } else if (value instanceof Space) {
-      this.spaces.delete(value.id);
-      this.entityManager.destroySpace(value);
+      this.spaceManager.destroySpace(value);
     } else if (value instanceof Query) {
       this.queryManager.removeQuery(value);
     }
@@ -191,55 +183,24 @@ export class World {
     this.time += elapsed;
 
     // clean up dead entities
-    this.cleanUpDeadEntitiesAndComponents();
+    this.spaceManager.cleanUpDeadEntitiesAndComponents();
 
     // update queries
     this.queryManager.update();
 
     // recycle destroyed entities and components after queries have been updated
-    this.entityManager.recycle();
+    this.spaceManager.recycle();
 
     // update components - runs update methods for all components that have them
-    this.entityManager.updateComponents(elapsed, this.time);
+    this.spaceManager.updateComponents(elapsed, this.time);
 
     // update entities - steps entity event system
-    this.entityManager.updateEntities();
+    this.spaceManager.updateEntities();
 
     // update spaces - steps space event system
-    for (const space of this.spaces.values()) {
-      space.events.tick();
-    }
+    this.spaceManager.updateSpaces();
 
     // update systems
     this.systemManager.update(elapsed, this.time);
-  }
-
-  private cleanUpDeadEntitiesAndComponents(): void {
-    // update entities in spaces - checks if entities are alive and releases them if they are dead
-    for (const space of this.spaces.values()) {
-      const dead: Entity[] = [];
-
-      for (const entity of space.entities.values()) {
-        if (!entity.alive) {
-          dead.push(entity);
-        } else {
-          // if the entity is still alive, clean up components
-          for (const component of entity.componentsToRemove.splice(
-            0,
-            entity.componentsToRemove.length
-          )) {
-            this.entityManager.removeComponentFromEntity(
-              entity,
-              component,
-              true
-            );
-          }
-        }
-      }
-
-      for (const d of dead) {
-        space.remove(d);
-      }
-    }
   }
 }

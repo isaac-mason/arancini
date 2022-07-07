@@ -98,7 +98,7 @@ export class Space {
   } {
     return {
       entity: (): Entity => {
-        return this.world.entityManager.createEntity(this);
+        return this.world.spaceManager.createEntity(this);
       },
     };
   }
@@ -137,7 +137,7 @@ export class Space {
    * @param entity the entity to remove
    */
   remove(entity: Entity): Space {
-    this.world.entityManager.removeEntity(entity, this);
+    this.world.spaceManager.removeEntity(entity, this);
     return this;
   }
 }

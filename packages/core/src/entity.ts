@@ -89,9 +89,9 @@ export class Entity {
   space!: Space;
 
   /**
-   * The RECS instance the entity is in
+   * The World the entity is in
    */
-  get recs(): World {
+  get world(): World {
     return this.space.world;
   }
 
@@ -104,7 +104,7 @@ export class Entity {
     ...args: Parameters<T['construct']>
   ): T {
     // add the component to this entity
-    const component = this.recs.entityManager.addComponentToEntity(
+    const component = this.world.spaceManager.addComponentToEntity(
       this,
       clazz,
       args
@@ -215,7 +215,7 @@ export class Entity {
     }
 
     if (options?.immediately) {
-      this.recs.entityManager.removeComponentFromEntity(this, component, true);
+      this.world.spaceManager.removeComponentFromEntity(this, component, true);
     } else {
       this.componentsToRemove.push(component);
     }
