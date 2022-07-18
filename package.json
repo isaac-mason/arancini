@@ -5,7 +5,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "(cd packages/core && yarn build) && (cd packages/react-three && yarn build)",
+    "build": "(cd packages/core && yarn build) && (cd packages/react && yarn build)",
     "test": "(cd packages/core && yarn test)",
     "change": "yarn changeset",
     "version": "yarn changeset version",

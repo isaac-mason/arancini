@@ -8,13 +8,14 @@ import {
   System as RSystem,
   World as RWorld,
 } from '@recs/core';
-import { useFrame } from '@react-three/fiber';
 import React, {
   createContext,
+  ForwardedRef,
   useCallback,
   useContext,
   useEffect,
   useImperativeHandle,
+  useRef,
   useState,
 } from 'react';
 import { useData } from './hooks/use-data';
@@ -32,7 +33,7 @@ type EntityProviderContext = {
 };
 
 export type WorldProps = {
-  children?: JSX.Element;
+  children?: React.ReactNode;
   /**
    * @default -50
    */
@@ -40,7 +41,7 @@ export type WorldProps = {
 };
 
 export type SpaceProps = {
-  children?: JSX.Element | JSX.Element[];
+  children?: React.ReactNode;
 };
 
 export type SystemProps = {
@@ -49,16 +50,18 @@ export type SystemProps = {
 
 export type EntityProps = {
   name?: string;
-  children?: JSX.Element | JSX.Element[];
+  children?: React.ReactNode;
 };
 
 export type ComponentProps<T extends RComponent> = {
   type: ComponentClass<T>;
   args?: Parameters<T['construct']>;
-  children?: Parameters<T['construct']> | Parameters<T['construct']>[0];
+  children?: Parameters<T['construct']> extends [unknown]
+    ? Parameters<T['construct']>[0]
+    : Parameters<T['construct']>;
 };
 
-export const createRECS = () => {
+export const createWorld = () => {
   const worldContext = createContext({} as WorldProviderContext);
   const spaceContext = createContext({} as SpaceProviderContext);
   const entityContext = createContext({} as EntityProviderContext);
@@ -75,17 +78,17 @@ export const createRECS = () => {
     }, []);
   }
 
-  const World = ({ children, renderPriority = -50 }: WorldProps) => {
-    useFrame((_, delta) => {
-      world.update(delta);
+  const step = (delta: number) => {
+    world.update(delta);
 
-      queryHooks.forEach((query, rerender) => {
-        if (query.added.length > 0 || query.removed.length > 0) {
-          rerender();
-        }
-      });
-    }, renderPriority);
+    queryHooks.forEach((query, rerender) => {
+      if (query.added.length > 0 || query.removed.length > 0) {
+        rerender();
+      }
+    });
+  };
 
+  const World = ({ children }: WorldProps) => {
     return (
       <worldContext.Provider value={{ world }}>
         {children}
@@ -143,34 +146,43 @@ export const createRECS = () => {
     );
   });
 
-  const Component = <T extends RComponent>({
-    args = [] as never,
-    children,
-    type,
-  }: ComponentProps<T>) => {
+  const ComponentImpl = <T extends RComponent>(
+    { args = [] as never, children, type }: ComponentProps<T>,
+    ref: ForwardedRef<T>
+  ) => {
     const { entity } = useContext(entityContext);
+    const component = useRef<T>();
+
+    useImperativeHandle(ref, () => component.current as T);
 
     useEffect(() => {
-      let component: RComponent;
+      let comp: RComponent;
 
       if (children) {
-        const c = (
+        const childrenArray = (
           !Array.isArray(children) ? [children] : children
         ) as Parameters<T['construct']>;
-        component = entity.addComponent(type, ...c);
+        comp = entity.addComponent(type, ...childrenArray);
       } else {
-        component = entity.addComponent(type, ...args);
+        comp = entity.addComponent(type, ...args);
       }
 
+      component.current = comp as T;
+
       return () => {
-        if (component && entity.has(component.class)) {
-          entity.removeComponent(component);
+        if (comp && entity.has(comp.class)) {
+          entity.removeComponent(comp);
         }
       };
     }, [args, entity]);
 
     return null;
   };
+
+  const Component = React.forwardRef(ComponentImpl) as <T extends RComponent>(
+    props: ComponentProps<T>,
+    ref: ForwardedRef<T>
+  ) => null;
 
   const useQuery = (
     queryDescription: QueryDescription,
@@ -198,6 +210,11 @@ export const createRECS = () => {
     return query;
   };
 
+  const useWorld = () => {
+    const { world: worldInstance } = useContext(worldContext);
+    return worldInstance;
+  };
+
   return {
     World,
     Space,
@@ -205,5 +222,7 @@ export const createRECS = () => {
     Entity,
     Component,
     useQuery,
+    useWorld,
+    step,
   };
 };

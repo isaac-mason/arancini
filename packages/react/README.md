@@ -1,11 +1,11 @@
-# @recs/react-three 🦖
+# @recs/react 🦖
 
 recs - *Reminiscent [of an] Entity Component System*
 
-@react-three/fiber glue for recs.
+react glue for recs.
 
 ```bash
-> yarn add @recs/react-three
+> yarn add @recs/react
 ```
 
 ## Getting Started
