@@ -6,6 +6,7 @@ import { SystemManager } from './managers/system-manager';
 import { Query, QueryDescription } from './query';
 import { Space, SpaceParams } from './space';
 import { System } from './system';
+import { Event, EventHandler, EventSubscription, EventSystem } from './events';
 
 /**
  * A World that can contain Spaces with Entities, Systems, and Queries.
@@ -37,6 +38,11 @@ export class World {
    * Whether the World has been initialised
    */
   initialised = false;
+
+  /**
+   * The world event system
+   */
+  events = new EventSystem({ queued: true });
 
   /**
    * The SpaceManager for the World that manages spaces, entities and components
@@ -200,7 +206,32 @@ export class World {
     // update spaces - steps space event system
     this.spaceManager.updateSpaces();
 
+    // update world - steps world event system
+    this.events.tick();
+
     // update systems
     this.systemManager.update(elapsed, this.time);
+  }
+
+  /**
+   * Broadcasts an event to the World
+   * @param event the event to broadcast in the World
+   */
+  emit<E extends Event | Event>(event: E): void {
+    return this.events.emit(event);
+  }
+
+  /**
+   * Adds a handler for World events
+   * @param eventName the event name
+   * @param handlerName the name of the handler
+   * @param handler the handler function
+   * @returns the id of the new handler
+   */
+  on<E extends Event | Event>(
+    eventName: string,
+    handler: EventHandler<E>
+  ): EventSubscription {
+    return this.events.on(eventName, handler);
   }
 }
