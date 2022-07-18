@@ -59,7 +59,7 @@ export class Space {
   /**
    * The spaces event system
    */
-  events = new EventSystem({ queued: true });
+  events = new EventSystem();
 
   /**
    * A unique ID for the space

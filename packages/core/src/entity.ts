@@ -71,7 +71,7 @@ export class Entity {
   /**
    * The event system for the entity
    */
-  events = new EventSystem({ queued: true });
+  events = new EventSystem();
 
   /**
    * The unique ID of the entity

@@ -22,8 +22,6 @@ describe('World Integration Tests', () => {
       topic: 'event-name',
     });
 
-    world.update(1);
-
     expect(mockFn).toBeCalledTimes(1);
 
     subscription.unsubscribe();
@@ -31,8 +29,6 @@ describe('World Integration Tests', () => {
     world.emit({
       topic: 'event-name',
     });
-
-    world.update(1);
 
     expect(mockFn).toBeCalledTimes(1);
   });

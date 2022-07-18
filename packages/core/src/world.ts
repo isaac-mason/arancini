@@ -26,6 +26,16 @@ import { Event, EventHandler, EventSubscription, EventSystem } from './events';
  * // update the world with a specified time elapsed
  * // (timeElapsed in Components and Systems will be set to this value)
  * world.update(0.1);
+ *
+ * // subscribe to a world event
+ * world.on('message', (e) => {
+ *   // ...
+ * });
+ *
+ * // emit a world event
+ * world.emit({
+ *  topic: 'message',
+ * })
  * ```
  */
 export class World {
@@ -42,7 +52,7 @@ export class World {
   /**
    * The world event system
    */
-  events = new EventSystem({ queued: true });
+  events = new EventSystem();
 
   /**
    * The SpaceManager for the World that manages spaces, entities and components
@@ -199,15 +209,6 @@ export class World {
 
     // update components - runs update methods for all components that have them
     this.spaceManager.updateComponents(elapsed, this.time);
-
-    // update entities - steps entity event system
-    this.spaceManager.updateEntities();
-
-    // update spaces - steps space event system
-    this.spaceManager.updateSpaces();
-
-    // update world - steps world event system
-    this.events.tick();
 
     // update systems
     this.systemManager.update(elapsed, this.time);

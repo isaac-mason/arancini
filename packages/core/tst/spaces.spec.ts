@@ -24,8 +24,6 @@ describe('Spaces', () => {
       topic: 'event-name',
     });
 
-    world.update(1);
-
     expect(mockFn).toBeCalledTimes(1);
 
     subscription.unsubscribe();
@@ -33,8 +31,6 @@ describe('Spaces', () => {
     space.emit({
       topic: 'event-name',
     });
-
-    world.update(1);
 
     expect(mockFn).toBeCalledTimes(1);
   });

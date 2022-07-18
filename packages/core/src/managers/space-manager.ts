@@ -291,24 +291,6 @@ export class SpaceManager {
     }
   }
 
-  /**
-   * Steps entity event systems for all entities
-   */
-  updateEntities(): void {
-    for (const entity of this.entitiesToUpdate.values()) {
-      entity.events.tick();
-    }
-  }
-
-  /**
-   * Steps space event systems for all spaces
-   */
-  updateSpaces(): void {
-    for (const space of this.spaces.values()) {
-      space.events.tick();
-    }
-  }
-
   cleanUpDeadEntitiesAndComponents(): void {
     // update entities in spaces - checks if entities are alive and releases them if they are dead
     for (const space of this.spaces.values()) {
