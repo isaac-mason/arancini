@@ -1,43 +1,29 @@
-import {
-  Component as RComponent,
-  ComponentClass,
-  Entity as REntity,
-  Query,
-  QueryDescription,
-  Space as RSpace,
-  System as RSystem,
-  World as RWorld,
-} from '@recs/core';
+import * as R from '@recs/core';
 import React, {
   createContext,
   ForwardedRef,
-  useCallback,
   useContext,
   useEffect,
   useImperativeHandle,
   useRef,
-  useState,
 } from 'react';
 import { useData } from './hooks/use-data';
+import { useRerender } from './hooks/use-rerender';
 
 type WorldProviderContext = {
-  world: RWorld;
+  world: R.World;
 };
 
 type SpaceProviderContext = {
-  space: RSpace;
+  space: R.Space;
 };
 
 type EntityProviderContext = {
-  entity: REntity;
+  entity: R.Entity;
 };
 
 export type WorldProps = {
   children?: React.ReactNode;
-  /**
-   * @default -50
-   */
-  renderPriority?: number;
 };
 
 export type SpaceProps = {
@@ -45,7 +31,7 @@ export type SpaceProps = {
 };
 
 export type SystemProps = {
-  system: RSystem;
+  system: R.System;
 };
 
 export type EntityProps = {
@@ -53,8 +39,8 @@ export type EntityProps = {
   children?: React.ReactNode;
 };
 
-export type ComponentProps<T extends RComponent> = {
-  type: ComponentClass<T>;
+export type ComponentProps<T extends R.Component> = {
+  type: R.ComponentClass<T>;
   args?: Parameters<T['construct']>;
   children?: Parameters<T['construct']> extends [unknown]
     ? Parameters<T['construct']>[0]
@@ -66,22 +52,15 @@ export const createWorld = () => {
   const spaceContext = createContext({} as SpaceProviderContext);
   const entityContext = createContext({} as EntityProviderContext);
 
-  const world = new RWorld();
+  const world = new R.World();
   world.init();
 
-  const queryHooks: Map<() => void, Query> = new Map();
-
-  function useRerender(): () => void {
-    const [_, setVersion] = useState(0);
-    return useCallback(() => {
-      setVersion((v) => v + 1);
-    }, []);
-  }
+  const queryRerenderHooks: Map<() => void, R.Query> = new Map();
 
   const step = (delta: number) => {
     world.update(delta);
 
-    queryHooks.forEach((query, rerender) => {
+    queryRerenderHooks.forEach((query, rerender) => {
       if (query.added.length > 0 || query.removed.length > 0) {
         rerender();
       }
@@ -97,7 +76,7 @@ export const createWorld = () => {
   };
 
   const Space = ({ children }: SpaceProps) => {
-    const space = useData((): RSpace => {
+    const space = useData((): R.Space => {
       return world.create.space();
     });
 
@@ -126,27 +105,29 @@ export const createWorld = () => {
     return null;
   };
 
-  const Entity = React.forwardRef<REntity, EntityProps>(({ children }, ref) => {
-    const { space } = useContext(spaceContext);
+  const Entity = React.forwardRef<R.Entity, EntityProps>(
+    ({ children }, ref) => {
+      const { space } = useContext(spaceContext);
 
-    const entity = useData<REntity>(() => space.create.entity());
+      const entity = useData<R.Entity>(() => space.create.entity());
 
-    useImperativeHandle(ref, () => entity);
+      useImperativeHandle(ref, () => entity);
 
-    useEffect(() => {
-      return () => {
-        entity.destroy();
-      };
-    }, []);
+      useEffect(() => {
+        return () => {
+          entity.destroy();
+        };
+      }, []);
 
-    return (
-      <entityContext.Provider value={{ entity }}>
-        {children}
-      </entityContext.Provider>
-    );
-  });
+      return (
+        <entityContext.Provider value={{ entity }}>
+          {children}
+        </entityContext.Provider>
+      );
+    }
+  );
 
-  const ComponentImpl = <T extends RComponent>(
+  const ComponentImpl = <T extends R.Component>(
     { args = [] as never, children, type }: ComponentProps<T>,
     ref: ForwardedRef<T>
   ) => {
@@ -156,7 +137,7 @@ export const createWorld = () => {
     useImperativeHandle(ref, () => component.current as T);
 
     useEffect(() => {
-      let comp: RComponent;
+      let comp: R.Component;
 
       if (children) {
         const childrenArray = (
@@ -179,13 +160,13 @@ export const createWorld = () => {
     return null;
   };
 
-  const Component = React.forwardRef(ComponentImpl) as <T extends RComponent>(
+  const Component = React.forwardRef(ComponentImpl) as <T extends R.Component>(
     props: ComponentProps<T>,
     ref: ForwardedRef<T>
   ) => null;
 
   const useQuery = (
-    queryDescription: QueryDescription,
+    queryDescription: R.QueryDescription,
     shouldRerender = true
   ) => {
     const query = useData(
@@ -197,12 +178,12 @@ export const createWorld = () => {
 
     useEffect(() => {
       if (shouldRerender) {
-        queryHooks.set(rerender, query);
+        queryRerenderHooks.set(rerender, query);
       }
 
       return () => {
         if (shouldRerender) {
-          queryHooks.delete(rerender);
+          queryRerenderHooks.delete(rerender);
         }
       };
     }, []);
