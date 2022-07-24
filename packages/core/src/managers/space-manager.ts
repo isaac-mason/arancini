@@ -85,12 +85,8 @@ export class SpaceManager {
     // set the components entity
     component.entity = entity;
 
-    // construct the component instance with args if they are present
-    if (args.length > 0) {
-      component.construct(...args);
-    } else {
-      component.construct();
-    }
+    // construct the component instance
+    component.construct(...args);
 
     // add the component to the entity components maps
     entity.components.set(clazz, component);
@@ -225,12 +221,12 @@ export class SpaceManager {
    *
    * @param entity the entity to remove from
    * @param component the component to remove
-   * @param notifyQueryManager whether the query manager should be notified
+   * @param entityAlive whether the entity is alive and the query manager should be notified.
    */
   removeComponentFromEntity(
     entity: Entity,
     component: Component,
-    notifyQueryManager: boolean
+    entityAlive: boolean
   ): void {
     // remove the onUpdate method from the component update pool if present
     this.componentsToUpdate.delete(component.id);
@@ -240,7 +236,7 @@ export class SpaceManager {
       component.onDestroy();
     }
 
-    if (notifyQueryManager) {
+    if (entityAlive) {
       // tell the query manager that the component has been removed from the entity
       this.world.queryManager.onEntityComponentRemoved(entity, component);
     }
