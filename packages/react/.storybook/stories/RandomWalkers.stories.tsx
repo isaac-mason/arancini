@@ -1,8 +1,9 @@
 import { OrbitControls } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { Component as RComponent } from '@recs/core';
+import * as RECS from '@recs/core';
 import React from 'react';
 import * as THREE from 'three';
+import { Vector3Tuple } from 'three';
 import { createWorld } from '../../src';
 import { Setup } from '../Setup';
 
@@ -20,17 +21,18 @@ const R3FStepper = () => {
   return null;
 };
 
-class Walking extends RComponent {}
+class Walking extends RECS.Component {}
 
-class Position extends RComponent {
+class Transform extends RECS.Component {
   group!: THREE.Group;
 
-  construct(position: [number, number, number]) {
+  construct(props: { position: Vector3Tuple }) {
     this.group = new THREE.Group();
-    this.group.position.set(...position);
+    this.group.position.set(...props.position);
   }
 }
-class Renderable extends RComponent {
+
+class Renderable extends RECS.Component {
   jsx!: JSX.Element;
 
   construct(jsx: JSX.Element): void {
@@ -38,25 +40,25 @@ class Renderable extends RComponent {
   }
 }
 
-const WalkingSystem = () => {
-  const { all: walkers } = R.useQuery([Position, Walking]);
+class WalkingSystem extends RECS.System {
+  queries = {
+    walking: [Transform, Walking],
+  };
 
-  useFrame((_, delta) => {
-    walkers.forEach((walker) => {
-      const { group } = walker.get(Position);
+  onUpdate(timeElapsed: number) {
+    this.results.walking.all.forEach((walker) => {
+      const { group } = walker.get(Transform);
 
-      group.position.x += (Math.random() - 0.5) * 2 * delta;
-      group.position.y += (Math.random() - 0.5) * 2 * delta;
-      group.position.z += (Math.random() - 0.5) * 2 * delta;
+      group.position.x += (Math.random() - 0.5) * 2 * timeElapsed;
+      group.position.y += (Math.random() - 0.5) * 2 * timeElapsed;
+      group.position.z += (Math.random() - 0.5) * 2 * timeElapsed;
 
-      group.rotation.x += (Math.random() - 0.5) * 2 * delta;
-      group.rotation.y += (Math.random() - 0.5) * 2 * delta;
-      group.rotation.z += (Math.random() - 0.5) * 2 * delta;
+      group.rotation.x += (Math.random() - 0.5) * 2 * timeElapsed;
+      group.rotation.y += (Math.random() - 0.5) * 2 * timeElapsed;
+      group.rotation.z += (Math.random() - 0.5) * 2 * timeElapsed;
     });
-  });
-
-  return null;
-};
+  }
+}
 
 const RendererSystem = () => {
   const { all: entities } = R.useQuery([Renderable]);
@@ -64,7 +66,7 @@ const RendererSystem = () => {
     <>
       {entities.map((entity) => {
         const { jsx } = entity.get(Renderable);
-        const { group } = entity.get(Position);
+        const { group } = entity.get(Transform);
         return (
           <primitive key={entity.id} object={group}>
             {jsx}
@@ -87,11 +89,15 @@ const App = () => {
           <R.Entity key={idx}>
             {/* initial position */}
             <R.Component
-              type={Position}
+              type={Transform}
               args={[
-                Array.from({ length: 3 }).map(
-                  () => (Math.random() - 0.5) * 4
-                ) as [number, number, number],
+                {
+                  position: [
+                    (Math.random() - 0.5) * 4,
+                    (Math.random() - 0.5) * 4,
+                    (Math.random() - 0.5) * 4,
+                  ],
+                },
               ]}
             />
 
@@ -109,10 +115,10 @@ const App = () => {
         ))}
       </R.Space>
 
-      {/* system to move the walkers */}
-      <WalkingSystem />
+      {/* class system to move the walkers */}
+      <R.System system={new WalkingSystem()} />
 
-      {/* system to render the walkers */}
+      {/* component system to render the walkers */}
       <RendererSystem />
 
       <OrbitControls />
