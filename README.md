@@ -2,4 +2,4 @@
 
 recs - *Reminiscent [of an] Entity Component System*
 
-**work in progress :)**
+**Under active alpha development! Minor version bumps will have breaking changes. Stable release coming soon :)**
