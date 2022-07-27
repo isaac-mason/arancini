@@ -41,12 +41,14 @@ class Renderable extends RECS.Component {
 }
 
 class WalkingSystem extends RECS.System {
-  queries = {
-    walking: [Transform, Walking],
-  };
+  walking!: RECS.Query;
+  
+  onInit() {
+    this.walking = this.query([Transform, Walking]);
+  }
 
   onUpdate(timeElapsed: number) {
-    this.results.walking.all.forEach((walker) => {
+    this.walking.all.forEach((walker) => {
       const { group } = walker.get(Transform);
 
       group.position.x += (Math.random() - 0.5) * 2 * timeElapsed;

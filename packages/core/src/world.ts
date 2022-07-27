@@ -112,7 +112,7 @@ export class World {
    * Adds a system to the RECS
    * @param system the system to add to the RECS
    */
-  addSystem(system: System): System {
+  addSystem<T extends System>(system: T): T {
     this.systemManager.addSystem(system);
     return system;
   }

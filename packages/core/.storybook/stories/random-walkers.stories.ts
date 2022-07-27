@@ -1,5 +1,5 @@
 import { useEffect } from '@storybook/client-api';
-import World, { Component, System } from '../../src';
+import World, { Component, Query, System } from '../../src';
 
 class Position extends Component {
   // * note the not null `!:` syntax! *
@@ -27,15 +27,17 @@ class DrawSystem extends System {
   canvas = document.getElementById('example-canvas') as HTMLCanvasElement;
 
   // A `System` can have many queries for entities, filtering by what components they have
-  queries = {
-    // this query is called `toDraw`
-    toDraw: {
+  // this query is called `toDraw`
+  toDraw!: Query;
+  
+  onInit(): void {
+    this.toDraw = this.query({
       // we want to find entities with a position
       all: [Position],
       // we want to find entities that are either red or blue
       one: [Red, Blue],
-    },
-  };
+    })
+  }
 
   // On each update, let's draw
   onUpdate() {
@@ -46,10 +48,10 @@ class DrawSystem extends System {
     const yOffset = this.canvas.height / 2;
 
     // the results of the `toDraw` query are available under
-    // `this.results.toDraw.all`
-    // We can also check `this.results.toDraw.added` and this.results.toDraw.removed`
+    // `this.toDraw.all`
+    // We can also check `this.toDraw.added` and this.toDraw.removed`
     // to get entities that have been matched and unmatched from the query
-    this.results.toDraw.all.forEach((entity) => {
+    this.toDraw.all.forEach((entity) => {
       // let's get the position of the random walker
       const { x, y } = entity.get(Position);
 
@@ -69,11 +71,11 @@ class DrawSystem extends System {
 }
 
 class WalkSystem extends System {
-  queries = {
-    walkers: {
-      all: [Position],
-    },
-  };
+  walkers!: Query;
+
+  onInit(): void {
+    this.walkers = this.query([Position]);
+  }
 
   static timeBetweenMovements = 0.05;
 
@@ -83,7 +85,7 @@ class WalkSystem extends System {
     this.movementCountdown -= timeElapsed;
 
     if (this.movementCountdown <= 0) {
-      this.results.walkers.all.forEach((entity) => {
+      this.walkers.all.forEach((entity) => {
         // move the walker in a random direction
         const position = entity.get(Position);
         position.x = position.x + Math.random() * 2 - 1;
@@ -96,14 +98,16 @@ class WalkSystem extends System {
 }
 
 class FlipSystem extends System {
-  queries = {
-    walkers: {
+  walkers!: Query;
+
+  onInit(): void {
+    this.walkers = this.query({
       one: [Red, Blue],
-    },
-  };
+    });
+  }
 
   onUpdate() {
-    this.results.walkers.all.forEach((entity) => {
+    this.walkers.all.forEach((entity) => {
       // small chance of changing color
       if (Math.random() >= 0.95) {
         if (entity.has(Blue)) {

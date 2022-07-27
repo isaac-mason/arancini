@@ -32,7 +32,7 @@ You can also optionally add behavior to Components for unity-like Game Objects.
 **1. Import everything we need**
 
 ```ts
-import World, { Component, System } from '@recs/core';
+import World, { Component, Query, System } from '@recs/core';
 ```
 
 **2. Create a few simple components to store some data**
@@ -75,13 +75,16 @@ class DrawSystem extends System {
   canvas = document.getElementById('example-canvas') as HTMLCanvasElement;
 
   // A `System` can have many queries for entities, filtering by what components they have
-  queries = {
-    // this query is called `toDraw`
-    toDraw: {
+  // this query is called `toDraw`
+  toDraw!: Query;
+
+  onInit() {
+    // initialise the `toDraw` query
+    this.toDraw = this.query({
       // we want to find entities with all of these components
       all: [Position, Color],
-    },
-  };
+    });
+  }
 
   // On each update, let's draw
   onUpdate() {
@@ -92,10 +95,10 @@ class DrawSystem extends System {
     const yOffset = this.canvas.height / 2;
 
     // the results of the `toDraw` query are available under
-    // `this.results.toDraw.all`
-    // We can also check `this.results.toDraw.added` and this.results.toDraw.removed`
+    // `this.toDraw.all`
+    // We can also check `this.toDraw.added` and this.toDraw.removed`
     // to get entities that have been matched and unmatched from the query
-    this.results.toDraw.all.forEach((entity) => {
+    this.toDraw.all.forEach((entity) => {
       // let's get the position of the random walker
       const { x, y } = entity.get(Position);
 
@@ -119,22 +122,24 @@ class DrawSystem extends System {
 
 ```ts
 class WalkSystem extends System {
-  queries = {
-    walkers: {
-      all: [Position],
-    },
-  };
+  walkers!: Query;
+
+  movementCountdown = WalkSystem.timeBetweenMovements;
 
   // our random walkers should move every 0.05s
   static timeBetweenMovements = 0.05;
 
-  movementCountdown = WalkSystem.timeBetweenMovements;
+  onInit() {
+    this.walkers = this.query({
+      all: [Position],
+    });
+  }
 
   onUpdate(timeElapsed: number) {
     this.movementCountdown -= timeElapsed;
 
     if (this.movementCountdown <= 0) {
-      this.results.walkers.all.forEach((entity) => {
+      this.walkers.all.forEach((entity) => {
         // move the walker in a random direction
         const position = entity.get(Position);
         position.x = position.x + Math.random() * 2 - 1;

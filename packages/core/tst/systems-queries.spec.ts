@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { describe, it, expect } from '@jest/globals';
-import { Component, World, System, QueryDescription } from '../src';
+import { Component, World, System, QueryDescription, Query } from '../src';
 
 class TestComponentOne extends Component {}
 class TestComponentTwo extends Component {}
@@ -20,11 +20,13 @@ describe('Systems and Queries Integration Tests', () => {
   describe('Systems', () => {
     it('systems can contain queries for components', () => {
       class TestSystem extends System {
-        queries = {
-          testQueryName: {
+        testQueryName!: Query;
+
+        onInit(): void {
+          this.testQueryName = this.query({
             all: [TestComponentOne, TestComponentTwo],
-          },
-        };
+          });
+        }
       }
 
       const system = world.addSystem(new TestSystem());
@@ -36,27 +38,27 @@ describe('Systems and Queries Integration Tests', () => {
       entity.addComponent(TestComponentOne);
       entity.addComponent(TestComponentTwo);
 
-      expect(system.results.testQueryName.all.length).toBe(0);
-      expect(system.results.testQueryName.added.length).toBe(0);
-      expect(system.results.testQueryName.removed.length).toBe(0);
+      expect(system.testQueryName.all.length).toBe(0);
+      expect(system.testQueryName.added.length).toBe(0);
+      expect(system.testQueryName.removed.length).toBe(0);
 
       world.update(1);
 
-      expect(system.results.testQueryName.added.length).toBe(1);
-      expect(system.results.testQueryName.removed.length).toBe(0);
-      expect(system.results.testQueryName.all.length).toBe(1);
+      expect(system.testQueryName.added.length).toBe(1);
+      expect(system.testQueryName.removed.length).toBe(0);
+      expect(system.testQueryName.all.length).toBe(1);
 
       entity.removeComponent(TestComponentOne);
 
-      expect(system.results.testQueryName.all.length).toBe(1);
-      expect(system.results.testQueryName.removed.length).toBe(0);
-      expect(system.results.testQueryName.all.length).toBe(1);
+      expect(system.testQueryName.all.length).toBe(1);
+      expect(system.testQueryName.removed.length).toBe(0);
+      expect(system.testQueryName.all.length).toBe(1);
 
       world.update(1);
 
-      expect(system.results.testQueryName.all.length).toBe(0);
-      expect(system.results.testQueryName.removed.length).toBe(1);
-      expect(system.results.testQueryName.all.length).toBe(0);
+      expect(system.testQueryName.all.length).toBe(0);
+      expect(system.testQueryName.removed.length).toBe(1);
+      expect(system.testQueryName.all.length).toBe(0);
     });
 
     it('recs will call system onInit, onUpdate, and onDestroy methods', () => {
@@ -79,35 +81,42 @@ describe('Systems and Queries Integration Tests', () => {
       world.addSystem(new TestSystem());
 
       expect(world.initialised).toBe(true);
-      expect(systemInitJestFn).toHaveBeenCalledTimes(1);
 
-      const timeElapsed = 1001;
-      world.update(timeElapsed);
-
-      expect(systemUpdateJestFn).toHaveBeenCalledTimes(1);
-
-      expect(systemUpdateJestFn.mock.calls[0][0]).toBe(timeElapsed);
+      const timeElapsedUpdateOne = 1;
+      const timeElapsedUpdateTwo = 2;
+      world.update(timeElapsedUpdateOne);
+      world.update(timeElapsedUpdateTwo);
 
       world.destroy();
+
+      expect(systemInitJestFn).toHaveBeenCalledTimes(1);
+
+      expect(systemUpdateJestFn).toHaveBeenCalledTimes(2);
+      expect(systemUpdateJestFn.mock.calls[0][0]).toBe(timeElapsedUpdateOne);
+      expect(systemUpdateJestFn.mock.calls[1][0]).toBe(timeElapsedUpdateTwo);
 
       expect(systemDestroyJestFn).toHaveBeenCalledTimes(1);
     });
 
     it('systems can be removed, and queries will be removed if they are no longer used by any systems', () => {
+      const description = {
+        all: [TestComponentOne],
+      };
+
       class TestSystemOne extends System {
-        queries = {
-          example: {
-            all: [TestComponentOne],
-          },
-        };
+        example!: Query;
+
+        onInit(): void {
+          this.example = this.query(description);
+        }
       }
 
       class TestSystemTwo extends System {
-        queries = {
-          example: {
-            all: [TestComponentOne],
-          },
-        };
+        example!: Query;
+
+        onInit(): void {
+          this.example = this.query(description);
+        }
       }
 
       const systemOne = new TestSystemOne();
@@ -144,12 +153,19 @@ describe('Systems and Queries Integration Tests', () => {
         all: [TestComponentOne],
       };
 
-      //
       class TestSystemOne extends System {
-        queries = { example: description };
+        example!: Query;
+
+        onInit(): void {
+          this.example = this.query(description);
+        }
       }
       class TestSystemTwo extends System {
-        queries = { example: description };
+        example!: Query;
+
+        onInit(): void {
+          this.example = this.query(description);
+        }
       }
 
       // use the query outside of a system
@@ -320,23 +336,6 @@ describe('Systems and Queries Integration Tests', () => {
       expect(onceOffQueryResults.includes(entityOne)).toBeTruthy();
     });
   });
-
-  // const entity1 = ctx.createEntity();
-  // const entity2 = ctx.createEntity();
-
-  // ctx.addPositionComponent(entity1);
-  // ctx.addVelocityComponent(entity1);
-
-  // ctx.addPositionComponent(entity2);
-  // ctx.addVelocityComponent(entity2);
-
-  // ctx.updateMovementSystem();
-
-  // ctx.removePositionComponent(entity1);
-
-  // ctx.updateMovementSystem();
-
-  // ctx.destroyEntity(entity1);
 
   describe('On Entity Component Changes', () => {
     it('should add entities to a query if the entity matches the query', () => {
@@ -572,11 +571,11 @@ describe('Systems and Queries Integration Tests', () => {
   describe('Query Matching', () => {
     it('updates system query results if an entity matches a query with the ONE condition', () => {
       class TestSystem extends System {
-        queries = {
-          test: {
-            one: [TestComponentOne, TestComponentTwo],
-          },
-        };
+        test!: Query;
+
+        onInit(): void {
+          this.test = this.query({ one: [TestComponentOne, TestComponentTwo] });
+        }
       }
 
       const system = world.addSystem(new TestSystem());
@@ -588,22 +587,22 @@ describe('Systems and Queries Integration Tests', () => {
 
       world.update(1);
 
-      expect(system.results.test.added.length).toBe(1);
-      expect(system.results.test.all.length).toBe(1);
-      expect(system.results.test.removed.length).toBe(0);
+      expect(system.test.added.length).toBe(1);
+      expect(system.test.all.length).toBe(1);
+      expect(system.test.removed.length).toBe(0);
 
-      expect(system.results.test.all.includes(entity)).toBeTruthy();
-      expect(system.results.test.added.includes(entity)).toBeTruthy();
-      expect(system.results.test.removed.includes(entity)).toBeFalsy();
+      expect(system.test.all.includes(entity)).toBeTruthy();
+      expect(system.test.added.includes(entity)).toBeTruthy();
+      expect(system.test.removed.includes(entity)).toBeFalsy();
     });
 
     it('does not update system query results an entity does not match a query with the ONE condition', () => {
       class TestSystem extends System {
-        queries = {
-          test: {
-            one: [TestComponentOne, TestComponentTwo],
-          },
-        };
+        test!: Query;
+
+        onInit(): void {
+          this.test = this.query({ one: [TestComponentOne, TestComponentTwo] });
+        }
       }
 
       const system = world.addSystem(new TestSystem());
@@ -615,34 +614,34 @@ describe('Systems and Queries Integration Tests', () => {
 
       world.update();
 
-      expect(system.results.test.added.length).toBe(1);
-      expect(system.results.test.all.length).toBe(1);
-      expect(system.results.test.removed.length).toBe(0);
+      expect(system.test.added.length).toBe(1);
+      expect(system.test.all.length).toBe(1);
+      expect(system.test.removed.length).toBe(0);
 
-      expect(system.results.test.all.includes(entity)).toBeTruthy();
-      expect(system.results.test.added.includes(entity)).toBeTruthy();
-      expect(system.results.test.removed.includes(entity)).toBeFalsy();
+      expect(system.test.all.includes(entity)).toBeTruthy();
+      expect(system.test.added.includes(entity)).toBeTruthy();
+      expect(system.test.removed.includes(entity)).toBeFalsy();
 
       entity.removeComponent(TestComponentOne);
 
       world.update();
 
-      expect(system.results.test.added.length).toBe(0);
-      expect(system.results.test.all.length).toBe(0);
-      expect(system.results.test.removed.length).toBe(1);
+      expect(system.test.added.length).toBe(0);
+      expect(system.test.all.length).toBe(0);
+      expect(system.test.removed.length).toBe(1);
 
-      expect(system.results.test.all.includes(entity)).toBeFalsy();
-      expect(system.results.test.added.includes(entity)).toBeFalsy();
-      expect(system.results.test.removed.includes(entity)).toBeTruthy();
+      expect(system.test.all.includes(entity)).toBeFalsy();
+      expect(system.test.added.includes(entity)).toBeFalsy();
+      expect(system.test.removed.includes(entity)).toBeTruthy();
     });
 
     it('updates system query results if an entity matches a query with the NOT condition', () => {
       class TestSystem extends System {
-        queries = {
-          test: {
-            not: [TestComponentOne],
-          },
-        };
+        test!: Query;
+
+        onInit(): void {
+          this.test = this.query({ not: [TestComponentOne] });
+        }
       }
 
       const system = world.addSystem(new TestSystem());
@@ -654,22 +653,22 @@ describe('Systems and Queries Integration Tests', () => {
 
       world.update(1);
 
-      expect(system.results.test.added.length).toBe(1);
-      expect(system.results.test.all.length).toBe(1);
-      expect(system.results.test.removed.length).toBe(0);
+      expect(system.test.added.length).toBe(1);
+      expect(system.test.all.length).toBe(1);
+      expect(system.test.removed.length).toBe(0);
 
-      expect(system.results.test.all.includes(entity)).toBeTruthy();
-      expect(system.results.test.added.includes(entity)).toBeTruthy();
-      expect(system.results.test.removed.includes(entity)).toBeFalsy();
+      expect(system.test.all.includes(entity)).toBeTruthy();
+      expect(system.test.added.includes(entity)).toBeTruthy();
+      expect(system.test.removed.includes(entity)).toBeFalsy();
     });
 
     it('does not update system query results if an entity does not match a query with the NOT condition', () => {
       class TestSystem extends System {
-        queries = {
-          test: {
-            not: [TestComponentOne],
-          },
-        };
+        test!: Query;
+
+        onInit(): void {
+          this.test = this.query({ not: [TestComponentOne] });
+        }
       }
 
       const system = world.addSystem(new TestSystem());
@@ -681,20 +680,26 @@ describe('Systems and Queries Integration Tests', () => {
 
       world.update(1);
 
-      expect(system.results.test.added.length).toBe(0);
-      expect(system.results.test.all.length).toBe(0);
-      expect(system.results.test.removed.length).toBe(0);
+      expect(system.test.added.length).toBe(0);
+      expect(system.test.all.length).toBe(0);
+      expect(system.test.removed.length).toBe(0);
 
-      expect(system.results.test.all.includes(entity)).toBeFalsy();
-      expect(system.results.test.added.includes(entity)).toBeFalsy();
-      expect(system.results.test.removed.includes(entity)).toBeFalsy();
+      expect(system.test.all.includes(entity)).toBeFalsy();
+      expect(system.test.added.includes(entity)).toBeFalsy();
+      expect(system.test.removed.includes(entity)).toBeFalsy();
     });
 
     it('updates system query results if an entity matches a query with the ALL condition', () => {
       class TestSystem extends System {
-        queries = {
-          test: [TestComponentOne, TestComponentTwo, TestComponentThree],
-        };
+        test!: Query;
+
+        onInit(): void {
+          this.test = this.query([
+            TestComponentOne,
+            TestComponentTwo,
+            TestComponentThree,
+          ]);
+        }
       }
 
       const system = world.addSystem(new TestSystem());
@@ -708,22 +713,24 @@ describe('Systems and Queries Integration Tests', () => {
 
       world.update(1);
 
-      expect(system.results.test.added.length).toBe(1);
-      expect(system.results.test.all.length).toBe(1);
-      expect(system.results.test.removed.length).toBe(0);
+      expect(system.test.added.length).toBe(1);
+      expect(system.test.all.length).toBe(1);
+      expect(system.test.removed.length).toBe(0);
 
-      expect(system.results.test.all.includes(entity)).toBeTruthy();
-      expect(system.results.test.added.includes(entity)).toBeTruthy();
-      expect(system.results.test.removed.includes(entity)).toBeFalsy();
+      expect(system.test.all.includes(entity)).toBeTruthy();
+      expect(system.test.added.includes(entity)).toBeTruthy();
+      expect(system.test.removed.includes(entity)).toBeFalsy();
     });
 
     it('does not update system query results if an entity does not match a query with the ALL condition', () => {
       class TestSystem extends System {
-        queries = {
-          test: {
+        test!: Query;
+
+        onInit(): void {
+          this.test = this.query({
             all: [TestComponentOne, TestComponentTwo, TestComponentThree],
-          },
-        };
+          });
+        }
       }
 
       const system = world.addSystem(new TestSystem());
@@ -737,24 +744,26 @@ describe('Systems and Queries Integration Tests', () => {
 
       world.update(1);
 
-      expect(system.results.test.added.length).toBe(0);
-      expect(system.results.test.all.length).toBe(0);
-      expect(system.results.test.removed.length).toBe(0);
+      expect(system.test.added.length).toBe(0);
+      expect(system.test.all.length).toBe(0);
+      expect(system.test.removed.length).toBe(0);
 
-      expect(system.results.test.all.includes(entity)).toBeFalsy();
-      expect(system.results.test.added.includes(entity)).toBeFalsy();
-      expect(system.results.test.removed.includes(entity)).toBeFalsy();
+      expect(system.test.all.includes(entity)).toBeFalsy();
+      expect(system.test.added.includes(entity)).toBeFalsy();
+      expect(system.test.removed.includes(entity)).toBeFalsy();
     });
 
     it('updates system query results if an entity matches a query with multiple condition', () => {
       class TestSystem extends System {
-        queries = {
-          test: {
+        test!: Query;
+
+        onInit(): void {
+          this.test = this.query({
             all: [TestComponentOne, TestComponentTwo],
             one: [TestComponentThree, TestComponentFour],
             not: [TestComponentFive, TestComponentSix],
-          },
-        };
+          });
+        }
       }
 
       const system = world.addSystem(new TestSystem());
@@ -768,13 +777,13 @@ describe('Systems and Queries Integration Tests', () => {
 
       world.update(1);
 
-      expect(system.results.test.added.length).toBe(1);
-      expect(system.results.test.all.length).toBe(1);
-      expect(system.results.test.removed.length).toBe(0);
+      expect(system.test.added.length).toBe(1);
+      expect(system.test.all.length).toBe(1);
+      expect(system.test.removed.length).toBe(0);
 
-      expect(system.results.test.all.includes(entity)).toBeTruthy();
-      expect(system.results.test.added.includes(entity)).toBeTruthy();
-      expect(system.results.test.removed.includes(entity)).toBeFalsy();
+      expect(system.test.all.includes(entity)).toBeTruthy();
+      expect(system.test.added.includes(entity)).toBeTruthy();
+      expect(system.test.removed.includes(entity)).toBeFalsy();
     });
   });
 });

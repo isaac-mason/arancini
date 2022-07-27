@@ -67,14 +67,16 @@ export type QueryDescription =
  *
  * // create a system with a query
  * class ExampleSystem extends System {
- *   queries = {
- *     exampleQueryName: {
+ *   exampleQueryName!: Query;
+ *
+ *   onInit() {
+ *     this.exampleQueryName = this.query({
  *       all: [ExampleComponentOne],
- *     },
- *   };
+ *     });
+ *   }
  *
  *   onUpdate() {
- *     this.results.exampleQueryName.all.forEach((entity) => console.log(entity));
+ *     this.exampleQueryName.all.forEach((entity) => console.log(entity));
  *   }
  * }
  * world.addSystem(new ExampleSystem());

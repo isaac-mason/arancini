@@ -3,47 +3,33 @@ import { uuid } from './utils';
 import { World } from './world';
 
 /**
- * Object with keys as friendly query names and values as Query Descriptions
- *
- * Used for defining what queries a System should have
- */
-export type SystemQueries = { [queryName: string]: QueryDescription };
-
-/**
- * System containing logic and queries for entities with given components.
- *
- * Systems can be created with multiple Queries for Entities by what Components they contain.
- *
- * Systems have lifecycle methods `onInit`, `onUpdate`, and `onDestroy` that are executed as part of World updates.
- *
- * Systems also have their own events system `events` that can be used to run that isn't required to be run on every update.
+ * Systems contain queries for entities and have lifecycle methods `onInit`, `onUpdate` and `onDestroy` that can add logic to a world.
  *
  * ```ts
  * class ExampleSystem extends System {
- *   // queries to create the system with
- *   queries = {
- *     queryName: {
+ *   // define a property for a query
+ *   queryName!: Query;
+ *
+ *   onInit() {
+ *     // logic to run to initialise the system, e.g. creating queries
+ *     this.queryName = this.query({
  *       all: [ComponentOne, ComponentTwo],
  *       one: [ComponentThree, ComponentFour],
  *       not: [ComponentFive],
- *     }
- *   }
- *
- *   onInit() {
- *     // logic to run to initialise the system
+ *     });
  *   }
  *
  *   onUpdate(timeElapsed: number) {
  *     // do something with the query results
  *
  *     // added this update
- *     console.log(this.results.queryName.added)
+ *     console.log(this.queryName.added)
  *
  *     // removed this update
- *     console.log(this.results.queryName.removed)
+ *     console.log(this.queryName.removed)
  *
  *     // all currently matched
- *     console.log(this.results.queryName.all)
+ *     console.log(this.queryName.all)
  *   }
  *
  *   onDestroy() {
@@ -64,23 +50,16 @@ export abstract class System {
   id = uuid();
 
   /**
-   * A map of query names to query descriptions
-   *
-   * This property should be overridden with desired System queries
-   */
-  queries: SystemQueries = {};
-
-  /**
-   * A map of query names to queries
-   *
-   * This object is populated by the SystemManager on adding the System to the SystemManager
-   */
-  results: { [name: string]: Query } = {};
-
-  /**
    * The World the system is in
    */
   world!: World;
+
+  /**
+   * A map of query names to query descriptions
+   *
+   * @private used internally, do not use directly
+   */
+  _queries: Set<Query> = new Set();
 
   /**
    * Destroys the system and removes it from the RECS
@@ -101,8 +80,21 @@ export abstract class System {
 
   /**
    * Logic for a systems update loop
-   * @param timeElapsed the time since the last update in seconds
-   * @param time the current time in seconds
+   * @param _timeElapsed the time since the last update in seconds
+   * @param _time the current time in seconds
    */
   onUpdate(_timeElapsed: number, _time: number) {}
+
+  /**
+   * Creates and returns a query that gets updated every update.
+   * @param queryDescription the query description
+   * @returns the query
+   */
+  protected query(queryDescription: QueryDescription): Query {
+    const query = this.world.queryManager.getQuery(queryDescription);
+    this.world.systemManager.addSystemToQuery(query, this);
+    this._queries.add(query);
+
+    return query;
+  }
 }

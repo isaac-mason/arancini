@@ -1,5 +1,5 @@
 import { useEffect } from '@storybook/client-api';
-import World, { Component, System } from '../../src';
+import World, { Component, Query, System } from '../../src';
 
 type InventoryEvent = {
   topic: 'inventory-event';
@@ -17,13 +17,13 @@ class Inventory extends Component {
 }
 
 class InventorySystem extends System {
-  queries = {
-    inventories: [Inventory],
-  };
+  inventories!: Query;
 
   onInit(): void {
+    this.inventories = this.query([Inventory]);
+
     this.world.on<InventoryEvent>('inventory-event', (e) => {
-      const entity = this.results.inventories.all.find(
+      const entity = this.inventories.all.find(
         (entity) => entity.id === e.entity
       );
 

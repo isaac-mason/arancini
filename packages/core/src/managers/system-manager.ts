@@ -1,4 +1,4 @@
-import { Query, QueryDescription } from '../query';
+import { Query } from '../query';
 import { World } from '../world';
 import { System } from '../system';
 
@@ -55,14 +55,6 @@ export class SystemManager {
 
     this.systems.set(system.id, system);
 
-    Object.entries(system.queries).forEach(
-      ([queryName, queryDescription]: [string, QueryDescription]) => {
-        const query = this.world.queryManager.getQuery(queryDescription);
-        this.addSystemToQuery(query, system);
-        system.results[queryName] = query;
-      }
-    );
-
     if (this.initialised) {
       this.initialiseSystem(system);
     }
@@ -96,13 +88,9 @@ export class SystemManager {
   removeSystem(system: System): SystemManager {
     this.systems.delete(system.id);
 
-    Object.entries(system.queries).forEach(
-      ([queryName, queryDescription]: [string, QueryDescription]) => {
-        const query = this.world.queryManager.getQuery(queryDescription);
-        this.removeSystemFromQuery(query, system);
-        delete system.results[queryName];
-      }
-    );
+    system._queries.forEach((query: Query) => {
+      this.removeSystemFromQuery(query, system);
+    });
 
     this.destroySystem(system);
 
@@ -122,7 +110,12 @@ export class SystemManager {
     }
   }
 
-  private addSystemToQuery(query: Query, system: System) {
+  /**
+   * Adds a system to a query
+   * @param query the query the system is being added to
+   * @param system the system to add
+   */
+  addSystemToQuery(query: Query, system: System) {
     let systems: Set<System> | undefined = this.queryToSystems.get(query.key);
 
     if (systems === undefined) {
@@ -150,7 +143,7 @@ export class SystemManager {
       systems.delete(system);
 
       // remove the query if
-      // - the query is standalone ie only used by systems
+      // - the query is not standalone ie only used by systems
       // - it is not being used by any systems
       if (!query.standalone && systems.size === 0) {
         this.world.queryManager.removeQuery(query);
