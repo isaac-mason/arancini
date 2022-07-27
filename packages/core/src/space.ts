@@ -121,7 +121,6 @@ export class Space {
   /**
    * Adds a handler for Space events
    * @param eventName the event name
-   * @param handlerName the name of the handler
    * @param handler the handler function
    * @returns the id of the new handler
    */
