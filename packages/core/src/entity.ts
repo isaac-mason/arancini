@@ -116,10 +116,10 @@ export class Entity {
   /**
    * Destroy the entities components and set the entity as dead immediately
    * @param options options for destroying the entity
-   * @param options.immediately whether the entity should be destroyed immediately, or in the next update
+   * @param options.immediately whether the entity should be destroyed immediately, or in the next update. Defaults to false
    */
-  destroy(options?: { immediately?: boolean }): void {
-    if (options?.immediately) {
+  destroy(options: { immediately?: boolean } = { immediately: false }): void {
+    if (options.immediately) {
       this.space.remove(this);
     } else {
       this.alive = false;
@@ -168,7 +168,7 @@ export class Entity {
 
   /**
    * Returns whether the entity contains the given component
-   * @param constr the component constructor, a component instance, or the string name of the component
+   * @param value the component constructor, a component instance, or the string name of the component
    * @returns whether the entity contains the given component
    */
   has(value: ComponentClass): boolean {
