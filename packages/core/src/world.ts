@@ -160,13 +160,14 @@ export class World {
    * Retrieves once-off query results without creating a persistent Query
    * @param queryDescription the query description
    * @param options options for the query
-   * @returns a set of matching
+   * @returns an array of matching entities
    */
   queryOnce(
     queryDescription: QueryDescription,
     options?: {
       /**
        * Whether existing query results should be used
+       * @default false
        */
       useExisting: boolean;
     }

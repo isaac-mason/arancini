@@ -26,10 +26,10 @@ export class QueryManager {
 
   private entityRemovalsBuffer: EntityRemovedEvent[] = [];
 
-  private entityCompositionChangesBufferGreen: Map<Entity, ComponentClass[]> =
+  private entityCompositionChangesBuffer: Map<Entity, ComponentClass[]> =
     new Map();
 
-  private entityCompositionChangesBufferBlue: Map<Entity, ComponentClass[]> =
+  private entityCompositionChangesBufferTemp: Map<Entity, ComponentClass[]> =
     new Map();
 
   private world: World;
@@ -84,11 +84,10 @@ export class QueryManager {
    * @param component the component added to the query
    */
   onEntityComponentAdded(entity: Entity, component: Component): void {
-    const compositionChanges =
-      this.entityCompositionChangesBufferGreen.get(entity);
+    const compositionChanges = this.entityCompositionChangesBuffer.get(entity);
 
     if (!compositionChanges) {
-      this.entityCompositionChangesBufferGreen.set(entity, [component.class]);
+      this.entityCompositionChangesBuffer.set(entity, [component.class]);
     } else {
       compositionChanges.push(component.class);
     }
@@ -100,11 +99,10 @@ export class QueryManager {
    * @param component the component added to the query
    */
   onEntityComponentRemoved(entity: Entity, component: Component): void {
-    const compositionChanges =
-      this.entityCompositionChangesBufferGreen.get(entity);
+    const compositionChanges = this.entityCompositionChangesBuffer.get(entity);
 
     if (!compositionChanges) {
-      this.entityCompositionChangesBufferGreen.set(entity, [component.class]);
+      this.entityCompositionChangesBuffer.set(entity, [component.class]);
     } else {
       compositionChanges.push(component.class);
     }
@@ -122,20 +120,19 @@ export class QueryManager {
   }
 
   /**
-   * Executes a query and returns a set of the matching Entities
-   *
-   * If the query already exists in a system, the results are taken from the existing query.
-   * If it does not exist, the query is executed once-off.
-   *
+   * Executes a query and returns a set of the matching Entities.
+   * By default the query is freshly evaluated, regardless of whether a query with the same description already exists in the world.
+   * If `options.useExisting` is true, results are taken from an existing query if present.
    * @param queryDescription the query description
+   * @param options options for the query
    */
   query(
     queryDescription: QueryDescription,
-    options?: { useExisting: boolean }
+    options: { useExisting: boolean } = { useExisting: false }
   ): Entity[] {
     const key = Query.getDescriptionDedupeString(queryDescription);
 
-    if (options?.useExisting) {
+    if (options.useExisting) {
       const existingQuery = this.queries.get(key);
       if (existingQuery) {
         return existingQuery.all;
@@ -157,17 +154,19 @@ export class QueryManager {
    * Updates queries with buffered entity and component events
    */
   update(): void {
-    // clear the `added` and `removed` arrays for all queries in preparation for the next update
+    // clear the `added` and `removed` arrays for all queries
     for (const query of this.queries.values()) {
       query.added = [];
       query.removed = [];
     }
 
-    // process entity removals
+    // empty the entity removals buffer
     const entityRemovals = this.entityRemovalsBuffer.splice(
       0,
       this.entityRemovalsBuffer.length
     );
+
+    // process entity removals
     for (const event of entityRemovals) {
       for (const query of this.queries.values()) {
         const index = query.all.findIndex((e) => e === event.entity);
@@ -178,14 +177,13 @@ export class QueryManager {
       }
 
       // do not process component composition updates as the entity will be removed from all queries
-      this.entityCompositionChangesBufferGreen.delete(event.entity);
+      this.entityCompositionChangesBuffer.delete(event.entity);
     }
 
     // swap the blue and green entity composition change buffers
-    const entityCompositionChanges = this.entityCompositionChangesBufferGreen;
-    this.entityCompositionChangesBufferGreen =
-      this.entityCompositionChangesBufferBlue;
-    this.entityCompositionChangesBufferBlue = entityCompositionChanges;
+    const entityCompositionChanges = this.entityCompositionChangesBuffer;
+    this.entityCompositionChangesBuffer =
+      this.entityCompositionChangesBufferTemp;
 
     for (const [entity, components] of entityCompositionChanges) {
       for (const query of this.queries.values()) {
@@ -218,7 +216,7 @@ export class QueryManager {
     }
 
     // clear the entity composition changes map
-    this.entityCompositionChangesBufferBlue.clear();
+    entityCompositionChanges.clear();
   }
 
   private evaluateQuery(
