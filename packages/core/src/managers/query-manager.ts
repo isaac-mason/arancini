@@ -3,17 +3,6 @@ import { Entity } from '../entity';
 import { Query, QueryDescription } from '../query';
 import { World } from '../world';
 
-enum QueryManagerEventType {
-  ENTITY_COMPONENT_ADDED_EVENT = 'ENTITY_COMPONENT_ADDED_EVENT',
-  ENTITY_COMPONENT_REMOVED_EVENT = 'ENTITY_COMPONENT_REMOVED_EVENT',
-  ENTITY_REMOVED_EVENT = 'ENTITY_REMOVED_EVENT',
-}
-
-type EntityRemovedEvent = {
-  entity: Entity;
-  type: QueryManagerEventType.ENTITY_REMOVED_EVENT;
-};
-
 /**
  * QueryManager is an internal class that manages Query class instances
  * @private internal class, do not use directly
@@ -24,12 +13,9 @@ export class QueryManager {
    */
   queries: Map<string, Query> = new Map();
 
-  private entityRemovalsBuffer: EntityRemovedEvent[] = [];
+  private destroyedEntities: Set<Entity> = new Set();
 
   private entityCompositionChangesBuffer: Map<Entity, ComponentClass[]> =
-    new Map();
-
-  private entityCompositionChangesBufferTemp: Map<Entity, ComponentClass[]> =
     new Map();
 
   private world: World;
@@ -62,6 +48,7 @@ export class QueryManager {
     for (const entity of matches.values()) {
       query.all.push(entity);
       query.added.push(entity);
+      query.set.add(entity);
     }
 
     this.queries.set(dedupeString, query);
@@ -109,14 +96,11 @@ export class QueryManager {
   }
 
   /**
-   * Updates queries after a query has been removed from the RECS
+   * Updates queries after a query has been removed from the World
    * @param entity the query
    */
   onEntityRemoved(entity: Entity): void {
-    this.entityRemovalsBuffer.push({
-      type: QueryManagerEventType.ENTITY_REMOVED_EVENT,
-      entity,
-    });
+    this.destroyedEntities.add(entity);
   }
 
   /**
@@ -154,61 +138,64 @@ export class QueryManager {
    * Updates queries with buffered entity and component events
    */
   update(): void {
-    // clear the `added` and `removed` arrays for all queries
+    // clear the added and removed arrays for all queries
     for (const query of this.queries.values()) {
       query.added = [];
       query.removed = [];
     }
 
     // empty the entity removals buffer
-    const entityRemovals = this.entityRemovalsBuffer.splice(
-      0,
-      this.entityRemovalsBuffer.length
-    );
+    const { destroyedEntities } = this;
+    this.destroyedEntities = new Set();
 
-    // process entity removals
-    for (const event of entityRemovals) {
+    // remove destroyed entities from all queries
+    for (const destroyedEntity of destroyedEntities) {
       for (const query of this.queries.values()) {
-        const index = query.all.findIndex((e) => e === event.entity);
+        const index = query.all.findIndex((e) => e === destroyedEntity);
+
         if (index !== -1) {
           query.all.splice(index, 1);
         }
-        query.removed.push(event.entity);
+
+        query.set.delete(destroyedEntity);
       }
 
-      // do not process component composition updates as the entity will be removed from all queries
-      this.entityCompositionChangesBuffer.delete(event.entity);
+      this.entityCompositionChangesBuffer.delete(destroyedEntity);
     }
 
     // swap the blue and green entity composition change buffers
     const entityCompositionChanges = this.entityCompositionChangesBuffer;
-    this.entityCompositionChangesBuffer =
-      this.entityCompositionChangesBufferTemp;
+    this.entityCompositionChangesBuffer = new Map();
 
     for (const [entity, components] of entityCompositionChanges) {
       for (const query of this.queries.values()) {
-        // if the event component is relevant to the query
+        // determine whether the composition change is relevant to this query
         if (
           // if the only condition is a `not` condition, the entity should be reindexed
           (!Array.isArray(query.description) &&
             query.description.one === undefined &&
             query.description.all === undefined &&
             query.description.not !== undefined) ||
-          // if the component is mentioned in one of the queries conditions, the entity should be reindexed
+          // if one of the components in the composition change is involved in the query, the entity should be reindexed
           this.hasIntersection(query.components, components)
         ) {
-          const match = this.evaluateQuery(query.description, entity);
-          const currentlyHasEntity = query.all.includes(entity);
+          const entityCurrentlyInQuery = query.set.has(entity);
 
-          if (match && !currentlyHasEntity) {
+          const matchesQueryConditions = this.matchesQueryConditions(
+            query.description,
+            entity
+          );
+
+          if (matchesQueryConditions && !entityCurrentlyInQuery) {
             query.all.push(entity);
             query.added.push(entity);
-          }
-          if (!match && currentlyHasEntity) {
+            query.set.add(entity);
+          } else if (!matchesQueryConditions && entityCurrentlyInQuery) {
             const index = query.all.findIndex((e) => e === entity);
             if (index !== -1) {
               query.all.splice(index, 1);
             }
+            query.set.delete(entity);
             query.removed.push(entity);
           }
         }
@@ -219,7 +206,7 @@ export class QueryManager {
     entityCompositionChanges.clear();
   }
 
-  private evaluateQuery(
+  private matchesQueryConditions(
     queryDescription: QueryDescription,
     entity: Entity
   ): boolean {
@@ -254,7 +241,7 @@ export class QueryManager {
     const matches: Entity[] = [];
     for (const space of this.world.spaceManager.spaces.values()) {
       for (const entity of space.entities.values()) {
-        if (this.evaluateQuery(queryDescription, entity)) {
+        if (this.matchesQueryConditions(queryDescription, entity)) {
           matches.push(entity);
         }
       }

@@ -36,7 +36,7 @@ class DrawSystem extends System {
       all: [Position],
       // we want to find entities that are either red or blue
       one: [Red, Blue],
-    })
+    });
   }
 
   // On each update, let's draw

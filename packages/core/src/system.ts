@@ -1,5 +1,5 @@
 import { Query, QueryDescription } from './query';
-import { uuid } from './utils';
+import { uniqueId } from './utils';
 import { World } from './world';
 
 /**
@@ -47,7 +47,7 @@ export abstract class System {
   /**
    * The id for the system
    */
-  id = uuid();
+  id = uniqueId();
 
   /**
    * The World the system is in

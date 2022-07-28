@@ -1,6 +1,6 @@
 import { Entity } from './entity';
 import { Space } from './space';
-import { uuid } from './utils';
+import { uniqueId } from './utils';
 
 export type ComponentClass<T extends Component | Component = Component> = {
   new (...args: never[]): T;
@@ -71,7 +71,7 @@ export abstract class Component {
   /**
    * This component instances unique id
    */
-  id: string = uuid();
+  id: string = uniqueId();
 
   /**
    * Gets the entity for the component. Available during init call.

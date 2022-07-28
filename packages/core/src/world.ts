@@ -1,4 +1,4 @@
-import { uuid } from './utils';
+import { uniqueId } from './utils';
 import { Entity } from './entity';
 import { SpaceManager } from './managers/space-manager';
 import { QueryManager } from './managers/query-manager';
@@ -42,7 +42,7 @@ export class World {
   /**
    * A unique id for the World
    */
-  id = uuid();
+  id = uniqueId();
 
   /**
    * Whether the World has been initialised
@@ -84,11 +84,11 @@ export class World {
   }
 
   /**
-   * Retrieves RECS factories
+   * Retrieves world factories
    */
   get create(): {
     /**
-     * Creates a space in the RECS
+     * Creates a space in the world
      * @param params the params for the space
      * @returns the new space
      */
@@ -109,8 +109,8 @@ export class World {
   }
 
   /**
-   * Adds a system to the RECS
-   * @param system the system to add to the RECS
+   * Adds a system to the World
+   * @param system the system to add to the World
    */
   addSystem<T extends System>(system: T): T {
     this.systemManager.addSystem(system);
@@ -131,13 +131,8 @@ export class World {
    * Initialises the World
    */
   init(): void {
-    // Set the RECS to be initialised
     this.initialised = true;
-
-    // Initialise systems
     this.systemManager.init();
-
-    // Initialise spaces
     this.spaceManager.init();
   }
 

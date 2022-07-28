@@ -660,6 +660,18 @@ describe('Systems and Queries Integration Tests', () => {
       expect(system.test.all.includes(entity)).toBeTruthy();
       expect(system.test.added.includes(entity)).toBeTruthy();
       expect(system.test.removed.includes(entity)).toBeFalsy();
+
+      entity.addComponent(TestComponentOne);
+
+      world.update(1);
+
+      expect(system.test.added.length).toBe(0);
+      expect(system.test.all.length).toBe(0);
+      expect(system.test.removed.length).toBe(1);
+
+      expect(system.test.all.includes(entity)).toBeFalsy();
+      expect(system.test.added.includes(entity)).toBeFalsy();
+      expect(system.test.removed.includes(entity)).toBeTruthy();
     });
 
     it('does not update system query results if an entity does not match a query with the NOT condition', () => {

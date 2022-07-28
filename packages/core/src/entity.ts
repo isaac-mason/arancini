@@ -2,7 +2,7 @@ import type { ComponentClass } from './component';
 import { Component } from './component';
 import { Event, EventHandler, EventSubscription, EventSystem } from './events';
 import { Space } from './space';
-import { uuid } from './utils';
+import { uniqueId } from './utils';
 import { World } from './world';
 
 /**
@@ -76,7 +76,7 @@ export class Entity {
   /**
    * The unique ID of the entity
    */
-  id = uuid();
+  id = uniqueId();
 
   /**
    * Whether the entity has been initialised

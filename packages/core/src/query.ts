@@ -121,6 +121,11 @@ export class Query {
   standalone = false;
 
   /**
+   * Set of entities currently matched by the query
+   */
+  set: Set<Entity> = new Set();
+
+  /**
    * Constructor for a new query instance
    * @param queryDescription the query description
    */

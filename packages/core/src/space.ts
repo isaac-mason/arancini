@@ -1,6 +1,6 @@
 import { Entity } from './entity';
 import { Event, EventHandler, EventSubscription, EventSystem } from './events';
-import { uuid } from './utils';
+import { uniqueId } from './utils';
 import { World } from './world';
 
 /**
@@ -83,7 +83,7 @@ export class Space {
    */
   constructor(world: World, params?: SpaceParams) {
     this.world = world;
-    this.id = params?.id || uuid();
+    this.id = params?.id || uniqueId();
   }
 
   /**

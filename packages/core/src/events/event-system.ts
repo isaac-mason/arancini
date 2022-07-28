@@ -1,4 +1,4 @@
-import { uuid } from '../utils/uuid';
+import { uniqueId } from '../utils/uniqueId';
 
 /**
  * An event that can be broadcast and consumed by entities and components
@@ -80,7 +80,7 @@ export class EventSystem {
     eventName: string,
     handler: EventHandler<E>
   ): EventSubscription {
-    const id = uuid();
+    const id = uniqueId();
     let eventHandlers = this.handlers.get(eventName);
 
     if (eventHandlers === undefined) {

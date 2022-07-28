@@ -1,4 +1,4 @@
-import { uuid } from '../utils';
+import { uniqueId } from '../utils';
 import type { Component, ComponentClass } from '../component';
 import type { Entity } from '../entity';
 import type { World } from '../world';
@@ -191,7 +191,7 @@ export class SpaceManager {
 
     for (const entity of entities) {
       // reset the entity
-      entity.id = uuid();
+      entity.id = uniqueId();
       entity.events.reset();
       entity.componentsToRemove = [];
       entity.alive = true;
@@ -208,7 +208,7 @@ export class SpaceManager {
 
     for (const component of components) {
       // reset the component
-      component.id = uuid();
+      component.id = uniqueId();
       component.entity = undefined;
 
       // release the component back into the update pool
