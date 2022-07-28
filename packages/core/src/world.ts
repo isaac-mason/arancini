@@ -221,7 +221,6 @@ export class World {
   /**
    * Adds a handler for World events
    * @param eventName the event name
-   * @param handlerName the name of the handler
    * @param handler the handler function
    * @returns the id of the new handler
    */
