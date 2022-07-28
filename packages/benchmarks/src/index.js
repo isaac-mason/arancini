@@ -1,3 +1,4 @@
+import { performance } from 'perf_hooks';
 import { addRemove } from './suites/add-remove.js';
 import { addition } from './suites/addition.js';
 import { destroy } from './suites/destroy.js';
@@ -18,8 +19,6 @@ const bench = (name, fn) => {
 
   console.log(`[${name}] took ${(time / 1000).toFixed(6)}s`);
 };
-
-const N = 5000;
 
 console.log('\nrunning benchmarks...\n')
 bench('velocity', velocity);
