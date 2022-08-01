@@ -1,7 +1,7 @@
-import { beforeEach, describe, it, jest, expect } from '@jest/globals';
-import { System } from '../system';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { System } from './system';
 import { SystemManager } from './system-manager';
-import { World } from '../world';
+import { World } from './world';
 
 describe('SystemManager', () => {
   const recs = {} as unknown as World;

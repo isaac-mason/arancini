@@ -1,6 +1,6 @@
-import { Query } from '../query';
-import { World } from '../world';
-import { System } from '../system';
+import { Query } from './query';
+import { World } from './world';
+import { System } from './system';
 
 /**
  * SystemManager is an internal class that manages systems in a RECS and calls their lifecycle hooks.
@@ -88,7 +88,7 @@ export class SystemManager {
   removeSystem(system: System): SystemManager {
     this.systems.delete(system.id);
 
-    system._queries.forEach((query: Query) => {
+    system.__recs.queries.forEach((query: Query) => {
       this.removeSystemFromQuery(query, system);
     });
 

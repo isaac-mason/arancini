@@ -18,41 +18,6 @@ class TestComponentFive extends Component {}
 class TestComponentSix extends Component {}
 
 describe('Query', () => {
-  it('should throw an error when constructing if the query is malformed', () => {
-    expect(() => new Query({})).toThrowError();
-
-    expect(() => new Query({ all: [] })).toThrowError();
-    expect(() => new Query({ one: [] })).toThrowError();
-    expect(() => new Query({ not: [] })).toThrowError();
-
-    expect(
-      () =>
-        new Query({
-          all: [],
-          one: [TestComponentTwo],
-          not: [TestComponentThree],
-        })
-    ).toThrowError();
-    expect(
-      () =>
-        new Query({
-          all: [TestComponentOne],
-          one: [],
-          not: [TestComponentThree],
-        })
-    ).toThrowError();
-    expect(
-      () =>
-        new Query({
-          all: [TestComponentOne],
-          one: [TestComponentTwo],
-          not: [],
-        })
-    ).toThrowError();
-
-    expect(() => new Query([])).toThrowError();
-  });
-
   describe('getKey', () => {
     it('should contain class names', () => {
       const queryOne: QueryDescription = {
@@ -66,7 +31,7 @@ describe('Query', () => {
 
     it('should return the same key for two matching query descriptions', () => {
       const queryOne: QueryDescription = {
-        one: [TestComponentOne, TestComponentTwo],
+        any: [TestComponentOne, TestComponentTwo],
         all: [TestComponentThree, TestComponentFour],
         not: [TestComponentFive, TestComponentSix],
       };
@@ -74,7 +39,7 @@ describe('Query', () => {
       const queryTwo: QueryDescription = {
         not: [TestComponentSix, TestComponentFive],
         all: [TestComponentFour, TestComponentThree],
-        one: [TestComponentTwo, TestComponentOne],
+        any: [TestComponentTwo, TestComponentOne],
       };
 
       expect(Query.getDescriptionDedupeString(queryOne)).toEqual(

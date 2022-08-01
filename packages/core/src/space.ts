@@ -1,7 +1,16 @@
+import { Component, ComponentClass } from './component';
 import { Entity } from './entity';
 import { Event, EventHandler, EventSubscription, EventSystem } from './events';
 import { uniqueId } from './utils';
 import { World } from './world';
+
+export type EntityBuilder = {
+  addComponent: <T extends Component>(
+    clazz: ComponentClass<T>,
+    ...args: Parameters<T['construct']>
+  ) => EntityBuilder;
+  build: () => Entity;
+};
 
 /**
  * Params for creating a new Space
@@ -87,6 +96,38 @@ export class Space {
   }
 
   /**
+   * Retrives space builders
+   */
+  get build(): {
+    /**
+     * Returns an EntityBuilder, used for creating an entity with multiple components
+     * @returns an EntityBuilder
+     */
+    entity: () => EntityBuilder;
+  } {
+    return {
+      entity: () => {
+        const components: { clazz: ComponentClass; args: unknown[] }[] = [];
+
+        const builder = {
+          addComponent: <T extends Component>(
+            clazz: ComponentClass<T>,
+            ...args: Parameters<T['construct']>
+          ) => {
+            components.push({ clazz, args });
+            return builder;
+          },
+          build: (): Entity => {
+            return this.world.spaceManager.createEntity(this, components);
+          },
+        };
+
+        return builder;
+      },
+    };
+  }
+
+  /**
    * Retrieves space factories
    */
   get create(): {
@@ -97,7 +138,7 @@ export class Space {
     entity: () => Entity;
   } {
     return {
-      entity: (): Entity => {
+      entity: () => {
         return this.world.spaceManager.createEntity(this);
       },
     };
@@ -115,7 +156,7 @@ export class Space {
    * @param event the event to broadcast in the Space
    */
   emit<E extends Event | Event>(event: E): void {
-    return this.events.emit(event);
+    this.events.emit(event);
   }
 
   /**

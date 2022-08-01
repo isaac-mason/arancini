@@ -1,12 +1,14 @@
-import { uniqueId } from './utils';
+import { ComponentClass } from './component';
+import { ComponentRegistry } from './component-registry';
 import { Entity } from './entity';
-import { SpaceManager } from './managers/space-manager';
-import { QueryManager } from './managers/query-manager';
-import { SystemManager } from './managers/system-manager';
-import { Query, QueryDescription } from './query';
-import { Space, SpaceParams } from './space';
-import { System } from './system';
 import { Event, EventHandler, EventSubscription, EventSystem } from './events';
+import { Query, QueryDescription } from './query';
+import { QueryManager } from './query-manager';
+import { Space, SpaceParams } from './space';
+import { SpaceManager } from './space-manager';
+import { System } from './system';
+import { SystemManager } from './system-manager';
+import { uniqueId } from './utils';
 
 /**
  * A World that can contain Spaces with Entities, Systems, and Queries.
@@ -50,24 +52,37 @@ export class World {
   initialised = false;
 
   /**
-   * The world event system
+   * The world EventSystem
    */
   events = new EventSystem();
 
   /**
-   * The SpaceManager for the World that manages spaces, entities and components
+   * The SpaceManager for the World.
+   *
+   * Manages Spaces, Entities and Components
    */
   spaceManager: SpaceManager;
 
   /**
-   * The query manager for the World
+   * The QueryManager for the World.
+   *
+   * Manages and updates Queries.
    */
   queryManager: QueryManager;
 
   /**
-   * The system manager for the World
+   * The SystemManager for the World.
+   *
+   * Manages System lifecycles.
    */
   systemManager: SystemManager;
+
+  /**
+   * The ComponentRegistry for the World.
+   *
+   * Maintains a mapping of Component classes to Component indices.
+   */
+  componentRegistry: ComponentRegistry;
 
   /**
    * The current time for the world
@@ -78,6 +93,7 @@ export class World {
    * Constructor for a World
    */
   constructor() {
+    this.componentRegistry = new ComponentRegistry(this);
     this.spaceManager = new SpaceManager(this);
     this.queryManager = new QueryManager(this);
     this.systemManager = new SystemManager(this);
@@ -143,7 +159,7 @@ export class World {
    * @returns the query
    */
   query(queryDescription: QueryDescription): Query {
-    const query = this.queryManager.getQuery(queryDescription);
+    const query = this.queryManager.createQuery(queryDescription);
 
     // set the query to be standalone so it cannot be removed by system related cleanup
     query.standalone = true;
@@ -157,17 +173,8 @@ export class World {
    * @param options options for the query
    * @returns an array of matching entities
    */
-  queryOnce(
-    queryDescription: QueryDescription,
-    options?: {
-      /**
-       * Whether existing query results should be used
-       * @default false
-       */
-      useExisting: boolean;
-    }
-  ): Entity[] {
-    return this.queryManager.query(queryDescription, options);
+  queryOnce(queryDescription: QueryDescription): Entity[] {
+    return this.queryManager.query(queryDescription);
   }
 
   /**
@@ -197,9 +204,6 @@ export class World {
     // clean up dead entities
     this.spaceManager.cleanUpDeadEntitiesAndComponents();
 
-    // update queries
-    this.queryManager.update();
-
     // recycle destroyed entities and components after queries have been updated
     this.spaceManager.recycle();
 
@@ -208,6 +212,9 @@ export class World {
 
     // update systems
     this.systemManager.update(elapsed, this.time);
+
+    // clear query added and removed lists after systems have updated
+    this.queryManager.clearAddedAndRemoved();
   }
 
   /**
@@ -215,7 +222,7 @@ export class World {
    * @param event the event to broadcast in the World
    */
   emit<E extends Event | Event>(event: E): void {
-    return this.events.emit(event);
+    this.events.emit(event);
   }
 
   /**
@@ -229,5 +236,16 @@ export class World {
     handler: EventHandler<E>
   ): EventSubscription {
     return this.events.on(eventName, handler);
+  }
+
+  /**
+   * Registers a Component class. Must be called before using a Component.
+   * @param component the Component class.
+   * @returns the World, for chaining
+   * @todo pool configuration - initial pool size, target size
+   */
+  registerComponent(component: ComponentClass): World {
+    this.componentRegistry.registerComponent(component);
+    return this;
   }
 }

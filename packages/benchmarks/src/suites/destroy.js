@@ -1,23 +1,15 @@
-import { Component, World } from '@recs/core';
+export const destroy = {
+  name: 'Destroy',
+  iterations: 100000,
+  setup(ctx) {
+    ctx.setup();
+  },
+  perform(ctx) {
+    const entity = ctx.createEntity();
 
-export const destroy = () => {
-  class Position extends Component {}
+    ctx.addPositionComponent(entity);
+    ctx.addVelocityComponent(entity);
 
-  class Velocity extends Component {}
-
-  const world = new World();
-  
-  const space = world.create.space();
-
-  world.init();
-
-  const N = 100_000;
-
-  for (let i = 0; i < N; i++) {
-    const entity = space.create.entity();
-    entity.addComponent(Position);
-    entity.addComponent(Velocity);
-
-    entity.destroy();
-  }
+    ctx.destroyEntity(entity);
+  },
 };

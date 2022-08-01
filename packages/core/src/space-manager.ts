@@ -1,14 +1,12 @@
-import { uniqueId } from '../utils';
-import type { Component, ComponentClass } from '../component';
-import type { Entity } from '../entity';
-import type { World } from '../world';
-import type { Space } from '../space';
-import { ComponentPool, EntityPool } from '../pools';
+import { uniqueId } from './utils';
+import type { Component, ComponentClass } from './component';
+import type { Entity } from './entity';
+import type { World } from './world';
+import type { Space } from './space';
+import { ComponentPool, EntityPool } from './pools';
 
 /**
  * SpaceManager that manages Spaces that contain Entities, Entities themselves, and Components
- *
- * @private used internally, do not use directly
  */
 export class SpaceManager {
   /**
@@ -19,12 +17,22 @@ export class SpaceManager {
   /**
    * An object pool of components
    */
-  private componentPool = new ComponentPool();
+  componentPool: ComponentPool;
 
   /**
-   * Components that need queries updated on the next update before they can be reused
+   * An object pool of entities
+   */
+  entityPool: EntityPool;
+
+  /**
+   * Components that need recycling
    */
   private componentsToCleanup: Component[] = [];
+
+  /**
+   * Entities that need queries recycling
+   */
+  private entitiesToCleanup: Entity[] = [];
 
   /**
    * A map of ids to update functions for all components
@@ -32,31 +40,18 @@ export class SpaceManager {
   private componentsToUpdate: Map<string, Component> = new Map();
 
   /**
-   * Entities that need queries updated on the next update before they can be reused
-   */
-  private entitiesToCleanup: Entity[] = [];
-
-  /**
-   * A map of ids to update functions for all entities
-   */
-  private entitiesToUpdate: Map<string, Entity> = new Map();
-
-  /**
-   * An object pool of entities
-   */
-  private entityPool = new EntityPool();
-
-  /**
    * The World the entity manager is part of
    */
   private world: World;
 
   /**
-   * Constructs a new EntityManager
-   * @param world the World the entity manager is part of
+   * Constructs a new SpaceManager
+   * @param world the World the SpaceManager is part of
    */
   constructor(world: World) {
     this.world = world;
+    this.componentPool = new ComponentPool(world);
+    this.entityPool = new EntityPool();
   }
 
   /**
@@ -88,8 +83,9 @@ export class SpaceManager {
     // construct the component instance
     component.construct(...args);
 
-    // add the component to the entity components maps
+    // add the component to the entity
     entity.components.set(clazz, component);
+    entity.componentsBitSet.add(component.__recs.classIndex);
 
     // initialise the component if the entity is already initialised
     if (entity.initialised) {
@@ -107,10 +103,23 @@ export class SpaceManager {
    * @param space the space to create a new entity in
    * @returns the provisioned entity
    */
-  createEntity(space: Space): Entity {
+  createEntity(
+    space: Space,
+    components: { clazz: ComponentClass; args: unknown[] }[] = []
+  ): Entity {
     const entity = this.entityPool.request();
     entity.space = space;
     space.entities.set(entity.id, entity);
+
+    for (const component of components) {
+      this.world.spaceManager.addComponentToEntity(
+        entity,
+        component.clazz,
+        component.args
+      );
+    }
+
+    this.world.queryManager.onEntityComponentChange(entity);
 
     if (space.initialised) {
       this.world.spaceManager.initialiseEntity(entity);
@@ -145,9 +154,6 @@ export class SpaceManager {
     if (this.isComponentMethodOverridden(component, 'onUpdate')) {
       this.componentsToUpdate.set(component.id, component);
     }
-
-    // inform the query manager that the component has been initialised
-    this.world.queryManager.onEntityComponentAdded(component.entity, component);
   }
 
   /**
@@ -159,13 +165,15 @@ export class SpaceManager {
     // initialise the entity
     entity.initialised = true;
 
+    // resize the components bitset
+    entity.componentsBitSet.resize(
+      this.world.componentRegistry.currentComponentIndex
+    );
+
     // initialise components
     for (const component of entity.components.values()) {
       this.initialiseComponent(component);
     }
-
-    // add entity update to the update pool
-    this.entitiesToUpdate.set(entity.id, entity);
   }
 
   /**
@@ -184,15 +192,14 @@ export class SpaceManager {
    */
   recycle(): void {
     // recycle destroyed entities
-    const entities = this.entitiesToCleanup.splice(
-      0,
-      this.entitiesToCleanup.length
-    );
+    const entities = this.entitiesToCleanup;
+    this.entitiesToCleanup = [];
 
     for (const entity of entities) {
       // reset the entity
       entity.id = uniqueId();
       entity.events.reset();
+      entity.componentsBitSet.reset();
       entity.componentsToRemove = [];
       entity.alive = true;
 
@@ -201,17 +208,12 @@ export class SpaceManager {
     }
 
     // recycle destroyed components
-    const components = this.componentsToCleanup.splice(
-      0,
-      this.componentsToCleanup.length
-    );
+    const components = this.componentsToCleanup;
+    this.componentsToCleanup = [];
 
     for (const component of components) {
-      // reset the component
       component.id = uniqueId();
-      component.entity = undefined;
-
-      // release the component back into the update pool
+      (component.entity as unknown) = undefined;
       this.componentPool.release(component);
     }
   }
@@ -221,12 +223,11 @@ export class SpaceManager {
    *
    * @param entity the entity to remove from
    * @param component the component to remove
-   * @param entityAlive whether the entity is alive and the query manager should be notified.
    */
   removeComponentFromEntity(
     entity: Entity,
     component: Component,
-    entityAlive: boolean
+    notifyQueryManager: boolean
   ): void {
     // remove the onUpdate method from the component update pool if present
     this.componentsToUpdate.delete(component.id);
@@ -236,13 +237,13 @@ export class SpaceManager {
       component.onDestroy();
     }
 
-    if (entityAlive) {
-      // tell the query manager that the component has been removed from the entity
-      this.world.queryManager.onEntityComponentRemoved(entity, component);
-    }
+    // remove the component from the entity
+    entity.components.delete(component.__recs.class);
+    entity.componentsBitSet.remove(component.__recs.classIndex);
 
-    // remove the component from the components maps
-    entity.components.delete(component.class);
+    if (notifyQueryManager) {
+      this.world.queryManager.onEntityComponentChange(entity);
+    }
 
     // stage the component for cleanup on the next update
     this.componentsToCleanup.push(component);
@@ -257,13 +258,10 @@ export class SpaceManager {
     // remove the entity from the space entities map
     space.entities.delete(entity.id);
 
-    // remove entity update from the update pool
-    this.entitiesToUpdate.delete(entity.id);
-
     // emit the entity destroy event to the space
     this.world.queryManager.onEntityRemoved(entity);
 
-    // destroy components without notifying the query manager
+    // destroy components
     for (const component of entity.components.values()) {
       this.removeComponentFromEntity(entity, component, false);
     }
@@ -290,24 +288,25 @@ export class SpaceManager {
   cleanUpDeadEntitiesAndComponents(): void {
     // update entities in spaces - checks if entities are alive and releases them if they are dead
     for (const space of this.spaces.values()) {
-      const dead: Entity[] = [];
-
       for (const entity of space.entities.values()) {
-        if (!entity.alive) {
-          dead.push(entity);
-        } else {
+        if (entity.alive) {
           // if the entity is still alive, clean up components
-          for (const component of entity.componentsToRemove.splice(
-            0,
-            entity.componentsToRemove.length
-          )) {
-            this.removeComponentFromEntity(entity, component, true);
-          }
-        }
-      }
+          const toRemove = entity.componentsToRemove;
+          entity.componentsToRemove = [];
 
-      for (const d of dead) {
-        space.remove(d);
+          if (toRemove.length > 0) {
+            // remove the components
+            for (let i = 0; i < toRemove.length; i++) {
+              this.removeComponentFromEntity(entity, toRemove[i], false);
+            }
+
+            // tell the query manager that the component has been removed from the entity
+            this.world.queryManager.onEntityComponentChange(entity);
+          }
+        } else {
+          // remove dead entity from the space
+          this.world.spaceManager.removeEntity(entity, space);
+        }
       }
     }
   }
@@ -316,7 +315,7 @@ export class SpaceManager {
     instance: Component,
     methodName: string
   ): boolean {
-    return Object.getOwnPropertyNames(instance.class.prototype).includes(
+    return Object.getOwnPropertyNames(instance.__recs.class.prototype).includes(
       methodName
     );
   }

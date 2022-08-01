@@ -1,5 +1,5 @@
 import { useEffect } from '@storybook/client-api';
-import World, { Component, Query, System } from '../../src';
+import { Component, Query, System, World } from '@recs/core';
 
 class Position extends Component {
   // * note the not null `!:` syntax! *
@@ -35,7 +35,7 @@ class DrawSystem extends System {
       // we want to find entities with a position
       all: [Position],
       // we want to find entities that are either red or blue
-      one: [Red, Blue],
+      any: [Red, Blue],
     });
   }
 
@@ -102,7 +102,7 @@ class FlipSystem extends System {
 
   onInit(): void {
     this.walkers = this.query({
-      one: [Red, Blue],
+      any: [Red, Blue],
     });
   }
 

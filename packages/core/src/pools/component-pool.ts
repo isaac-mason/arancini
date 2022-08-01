@@ -1,4 +1,5 @@
 import { Component, ComponentClass } from '../component';
+import { World } from '../world';
 import { ObjectPool } from './object-pool';
 
 /**
@@ -7,11 +8,6 @@ import { ObjectPool } from './object-pool';
  * @private internal class, do not use directly
  */
 export class ComponentPool {
-  /**
-   * The a map of component names to object pools
-   */
-  private objectPools: Map<ComponentClass, ObjectPool<Component>> = new Map();
-
   /**
    * The total number of component pools
    */
@@ -53,11 +49,29 @@ export class ComponentPool {
   }
 
   /**
+   * The a map of component names to object pools
+   */
+  private objectPools: Map<ComponentClass, ObjectPool<Component>> = new Map();
+
+  /**
+   * The World the ComponentPool is in
+   */
+  private world: World;
+
+  /**
+   * Constructor for a ComponentPool
+   * @param world the World the ComponentPool being created in
+   */
+  constructor(world: World) {
+    this.world = world;
+  }
+
+  /**
    * Releases a component from the component pool
    * @param component the component to release
    */
   release(component: Component): void {
-    const pool = this.objectPools.get(component.class);
+    const pool = this.objectPools.get(component.__recs.class);
 
     if (pool !== undefined) {
       pool.release(component);
@@ -67,20 +81,22 @@ export class ComponentPool {
   /**
    * Requests a component from the component pool
    */
-  request<T extends Component>(clazz: ComponentClass<T>): T {
-    let pool = this.objectPools.get(clazz);
+  request<T extends Component>(Clazz: ComponentClass<T>): T {
+    let pool = this.objectPools.get(Clazz);
 
     if (pool === undefined) {
       pool = new ObjectPool<T>(() => {
-        // eslint-disable-next-line new-cap
-        const component = new clazz();
+        const component = new Clazz();
 
-        // store a reference to the class in the component instance
-        component.class = clazz;
+        component.__recs = {
+          class: Clazz,
+          classIndex: this.world.componentRegistry.getComponentIndex(Clazz),
+        };
 
         return component;
       });
-      this.objectPools.set(clazz, pool);
+
+      this.objectPools.set(Clazz, pool);
     }
 
     return pool.request() as T;

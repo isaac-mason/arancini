@@ -64,29 +64,14 @@ export type ComponentClass<T extends Component | Component = Component> = {
  */
 export abstract class Component {
   /**
-   * The class the component was constructed from
-   */
-  class!: ComponentClass;
-
-  /**
    * This component instances unique id
    */
   id: string = uniqueId();
 
   /**
-   * Gets the entity for the component. Available during init call.
+   * The entity this component belongs to.
    */
-  get entity(): Entity {
-    return this._entity as Entity;
-  }
-
-  /**
-   * Sets what entity the component belongs to
-   * @param entity the entity
-   */
-  set entity(entity: Entity | undefined) {
-    this._entity = entity;
-  }
+  entity!: Entity;
 
   /**
    * The Space the components entity is in
@@ -96,9 +81,19 @@ export abstract class Component {
   }
 
   /**
-   * The entity this component belongs to. Set on adding to an Entity.
+   * @private used internally, do not use directly
    */
-  private _entity?: Entity;
+  __recs!: {
+    /**
+     * The class the component was constructed from
+     */
+    class: ComponentClass;
+
+    /**
+     * The unique index for the component class
+     */
+    classIndex: number;
+  };
 
   /**
    * Method for "constructing" a component instance.

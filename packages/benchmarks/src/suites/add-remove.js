@@ -1,64 +1,25 @@
-import { World, Component, System } from '@recs/core';
+export const addRemove = {
+  name: 'Add/Remove',
+  iterations: 5000,
+  setup(ctx) {
+      ctx.setup();
+  },
+  perform(ctx) {
+      const entity1 = ctx.createEntity();
+      const entity2 = ctx.createEntity();
 
-export const addRemove = () => {
-  const N = 10000;
+      ctx.addPositionComponent(entity1);
+      ctx.addVelocityComponent(entity1);
 
-  class Position extends Component {
-    construct() {
-      this.x = 0;
-      this.y = 0;
-    }
-  }
+      ctx.addPositionComponent(entity2);
+      ctx.addVelocityComponent(entity2);
 
-  class Velocity extends Component {
-    construct() {
-      this.dx = Math.random - 0.5;
-      this.dy = Math.random - 0.5;
-    }
-  }
+      ctx.updateMovementSystem();
 
-  class MovementSystem extends System {
-    onInit() {
-      this.movement = this.query([Velocity, Position]);
-    }
+      ctx.removePositionComponent(entity1);
 
-    onUpdate() {
-      for (let i = 0; i < this.movement.all.length; i++) {
-        const e = this.movement.all[i];
+      ctx.updateMovementSystem();
 
-        const velocity = e.get(Velocity);
-        const position = e.get(Position);
-
-        position.x += velocity.dx;
-        position.y += velocity.dy;
-      }
-    }
-  }
-
-  const world = new World();
-
-  world.addSystem(new MovementSystem());
-  
-  const space = world.create.space();
-
-  world.init()
-
-  for (let i = 0; i < N; i++) {
-    const entityOne = space.create.entity();
-    const entityTwo = space.create.entity();
-
-    entityOne.addComponent(Position);
-    entityOne.addComponent(Velocity);
-
-    entityTwo.addComponent(Position);
-    entityTwo.addComponent(Velocity);
-
-    world.update();
-
-    entityOne.removeComponent(Position);
-
-    world.update();
-
-    entityOne.destroy();
-  }
+      ctx.destroyEntity(entity1);
+  },
 };

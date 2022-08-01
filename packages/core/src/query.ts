@@ -1,12 +1,13 @@
 import { ComponentClass } from './component';
 import { Entity } from './entity';
+import { BitSet } from './utils/bit-set';
 
 /**
  * Enum for query condition types
  */
 export enum QueryConditionType {
   ALL = 'all',
-  ONE = 'one',
+  ANY = 'any',
   NOT = 'not',
 }
 
@@ -18,8 +19,14 @@ export type QueryDescription =
   | {
       [QueryConditionType.ALL]?: ComponentClass[];
       [QueryConditionType.NOT]?: ComponentClass[];
-      [QueryConditionType.ONE]?: ComponentClass[];
+      [QueryConditionType.ANY]?: ComponentClass[];
     };
+
+export type QueryBitSets = {
+  all?: BitSet;
+  any?: BitSet;
+  not?: BitSet;
+};
 
 /**
  * A Query for Entities with specified Components.
@@ -50,7 +57,7 @@ export type QueryDescription =
  * // create a complex query description
  * const queryDescription: QueryDescription = {
  *   all: [ExampleComponentOne],
- *   one: [ExampleComponentOne, ExampleComponentTwo],
+ *   any: [ExampleComponentOne, ExampleComponentTwo],
  *   not: [ExampleComponentFour],
  * };
  *
@@ -84,14 +91,19 @@ export type QueryDescription =
  */
 export class Query {
   /**
-   * Entities added to the query on the latest update
+   * The current entities matched by the query
+   */
+  all: Entity[] = [];
+
+  /**
+   * Entities added to the query since the latest update.  Cleared at the end of every world update.
    */
   added: Entity[] = [];
 
   /**
-   * The current entities matched by the query
+   * Entities removed from the query since the latest update. Cleared at the end of every world update.
    */
-  all: Entity[] = [];
+  removed: Entity[] = [];
 
   /**
    * A list of all component classes that are involved in the conditions for this query
@@ -109,11 +121,6 @@ export class Query {
   key: string;
 
   /**
-   * Entities removed from the query on the latest update
-   */
-  removed: Entity[] = [];
-
-  /**
    * Whether the query is used outside of a system
    *
    * If true, the query will not be removed from the world when all systems using it are removed.
@@ -126,38 +133,27 @@ export class Query {
   set: Set<Entity> = new Set();
 
   /**
-   * Constructor for a new query instance
-   * @param queryDescription the query description
+   * BitSets for the query conditions. Set by the QueryManager
    */
-  constructor(queryDescription: QueryDescription) {
-    const isArray = Array.isArray(queryDescription);
+  bitSets!: QueryBitSets;
 
-    // check if the query is valid
-    // must have at least one query type, and must not have an empty array of components
-    if (
-      (isArray && queryDescription.length === 0) ||
-      (!isArray &&
-        ((!queryDescription.all &&
-          !queryDescription.one &&
-          !queryDescription.not) ||
-          (queryDescription.all && queryDescription.all.length === 0) ||
-          (queryDescription.one && queryDescription.one.length === 0) ||
-          (queryDescription.not && queryDescription.not.length === 0)))
-    ) {
-      throw new Error('Query must have at least one condition');
-    }
-
-    this.key = Query.getDescriptionDedupeString(queryDescription);
+  /**
+   * Constructor for a new query instance
+   * @param queryKey the key for the query
+   * @param queryComponents the components referenced by the query
+   * @param queryDescription the query description
+   * @param queryBitSets the bitSets used to evaluate the query
+   */
+  constructor(
+    queryKey: string,
+    queryComponents: ComponentClass[],
+    queryDescription: QueryDescription,
+    queryBitSets: QueryBitSets
+  ) {
+    this.key = queryKey;
     this.description = queryDescription;
-    this.components = isArray
-      ? queryDescription
-      : Array.from(
-          new Set<ComponentClass>([
-            ...(queryDescription.all ? queryDescription.all : []),
-            ...(queryDescription.one ? queryDescription.one : []),
-            ...(queryDescription.not ? queryDescription.not : []),
-          ])
-        );
+    this.components = queryComponents;
+    this.bitSets = queryBitSets;
   }
 
   /**
@@ -166,7 +162,7 @@ export class Query {
    * @returns a string that identifies a query description
    * @private called internally, do not call directly
    */
-  public static getDescriptionDedupeString(query: QueryDescription): string {
+  static getDescriptionDedupeString(query: QueryDescription): string {
     if (Array.isArray(query)) {
       return query.map((c) => `${c.name}`).join('&');
     }

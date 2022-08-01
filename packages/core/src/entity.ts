@@ -3,6 +3,7 @@ import { Component } from './component';
 import { Event, EventHandler, EventSubscription, EventSystem } from './events';
 import { Space } from './space';
 import { uniqueId } from './utils';
+import { BitSet } from './utils/bit-set';
 import { World } from './world';
 
 /**
@@ -54,6 +55,11 @@ import { World } from './world';
  */
 export class Entity {
   /**
+   * The unique ID of the entity
+   */
+  id = uniqueId();
+
+  /**
    * Whether the entity is alive. If false, the entity will be destroyed on the next update
    */
   alive = true;
@@ -64,6 +70,11 @@ export class Entity {
   components: Map<{ new (...args: never[]): Component }, Component> = new Map();
 
   /**
+   * BitSet containing component indices for Components in this Entitiy
+   */
+  componentsBitSet = new BitSet();
+
+  /**
    * Components queued for removal on the next update
    */
   componentsToRemove: Component[] = [];
@@ -72,11 +83,6 @@ export class Entity {
    * The event system for the entity
    */
   events = new EventSystem();
-
-  /**
-   * The unique ID of the entity
-   */
-  id = uniqueId();
 
   /**
    * Whether the entity has been initialised
@@ -110,15 +116,24 @@ export class Entity {
       args
     );
 
+    // inform the query manager that the component has been initialised
+    this.world.queryManager.onEntityComponentChange(this);
+
     return component;
   }
 
   /**
    * Destroy the entities components and set the entity as dead immediately
    * @param options options for destroying the entity
-   * @param options.immediately whether the entity should be destroyed immediately, or in the next update. Defaults to false
    */
-  destroy(options: { immediately?: boolean } = { immediately: false }): void {
+  destroy(
+    options: {
+      /**
+       * Whether the entity should be destroyed immediately, or in the next update. Defaults to false
+       */
+      immediately?: boolean;
+    } = { immediately: false }
+  ): void {
     if (options.immediately) {
       this.space.remove(this);
     } else {
@@ -127,11 +142,11 @@ export class Entity {
   }
 
   /**
-   * Broadcasts an event for handling by the entity
+   * Broadcasts an event to the Entity EventSystem
    * @param event the event to broadcast
    */
   emit<E extends Event | Event>(event: E): void {
-    return this.events.emit(event);
+    this.events.emit(event);
   }
 
   /**
@@ -157,10 +172,10 @@ export class Entity {
    * @returns the component
    */
   get<T extends Component | Component>(value: ComponentClass<T>): T {
-    const component: T | undefined = this.find(value);
+    const component: Component | undefined = this.components.get(value);
 
-    if (component) {
-      return component;
+    if (component !== undefined) {
+      return component as T;
     }
 
     throw new Error(`Component ${value}} not in entity ${this.id}`);
@@ -199,19 +214,18 @@ export class Entity {
     value: Component | ComponentClass,
     options?: { immediately?: boolean }
   ): Entity {
-    let component: Component;
+    let component: Component | undefined;
 
     if (value instanceof Component) {
-      if (!this.components.has(value.class)) {
-        throw new Error('Component does not exist in Entity');
+      if (!this.components.has(value.__recs.class)) {
+        throw new Error('Component instance does not exist in Entity');
       }
       component = value;
     } else {
-      const c = this.find(value);
-      if (!c) {
+      component = this.find(value);
+      if (component === undefined) {
         throw new Error('Component does not exist in Entity');
       }
-      component = c;
     }
 
     if (options?.immediately) {

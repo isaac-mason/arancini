@@ -55,11 +55,14 @@ export abstract class System {
   world!: World;
 
   /**
-   * A map of query names to query descriptions
-   *
    * @private used internally, do not use directly
    */
-  _queries: Set<Query> = new Set();
+  __recs: {
+    /**
+     * A map of query names to query descriptions
+     */
+    queries: Set<Query>;
+  } = { queries: new Set() };
 
   /**
    * Destroys the system and removes it from the RECS
@@ -91,9 +94,9 @@ export abstract class System {
    * @returns the query
    */
   protected query(queryDescription: QueryDescription): Query {
-    const query = this.world.queryManager.getQuery(queryDescription);
+    const query = this.world.queryManager.createQuery(queryDescription);
     this.world.systemManager.addSystemToQuery(query, this);
-    this._queries.add(query);
+    this.__recs.queries.add(query);
 
     return query;
   }

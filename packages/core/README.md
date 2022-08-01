@@ -32,7 +32,7 @@ You can also optionally add behavior to Components for unity-like Game Objects.
 **1. Import everything we need**
 
 ```ts
-import World, { Component, Query, System } from '@recs/core';
+import { Component, Query, System, World } from '@recs/core';
 ```
 
 **2. Create a few simple components to store some data**

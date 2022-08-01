@@ -1,16 +1,38 @@
 /* eslint-disable max-classes-per-file */
 import { describe, it, expect } from '@jest/globals';
 import { Component } from '../component';
+import { World } from '../world';
 import { ComponentPool } from './component-pool';
 
 describe('ComponentPool', () => {
   class ExampleComponentOne extends Component {}
   class ExampleComponentTwo extends Component {}
 
+  let world: World;
   let pool: ComponentPool;
 
   beforeEach(() => {
-    pool = new ComponentPool();
+    world = new World();
+    world.registerComponent(ExampleComponentOne);
+    world.registerComponent(ExampleComponentTwo);
+    pool = world.spaceManager.componentPool;
+  });
+
+  it('should retrieve component indexes on creating new components in the object pool', () => {
+    const exampleComponentOneIndex =
+      world.componentRegistry.getComponentIndex(ExampleComponentOne);
+    const exampleComponentTwoIndex =
+      world.componentRegistry.getComponentIndex(ExampleComponentTwo);
+
+    const exampleComponentOne = pool.request(ExampleComponentOne);
+    const exampleComponentTwo = pool.request(ExampleComponentTwo);
+
+    expect(exampleComponentOne.__recs.classIndex).toBe(
+      exampleComponentOneIndex
+    );
+    expect(exampleComponentTwo.__recs.classIndex).toBe(
+      exampleComponentTwoIndex
+    );
   });
 
   it('should create a new pool on retrieving a component for the first time', () => {
