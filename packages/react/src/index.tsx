@@ -31,7 +31,8 @@ export type SpaceProps = {
 };
 
 export type SystemProps = {
-  system: R.System;
+  system: R.SystemClass;
+  priority?: number;
 };
 
 export type EntityProps = {
@@ -48,23 +49,28 @@ export type ComponentProps<T extends R.Component> = {
 };
 
 export const createWorld = () => {
+  const queryRerenderHooks: Map<() => void, R.Query> = new Map();
+
+  class QueryRerenderSystem extends R.System {
+    onUpdate() {
+      queryRerenderHooks.forEach((query, rerender) => {
+        if (query.added.length > 0 || query.removed.length > 0) {
+          rerender();
+        }
+      });
+    }
+  }
+
   const worldContext = createContext({} as WorldProviderContext);
   const spaceContext = createContext({} as SpaceProviderContext);
   const entityContext = createContext({} as EntityProviderContext);
 
   const world = new R.World();
+  world.registerSystem(QueryRerenderSystem, { priority: -Infinity });
   world.init();
-
-  const queryRerenderHooks: Map<() => void, R.Query> = new Map();
 
   const step = (delta: number) => {
     world.update(delta);
-
-    queryRerenderHooks.forEach((query, rerender) => {
-      if (query.added.length > 0 || query.removed.length > 0) {
-        rerender();
-      }
-    });
   };
 
   const World = ({ children }: WorldProps) => {
@@ -93,14 +99,14 @@ export const createWorld = () => {
     );
   };
 
-  const System = ({ system }: SystemProps) => {
+  const System = ({ system, priority }: SystemProps) => {
     useEffect(() => {
-      world.addSystem(system);
+      world.registerSystem(system, { priority });
 
       return () => {
-        world.remove(system);
+        world.unregisterSystem(system);
       };
-    }, [system]);
+    }, [system, priority]);
 
     return null;
   };
@@ -151,7 +157,7 @@ export const createWorld = () => {
       component.current = comp as T;
 
       return () => {
-        if (comp && entity.has(comp.class)) {
+        if (comp && entity.has(comp.__recs.class)) {
           entity.removeComponent(comp);
         }
       };

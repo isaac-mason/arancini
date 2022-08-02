@@ -5,7 +5,8 @@ import { BitSet } from './utils/bit-set';
 import { World } from './world';
 
 /**
- * QueryManager is an internal class that manages Query class instances
+ * QueryManager is an internal class that manages Query instances
+ *
  * @private internal class, do not use directly
  */
 export class QueryManager {
@@ -101,7 +102,7 @@ export class QueryManager {
   }
 
   getQueryBitSets(queryDescription: QueryDescription): QueryBitSets {
-    // build bitsets for the queries
+    // build bitsets for the query conditions
     const { all, any, not } = Array.isArray(queryDescription)
       ? { all: queryDescription, any: undefined, not: undefined }
       : queryDescription;

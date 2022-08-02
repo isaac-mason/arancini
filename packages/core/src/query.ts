@@ -86,7 +86,8 @@ export type QueryBitSets = {
  *     this.exampleQueryName.all.forEach((entity) => console.log(entity));
  *   }
  * }
- * world.addSystem(new ExampleSystem());
+ *
+ * world.registerSystem(ExampleSystem);
  * ```
  */
 export class Query {

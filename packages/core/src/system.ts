@@ -2,6 +2,10 @@ import { Query, QueryDescription } from './query';
 import { uniqueId } from './utils';
 import { World } from './world';
 
+export type SystemClass<T extends System = System> = {
+  new (): T;
+};
+
 /**
  * Systems contain queries for entities and have lifecycle methods `onInit`, `onUpdate` and `onDestroy` that can add logic to a world.
  *
@@ -59,16 +63,32 @@ export abstract class System {
    */
   __recs: {
     /**
+     * The System class
+     */
+    clazz: SystemClass;
+
+    /**
      * A map of query names to query descriptions
      */
     queries: Set<Query>;
-  } = { queries: new Set() };
+
+    /**
+     * The priority of the system, determines system run order.
+     */
+    priority: number;
+
+    /**
+     * The order the system was inserted in
+     */
+    order: number;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  } = { queries: new Set(), priority: 0, order: 0, clazz: null! };
 
   /**
    * Destroys the system and removes it from the RECS
    */
   destroy(): void {
-    this.world.remove(this);
+    this.world.unregisterSystem(this.__recs.clazz);
   }
 
   /**

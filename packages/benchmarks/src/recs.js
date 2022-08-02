@@ -39,7 +39,7 @@ class MovementSystem extends System {
 export const recs = {
   setup() {
     this.world = new World();
-    this.world.addSystem(new MovementSystem());
+    this.world.registerSystem(MovementSystem);
     this.space = this.world.create.space();
     this.world.init();
     updateCount = 0;

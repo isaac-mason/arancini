@@ -126,9 +126,9 @@ export const RandomColorChangingWalkers = () => {
   useEffect(() => {
     const world = new World();
 
-    world.addSystem(new WalkSystem());
-    world.addSystem(new DrawSystem());
-    world.addSystem(new FlipSystem());
+    world.registerSystem(WalkSystem);
+    world.registerSystem(DrawSystem);
+    world.registerSystem(FlipSystem);
 
     // create a space for our entities
     const space = world.create.space();

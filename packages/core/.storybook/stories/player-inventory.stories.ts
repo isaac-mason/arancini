@@ -50,7 +50,7 @@ class InventorySystem extends System {
 export const PlayerInventory = () => {
   useEffect(() => {
     const world = new World();
-    world.addSystem(new InventorySystem());
+    world.registerSystem(InventorySystem);
 
     const space = world.create.space();
     const player = space.create.entity();

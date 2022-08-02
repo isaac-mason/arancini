@@ -1,4 +1,4 @@
-import { uniqueId } from './utils';
+import { isSubclassMethodOverridden, uniqueId } from './utils';
 import type { Component, ComponentClass } from './component';
 import type { Entity } from './entity';
 import type { World } from './world';
@@ -146,12 +146,12 @@ export class SpaceManager {
    */
   initialiseComponent(component: Component): void {
     // run component initialisation logic
-    if (this.isComponentMethodOverridden(component, 'onInit')) {
+    if (isSubclassMethodOverridden(component.__recs.class, 'onInit')) {
       component.onInit();
     }
 
     // add the components `onUpdate` method to the component update pool if overriden
-    if (this.isComponentMethodOverridden(component, 'onUpdate')) {
+    if (isSubclassMethodOverridden(component.__recs.class, 'onUpdate')) {
       this.componentsToUpdate.set(component.id, component);
     }
   }
@@ -233,7 +233,7 @@ export class SpaceManager {
     this.componentsToUpdate.delete(component.id);
 
     // run the onDestroy method
-    if (this.isComponentMethodOverridden(component, 'onDestroy')) {
+    if (isSubclassMethodOverridden(component.__recs.class, 'onDestroy')) {
       component.onDestroy();
     }
 
@@ -309,14 +309,5 @@ export class SpaceManager {
         }
       }
     }
-  }
-
-  private isComponentMethodOverridden(
-    instance: Component,
-    methodName: string
-  ): boolean {
-    return Object.getOwnPropertyNames(instance.__recs.class.prototype).includes(
-      methodName
-    );
   }
 }

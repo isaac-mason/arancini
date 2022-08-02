@@ -6,8 +6,8 @@ import { Query, QueryDescription } from './query';
 import { QueryManager } from './query-manager';
 import { Space, SpaceParams } from './space';
 import { SpaceManager } from './space-manager';
-import { System } from './system';
-import { SystemManager } from './system-manager';
+import { System, SystemClass } from './system';
+import { SystemAttributes, SystemManager } from './system-manager';
 import { uniqueId } from './utils';
 
 /**
@@ -125,15 +125,6 @@ export class World {
   }
 
   /**
-   * Adds a system to the World
-   * @param system the system to add to the World
-   */
-  addSystem<T extends System>(system: T): T {
-    this.systemManager.addSystem(system);
-    return system;
-  }
-
-  /**
    * Destroys the World
    */
   destroy(): void {
@@ -181,10 +172,8 @@ export class World {
    * Removes from the World
    * @param value the value to remove
    */
-  remove(value: System | Space | Query): void {
-    if (value instanceof System) {
-      this.systemManager.removeSystem(value);
-    } else if (value instanceof Space) {
+  remove(value: Space | Query): void {
+    if (value instanceof Space) {
       this.spaceManager.destroySpace(value);
     } else if (value instanceof Query) {
       this.queryManager.removeQuery(value);
@@ -195,11 +184,9 @@ export class World {
    * Updates the World
    * @param timeElapsed the time elapsed in seconds, uses 0 if not specified
    */
-  update(timeElapsed?: number): void {
-    const elapsed = timeElapsed || 0;
-
+  update(timeElapsed = 0): void {
     // update the current time
-    this.time += elapsed;
+    this.time += timeElapsed;
 
     // clean up dead entities
     this.spaceManager.cleanUpDeadEntitiesAndComponents();
@@ -208,10 +195,10 @@ export class World {
     this.spaceManager.recycle();
 
     // update components - runs update methods for all components that have them
-    this.spaceManager.updateComponents(elapsed, this.time);
+    this.spaceManager.updateComponents(timeElapsed, this.time);
 
     // update systems
-    this.systemManager.update(elapsed, this.time);
+    this.systemManager.update(timeElapsed, this.time);
 
     // clear query added and removed lists after systems have updated
     this.queryManager.clearAddedAndRemoved();
@@ -247,5 +234,45 @@ export class World {
   registerComponent(component: ComponentClass): World {
     this.componentRegistry.registerComponent(component);
     return this;
+  }
+
+  /**
+   * Adds a system to the World
+   * @param system the system to add to the World
+   * @returns the World, for chaining
+   */
+  registerSystem<T extends System>(
+    system: SystemClass<T>,
+    attributes?: SystemAttributes
+  ): World {
+    this.systemManager.registerSystem(system, attributes);
+    return this;
+  }
+
+  /**
+   * Adds a system to the World
+   * @param system the system to add to the World
+   * @returns the World, for chaining
+   */
+  unregisterSystem<T extends System>(system: SystemClass<T>): World {
+    this.systemManager.unregisterSystem(system);
+    return this;
+  }
+
+  /**
+   * Retrives a system by class
+   * @param clazz the system class
+   * @returns the system, or undefined if it is not registerd
+   */
+  getSystem(clazz: SystemClass): System | undefined {
+    return this.systemManager.systems.get(clazz);
+  }
+
+  /**
+   * Retrieves a list of all systems in the world
+   * @returns all systems in the world
+   */
+  getSystems(): System[] {
+    return Array.from(this.systemManager.systems.values());
   }
 }

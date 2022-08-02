@@ -26,13 +26,14 @@ class Walking extends RECS.Component {}
 class Transform extends RECS.Component {
   group!: THREE.Group;
 
-  construct(props: { position: Vector3Tuple }) {
+  construct(props: { position?: Vector3Tuple; rotation?: Vector3Tuple }) {
     this.group = new THREE.Group();
-    this.group.position.set(...props.position);
+    this.group.position.set(...(props.position ?? [0, 0, 0]));
+    this.group.rotation.set(...(props.rotation ?? [0, 0, 0]));
   }
 }
 
-class Renderable extends RECS.Component {
+class JSX extends RECS.Component {
   jsx!: JSX.Element;
 
   construct(jsx: JSX.Element): void {
@@ -63,11 +64,11 @@ class WalkingSystem extends RECS.System {
 }
 
 const RendererSystem = () => {
-  const { all: entities } = R.useQuery([Renderable]);
+  const { all: entities } = R.useQuery([JSX]);
   return (
     <>
       {entities.map((entity) => {
-        const { jsx } = entity.get(Renderable);
+        const { jsx } = entity.get(JSX);
         const { group } = entity.get(Transform);
         return (
           <primitive key={entity.id} object={group}>
@@ -104,7 +105,7 @@ const App = () => {
             />
 
             {/* how the walker should be displayed */}
-            <R.Component type={Renderable}>
+            <R.Component type={JSX}>
               <mesh>
                 <boxBufferGeometry args={[1, 1, 1]} />
                 <meshNormalMaterial />
@@ -118,7 +119,7 @@ const App = () => {
       </R.Space>
 
       {/* class system to move the walkers */}
-      <R.System system={new WalkingSystem()} />
+      <R.System system={WalkingSystem} />
 
       {/* component system to render the walkers */}
       <RendererSystem />

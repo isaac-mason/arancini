@@ -1,6 +1,11 @@
 import { Query } from './query';
 import { World } from './world';
-import { System } from './system';
+import { System, SystemClass } from './system';
+import { isSubclassMethodOverridden } from './utils';
+
+export type SystemAttributes = {
+  priority?: number;
+};
 
 /**
  * SystemManager is an internal class that manages systems in a RECS and calls their lifecycle hooks.
@@ -16,7 +21,12 @@ export class SystemManager {
   /**
    * Systems in the System Manager
    */
-  systems: Map<string, System> = new Map();
+  systems: Map<SystemClass, System> = new Map();
+
+  /**
+   * Systems with onUpdate methods overriden sorted by priority
+   */
+  private sortedSystems: System[] = [];
 
   /**
    * Whether the system manager has been initialised
@@ -48,18 +58,35 @@ export class SystemManager {
 
   /**
    * Adds a system to the system manager
-   * @param system the system to add
+   * @param Clazz the system class to add
    */
-  addSystem(system: System): SystemManager {
-    system.world = this.world;
+  registerSystem(Clazz: SystemClass, attributes?: SystemAttributes): void {
+    if (this.systems.has(Clazz)) {
+      throw new Error(`System "${Clazz.name}" has already been registered`);
+    }
 
-    this.systems.set(system.id, system);
+    const system = new Clazz();
+    system.world = this.world;
+    system.__recs.clazz = Clazz;
+    system.__recs.priority = attributes?.priority ?? 0;
+    system.__recs.order = this.systems.size;
+
+    this.systems.set(Clazz, system);
+
+    if (isSubclassMethodOverridden(system.__recs.clazz, 'onUpdate')) {
+      this.sortedSystems.push(system);
+
+      this.sortedSystems.sort((a, b) => {
+        return (
+          a.__recs.priority - b.__recs.priority ||
+          a.__recs.order - b.__recs.order
+        );
+      });
+    }
 
     if (this.initialised) {
       this.initialiseSystem(system);
     }
-
-    return this;
   }
 
   /**
@@ -83,18 +110,21 @@ export class SystemManager {
 
   /**
    * Removes a system from the system manager
-   * @param system the system to remove
+   * @param clazz the system to remove
    */
-  removeSystem(system: System): SystemManager {
-    this.systems.delete(system.id);
+  unregisterSystem(clazz: SystemClass): void {
+    const system = this.systems.get(clazz);
+    if (!system) {
+      return;
+    }
+
+    this.systems.delete(clazz);
 
     system.__recs.queries.forEach((query: Query) => {
       this.removeSystemFromQuery(query, system);
     });
 
     this.destroySystem(system);
-
-    return this;
   }
 
   /**

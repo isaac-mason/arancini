@@ -163,8 +163,8 @@ const world = new World();
 Next, let's add the systems we created:
 
 ```ts
-world.addSystem(new WalkSystem());
-world.addSystem(new DrawSystem());
+world.registerSystem(WalkSystem);
+world.registerSystem(DrawSystem);
 ```
 
 Now let's create some entities for our random walkers and add `Position` and `Color` components.

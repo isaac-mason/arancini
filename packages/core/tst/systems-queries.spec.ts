@@ -35,6 +35,27 @@ describe('Systems and Queries Integration Tests', () => {
   });
 
   describe('Systems', () => {
+    it('initialises systems on initialising the world', () => {
+      world = new World();
+      space = world.create.space();
+
+      const systemInitFn = jest.fn();
+
+      class TestSystem extends System {
+        onInit(): void {
+          systemInitFn();
+        }
+      }
+
+      world.registerSystem(TestSystem);
+
+      expect(systemInitFn).not.toHaveBeenCalled();
+
+      world.init();
+
+      expect(systemInitFn).toHaveBeenCalled();
+    });
+
     it('can create queries for components', () => {
       // system with query for both TestComponentOne and TestComponentTwo
       class TestSystem extends System {
@@ -46,7 +67,9 @@ describe('Systems and Queries Integration Tests', () => {
           });
         }
       }
-      const system = world.addSystem(new TestSystem());
+
+      world.registerSystem(TestSystem);
+      const system = world.getSystem(TestSystem) as TestSystem;
 
       // create entity that matches query
       const entity = space.create.entity();
@@ -85,14 +108,20 @@ describe('Systems and Queries Integration Tests', () => {
           systemUpdateJestFn(timeElapsed);
         }
       }
-      world.addSystem(new TestSystem());
+
+      world.registerSystem(TestSystem);
+      const testSystem = world.getSystem(TestSystem) as TestSystem;
 
       expect(world.initialised).toBe(true);
 
       const timeElapsedUpdateOne = 1;
       const timeElapsedUpdateTwo = 2;
+
       world.update(timeElapsedUpdateOne);
       world.update(timeElapsedUpdateTwo);
+
+      testSystem.enabled = false;
+      world.update();
 
       world.destroy();
 
@@ -105,7 +134,89 @@ describe('Systems and Queries Integration Tests', () => {
       expect(systemDestroyJestFn).toHaveBeenCalledTimes(1);
     });
 
-    describe('System removal', () => {
+    describe('System registration', () => {
+      const systemUpdateFn = jest.fn();
+
+      class SystemOne extends System {
+        onUpdate(): void {
+          systemUpdateFn(SystemOne);
+        }
+      }
+
+      class SystemTwo extends System {
+        onUpdate(): void {
+          systemUpdateFn(SystemTwo);
+        }
+      }
+
+      class SystemThree extends System {
+        onUpdate(): void {
+          systemUpdateFn(SystemThree);
+        }
+      }
+
+      beforeEach(() => {
+        systemUpdateFn.mockReset();
+      });
+
+      it('silently swallows attempting to unregister a system that is not registered or has already been unregistered', () => {
+        expect(() => {
+          world
+            .unregisterSystem(SystemOne)
+            .registerSystem(SystemOne)
+            .unregisterSystem(SystemOne)
+            .unregisterSystem(SystemOne);
+        }).not.toThrowError();
+      });
+
+      it('throws an error on attempting to re-register a system', () => {
+        expect(() => {
+          world.registerSystem(SystemOne).registerSystem(SystemOne);
+        }).toThrowError();
+      });
+
+      it('defaults to sorting systems by insertion order', () => {
+        world
+          .registerSystem(SystemOne)
+          .registerSystem(SystemTwo)
+          .registerSystem(SystemThree);
+
+        expect(world.getSystems().map((s) => s.__recs.clazz)).toEqual([
+          SystemOne,
+          SystemTwo,
+          SystemThree,
+        ]);
+
+        world.update();
+
+        expect(systemUpdateFn).toHaveBeenCalledTimes(3);
+        expect(systemUpdateFn).nthCalledWith(1, SystemOne);
+        expect(systemUpdateFn).nthCalledWith(2, SystemTwo);
+        expect(systemUpdateFn).nthCalledWith(3, SystemThree);
+      });
+
+      it('supports sorting with an optional system priority', () => {
+        world
+          .registerSystem(SystemOne, { priority: -100 })
+          .registerSystem(SystemTwo)
+          .registerSystem(SystemThree);
+
+        expect(world.getSystems().map((s) => s.__recs.clazz)).toEqual([
+          SystemOne,
+          SystemTwo,
+          SystemThree,
+        ]);
+
+        world.update();
+
+        expect(systemUpdateFn).toHaveBeenCalledTimes(3);
+        expect(systemUpdateFn).nthCalledWith(2, SystemTwo);
+        expect(systemUpdateFn).nthCalledWith(3, SystemThree);
+        expect(systemUpdateFn).nthCalledWith(1, SystemOne);
+      });
+    });
+
+    describe('System unregistration', () => {
       const description = {
         all: [TestComponentOne],
       };
@@ -126,11 +237,11 @@ describe('Systems and Queries Integration Tests', () => {
       }
 
       it('systems can be removed, and queries will be removed if they are no longer used by any systems', () => {
-        const systemOne = new TestSystemOne();
-        world.addSystem(systemOne);
+        world.registerSystem(TestSystemOne);
+        const systemOne = world.getSystem(TestSystemOne) as TestSystemOne;
 
-        const systemTwo = new TestSystemTwo();
-        world.addSystem(systemTwo);
+        world.registerSystem(TestSystemTwo);
+        const systemTwo = world.getSystem(TestSystemTwo) as TestSystemTwo;
 
         expect(
           world.queryManager.hasQuery({
@@ -159,11 +270,11 @@ describe('Systems and Queries Integration Tests', () => {
         // use the query outside of a system
         const query = world.query(description);
 
-        const systemOne = new TestSystemOne();
-        world.addSystem(systemOne);
+        world.registerSystem(TestSystemOne);
+        const systemOne = world.getSystem(TestSystemOne) as TestSystemOne;
 
-        const systemTwo = new TestSystemTwo();
-        world.addSystem(systemTwo);
+        world.registerSystem(TestSystemTwo);
+        const systemTwo = world.getSystem(TestSystemTwo) as TestSystemTwo;
 
         // assert the query exists
         expect(
@@ -326,7 +437,8 @@ describe('Systems and Queries Integration Tests', () => {
         }
       }
 
-      const system = world.addSystem(new TestSystem());
+      world.registerSystem(TestSystem);
+      const system = world.getSystem(TestSystem) as TestSystem;
 
       const entity = space.create.entity();
       entity.addComponent(TestComponentOne);
@@ -363,7 +475,8 @@ describe('Systems and Queries Integration Tests', () => {
         }
       }
 
-      const system = world.addSystem(new TestSystem());
+      world.registerSystem(TestSystem);
+      const system = world.getSystem(TestSystem) as TestSystem;
 
       const entity = space.create.entity();
       entity.addComponent(TestComponentTwo);
@@ -402,7 +515,8 @@ describe('Systems and Queries Integration Tests', () => {
         }
       }
 
-      const system = world.addSystem(new TestSystem());
+      world.registerSystem(TestSystem);
+      const system = world.getSystem(TestSystem) as TestSystem;
 
       const entity = space.create.entity();
       entity.addComponent(TestComponentOne);
@@ -443,7 +557,8 @@ describe('Systems and Queries Integration Tests', () => {
         }
       }
 
-      const system = world.addSystem(new TestSystem());
+      world.registerSystem(TestSystem);
+      const system = world.getSystem(TestSystem) as TestSystem;
 
       const entity = space.create.entity();
       entity.addComponent(TestComponentOne);
