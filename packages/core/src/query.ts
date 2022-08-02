@@ -5,11 +5,11 @@ import { BitSet } from './utils/bit-set';
 /**
  * Enum for query condition types
  */
-export enum QueryConditionType {
-  ALL = 'all',
-  ANY = 'any',
-  NOT = 'not',
-}
+export const QueryConditionType = {
+  ALL: 'all',
+  ANY: 'any',
+  NOT: 'not',
+} as const;
 
 /**
  * Type for query conditions
