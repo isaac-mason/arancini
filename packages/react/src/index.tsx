@@ -57,6 +57,7 @@ export const createWorld = () => {
         if (query.added.length > 0 || query.removed.length > 0) {
           rerender();
         }
+        query.clearEvents();
       });
     }
   }

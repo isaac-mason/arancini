@@ -136,6 +136,9 @@ export class SystemManager {
     for (const system of this.systems.values()) {
       if (system.enabled) {
         system.onUpdate(timeElapsed, time);
+        for (const query of system.__recs.queries) {
+          query.clearEvents();
+        }
       }
     }
   }
@@ -172,12 +175,7 @@ export class SystemManager {
     if (systems !== undefined) {
       systems.delete(system);
 
-      // remove the query if
-      // - the query is not standalone ie only used by systems
-      // - it is not being used by any systems
-      if (!query.standalone && systems.size === 0) {
-        this.world.queryManager.removeQuery(query);
-      }
+      this.world.queryManager.removeQuery(query);
     }
   }
 }

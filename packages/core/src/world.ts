@@ -152,9 +152,6 @@ export class World {
   query(queryDescription: QueryDescription): Query {
     const query = this.queryManager.createQuery(queryDescription);
 
-    // set the query to be standalone so it cannot be removed by system related cleanup
-    query.standalone = true;
-
     return query;
   }
 
@@ -199,9 +196,6 @@ export class World {
 
     // update systems
     this.systemManager.update(timeElapsed, this.time);
-
-    // clear query added and removed lists after systems have updated
-    this.queryManager.clearAddedAndRemoved();
   }
 
   /**

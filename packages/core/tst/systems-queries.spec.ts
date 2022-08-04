@@ -56,7 +56,7 @@ describe('Systems and Queries Integration Tests', () => {
       expect(systemInitFn).toHaveBeenCalled();
     });
 
-    it('can create queries for components', () => {
+    it('can create queries for Entities based on Components', () => {
       // system with query for both TestComponentOne and TestComponentTwo
       class TestSystem extends System {
         testQueryName!: Query;
@@ -89,6 +89,58 @@ describe('Systems and Queries Integration Tests', () => {
       expect(system.testQueryName.all.length).toBe(0);
       expect(system.testQueryName.removed.length).toBe(1);
       expect(system.testQueryName.all.length).toBe(0);
+    });
+
+    it('mainains seperate Query "added" and "removed" event arrays when multiple Systems have the same queries', () => {
+      class TestSystemOne extends System {
+        testQueryName!: Query;
+
+        onInit(): void {
+          this.testQueryName = this.query({
+            all: [TestComponentOne, TestComponentTwo],
+          });
+        }
+      }
+
+      class TestSystemTwo extends System {
+        testQueryName!: Query;
+
+        onInit(): void {
+          this.testQueryName = this.query({
+            all: [TestComponentOne, TestComponentTwo],
+          });
+        }
+      }
+
+      // register TestSystemOne
+      world.registerSystem(TestSystemOne);
+
+      const testSystemOne = world.getSystem(TestSystemOne) as TestSystemOne;
+
+      // create entity that matches the query in both systems
+      const entity = space.create.entity();
+      entity.addComponent(TestComponentOne);
+      entity.addComponent(TestComponentTwo);
+
+      // entity should be in TestSystemOne query
+      expect(testSystemOne.testQueryName.added.length).toBe(1);
+      expect(testSystemOne.testQueryName.removed.length).toBe(0);
+      expect(testSystemOne.testQueryName.all.length).toBe(1);
+
+      // update, should clear added and removed for TestSystemOne
+      world.update();
+      expect(testSystemOne.testQueryName.added.length).toBe(0);
+      expect(testSystemOne.testQueryName.removed.length).toBe(0);
+      expect(testSystemOne.testQueryName.all.length).toBe(1);
+
+      // register TestSystemTwo
+      world.registerSystem(TestSystemTwo);
+      const testSystemTwo = world.getSystem(TestSystemTwo) as TestSystemTwo;
+
+      // TestSystemTwo should have 1 entity in added
+      expect(testSystemTwo.testQueryName.added.length).toBe(1);
+      expect(testSystemTwo.testQueryName.removed.length).toBe(0);
+      expect(testSystemTwo.testQueryName.all.length).toBe(1);
     });
 
     it('will have onInit, onUpdate, and onDestroy lifecycle methods called', () => {

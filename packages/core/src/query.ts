@@ -92,6 +92,11 @@ export type QueryBitSets = {
  */
 export class Query {
   /**
+   * The query dedupe string
+   */
+  key: string;
+
+  /**
    * The current entities matched by the query
    */
   all: Entity[] = [];
@@ -107,68 +112,32 @@ export class Query {
   removed: Entity[] = [];
 
   /**
-   * A list of all component classes that are involved in the conditions for this query
-   */
-  components: ComponentClass[];
-
-  /**
-   * The query description for this query
-   */
-  description: QueryDescription;
-
-  /**
-   * The query dedupe string
-   */
-  key: string;
-
-  /**
-   * Whether the query is used outside of a system
-   *
-   * If true, the query will not be removed from the world when all systems using it are removed.
-   */
-  standalone = false;
-
-  /**
-   * Set of entities currently matched by the query
-   */
-  set: Set<Entity> = new Set();
-
-  /**
-   * BitSets for the query conditions. Set by the QueryManager
-   */
-  bitSets!: QueryBitSets;
-
-  /**
    * Constructor for a new query instance
    * @param queryKey the key for the query
-   * @param queryComponents the components referenced by the query
-   * @param queryDescription the query description
-   * @param queryBitSets the bitSets used to evaluate the query
    */
-  constructor(
-    queryKey: string,
-    queryComponents: ComponentClass[],
-    queryDescription: QueryDescription,
-    queryBitSets: QueryBitSets
-  ) {
+  constructor(queryKey: string) {
     this.key = queryKey;
-    this.description = queryDescription;
-    this.components = queryComponents;
-    this.bitSets = queryBitSets;
+  }
+
+  clearEvents(): void {
+    this.added = [];
+    this.removed = [];
   }
 
   /**
    * Returns a string that identifies a query description
-   * @param query the query description
+   * @param queryDescription the query description
    * @returns a string that identifies a query description
    * @private called internally, do not call directly
    */
-  static getDescriptionDedupeString(query: QueryDescription): string {
-    if (Array.isArray(query)) {
-      return query.map((c) => `${c.name}`).join('&');
+  static getDescriptionDedupeString(
+    queryDescription: QueryDescription
+  ): string {
+    if (Array.isArray(queryDescription)) {
+      return queryDescription.map((c) => `${c.name}`).join('&');
     }
 
-    return Object.entries(query)
+    return Object.entries(queryDescription)
       .flatMap(([type, components]) => {
         if (type === QueryConditionType.ALL) {
           return components.map((c) => `${c.name}`).sort();
