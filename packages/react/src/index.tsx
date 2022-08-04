@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import * as R from '@recs/core';
 import React, {
   createContext,
@@ -27,6 +28,7 @@ export type WorldProps = {
 };
 
 export type SpaceProps = {
+  id?: string;
   children?: React.ReactNode;
 };
 
@@ -77,14 +79,16 @@ export const createWorld = () => {
   const World = ({ children }: WorldProps) => {
     return (
       <worldContext.Provider value={{ world }}>
-        {children}
+        <spaceContext.Provider value={{ space: world.defaultSpace }}>
+          {children}
+        </spaceContext.Provider>
       </worldContext.Provider>
     );
   };
 
-  const Space = ({ children }: SpaceProps) => {
+  const Space = ({ id, children }: SpaceProps) => {
     const space = useData((): R.Space => {
-      return world.create.space();
+      return world.create.space({ id });
     });
 
     useEffect(() => {
@@ -172,10 +176,7 @@ export const createWorld = () => {
     ref: ForwardedRef<T>
   ) => null;
 
-  const useQuery = (
-    queryDescription: R.QueryDescription,
-    shouldRerender = true
-  ) => {
+  const useQuery = (queryDescription: R.QueryDescription) => {
     const query = useData(
       () => world.create.query(queryDescription),
       [queryDescription]
@@ -184,14 +185,10 @@ export const createWorld = () => {
     const rerender = useRerender();
 
     useEffect(() => {
-      if (shouldRerender) {
-        queryRerenderHooks.set(rerender, query);
-      }
+      queryRerenderHooks.set(rerender, query);
 
       return () => {
-        if (shouldRerender) {
-          queryRerenderHooks.delete(rerender);
-        }
+        queryRerenderHooks.delete(rerender);
       };
     }, []);
 

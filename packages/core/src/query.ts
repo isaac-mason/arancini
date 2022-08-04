@@ -40,7 +40,7 @@ export type QueryBitSets = {
  * Query results can also be retrieved once-off without creating a persistent query with `world.query(...)`.
  *
  * ```ts
- * import { Component, System, World, QueryDescription } from "@rapidajs/recs";
+ * import { Component, System, World, QueryDescription } from "@recs/core";
  *
  * // create a world
  * const world = new World();
@@ -113,15 +113,8 @@ export class Query {
   /**
    * Returns the first entity within this archetype.
    * */
-  get first(): Entity | null {
-    return this.all[0] || null;
-  }
-
-  /**
-   * Iterator for all Entities matched by the query.
-   */
-  get [Symbol.iterator]() {
-    return this.all[Symbol.iterator];
+  get first(): Entity | undefined {
+    return this.all[0] || undefined;
   }
 
   /**

@@ -9,27 +9,51 @@ describe('World Integration Tests', () => {
     world = new World();
   });
 
-  it('should be able to register event handlers and emit events', () => {
-    const mockFn = jest.fn();
+  it('should have a default space that entities can be created in', () => {
+    expect(Array.from(world.spaceManager.spaces.values())[0]).toBe(
+      world.defaultSpace
+    );
 
-    world.init();
+    const entityOne = world.create.entity();
 
-    const subscription = world.on('event-name', () => mockFn());
+    expect(world.defaultSpace.entities.get(entityOne.id)).toBe(entityOne);
 
-    expect(mockFn).toBeCalledTimes(0);
+    const entityTwo = world.build.entity().build();
 
-    world.emit({
-      topic: 'event-name',
+    expect(world.defaultSpace.entities.get(entityTwo.id)).toBe(entityTwo);
+  });
+
+  describe('getSpace', () => {
+    it('can retrieve spaces by id', () => {
+      const space = world.create.space({ id: 'SpaceName' });
+
+      expect(world.getSpace('SpaceName')).toBe(space);
     });
+  });
 
-    expect(mockFn).toBeCalledTimes(1);
+  describe('Events', () => {
+    it('should be able to register event handlers and emit events', () => {
+      const mockFn = jest.fn();
 
-    subscription.unsubscribe();
+      world.init();
 
-    world.emit({
-      topic: 'event-name',
+      const subscription = world.on('event-name', () => mockFn());
+
+      expect(mockFn).toBeCalledTimes(0);
+
+      world.emit({
+        topic: 'event-name',
+      });
+
+      expect(mockFn).toBeCalledTimes(1);
+
+      subscription.unsubscribe();
+
+      world.emit({
+        topic: 'event-name',
+      });
+
+      expect(mockFn).toBeCalledTimes(1);
     });
-
-    expect(mockFn).toBeCalledTimes(1);
   });
 });

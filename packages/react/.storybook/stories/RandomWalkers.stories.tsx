@@ -49,7 +49,7 @@ class WalkingSystem extends RECS.System {
   }
 
   onUpdate(delta: number) {
-    this.walking.all.forEach((walker) => {
+    for (const walker of this.walking.all) {
       const { group } = walker.get(Transform);
 
       group.position.x += (Math.random() - 0.5) * 2 * delta;
@@ -59,7 +59,7 @@ class WalkingSystem extends RECS.System {
       group.rotation.x += (Math.random() - 0.5) * 2 * delta;
       group.rotation.y += (Math.random() - 0.5) * 2 * delta;
       group.rotation.z += (Math.random() - 0.5) * 2 * delta;
-    });
+    }
   }
 }
 

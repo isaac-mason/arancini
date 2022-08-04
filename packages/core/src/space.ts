@@ -1,16 +1,8 @@
-import { Component, ComponentClass } from './component';
 import { Entity } from './entity';
 import { Event, EventHandler, EventSubscription, EventSystem } from './events';
 import { uniqueId } from './utils';
+import { EntityBuilder, EntityBuilderFactory } from './utils/entity-builder';
 import { World } from './world';
-
-export type EntityBuilder = {
-  addComponent: <T extends Component>(
-    clazz: ComponentClass<T>,
-    ...args: Parameters<T['construct']>
-  ) => EntityBuilder;
-  build: () => Entity;
-};
 
 /**
  * Params for creating a new Space
@@ -33,7 +25,7 @@ export type SpaceParams = {
  * Aside from containing Entities, Spaces also have an event system that can be used to share data.
  *
  * ```ts
- * import { World } from "@rapidajs/recs";
+ * import { World } from "@recs/core";
  *
  * // create a new world
  * const world = new World();
@@ -106,24 +98,7 @@ export class Space {
     entity: () => EntityBuilder;
   } {
     return {
-      entity: () => {
-        const components: { clazz: ComponentClass; args: unknown[] }[] = [];
-
-        const builder = {
-          addComponent: <T extends Component>(
-            clazz: ComponentClass<T>,
-            ...args: Parameters<T['construct']>
-          ) => {
-            components.push({ clazz, args });
-            return builder;
-          },
-          build: (): Entity => {
-            return this.world.spaceManager.createEntity(this, components);
-          },
-        };
-
-        return builder;
-      },
+      entity: EntityBuilderFactory(this, this.world.spaceManager),
     };
   }
 

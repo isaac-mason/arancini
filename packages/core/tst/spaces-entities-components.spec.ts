@@ -378,15 +378,15 @@ describe('Spaces, Entities, Components', () => {
     });
   });
 
-  it('components should have a getter for the space the component is in', () => {
+  it('components should have a getter for the space and world the component is in', () => {
     class TestComponentOne extends Component {}
+    world.registerComponent(TestComponentOne);
 
     const entity = space.create.entity();
-
-    world.registerComponent(TestComponentOne);
 
     const component = entity.addComponent(TestComponentOne);
 
     expect(component.space).toBe(space);
+    expect(component.world).toBe(world);
   });
 });

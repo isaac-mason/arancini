@@ -14,7 +14,7 @@ import { World } from './world';
  * Aside from containing Components, Entities in recs also have an event system that can be used to share data.
  *
  * ```ts
- * import { Component, World } from '@rapidajs/recs';
+ * import { Component, World } from '@recs/core';
  *
  * // example tag component without any data or behavior
  * class ExampleComponent extends Component {}

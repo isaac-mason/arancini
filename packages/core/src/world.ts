@@ -9,12 +9,13 @@ import { SpaceManager } from './space-manager';
 import { System, SystemClass } from './system';
 import { SystemAttributes, SystemManager } from './system-manager';
 import { uniqueId } from './utils';
+import { EntityBuilder, EntityBuilderFactory } from './utils/entity-builder';
 
 /**
  * A World that can contain Spaces with Entities, Systems, and Queries.
  *
  * ```ts
- * import { World } from "@rapidajs/recs";
+ * import { World } from "@recs/core";
  *
  * const world = new World();
  *
@@ -52,14 +53,24 @@ export class World {
   initialised = false;
 
   /**
-   * The world EventSystem
+   * The current World time
    */
-  events = new EventSystem();
+  time = 0;
+
+  /**
+   * The default Space for the world.
+   */
+  defaultSpace: Space;
+
+  /**
+   * The world EventSystem.
+   */
+  events: EventSystem;
 
   /**
    * The SpaceManager for the World.
    *
-   * Manages Spaces, Entities and Components
+   * Manages Spaces, Entities and Components.
    */
   spaceManager: SpaceManager;
 
@@ -85,18 +96,30 @@ export class World {
   componentRegistry: ComponentRegistry;
 
   /**
-   * The current time for the world
-   */
-  private time = 0;
-
-  /**
    * Constructor for a World
    */
   constructor() {
+    this.events = new EventSystem();
     this.componentRegistry = new ComponentRegistry(this);
     this.spaceManager = new SpaceManager(this);
     this.queryManager = new QueryManager(this);
     this.systemManager = new SystemManager(this);
+    this.defaultSpace = this.create.space({ id: 'default' });
+  }
+
+  /**
+   * Retrives World builders
+   */
+  get build(): {
+    /**
+     * Returns an EntityBuilder, used for creating an entity with multiple components
+     * @returns an EntityBuilder
+     */
+    entity: () => EntityBuilder;
+  } {
+    return {
+      entity: EntityBuilderFactory(this.defaultSpace, this.spaceManager),
+    };
   }
 
   /**
@@ -104,19 +127,28 @@ export class World {
    */
   get create(): {
     /**
-     * Creates a space in the world
+     * Creates a new Entity in the default World Space
+     * @see defaultSpace
+     * @returns a new Entity
+     */
+    entity: () => Entity;
+    /**
+     * Creates a Space in the world
      * @param params the params for the space
-     * @returns the new space
+     * @returns the new Space
      */
     space: (params?: SpaceParams) => Space;
     /**
-     * Creates a query from a given query description
+     * Creates a Query from a given query description
      * @param queryDescription the query description
-     * @returns the query
+     * @returns the Query
      */
     query: (queryDescription: QueryDescription) => Query;
   } {
     return {
+      entity: () => {
+        return this.spaceManager.createEntity(this.defaultSpace);
+      },
       space: (params) => {
         const space = new Space(this, params);
         this.spaceManager.spaces.set(space.id, space);
@@ -240,8 +272,8 @@ export class World {
   }
 
   /**
-   * Adds a system to the World
-   * @param system the system to add to the World
+   * Adds a System to the World
+   * @param system the System to add to the World
    * @returns the World, for chaining
    */
   unregisterSystem<T extends System>(system: SystemClass<T>): World {
@@ -250,9 +282,9 @@ export class World {
   }
 
   /**
-   * Retrives a system by class
-   * @param clazz the system class
-   * @returns the system, or undefined if it is not registerd
+   * Retrives a System by class
+   * @param clazz the System class
+   * @returns the System, or undefined if it is not registerd
    */
   getSystem(clazz: SystemClass): System | undefined {
     return this.systemManager.systems.get(clazz);
@@ -264,5 +296,14 @@ export class World {
    */
   getSystems(): System[] {
     return Array.from(this.systemManager.systems.values());
+  }
+
+  /**
+   * Retrives a Space by id
+   * @param id the Space id
+   * @returns the Space, or undefined if a Space with the given id is not in the World
+   */
+  getSpace(id: string): Space | undefined {
+    return this.spaceManager.spaces.get(id);
   }
 }

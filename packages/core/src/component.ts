@@ -1,6 +1,7 @@
 import { Entity } from './entity';
 import { Space } from './space';
 import { uniqueId } from './utils';
+import { World } from './world';
 
 export type ComponentClass<T extends Component | Component = Component> = {
   new (...args: never[]): T;
@@ -16,7 +17,7 @@ export type ComponentClass<T extends Component | Component = Component> = {
  * A constructor should not be added to classes extending `Component`, as Component objects are reused. See the documentation for the `construct` method for initializing properties.
  *
  * ```ts
- * import { Component, World } from "@rapidajs/recs";
+ * import { Component, World } from "@recs/core";
  *
  * class ExampleComponent extends Component {
  *   // When using typescript, the `!:` not null assertion can be used as a "late-init" syntax.
@@ -78,6 +79,13 @@ export abstract class Component {
    */
   get space(): Space {
     return this.entity.space;
+  }
+
+  /**
+   * The World the components entity is in
+   */
+  get world(): World {
+    return this.entity.world;
   }
 
   /**

@@ -410,8 +410,7 @@ describe('Systems and Queries Integration Tests', () => {
       const entityOne = space.create.entity();
       entityOne.addComponent(TestComponentOne);
 
-      world.update();
-
+      // entity should be updated
       expect(query).toBeTruthy();
       expect(query.all.length).toBe(1);
       expect(query.all.includes(entityOne)).toBeTruthy();
@@ -419,17 +418,48 @@ describe('Systems and Queries Integration Tests', () => {
       // remove the query
       world.remove(query);
 
-      // create entity matching the query
-      const entityTwo = space.create.entity();
-      entityTwo.addComponent(TestComponentOne);
-
-      world.update();
-
-      // no change to query
+      // creating an entity matching the removed query should not update the query
+      const entityTwo = space.build
+        .entity()
+        .addComponent(TestComponentOne)
+        .build();
       expect(query).toBeTruthy();
       expect(query.all.length).toBe(1);
       expect(query.all.includes(entityOne)).toBeTruthy();
       expect(query.all.includes(entityTwo)).toBeFalsy();
+
+      // removing a query that isn't in the world is swallowed silently
+      world.remove(new Query('some key not in the query manager'));
+
+      // removing an already removed query is swallowed silently
+      world.remove(query);
+    });
+  });
+
+  describe('first', () => {
+    it('should retrieve the first Entity in the Query, or null if no Entities match the query', () => {
+      const description: QueryDescription = {
+        all: [TestComponentOne],
+      };
+
+      const entityOne = space.build
+        .entity()
+        .addComponent(TestComponentOne)
+        .build();
+
+      const entityTwo = space.build
+        .entity()
+        .addComponent(TestComponentOne)
+        .build();
+
+      const query = world.create.query(description);
+
+      expect(query.first).toBe(entityOne);
+
+      entityOne.destroy({ immediately: true });
+      entityTwo.destroy({ immediately: true });
+
+      expect(query.first).toBe(undefined);
     });
   });
 
