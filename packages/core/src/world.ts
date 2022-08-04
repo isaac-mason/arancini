@@ -109,9 +109,15 @@ export class World {
      * @returns the new space
      */
     space: (params?: SpaceParams) => Space;
+    /**
+     * Creates a query from a given query description
+     * @param queryDescription the query description
+     * @returns the query
+     */
+    query: (queryDescription: QueryDescription) => Query;
   } {
     return {
-      space: (params?: SpaceParams): Space => {
+      space: (params) => {
         const space = new Space(this, params);
         this.spaceManager.spaces.set(space.id, space);
 
@@ -120,6 +126,9 @@ export class World {
         }
 
         return space;
+      },
+      query: (queryDescription) => {
+        return this.queryManager.createQuery(queryDescription);
       },
     };
   }
@@ -144,24 +153,11 @@ export class World {
   }
 
   /**
-   * Retrieves a query from a query description
-   *
+   * Retrieves entities that match a given query description.
    * @param queryDescription the query description
-   * @returns the query
-   */
-  query(queryDescription: QueryDescription): Query {
-    const query = this.queryManager.createQuery(queryDescription);
-
-    return query;
-  }
-
-  /**
-   * Retrieves once-off query results without creating a persistent Query
-   * @param queryDescription the query description
-   * @param options options for the query
    * @returns an array of matching entities
    */
-  queryOnce(queryDescription: QueryDescription): Entity[] {
+  query(queryDescription: QueryDescription): Entity[] {
     return this.queryManager.query(queryDescription);
   }
 

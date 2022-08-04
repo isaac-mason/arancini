@@ -37,7 +37,7 @@ export type QueryBitSets = {
  *
  * Changes to Entity Components are queued, and Query results are updated as part of the World update loop.
  *
- * Query results can also be retrieved once-off without creating a persistent query with `world.queryOnce(...)`.
+ * Query results can also be retrieved once-off without creating a persistent query with `world.query(...)`.
  *
  * ```ts
  * import { Component, System, World, QueryDescription } from "@rapidajs/recs";
@@ -61,14 +61,11 @@ export type QueryBitSets = {
  *   not: [ExampleComponentFour],
  * };
  *
- * // get once-off query results
- * world.queryOnce(simpleQueryDescription);
- *
  * // get once-off query results, re-using existing query results if available
- * world.queryOnce(queryDescription, { useExisting: true });
+ * world.query(simpleQueryDescription);
  *
  * // get a query that will update every world update
- * const query = world.query({
+ * const query = world.create.query({
  *   all: [ExampleComponentOne]
  * });
  *
@@ -102,14 +99,30 @@ export class Query {
   all: Entity[] = [];
 
   /**
-   * Entities added to the query since the latest update.  Cleared at the end of every world update.
+   * Entities added to the query.
+   * @see clearEvents
    */
   added: Entity[] = [];
 
   /**
-   * Entities removed from the query since the latest update. Cleared at the end of every world update.
+   * Entities removed from the query.
+   * @see clearEvents
    */
   removed: Entity[] = [];
+
+  /**
+   * Returns the first entity within this archetype.
+   * */
+  get first(): Entity | null {
+    return this.all[0] || null;
+  }
+
+  /**
+   * Iterator for all Entities matched by the query.
+   */
+  get [Symbol.iterator]() {
+    return this.all[Symbol.iterator];
+  }
 
   /**
    * Constructor for a new query instance
@@ -119,6 +132,11 @@ export class Query {
     this.key = queryKey;
   }
 
+  /**
+   * Clears the added and removed entity arrays.
+   * Must be called manually for standalone Queries created with `world.query(...)`.
+   * Called automatically for Queries in Systems.
+   */
   clearEvents(): void {
     this.added = [];
     this.removed = [];

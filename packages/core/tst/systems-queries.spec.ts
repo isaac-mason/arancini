@@ -320,7 +320,7 @@ describe('Systems and Queries Integration Tests', () => {
 
       it('systems can be removed, and queries will not be removed if they are used standalone outside of systems', () => {
         // use the query outside of a system
-        const query = world.query(description);
+        const query = world.create.query(description);
 
         world.registerSystem(TestSystemOne);
         const systemOne = world.getSystem(TestSystemOne) as TestSystemOne;
@@ -360,7 +360,7 @@ describe('Systems and Queries Integration Tests', () => {
   describe('Query', () => {
     it('should throw an error when attempting to create a query with no conditions', () => {
       expect(() => {
-        world.query({});
+        world.create.query({});
       }).toThrow();
     });
 
@@ -375,7 +375,7 @@ describe('Systems and Queries Integration Tests', () => {
       entity.addComponent(TestComponentOne);
 
       // create query
-      const query = world.query(description);
+      const query = world.create.query(description);
 
       // query is populated with existing entity
       expect(query).toBeTruthy();
@@ -390,8 +390,8 @@ describe('Systems and Queries Integration Tests', () => {
 
       const descriptionTwo: QueryDescription = [TestComponentOne];
 
-      const queryOne = world.query(descriptionOne);
-      const queryTwo = world.query(descriptionTwo);
+      const queryOne = world.create.query(descriptionOne);
+      const queryTwo = world.create.query(descriptionTwo);
 
       expect(queryOne).toBeTruthy();
       expect(queryTwo).toBeTruthy();
@@ -404,7 +404,7 @@ describe('Systems and Queries Integration Tests', () => {
       const description: QueryDescription = {
         all: [TestComponentOne],
       };
-      const query = world.query(description);
+      const query = world.create.query(description);
 
       // create entity matching the query
       const entityOne = space.create.entity();
@@ -433,7 +433,7 @@ describe('Systems and Queries Integration Tests', () => {
     });
   });
 
-  describe('queryOnce', () => {
+  describe('query', () => {
     it('should generate new query results if the same query does not already exists', () => {
       const description: QueryDescription = {
         all: [TestComponentOne],
@@ -448,7 +448,7 @@ describe('Systems and Queries Integration Tests', () => {
       entityTwo.addComponent(TestComponentOne);
 
       // get query results
-      const queryResults = world.queryOnce(description);
+      const queryResults = world.query(description);
       expect(queryResults).toBeTruthy();
       expect(queryResults.length).toBe(2);
       expect(queryResults.includes(entityOne)).toBeTruthy();
@@ -463,14 +463,14 @@ describe('Systems and Queries Integration Tests', () => {
       const entityOne = space.create.entity();
       entityOne.addComponent(TestComponentOne);
 
-      const activeQuery = world.query(description);
+      const activeQuery = world.create.query(description);
 
       world.update();
 
       const entityTwo = space.create.entity();
       entityTwo.addComponent(TestComponentOne);
 
-      const onceOffQueryResults = world.queryOnce(description);
+      const onceOffQueryResults = world.query(description);
 
       // once-off query results should be the same as the active query results
       expect(onceOffQueryResults).toBeTruthy();
@@ -631,7 +631,7 @@ describe('Systems and Queries Integration Tests', () => {
       const description: QueryDescription = {
         all: [TestComponentOne],
       };
-      const query = world.query(description);
+      const query = world.create.query(description);
 
       expect(query.all.length).toBe(0);
 

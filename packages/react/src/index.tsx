@@ -177,7 +177,7 @@ export const createWorld = () => {
     shouldRerender = true
   ) => {
     const query = useData(
-      () => world.query(queryDescription),
+      () => world.create.query(queryDescription),
       [queryDescription]
     );
 
