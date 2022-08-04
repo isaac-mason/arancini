@@ -129,13 +129,13 @@ export class SystemManager {
 
   /**
    * Updates systems in the system manager
-   * @param timeElapsed the time elapsed in seconds
+   * @param delta the time elapsed in seconds
    * @param time the current time in seconds
    */
-  update(timeElapsed: number, time: number): void {
+  update(delta: number, time: number): void {
     for (const system of this.systems.values()) {
       if (system.enabled) {
-        system.onUpdate(timeElapsed, time);
+        system.onUpdate(delta, time);
         for (const query of system.__recs.queries) {
           query.clearEvents();
         }

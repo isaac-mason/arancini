@@ -23,7 +23,7 @@ export type SystemClass<T extends System = System> = {
  *     });
  *   }
  *
- *   onUpdate(timeElapsed: number) {
+ *   onUpdate(delta: number) {
  *     // do something with the query results
  *
  *     // added this update
@@ -103,10 +103,10 @@ export abstract class System {
 
   /**
    * Logic for a systems update loop
-   * @param _timeElapsed the time since the last update in seconds
+   * @param _delta the time since the last update in seconds
    * @param _time the current time in seconds
    */
-  onUpdate(_timeElapsed: number, _time: number) {}
+  onUpdate(_delta: number, _time: number) {}
 
   /**
    * Creates and returns a query that gets updated every update.

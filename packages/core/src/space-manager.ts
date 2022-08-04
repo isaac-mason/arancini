@@ -276,12 +276,12 @@ export class SpaceManager {
   /**
    * Run update `onUpdate` methods for all components that have them defined
    *
-   * @param timeElapsed the time elapsed in seconds
+   * @param delta the time elapsed in seconds
    * @param time the current time in seconds
    */
-  updateComponents(timeElapsed: number, time: number): void {
+  updateComponents(delta: number, time: number): void {
     for (const component of this.componentsToUpdate.values()) {
-      component.onUpdate(timeElapsed, time);
+      component.onUpdate(delta, time);
     }
   }
 

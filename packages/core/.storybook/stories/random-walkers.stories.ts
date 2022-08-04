@@ -81,8 +81,8 @@ class WalkSystem extends System {
 
   movementCountdown = WalkSystem.timeBetweenMovements;
 
-  onUpdate(timeElapsed: number) {
-    this.movementCountdown -= timeElapsed;
+  onUpdate(delta: number) {
+    this.movementCountdown -= delta;
 
     if (this.movementCountdown <= 0) {
       this.walkers.all.forEach((entity) => {

@@ -22,11 +22,11 @@ import { uniqueId } from './utils';
  * world.init();
  *
  * // update the world without specifying time elapsed
- * // (timeElapsed in Components and Systems will be 0)
+ * // (delta in Components and Systems will be 0)
  * world.update();
  *
  * // update the world with a specified time elapsed
- * // (timeElapsed in Components and Systems will be set to this value)
+ * // (delta in Components and Systems will be set to this value)
  * world.update(0.1);
  *
  * // subscribe to a world event
@@ -179,11 +179,11 @@ export class World {
 
   /**
    * Updates the World
-   * @param timeElapsed the time elapsed in seconds, uses 0 if not specified
+   * @param delta the time elapsed in seconds, uses 0 if not specified
    */
-  update(timeElapsed = 0): void {
+  update(delta = 0): void {
     // update the current time
-    this.time += timeElapsed;
+    this.time += delta;
 
     // clean up dead entities
     this.spaceManager.cleanUpDeadEntitiesAndComponents();
@@ -192,10 +192,10 @@ export class World {
     this.spaceManager.recycle();
 
     // update components - runs update methods for all components that have them
-    this.spaceManager.updateComponents(timeElapsed, this.time);
+    this.spaceManager.updateComponents(delta, this.time);
 
     // update systems
-    this.systemManager.update(timeElapsed, this.time);
+    this.systemManager.update(delta, this.time);
   }
 
   /**

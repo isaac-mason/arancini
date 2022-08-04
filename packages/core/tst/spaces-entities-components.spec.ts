@@ -209,8 +209,8 @@ describe('Spaces, Entities, Components', () => {
           componentInitJestFn();
         }
 
-        onUpdate(timeElapsed: number, time: number): void {
-          componentUpdateJestFn(timeElapsed, time);
+        onUpdate(delta: number, time: number): void {
+          componentUpdateJestFn(delta, time);
         }
       }
 
@@ -221,19 +221,19 @@ describe('Spaces, Entities, Components', () => {
       expect(componentInitJestFn).toHaveBeenCalledTimes(1);
 
       // onUpdate
-      const timeElapsed = 100;
-      world.update(timeElapsed);
-      world.update(timeElapsed);
+      const delta = 100;
+      world.update(delta);
+      world.update(delta);
 
       expect(componentUpdateJestFn).toHaveBeenCalledTimes(2);
-      expect(componentUpdateJestFn.mock.calls[0][0]).toBe(timeElapsed);
-      expect(componentUpdateJestFn.mock.calls[0][1]).toBe(timeElapsed);
-      expect(componentUpdateJestFn.mock.calls[1][0]).toBe(timeElapsed);
-      expect(componentUpdateJestFn.mock.calls[1][1]).toBe(timeElapsed * 2);
+      expect(componentUpdateJestFn.mock.calls[0][0]).toBe(delta);
+      expect(componentUpdateJestFn.mock.calls[0][1]).toBe(delta);
+      expect(componentUpdateJestFn.mock.calls[1][0]).toBe(delta);
+      expect(componentUpdateJestFn.mock.calls[1][1]).toBe(delta * 2);
 
       // onDestroy
       entity.destroy();
-      world.update(timeElapsed);
+      world.update(delta);
       expect(componentUpdateJestFn).toHaveBeenCalledTimes(2);
       expect(componentDestroyJestFn).toHaveBeenCalledTimes(1);
     });
@@ -270,14 +270,14 @@ describe('Spaces, Entities, Components', () => {
 
       expect(componentInitJestFn).toHaveBeenCalledTimes(0);
 
-      const timeElapsed = 1001;
-      world.update(timeElapsed);
+      const delta = 1001;
+      world.update(delta);
 
       expect(componentUpdateJestFn).toHaveBeenCalledTimes(0);
 
       entity.destroy();
 
-      world.update(timeElapsed);
+      world.update(delta);
 
       expect(componentUpdateJestFn).toHaveBeenCalledTimes(0);
 

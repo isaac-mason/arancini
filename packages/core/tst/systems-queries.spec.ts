@@ -156,8 +156,8 @@ describe('Systems and Queries Integration Tests', () => {
           systemInitJestFn();
         }
 
-        onUpdate(timeElapsed: number): void {
-          systemUpdateJestFn(timeElapsed);
+        onUpdate(delta: number): void {
+          systemUpdateJestFn(delta);
         }
       }
 
@@ -166,11 +166,11 @@ describe('Systems and Queries Integration Tests', () => {
 
       expect(world.initialised).toBe(true);
 
-      const timeElapsedUpdateOne = 1;
-      const timeElapsedUpdateTwo = 2;
+      const deltaUpdateOne = 1;
+      const deltaUpdateTwo = 2;
 
-      world.update(timeElapsedUpdateOne);
-      world.update(timeElapsedUpdateTwo);
+      world.update(deltaUpdateOne);
+      world.update(deltaUpdateTwo);
 
       testSystem.enabled = false;
       world.update();
@@ -180,8 +180,8 @@ describe('Systems and Queries Integration Tests', () => {
       expect(systemInitJestFn).toHaveBeenCalledTimes(1);
 
       expect(systemUpdateJestFn).toHaveBeenCalledTimes(2);
-      expect(systemUpdateJestFn.mock.calls[0][0]).toBe(timeElapsedUpdateOne);
-      expect(systemUpdateJestFn.mock.calls[1][0]).toBe(timeElapsedUpdateTwo);
+      expect(systemUpdateJestFn.mock.calls[0][0]).toBe(deltaUpdateOne);
+      expect(systemUpdateJestFn.mock.calls[1][0]).toBe(deltaUpdateTwo);
 
       expect(systemDestroyJestFn).toHaveBeenCalledTimes(1);
     });

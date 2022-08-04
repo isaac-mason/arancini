@@ -48,17 +48,17 @@ class WalkingSystem extends RECS.System {
     this.walking = this.query([Transform, Walking]);
   }
 
-  onUpdate(timeElapsed: number) {
+  onUpdate(delta: number) {
     this.walking.all.forEach((walker) => {
       const { group } = walker.get(Transform);
 
-      group.position.x += (Math.random() - 0.5) * 2 * timeElapsed;
-      group.position.y += (Math.random() - 0.5) * 2 * timeElapsed;
-      group.position.z += (Math.random() - 0.5) * 2 * timeElapsed;
+      group.position.x += (Math.random() - 0.5) * 2 * delta;
+      group.position.y += (Math.random() - 0.5) * 2 * delta;
+      group.position.z += (Math.random() - 0.5) * 2 * delta;
 
-      group.rotation.x += (Math.random() - 0.5) * 2 * timeElapsed;
-      group.rotation.y += (Math.random() - 0.5) * 2 * timeElapsed;
-      group.rotation.z += (Math.random() - 0.5) * 2 * timeElapsed;
+      group.rotation.x += (Math.random() - 0.5) * 2 * delta;
+      group.rotation.y += (Math.random() - 0.5) * 2 * delta;
+      group.rotation.z += (Math.random() - 0.5) * 2 * delta;
     });
   }
 }

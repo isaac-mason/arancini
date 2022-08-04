@@ -37,7 +37,7 @@ export type ComponentClass<T extends Component | Component = Component> = {
  *     // called on component init
  *   }
  *
- *   onUpdate(timeElapsed: number, currentTime: number) {
+ *   onUpdate(delta: number, currentTime: number) {
  *     // called on component updates
  *     // if this method is not overridden, it will not be executed
  *   }
@@ -141,8 +141,8 @@ export abstract class Component {
   /**
    * Update logic for the component
    * If this method is not implemented in a component it will not be added to the update job pool
-   * @param timeElapsed the time since the last update for this component in seconds
-   * @param time the current time in seconds
+   * @param _delta the time since the last update for this component in seconds
+   * @param _time the current time in seconds
    */
-  onUpdate(_timeElapsed: number, _time: number) {}
+  onUpdate(_delta: number, _time: number) {}
 }
