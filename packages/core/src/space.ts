@@ -1,7 +1,7 @@
 import { Entity } from './entity';
 import { Event, EventHandler, EventSubscription, EventSystem } from './events';
+import { EntityBuilder } from './space-manager';
 import { uniqueId } from './utils';
-import { EntityBuilder, EntityBuilderFactory } from './utils/entity-builder';
 import { World } from './world';
 
 /**
@@ -98,7 +98,7 @@ export class Space {
     entity: () => EntityBuilder;
   } {
     return {
-      entity: EntityBuilderFactory(this, this.world.spaceManager),
+      entity: () => this.world.spaceManager.createEntityBuilder(this),
     };
   }
 
@@ -123,7 +123,7 @@ export class Space {
    * Destroys the space and removes it from the RECS
    */
   destroy(): void {
-    this.world.remove(this);
+    this.world.removeSpace(this);
   }
 
   /**

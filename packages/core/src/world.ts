@@ -5,11 +5,10 @@ import { Event, EventHandler, EventSubscription, EventSystem } from './events';
 import { Query, QueryDescription } from './query';
 import { QueryManager } from './query-manager';
 import { Space, SpaceParams } from './space';
-import { SpaceManager } from './space-manager';
+import { EntityBuilder, SpaceManager } from './space-manager';
 import { System, SystemClass } from './system';
 import { SystemAttributes, SystemManager } from './system-manager';
 import { uniqueId } from './utils';
-import { EntityBuilder, EntityBuilderFactory } from './utils/entity-builder';
 
 export const WORLD_DEFAULT_SPACE_ID = 'default';
 
@@ -120,7 +119,7 @@ export class World {
     entity: () => EntityBuilder;
   } {
     return {
-      entity: EntityBuilderFactory(this.defaultSpace, this.spaceManager),
+      entity: () => this.spaceManager.createEntityBuilder(this.defaultSpace),
     };
   }
 
@@ -161,43 +160,12 @@ export class World {
   }
 
   /**
-   * Destroys the World
-   */
-  destroy(): void {
-    this.systemManager.destroy();
-    for (const space of this.spaceManager.spaces.values()) {
-      this.spaceManager.destroySpace(space);
-    }
-  }
-
-  /**
    * Initialises the World
    */
   init(): void {
     this.initialised = true;
     this.systemManager.init();
     this.spaceManager.init();
-  }
-
-  /**
-   * Retrieves entities that match a given query description.
-   * @param queryDescription the query description
-   * @returns an array of matching entities
-   */
-  query(queryDescription: QueryDescription): Entity[] {
-    return this.queryManager.query(queryDescription);
-  }
-
-  /**
-   * Removes from the World
-   * @param value the value to remove
-   */
-  remove(value: Space | Query): void {
-    if (value instanceof Space) {
-      this.spaceManager.destroySpace(value);
-    } else if (value instanceof Query) {
-      this.queryManager.removeQuery(value);
-    }
   }
 
   /**
@@ -219,6 +187,41 @@ export class World {
 
     // update systems
     this.systemManager.update(delta, this.time);
+  }
+
+  /**
+   * Destroys the World
+   */
+  destroy(): void {
+    this.systemManager.destroy();
+    for (const space of this.spaceManager.spaces.values()) {
+      this.spaceManager.destroySpace(space);
+    }
+  }
+
+  /**
+   * Retrieves entities that match a given query description.
+   * @param queryDescription the query description
+   * @returns an array of matching entities
+   */
+  query(queryDescription: QueryDescription): Entity[] {
+    return this.queryManager.query(queryDescription);
+  }
+
+  /**
+   * Removes a Query from the World
+   * @param query the Query to remove
+   */
+  removeQuery(query: Query): void {
+    this.queryManager.removeQuery(query);
+  }
+
+  /**
+   * Removes a Space from the World
+   * @param space the Space to remove
+   */
+  removeSpace(space: Space): void {
+    this.spaceManager.destroySpace(space);
   }
 
   /**

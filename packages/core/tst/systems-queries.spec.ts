@@ -362,7 +362,7 @@ describe('Systems and Queries Integration Tests', () => {
         ).toBe(true);
 
         // remove the query manually
-        world.remove(query);
+        world.removeQuery(query);
 
         expect(
           world.queryManager.hasQuery({
@@ -432,7 +432,7 @@ describe('Systems and Queries Integration Tests', () => {
       expect(query.all.includes(entityOne)).toBeTruthy();
 
       // remove the query
-      world.remove(query);
+      world.removeQuery(query);
 
       // creating an entity matching the removed query should not update the query
       const entityTwo = space.build
@@ -445,10 +445,10 @@ describe('Systems and Queries Integration Tests', () => {
       expect(query.all.includes(entityTwo)).toBeFalsy();
 
       // removing a query that isn't in the world is swallowed silently
-      world.remove(new Query('some key not in the query manager'));
+      world.removeQuery(new Query('some key not in the query manager'));
 
       // removing an already removed query is swallowed silently
-      world.remove(query);
+      world.removeQuery(query);
     });
   });
 

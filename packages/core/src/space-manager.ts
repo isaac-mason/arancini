@@ -6,6 +6,14 @@ import { Space } from './space';
 import { isSubclassMethodOverridden, uniqueId } from './utils';
 import { World } from './world';
 
+export type EntityBuilder = {
+  addComponent: <T extends Component>(
+    clazz: ComponentClass<T>,
+    ...args: Parameters<T['construct']>
+  ) => EntityBuilder;
+  build: () => Entity;
+};
+
 /**
  * SpaceManager that manages Spaces that contain Entities, Entities themselves, and Components
  */
@@ -298,6 +306,9 @@ export class SpaceManager {
     }
   }
 
+  /**
+   * Clean up dead entities and components
+   */
   cleanUpDeadEntitiesAndComponents(): void {
     // update entities in spaces - checks if entities are alive and releases them if they are dead
     for (const space of this.spaces.values()) {
@@ -322,5 +333,24 @@ export class SpaceManager {
         }
       }
     }
+  }
+
+  createEntityBuilder(space: Space): EntityBuilder {
+    const components: { clazz: ComponentClass; args: unknown[] }[] = [];
+
+    const builder = {
+      addComponent: <T extends Component>(
+        clazz: ComponentClass<T>,
+        ...args: Parameters<T['construct']>
+      ) => {
+        components.push({ clazz, args });
+        return builder;
+      },
+      build: (): Entity => {
+        return this.createEntity(space, components);
+      },
+    };
+
+    return builder;
   }
 }
