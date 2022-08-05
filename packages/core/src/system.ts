@@ -26,10 +26,10 @@ export type SystemClass<T extends System = System> = {
  *   onUpdate(delta: number) {
  *     // do something with the query results
  *
- *     // added this update
+ *     // added since the last update
  *     console.log(this.queryName.added)
  *
- *     // removed this update
+ *     // removed since the last update
  *     console.log(this.queryName.removed)
  *
  *     // all currently matched
