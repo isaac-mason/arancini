@@ -83,8 +83,8 @@ describe('Systems and Queries Integration Tests', () => {
       // update, clearing added and removed arrays
       world.update();
 
-      // remove component immediately so it is reflected in the query
-      entity.removeComponent(TestComponentOne, { immediately: true });
+      // remove component, assert removal is reflected in the query
+      entity.removeComponent(TestComponentOne);
 
       expect(system.testQueryName.all.length).toBe(0);
       expect(system.testQueryName.removed.length).toBe(1);
@@ -472,8 +472,8 @@ describe('Systems and Queries Integration Tests', () => {
 
       expect(query.first).toBe(entityOne);
 
-      entityOne.destroy({ immediately: true });
-      entityTwo.destroy({ immediately: true });
+      entityOne.destroy();
+      entityTwo.destroy();
 
       expect(query.first).toBe(undefined);
     });
@@ -551,7 +551,7 @@ describe('Systems and Queries Integration Tests', () => {
 
       world.update();
 
-      entity.removeComponent(TestComponentOne, { immediately: true });
+      entity.removeComponent(TestComponentOne);
 
       expect(system.test.added.length).toBe(0);
       expect(system.test.all.length).toBe(0);
@@ -631,7 +631,7 @@ describe('Systems and Queries Integration Tests', () => {
 
       world.update();
 
-      entity.removeComponent(TestComponentThree, { immediately: true });
+      entity.removeComponent(TestComponentThree);
 
       expect(system.test.added.length).toBe(0);
       expect(system.test.all.length).toBe(0);
@@ -697,8 +697,8 @@ describe('Systems and Queries Integration Tests', () => {
       // update, flushing added and removed
       world.update();
 
-      // destroy entityOne immediately, removing it from the query
-      entityOne.destroy({ immediately: true });
+      // destroy entityOne, removing it from the query
+      entityOne.destroy();
 
       expect(query.all.length).toBe(1);
       expect(query.all.includes(entityOne)).toBeFalsy();

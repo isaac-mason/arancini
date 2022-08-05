@@ -229,7 +229,6 @@ export class SpaceManager {
       entity.id = uniqueId();
       entity.events.reset();
       entity.componentsBitSet.reset();
-      entity.componentsToRemove = [];
       entity.alive = true;
 
       // release the entity back into the entity pool
@@ -303,35 +302,6 @@ export class SpaceManager {
   updateComponents(delta: number, time: number): void {
     for (const component of this.componentsToUpdate.values()) {
       component.onUpdate(delta, time);
-    }
-  }
-
-  /**
-   * Clean up dead entities and components
-   */
-  cleanUpDeadEntitiesAndComponents(): void {
-    // update entities in spaces - checks if entities are alive and releases them if they are dead
-    for (const space of this.spaces.values()) {
-      for (const entity of space.entities.values()) {
-        if (entity.alive) {
-          // if the entity is still alive, clean up components
-          const toRemove = entity.componentsToRemove;
-          entity.componentsToRemove = [];
-
-          if (toRemove.length > 0) {
-            // remove the components
-            for (let i = 0; i < toRemove.length; i++) {
-              this.removeComponentFromEntity(entity, toRemove[i]);
-            }
-
-            // tell the query manager that the component has been removed from the entity
-            this.world.queryManager.onEntityComponentChange(entity);
-          }
-        } else {
-          // remove dead entity from the space
-          this.world.spaceManager.removeEntity(entity, space);
-        }
-      }
     }
   }
 

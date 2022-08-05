@@ -176,10 +176,7 @@ export class World {
     // update the current time
     this.time += delta;
 
-    // clean up dead entities
-    this.spaceManager.cleanUpDeadEntitiesAndComponents();
-
-    // recycle destroyed entities and components after queries have been updated
+    // recycle destroyed entities and components
     this.spaceManager.recycle();
 
     // update components - runs update methods for all components that have them
@@ -197,6 +194,27 @@ export class World {
     for (const space of this.spaceManager.spaces.values()) {
       this.spaceManager.destroySpace(space);
     }
+  }
+
+  /**
+   * Broadcasts an event to the World
+   * @param event the event to broadcast in the World
+   */
+  emit<E extends Event | Event>(event: E): void {
+    this.events.emit(event);
+  }
+
+  /**
+   * Adds a handler for World events
+   * @param eventName the event name
+   * @param handler the handler function
+   * @returns the id of the new handler
+   */
+  on<E extends Event | Event>(
+    eventName: string,
+    handler: EventHandler<E>
+  ): EventSubscription {
+    return this.events.on(eventName, handler);
   }
 
   /**
@@ -222,27 +240,6 @@ export class World {
    */
   removeSpace(space: Space): void {
     this.spaceManager.destroySpace(space);
-  }
-
-  /**
-   * Broadcasts an event to the World
-   * @param event the event to broadcast in the World
-   */
-  emit<E extends Event | Event>(event: E): void {
-    this.events.emit(event);
-  }
-
-  /**
-   * Adds a handler for World events
-   * @param eventName the event name
-   * @param handler the handler function
-   * @returns the id of the new handler
-   */
-  on<E extends Event | Event>(
-    eventName: string,
-    handler: EventHandler<E>
-  ): EventSubscription {
-    return this.events.on(eventName, handler);
   }
 
   /**

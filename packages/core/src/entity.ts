@@ -75,11 +75,6 @@ export class Entity {
   componentsBitSet = new BitSet();
 
   /**
-   * Components queued for removal on the next update
-   */
-  componentsToRemove: Component[] = [];
-
-  /**
    * The event system for the entity
    */
   events = new EventSystem();
@@ -123,22 +118,11 @@ export class Entity {
   }
 
   /**
-   * Destroy the entities components and set the entity as dead immediately
-   * @param options options for destroying the entity
+   * Destroy the Entity's components and remove the Entity from the space
    */
-  destroy(
-    options: {
-      /**
-       * Whether the entity should be destroyed immediately, or in the next update. Defaults to false
-       */
-      immediately?: boolean;
-    } = { immediately: false }
-  ): void {
-    if (options.immediately) {
-      this.space.remove(this);
-    } else {
-      this.alive = false;
-    }
+  destroy(): void {
+    this.world.spaceManager.removeEntity(this, this.space);
+    this.alive = false;
   }
 
   /**
@@ -207,13 +191,8 @@ export class Entity {
    * Removes a component from the entity and destroys it
    * The value can either be a Component constructor, or the component instance itself
    * @param value the component to remove and destroy
-   * @param options options for destroying the entity
-   * @param options.immediately whether the component should be removed immediately
    */
-  removeComponent(
-    value: Component | ComponentClass,
-    options?: { immediately?: boolean }
-  ): Entity {
+  removeComponent(value: Component | ComponentClass): Entity {
     let component: Component | undefined;
 
     if (value instanceof Component) {
@@ -228,12 +207,8 @@ export class Entity {
       }
     }
 
-    if (options?.immediately) {
-      this.world.spaceManager.removeComponentFromEntity(this, component);
-      this.world.queryManager.onEntityComponentChange(this);
-    } else {
-      this.componentsToRemove.push(component);
-    }
+    this.world.spaceManager.removeComponentFromEntity(this, component);
+    this.world.queryManager.onEntityComponentChange(this);
 
     return this;
   }

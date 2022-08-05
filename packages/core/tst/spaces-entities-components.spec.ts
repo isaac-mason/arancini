@@ -13,8 +13,8 @@ describe('Spaces, Entities, Components', () => {
     world.init();
   });
 
-  describe('entity creation', () => {
-    it('should support creating an entity with or without components', () => {
+  describe('Entity', () => {
+    it('should support creation with or without components', () => {
       class TestComponentOne extends Component {}
 
       const entity = space.create.entity();
@@ -30,6 +30,20 @@ describe('Spaces, Entities, Components', () => {
       expect(otherEntity).toBeTruthy();
       expect(otherEntity.components.size).toBe(1);
       expect(otherEntity.has(TestComponentOne)).toBe(true);
+    });
+
+    it('can be destroyed or removed from a space', () => {
+      const entityOne = space.create.entity();
+      const entityTwo = space.create.entity();
+
+      entityOne.destroy();
+      space.removeEntity(entityTwo);
+
+      expect(entityOne.alive).toBe(false);
+      expect(space.entities.has(entityOne.id)).toBe(false);
+
+      expect(entityTwo.alive).toBe(false);
+      expect(space.entities.has(entityTwo.id)).toBe(false);
     });
   });
 
@@ -55,35 +69,21 @@ describe('Spaces, Entities, Components', () => {
       expect(entityTwo.has(TestComponentOne)).toBeTruthy();
       expect(entityTwo.has(TestComponentTwo)).toBeFalsy();
 
-      // remove component by instance immediately
-      entityOne.removeComponent(testComponentOne, { immediately: true });
+      // remove component by instance
+      entityOne.removeComponent(testComponentOne);
 
       // remove component by component class
       entityTwo.removeComponent(TestComponentOne);
-
-      // immediate removal - should not have the component
       expect(entityOne.has(TestComponentOne)).toBeFalsy();
-
-      // deferred removal - should still have the component
-      expect(entityTwo.has(TestComponentOne)).toBeTruthy();
-
-      // both should not have TestComponentTwo
+      expect(entityTwo.has(TestComponentOne)).toBeFalsy();
       expect(entityOne.has(TestComponentTwo)).toBeFalsy();
       expect(entityTwo.has(TestComponentTwo)).toBeFalsy();
-
-      // should be removed after world update
-      world.update();
-      expect(entityTwo.has(TestComponentOne)).toBeFalsy();
 
       // add TestComponentOne components back
       entityOne.addComponent(TestComponentOne);
       entityTwo.addComponent(TestComponentOne);
-
-      // should have the added component
       expect(entityOne.has(TestComponentOne)).toBeTruthy();
       expect(entityTwo.has(TestComponentOne)).toBeTruthy();
-
-      // both should not have TestComponentTwo
       expect(entityOne.has(TestComponentTwo)).toBeFalsy();
       expect(entityTwo.has(TestComponentTwo)).toBeFalsy();
     });
@@ -105,9 +105,7 @@ describe('Spaces, Entities, Components', () => {
       expect(componentOne.position.x).toBe(1);
       expect(componentOne.position.y).toBe(2);
 
-      entity.removeComponent(TestComponentWithConstructParams, {
-        immediately: true,
-      });
+      entity.removeComponent(TestComponentWithConstructParams);
       expect(entity.has(TestComponentWithConstructParams)).toBe(false);
 
       entity.addComponent(TestComponentWithConstructParams, 3, 4);
@@ -231,8 +229,7 @@ describe('Spaces, Entities, Components', () => {
       expect(componentUpdateJestFn.mock.calls[1][0]).toBe(delta);
       expect(componentUpdateJestFn.mock.calls[1][1]).toBe(delta * 2);
 
-      // onDestroy
-      entity.destroy();
+      space.removeEntity(entity);
       world.update(delta);
       expect(componentUpdateJestFn).toHaveBeenCalledTimes(2);
       expect(componentDestroyJestFn).toHaveBeenCalledTimes(1);
@@ -361,17 +358,12 @@ describe('Spaces, Entities, Components', () => {
       expect(entity.has(TestComponentOne)).toBe(true);
       expect(entity.has(TestComponentTwo)).toBe(true);
 
-      entity.removeComponent(TestComponentOne, { immediately: true });
+      entity.removeComponent(TestComponentOne);
 
       expect(entity.has(TestComponentOne)).toBe(false);
       expect(entity.has(TestComponentTwo)).toBe(true);
 
       entity.removeComponent(componentTwo);
-
-      expect(entity.has(TestComponentOne)).toBe(false);
-      expect(entity.has(TestComponentTwo)).toBe(true);
-
-      world.update();
 
       expect(entity.has(TestComponentOne)).toBe(false);
       expect(entity.has(TestComponentTwo)).toBe(false);

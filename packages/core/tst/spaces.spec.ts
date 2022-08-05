@@ -36,32 +36,6 @@ describe('Spaces', () => {
     expect(mockFn).toBeCalledTimes(1);
   });
 
-  it('should should remove dead entities on update', () => {
-    const space = world.create.space();
-
-    const entityOne = space.create.entity();
-    const entityTwo = space.create.entity();
-
-    world.init();
-
-    world.update(1);
-
-    expect(space.entities.size).toBe(2);
-
-    entityOne.destroy();
-
-    expect(space.entities.size).toBe(2);
-
-    world.update(1);
-
-    expect(space.entities.size).toBe(1);
-
-    entityTwo.destroy({ immediately: true });
-
-    // should be destroyed without an update
-    expect(space.entities.size).toBe(0);
-  });
-
   it('should destroy contained entities when destroying the space', () => {
     const space = world.create.space();
 

@@ -120,7 +120,7 @@ export class Space {
   }
 
   /**
-   * Destroys the space and removes it from the RECS
+   * Destroys the space and removes it from the World
    */
   destroy(): void {
     this.world.removeSpace(this);
@@ -148,11 +148,11 @@ export class Space {
   }
 
   /**
-   * Removes an entity from the space
-   * @param entity the entity to remove
+   * Removes an Entity from the Space
+   * @param entity the Entity to remove
    */
-  remove(entity: Entity): Space {
-    this.world.spaceManager.removeEntity(entity, this);
+  removeEntity(entity: Entity): Space {
+    entity.destroy();
     return this;
   }
 }
