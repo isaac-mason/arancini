@@ -22,7 +22,7 @@ export type SpaceParams = {
  * On entering a room, a Space could be created to house all Entities for that room,
  * then the Space could be removed on leaving that room.
  *
- * Aside from containing Entities, Spaces also have an event system that can be used to share data.
+ * Aside from containing Entities, Spaces also have an event system.
  *
  * ```ts
  * import { World } from "@recs/core";
@@ -53,6 +53,11 @@ export type SpaceParams = {
  */
 export class Space {
   /**
+   * A unique ID for the space
+   */
+  id: string;
+
+  /**
    * Entities in the space
    */
   entities: Map<string, Entity> = new Map();
@@ -61,11 +66,6 @@ export class Space {
    * The spaces event system
    */
   events = new EventSystem();
-
-  /**
-   * A unique ID for the space
-   */
-  id: string;
 
   /**
    * Whether the space has been initialised

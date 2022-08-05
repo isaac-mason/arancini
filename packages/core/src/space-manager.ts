@@ -1,9 +1,10 @@
-import { isSubclassMethodOverridden, uniqueId } from './utils';
 import type { Component, ComponentClass } from './component';
 import type { Entity } from './entity';
-import { World } from './world';
-import type { Space } from './space';
 import { ComponentPool, EntityPool } from './pools';
+import type { SpaceParams } from './space';
+import { Space } from './space';
+import { isSubclassMethodOverridden, uniqueId } from './utils';
+import { World } from './world';
 
 /**
  * SpaceManager that manages Spaces that contain Entities, Entities themselves, and Components
@@ -96,7 +97,23 @@ export class SpaceManager {
   }
 
   /**
-   * Creates a new entity in a space
+   * Creates a new Space in the SpaceManager
+   * @param params params for the space
+   * @returns the new Space
+   */
+  createSpace(params?: SpaceParams): Space {
+    const space = new Space(this.world, params);
+    this.spaces.set(space.id, space);
+
+    if (this.world.initialised) {
+      this.initialiseSpace(space);
+    }
+
+    return space;
+  }
+
+  /**
+   * Creates a new Entity in a Space
    *
    * Requests an entity from the entity object pool and initialises it in the space
    *

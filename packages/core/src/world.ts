@@ -152,14 +152,7 @@ export class World {
         return this.spaceManager.createEntity(this.defaultSpace);
       },
       space: (params) => {
-        const space = new Space(this, params);
-        this.spaceManager.spaces.set(space.id, space);
-
-        if (this.initialised) {
-          this.spaceManager.initialiseSpace(space);
-        }
-
-        return space;
+        return this.spaceManager.createSpace(params);
       },
       query: (queryDescription) => {
         return this.queryManager.createQuery(queryDescription);

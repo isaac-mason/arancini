@@ -46,6 +46,41 @@ export class SystemManager {
   }
 
   /**
+   * Initialises the system manager
+   */
+  init(): void {
+    this.initialised = true;
+    for (const system of this.systems.values()) {
+      this.initialiseSystem(system);
+    }
+  }
+
+  /**
+   * Updates Systems in the SystemManager
+   * @param delta the time elapsed in seconds
+   * @param time the current time in seconds
+   */
+  update(delta: number, time: number): void {
+    for (const system of this.sortedSystems.values()) {
+      if (system.enabled) {
+        system.onUpdate(delta, time);
+        for (const query of system.__recs.queries) {
+          query.clearEvents();
+        }
+      }
+    }
+  }
+
+  /**
+   * Destroys all systems
+   */
+  destroy(): void {
+    for (const system of this.systems.values()) {
+      this.destroySystem(system);
+    }
+  }
+
+  /**
    * Adds a system to the system manager
    * @param Clazz the system class to add
    */
@@ -68,25 +103,6 @@ export class SystemManager {
   }
 
   /**
-   * Destroys all systems
-   */
-  destroy(): void {
-    for (const system of this.systems.values()) {
-      this.destroySystem(system);
-    }
-  }
-
-  /**
-   * Initialises the system manager
-   */
-  init(): void {
-    this.initialised = true;
-    for (const system of this.systems.values()) {
-      this.initialiseSystem(system);
-    }
-  }
-
-  /**
    * Unregisters a System from the SystemManager
    * @param clazz the System to remove
    */
@@ -103,22 +119,6 @@ export class SystemManager {
     });
 
     this.destroySystem(system);
-  }
-
-  /**
-   * Updates Systems in the SystemManager
-   * @param delta the time elapsed in seconds
-   * @param time the current time in seconds
-   */
-  update(delta: number, time: number): void {
-    for (const system of this.sortedSystems.values()) {
-      if (system.enabled) {
-        system.onUpdate(delta, time);
-        for (const query of system.__recs.queries) {
-          query.clearEvents();
-        }
-      }
-    }
   }
 
   private destroySystem(system: System) {
