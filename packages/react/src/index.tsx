@@ -6,7 +6,7 @@ import React, {
   useContext,
   useEffect,
   useImperativeHandle,
-  useRef,
+  useState,
 } from 'react';
 import { useData } from './hooks/use-data';
 import { useRerender } from './hooks/use-rerender';
@@ -64,9 +64,9 @@ export const createWorld = () => {
     }
   }
 
-  const worldContext = createContext({} as WorldProviderContext);
-  const spaceContext = createContext({} as SpaceProviderContext);
-  const entityContext = createContext({} as EntityProviderContext);
+  const WorldContext = createContext(null! as WorldProviderContext);
+  const SpaceContext = createContext(null! as SpaceProviderContext);
+  const EntityContext = createContext(null! as EntityProviderContext);
 
   const world = new R.World();
   world.registerSystem(QueryRerenderSystem, { priority: -Infinity });
@@ -78,29 +78,32 @@ export const createWorld = () => {
 
   const World = ({ children }: WorldProps) => {
     return (
-      <worldContext.Provider value={{ world }}>
-        <spaceContext.Provider value={{ space: world.defaultSpace }}>
+      <WorldContext.Provider value={{ world }}>
+        <SpaceContext.Provider value={{ space: world.defaultSpace }}>
           {children}
-        </spaceContext.Provider>
-      </worldContext.Provider>
+        </SpaceContext.Provider>
+      </WorldContext.Provider>
     );
   };
 
   const Space = ({ id, children }: SpaceProps) => {
-    const space = useData((): R.Space => {
-      return world.create.space({ id });
-    });
+    const [space, setSpace] = useState<R.Space>(null!);
 
     useEffect(() => {
+      const newSpace = world.create.space({ id });
+      setSpace(newSpace);
+
       return () => {
-        space.destroy();
+        newSpace.destroy();
       };
     }, []);
 
     return (
-      <spaceContext.Provider value={{ space }}>
-        {children}
-      </spaceContext.Provider>
+      space && (
+        <SpaceContext.Provider value={{ space }}>
+          {children}
+        </SpaceContext.Provider>
+      )
     );
   };
 
@@ -118,34 +121,39 @@ export const createWorld = () => {
 
   const Entity = React.forwardRef<R.Entity, EntityProps>(
     ({ children }, ref) => {
-      const { space } = useContext(spaceContext);
-
-      const entity = useData<R.Entity>(() => space.create.entity());
+      const { space } = useContext(SpaceContext);
+      const [entity, setEntity] = useState<R.Entity>(null!);
 
       useImperativeHandle(ref, () => entity);
 
       useEffect(() => {
+        const newEntity = space.create.entity();
+        setEntity(newEntity);
+
         return () => {
-          entity.destroy();
+          newEntity.destroy();
+          setEntity(null!);
         };
       }, []);
 
       return (
-        <entityContext.Provider value={{ entity }}>
-          {children}
-        </entityContext.Provider>
+        entity && (
+          <EntityContext.Provider value={{ entity }}>
+            {children}
+          </EntityContext.Provider>
+        )
       );
     }
   );
 
   const ComponentImpl = <T extends R.Component>(
-    { args = [] as never, children, type }: ComponentProps<T>,
+    { args, children, type }: ComponentProps<T>,
     ref: ForwardedRef<T>
   ) => {
-    const { entity } = useContext(entityContext);
-    const component = useRef<T>();
+    const { entity } = useContext(EntityContext);
+    const [component, setComponent] = useState<T>();
 
-    useImperativeHandle(ref, () => component.current as T);
+    useImperativeHandle(ref, () => component as T);
 
     useEffect(() => {
       let comp: R.Component;
@@ -156,17 +164,18 @@ export const createWorld = () => {
         ) as Parameters<T['construct']>;
         comp = entity.addComponent(type, ...childrenArray);
       } else {
-        comp = entity.addComponent(type, ...args);
+        comp = entity.addComponent(type, ...(args ?? ([] as never)));
       }
 
-      component.current = comp as T;
+      setComponent(comp as T);
 
       return () => {
         if (comp && entity.has(comp.__recs.class)) {
           entity.removeComponent(comp);
+          setComponent(null!);
         }
       };
-    }, [args, entity]);
+    }, [args, children, entity, type]);
 
     return null;
   };
@@ -196,7 +205,7 @@ export const createWorld = () => {
   };
 
   const useWorld = () => {
-    const { world: worldInstance } = useContext(worldContext);
+    const { world: worldInstance } = useContext(WorldContext);
     return worldInstance;
   };
 
