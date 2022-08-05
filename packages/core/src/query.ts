@@ -1,6 +1,7 @@
 import { ComponentClass } from './component';
 import { Entity } from './entity';
 import { BitSet } from './utils/bit-set';
+import { World } from './world';
 
 /**
  * Enum for query condition types
@@ -118,11 +119,25 @@ export class Query {
   }
 
   /**
+   * The World the Query is in
+   */
+  private world: World;
+
+  /**
    * Constructor for a new query instance
+   * @param world the world the query is in
    * @param queryKey the key for the query
    */
-  constructor(queryKey: string) {
+  constructor(world: World, queryKey: string) {
+    this.world = world;
     this.key = queryKey;
+  }
+
+  /**
+   * Destroys the Query
+   */
+  destroy(): void {
+    this.world.queryManager.removeQuery(this);
   }
 
   /**

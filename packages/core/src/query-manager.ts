@@ -79,7 +79,7 @@ export class QueryManager {
       this.dedupedQueries.set(dedupeString, dedupedQuery);
     }
 
-    const newQueryInstance = new Query(dedupeString);
+    const newQueryInstance = new Query(this.world, dedupeString);
     newQueryInstance.all = dedupedQuery.entities;
     newQueryInstance.added = [...dedupedQuery.entities];
 

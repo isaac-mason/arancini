@@ -1,8 +1,8 @@
 /* eslint-disable max-classes-per-file */
 import { describe, it, expect } from '@jest/globals';
-import { World } from '../src';
+import { System, World } from '../src';
 
-describe('World Integration Tests', () => {
+describe('World', () => {
   let world: World;
 
   beforeEach(() => {
@@ -23,37 +23,67 @@ describe('World Integration Tests', () => {
     expect(world.defaultSpace.entities.get(entityTwo.id)).toBe(entityTwo);
   });
 
-  describe('getSpace', () => {
-    it('can retrieve spaces by id', () => {
-      const space = world.create.space({ id: 'SpaceName' });
+  it('can retrieve systems by system class', () => {
+    class TestSystem extends System {}
 
-      expect(world.getSpace('SpaceName')).toBe(space);
-    });
+    world.registerSystem(TestSystem);
+
+    const testSystem = world.getSystem(TestSystem);
+    expect(testSystem?.__recs.class).toBe(TestSystem);
   });
 
-  describe('Events', () => {
-    it('should be able to register event handlers and emit events', () => {
-      const mockFn = jest.fn();
+  it('can retrieve all systems registered in the world', () => {
+    class TestSystem extends System {}
 
-      world.init();
+    world.registerSystem(TestSystem);
 
-      const subscription = world.on('event-name', () => mockFn());
+    const systems = world.getSystems();
+    expect(systems.length).toBe(1);
+    expect(systems[0].__recs.class).toBe(TestSystem);
+  });
 
-      expect(mockFn).toBeCalledTimes(0);
+  it('can retrieve spaces by id', () => {
+    const space = world.create.space({ id: 'SpaceName' });
 
-      world.emit({
-        topic: 'event-name',
-      });
+    expect(world.getSpace('SpaceName')).toBe(space);
+  });
 
-      expect(mockFn).toBeCalledTimes(1);
+  it('should be able to register event handlers and emit events', () => {
+    const mockFn = jest.fn();
 
-      subscription.unsubscribe();
+    world.init();
 
-      world.emit({
-        topic: 'event-name',
-      });
+    const subscription = world.on('event-name', () => mockFn());
 
-      expect(mockFn).toBeCalledTimes(1);
+    expect(mockFn).toBeCalledTimes(0);
+
+    world.emit({
+      topic: 'event-name',
     });
+
+    expect(mockFn).toBeCalledTimes(1);
+
+    subscription.unsubscribe();
+
+    world.emit({
+      topic: 'event-name',
+    });
+
+    expect(mockFn).toBeCalledTimes(1);
+  });
+
+  it('removes all Systems and Spaces on destroying a World', () => {
+    world.create.space();
+
+    class TestSystem extends System {}
+    world.registerSystem(TestSystem);
+
+    expect(world.spaceManager.spaces.size).toBe(2);
+    expect(world.systemManager.systems.size).toBe(1);
+
+    world.destroy();
+
+    expect(world.spaceManager.spaces.size).toBe(0);
+    expect(world.systemManager.systems.size).toBe(0);
   });
 });

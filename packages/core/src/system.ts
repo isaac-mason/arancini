@@ -65,7 +65,7 @@ export abstract class System {
     /**
      * The System class
      */
-    clazz: SystemClass;
+    class: SystemClass;
 
     /**
      * A map of query names to query descriptions
@@ -82,14 +82,7 @@ export abstract class System {
      */
     order: number;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  } = { queries: new Set(), priority: 0, order: 0, clazz: null! };
-
-  /**
-   * Destroys the system and removes it from the RECS
-   */
-  destroy(): void {
-    this.world.unregisterSystem(this.__recs.clazz);
-  }
+  } = { queries: new Set(), priority: 0, order: 0, class: null! };
 
   /**
    * Logic for destruction of the system. Called on removing a System from the RECS.
@@ -107,6 +100,13 @@ export abstract class System {
    * @param _time the current time in seconds
    */
   onUpdate(_delta: number, _time: number) {}
+
+  /**
+   * Destroys the system and removes it from the RECS
+   */
+  destroy(): void {
+    this.world.unregisterSystem(this.__recs.class);
+  }
 
   /**
    * Creates and returns a query that gets updated every update.

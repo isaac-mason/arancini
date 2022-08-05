@@ -3,7 +3,7 @@
 import { Component, World } from '../src';
 import { ComponentRegistry } from '../src/component-registry';
 
-describe('ComponentManager', () => {
+describe('ComponentRegistry', () => {
   let world: World;
   let componentRegistry: ComponentRegistry;
 

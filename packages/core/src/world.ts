@@ -10,7 +10,7 @@ import { System, SystemClass } from './system';
 import { SystemAttributes, SystemManager } from './system-manager';
 import { uniqueId } from './utils';
 
-export const WORLD_DEFAULT_SPACE_ID = 'default';
+export const WORLD_DEFAULT_SPACE_ID = '__recs_default_world_space';
 
 /**
  * A World that can contain Spaces with Entities, Systems, and Queries.
@@ -59,40 +59,36 @@ export class World {
   time = 0;
 
   /**
-   * The default Space for the world.
+   * The default Space for the World
    */
   defaultSpace: Space;
 
   /**
-   * The world EventSystem.
+   * The World EventSystem
    */
   events: EventSystem;
 
   /**
-   * The SpaceManager for the World.
-   *
-   * Manages Spaces, Entities and Components.
+   * The SpaceManager for the World
+   * Manages Spaces, Entities and Components
    */
   spaceManager: SpaceManager;
 
   /**
-   * The QueryManager for the World.
-   *
-   * Manages and updates Queries.
+   * The QueryManager for the World
+   * Manages and updates Queries
    */
   queryManager: QueryManager;
 
   /**
-   * The SystemManager for the World.
-   *
-   * Manages System lifecycles.
+   * The SystemManager for the World
+   * Manages System lifecycles
    */
   systemManager: SystemManager;
 
   /**
-   * The ComponentRegistry for the World.
-   *
-   * Maintains a mapping of Component classes to Component indices.
+   * The ComponentRegistry for the World
+   * Maintains a mapping of Component classes to Component indices
    */
   componentRegistry: ComponentRegistry;
 
@@ -113,7 +109,7 @@ export class World {
    */
   get build(): {
     /**
-     * Returns an EntityBuilder, used for creating an entity with multiple components
+     * Returns an EntityBuilder, used for creating an Entity with multiple Components
      * @returns an EntityBuilder
      */
     entity: () => EntityBuilder;
@@ -124,7 +120,7 @@ export class World {
   }
 
   /**
-   * Retrieves world factories
+   * Retrieves World factories
    */
   get create(): {
     /**
@@ -134,7 +130,7 @@ export class World {
      */
     entity: () => Entity;
     /**
-     * Creates a Space in the world
+     * Creates a Space in the Qorld
      * @param params the params for the space
      * @returns the new Space
      */
@@ -173,16 +169,9 @@ export class World {
    * @param delta the time elapsed in seconds, uses 0 if not specified
    */
   update(delta = 0): void {
-    // update the current time
     this.time += delta;
-
-    // recycle destroyed entities and components
     this.spaceManager.recycle();
-
-    // update components - runs update methods for all components that have them
     this.spaceManager.updateComponents(delta, this.time);
-
-    // update systems
     this.systemManager.update(delta, this.time);
   }
 
@@ -191,9 +180,7 @@ export class World {
    */
   destroy(): void {
     this.systemManager.destroy();
-    for (const space of this.spaceManager.spaces.values()) {
-      this.spaceManager.destroySpace(space);
-    }
+    this.spaceManager.destroy();
   }
 
   /**
@@ -224,22 +211,6 @@ export class World {
    */
   query(queryDescription: QueryDescription): Entity[] {
     return this.queryManager.query(queryDescription);
-  }
-
-  /**
-   * Removes a Query from the World
-   * @param query the Query to remove
-   */
-  removeQuery(query: Query): void {
-    this.queryManager.removeQuery(query);
-  }
-
-  /**
-   * Removes a Space from the World
-   * @param space the Space to remove
-   */
-  removeSpace(space: Space): void {
-    this.spaceManager.destroySpace(space);
   }
 
   /**
@@ -286,8 +257,8 @@ export class World {
   }
 
   /**
-   * Retrieves a list of all systems in the world
-   * @returns all systems in the world
+   * Retrieves a list of all Systems in the world
+   * @returns all Systems in the world
    */
   getSystems(): System[] {
     return Array.from(this.systemManager.systems.values());

@@ -23,7 +23,7 @@ export class SystemManager {
   systems: Map<SystemClass, System> = new Map();
 
   /**
-   * Systems with onUpdate methods overriden sorted by priority
+   * Systems sorted by priority and insertion order
    */
   private sortedSystems: System[] = [];
 
@@ -77,6 +77,7 @@ export class SystemManager {
   destroy(): void {
     for (const system of this.systems.values()) {
       this.destroySystem(system);
+      this.systems.delete(system.__recs.class);
     }
   }
 
@@ -91,7 +92,7 @@ export class SystemManager {
 
     const system = new Clazz();
     system.world = this.world;
-    system.__recs.clazz = Clazz;
+    system.__recs.class = Clazz;
     system.__recs.priority = attributes?.priority ?? 0;
     system.__recs.order = this.systems.size;
 

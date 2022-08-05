@@ -3,7 +3,7 @@ import { describe, it, expect } from '@jest/globals';
 import { WORLD_DEFAULT_SPACE_ID } from '../src/world';
 import { World } from '../src';
 
-describe('Spaces', () => {
+describe('Space', () => {
   let world: World;
 
   beforeEach(() => {
