@@ -1,5 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { describe, it, expect } from '@jest/globals';
+import { WORLD_DEFAULT_SPACE_ID } from '../src/world';
 import { World } from '../src';
 
 describe('Spaces', () => {
@@ -78,5 +79,9 @@ describe('Spaces', () => {
 
     // only the world's default space
     expect(world.spaceManager.spaces.size).toBe(1);
+  });
+
+  it('should throw an error on attempting to create a space that already exists', () => {
+    expect(() => world.create.space({ id: WORLD_DEFAULT_SPACE_ID })).toThrow();
   });
 });

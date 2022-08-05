@@ -102,6 +102,10 @@ export class SpaceManager {
    * @returns the new Space
    */
   createSpace(params?: SpaceParams): Space {
+    if (params?.id && this.spaces.has(params.id)) {
+      throw new Error('A space with the provided id already exists');
+    }
+
     const space = new Space(this.world, params);
     this.spaces.set(space.id, space);
 
