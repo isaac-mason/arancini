@@ -1,7 +1,7 @@
 import { isSubclassMethodOverridden, uniqueId } from './utils';
 import type { Component, ComponentClass } from './component';
 import type { Entity } from './entity';
-import type { World } from './world';
+import { World } from './world';
 import type { Space } from './space';
 import { ComponentPool, EntityPool } from './pools';
 
@@ -224,11 +224,7 @@ export class SpaceManager {
    * @param entity the entity to remove from
    * @param component the component to remove
    */
-  removeComponentFromEntity(
-    entity: Entity,
-    component: Component,
-    notifyQueryManager: boolean
-  ): void {
+  removeComponentFromEntity(entity: Entity, component: Component): void {
     // remove the onUpdate method from the component update pool if present
     this.componentsToUpdate.delete(component.id);
 
@@ -240,10 +236,6 @@ export class SpaceManager {
     // remove the component from the entity
     entity.components.delete(component.__recs.class);
     entity.componentsBitSet.remove(component.__recs.classIndex);
-
-    if (notifyQueryManager) {
-      this.world.queryManager.onEntityComponentChange(entity);
-    }
 
     // stage the component for cleanup on the next update
     this.componentsToCleanup.push(component);
@@ -263,7 +255,7 @@ export class SpaceManager {
 
     // destroy components
     for (const component of entity.components.values()) {
-      this.removeComponentFromEntity(entity, component, false);
+      this.removeComponentFromEntity(entity, component);
     }
 
     // mark the entity as dead
@@ -297,7 +289,7 @@ export class SpaceManager {
           if (toRemove.length > 0) {
             // remove the components
             for (let i = 0; i < toRemove.length; i++) {
-              this.removeComponentFromEntity(entity, toRemove[i], false);
+              this.removeComponentFromEntity(entity, toRemove[i]);
             }
 
             // tell the query manager that the component has been removed from the entity

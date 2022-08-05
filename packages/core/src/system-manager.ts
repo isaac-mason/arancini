@@ -1,7 +1,6 @@
 import { Query } from './query';
 import { World } from './world';
 import { System, SystemClass } from './system';
-import { isSubclassMethodOverridden } from './utils';
 
 export type SystemAttributes = {
   priority?: number;
@@ -34,16 +33,6 @@ export class SystemManager {
   private initialised = false;
 
   /**
-   * A map of query ids to systems using the query
-   */
-  private queryToSystems: Map<string, Set<System>> = new Map();
-
-  /**
-   * A map of ids to systems with update methods
-   */
-  private updatePool: Map<string, System> = new Map();
-
-  /**
    * The World the system manager belongs in
    */
   private world: World;
@@ -73,17 +62,6 @@ export class SystemManager {
 
     this.systems.set(Clazz, system);
 
-    if (isSubclassMethodOverridden(system.__recs.clazz, 'onUpdate')) {
-      this.sortedSystems.push(system);
-
-      this.sortedSystems.sort((a, b) => {
-        return (
-          a.__recs.priority - b.__recs.priority ||
-          a.__recs.order - b.__recs.order
-        );
-      });
-    }
-
     if (this.initialised) {
       this.initialiseSystem(system);
     }
@@ -109,8 +87,8 @@ export class SystemManager {
   }
 
   /**
-   * Removes a system from the system manager
-   * @param clazz the system to remove
+   * Unregisters a System from the SystemManager
+   * @param clazz the System to remove
    */
   unregisterSystem(clazz: SystemClass): void {
     const system = this.systems.get(clazz);
@@ -121,19 +99,19 @@ export class SystemManager {
     this.systems.delete(clazz);
 
     system.__recs.queries.forEach((query: Query) => {
-      this.removeSystemFromQuery(query, system);
+      this.world.queryManager.removeQuery(query);
     });
 
     this.destroySystem(system);
   }
 
   /**
-   * Updates systems in the system manager
+   * Updates Systems in the SystemManager
    * @param delta the time elapsed in seconds
    * @param time the current time in seconds
    */
   update(delta: number, time: number): void {
-    for (const system of this.systems.values()) {
+    for (const system of this.sortedSystems.values()) {
       if (system.enabled) {
         system.onUpdate(delta, time);
         for (const query of system.__recs.queries) {
@@ -143,39 +121,22 @@ export class SystemManager {
     }
   }
 
-  /**
-   * Adds a system to a query
-   * @param query the query the system is being added to
-   * @param system the system to add
-   */
-  addSystemToQuery(query: Query, system: System) {
-    let systems: Set<System> | undefined = this.queryToSystems.get(query.key);
-
-    if (systems === undefined) {
-      systems = new Set([system]);
-      this.queryToSystems.set(query.key, systems);
-    }
-
-    systems.add(system);
-  }
-
   private destroySystem(system: System) {
     system.onDestroy();
   }
 
   private initialiseSystem(system: System) {
-    this.updatePool.set(system.id, system);
-
     system.onInit();
-  }
 
-  private removeSystemFromQuery(query: Query, system: System) {
-    const systems: Set<System> | undefined = this.queryToSystems.get(query.key);
+    this.sortedSystems.push(system);
 
-    if (systems !== undefined) {
-      systems.delete(system);
-
-      this.world.queryManager.removeQuery(query);
-    }
+    this.sortedSystems.sort((a, b) => {
+      return (
+        // higher priority runs first
+        b.__recs.priority - a.__recs.priority ||
+        // default to order system was registered
+        a.__recs.order - b.__recs.order
+      );
+    });
   }
 }

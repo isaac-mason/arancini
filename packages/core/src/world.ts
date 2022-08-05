@@ -11,6 +11,8 @@ import { SystemAttributes, SystemManager } from './system-manager';
 import { uniqueId } from './utils';
 import { EntityBuilder, EntityBuilderFactory } from './utils/entity-builder';
 
+export const WORLD_DEFAULT_SPACE_ID = 'default';
+
 /**
  * A World that can contain Spaces with Entities, Systems, and Queries.
  *
@@ -104,7 +106,7 @@ export class World {
     this.spaceManager = new SpaceManager(this);
     this.queryManager = new QueryManager(this);
     this.systemManager = new SystemManager(this);
-    this.defaultSpace = this.create.space({ id: 'default' });
+    this.defaultSpace = this.create.space({ id: WORLD_DEFAULT_SPACE_ID });
   }
 
   /**

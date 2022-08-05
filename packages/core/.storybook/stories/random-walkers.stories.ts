@@ -130,15 +130,12 @@ export const RandomColorChangingWalkers = () => {
     world.registerSystem(DrawSystem);
     world.registerSystem(FlipSystem);
 
-    // create a space for our entities
-    const space = world.create.space();
-
     // how many entities to create
     const n = 100;
 
-    // create entities in the space
+    // create entities in the World's default space
     for (let i = 0; i < n; i++) {
-      const entity = space.create.entity();
+      const entity = world.create.entity();
       entity.addComponent(
         Position,
         Math.random() * 10 - 5,

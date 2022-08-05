@@ -35,7 +35,7 @@ describe('Systems and Queries Integration Tests', () => {
   });
 
   describe('Systems', () => {
-    it('initialises systems on initialising the world', () => {
+    it('initialises Systems on initialising the world', () => {
       world = new World();
       space = world.create.space();
 
@@ -56,7 +56,7 @@ describe('Systems and Queries Integration Tests', () => {
       expect(systemInitFn).toHaveBeenCalled();
     });
 
-    it('can create queries for Entities based on Components', () => {
+    it('can create Queries for Entities based on Components', () => {
       // system with query for both TestComponentOne and TestComponentTwo
       class TestSystem extends System {
         testQueryName!: Query;
@@ -99,6 +99,10 @@ describe('Systems and Queries Integration Tests', () => {
           this.testQueryName = this.query({
             all: [TestComponentOne, TestComponentTwo],
           });
+        }
+
+        onUpdate() {
+          /* noop, but defined */
         }
       }
 
@@ -207,6 +211,12 @@ describe('Systems and Queries Integration Tests', () => {
         }
       }
 
+      class SystemFour extends System {
+        onUpdate(): void {
+          systemUpdateFn(SystemFour);
+        }
+      }
+
       beforeEach(() => {
         systemUpdateFn.mockReset();
       });
@@ -231,40 +241,46 @@ describe('Systems and Queries Integration Tests', () => {
         world
           .registerSystem(SystemOne)
           .registerSystem(SystemTwo)
-          .registerSystem(SystemThree);
+          .registerSystem(SystemThree)
+          .registerSystem(SystemFour);
 
         expect(world.getSystems().map((s) => s.__recs.clazz)).toEqual([
           SystemOne,
           SystemTwo,
           SystemThree,
+          SystemFour,
         ]);
 
         world.update();
 
-        expect(systemUpdateFn).toHaveBeenCalledTimes(3);
+        expect(systemUpdateFn).toHaveBeenCalledTimes(4);
         expect(systemUpdateFn).nthCalledWith(1, SystemOne);
         expect(systemUpdateFn).nthCalledWith(2, SystemTwo);
         expect(systemUpdateFn).nthCalledWith(3, SystemThree);
+        expect(systemUpdateFn).nthCalledWith(4, SystemFour);
       });
 
       it('supports sorting with an optional system priority', () => {
         world
           .registerSystem(SystemOne, { priority: -100 })
           .registerSystem(SystemTwo)
-          .registerSystem(SystemThree);
+          .registerSystem(SystemThree, { priority: -50 })
+          .registerSystem(SystemFour);
 
         expect(world.getSystems().map((s) => s.__recs.clazz)).toEqual([
           SystemOne,
           SystemTwo,
           SystemThree,
+          SystemFour,
         ]);
 
         world.update();
 
-        expect(systemUpdateFn).toHaveBeenCalledTimes(3);
-        expect(systemUpdateFn).nthCalledWith(2, SystemTwo);
+        expect(systemUpdateFn).toHaveBeenCalledTimes(4);
+        expect(systemUpdateFn).nthCalledWith(1, SystemTwo);
+        expect(systemUpdateFn).nthCalledWith(2, SystemFour);
         expect(systemUpdateFn).nthCalledWith(3, SystemThree);
-        expect(systemUpdateFn).nthCalledWith(1, SystemOne);
+        expect(systemUpdateFn).nthCalledWith(4, SystemOne);
       });
     });
 

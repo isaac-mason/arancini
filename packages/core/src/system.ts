@@ -115,7 +115,6 @@ export abstract class System {
    */
   protected query(queryDescription: QueryDescription): Query {
     const query = this.world.queryManager.createQuery(queryDescription);
-    this.world.systemManager.addSystemToQuery(query, this);
     this.__recs.queries.add(query);
 
     return query;

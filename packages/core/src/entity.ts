@@ -229,7 +229,8 @@ export class Entity {
     }
 
     if (options?.immediately) {
-      this.world.spaceManager.removeComponentFromEntity(this, component, true);
+      this.world.spaceManager.removeComponentFromEntity(this, component);
+      this.world.queryManager.onEntityComponentChange(this);
     } else {
       this.componentsToRemove.push(component);
     }
