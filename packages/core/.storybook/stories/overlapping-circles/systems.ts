@@ -28,7 +28,7 @@ export class MovementSystem extends System {
 
     let canvasWidth = context.get(CanvasContext).width;
     let canvasHeight = context.get(CanvasContext).height;
-    let multiplier = 0.001;
+    let multiplier = 0.5;
 
     let entities = this.entities.all;
     for (let i = 0; i < entities.length; i++) {

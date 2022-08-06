@@ -1,5 +1,36 @@
 # @recs/react
 
+## 0.0.4
+
+### Patch Changes
+
+- 0be0265: Fix incorrect handling of Space, Entity and Component lifecycle
+- 84bde0d: Remove rerender argument from useQuery, always rerender on Query changes
+- d8c1325: Add ref support to Space and System components
+- 3348c4b: Update useQuery hook to clear query instance events after rerenders
+- d3e4ae0: Update react glue to support useQuery with @recs/core changing to updating queries as entities change
+- f2dc1a9: Add "type": "module" to package.json
+- Updated dependencies [edc4eed]
+- Updated dependencies [c43e8b2]
+- Updated dependencies [f2dc1a9]
+- Updated dependencies [4b39c94]
+- Updated dependencies [d3e4ae0]
+- Updated dependencies [4b39c94]
+- Updated dependencies [d8c1325]
+- Updated dependencies [edc4eed]
+- Updated dependencies [d3e4ae0]
+- Updated dependencies [2fb022f]
+- Updated dependencies [94241cd]
+- Updated dependencies [066a95e]
+- Updated dependencies [f2dc1a9]
+- Updated dependencies [f2dc1a9]
+- Updated dependencies [f2dc1a9]
+- Updated dependencies [1674f80]
+- Updated dependencies [4b39c94]
+- Updated dependencies [3348c4b]
+- Updated dependencies [84bde0d]
+  - @recs/core@0.0.4
+
 ## 0.0.3
 
 ### Patch Changes

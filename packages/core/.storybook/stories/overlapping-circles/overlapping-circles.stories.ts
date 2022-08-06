@@ -57,10 +57,10 @@ export const OverlappingCircles = () => {
     world.init();
     
     let running = true;
-    let lastTime = performance.now();
+    let lastTime = performance.now() / 1000;
     function update() {
       if (!running) return;
-      const time = performance.now();
+      const time = performance.now() / 1000;
       const delta = time - lastTime;
       lastTime = time;
       world.update(delta);

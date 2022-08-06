@@ -21,9 +21,9 @@ class Red extends Component {}
 class Blue extends Component {}
 
 export class CanvasContext extends Component {
-  ctx: CanvasRenderingContext2D;
-  width: number;
-  height: number;
+  ctx!: CanvasRenderingContext2D;
+  width!: number;
+  height!: number;
 }
 
 const Queries = {
@@ -158,10 +158,8 @@ export const RandomColorChangingWalkers = () => {
       entity.addComponent(i % 2 === 0 ? Red : Blue);
     }
 
-    const context = world.build
-      .entity()
-      .addComponent(CanvasContext)
-      .build();
+    // create an entity with a component containing the canvas context
+    const context = world.create.entity()
 
     const canvas = document.querySelector(
       '#example-canvas'
@@ -169,11 +167,12 @@ export const RandomColorChangingWalkers = () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const canvasComponent = context.get(CanvasContext);
+    const canvasComponent = context.addComponent(CanvasContext);
     canvasComponent.ctx = canvas.getContext('2d')!;
     canvasComponent.width = canvas.width;
     canvasComponent.height = canvas.height;
 
+    // handle resizing
     window.addEventListener(
       'resize',
       () => {
@@ -186,10 +185,10 @@ export const RandomColorChangingWalkers = () => {
     world.init();
 
     let running = true;
-    let lastTime = performance.now();
+    let lastTime = performance.now() / 1000;
     function update() {
       if (!running) return;
-      const time = performance.now();
+      const time = performance.now() / 1000;
       const delta = time - lastTime;
       lastTime = time;
       world.update(delta);

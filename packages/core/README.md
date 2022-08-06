@@ -1,38 +1,48 @@
-# @recs/core 🦖
+# recs 🦖
 
-recs - *Reminiscent [of an] Entity Component System*
+recs is _Reminiscent [of an] Entity Component System_
 
-- [x] Simple to use API
-- [x] Flexible and extensible!
-- [x] Avoids garbage collection without making you think too hard
-- [x] Predictable - runs updates in the order systems and components are added, queues events and processes them each update
+- 🚀 ‎ Simple to use and performant
+- 💪 ‎ Flexible and extensible
+- 🗑️ ‎ Avoids garbage collection without making you think too hard 🗑️
+- 🖇 ‎ Easy integration with React - [`@recs/react`](https://github.com/isaac-mason/recs/tree/main/packages/react)
+
+## Packages
+
+### **`@recs/core`**
+
+[![Version](https://img.shields.io/npm/v/@recs/core)](https://www.npmjs.com/package/@recs/core)
+
+The core library!
 
 ```bash
 > yarn add @recs/core
 ```
 
+### **`@recs/react`**
+
+[![Version](https://img.shields.io/npm/v/@recs/react)](https://www.npmjs.com/package/@recs/react)
+
+React glue for `recs`.
+
+```bash
+> yarn add @recs/react
+```
+
 ## Introduction
 
-As mentioned above, RECS is *kind-of* an Entity Component System.
+As mentioned above, `recs` is _kind-of_ an Entity Component System. It's structure was inspired by how SimonDev structures games in his YouTube tutorial videos. If you haven't his videos before, [check them out](https://www.youtube.com/channel/UCEwhtpXrg5MmwlH04ANpL8A)!
 
-The structure of RECS was partially inspired by how SimonDev structures the code for his game development tutorial youtube videos. If you haven't his videos before, check them out! https://www.youtube.com/channel/UCEwhtpXrg5MmwlH04ANpL8A
-
-`recs` is far from being a pure Entity Component System.
-
-You can use `recs` as *~more* of a pure ECS with data-only `Components` belonging to `Entities` that are managed by `Systems` with `Queries`.
-
-You can also optionally add behavior to Components for unity-like Game Objects.
-
-`recs` also contains an event system for eventing in Spaces and Entities.
+You can use `recs` as _~more_ of a pure ECS with data-only `Components` belonging to `Entities` that are managed by `Systems` with `Queries`. You can also optionally add behavior to Components for unity-like Game Objects.
 
 ## Getting Started
 
-***Let's use RECS to make a dirt simple 2D random walk simulation!***
+**_Let's use RECS to make a dirt simple random walk simulation!_**
 
 **1. Import everything we need**
 
 ```ts
-import { Component, Query, System, World } from '@recs/core';
+import { Component, Query, System, World } from "@recs/core";
 ```
 
 **2. Create a few simple components to store some data**
@@ -47,52 +57,58 @@ class Position extends Component {
   x!: number;
   y!: number;
 
-  // * `recs` reuses component objects! *
-  // Here we add a method `construct`, which behaves just like a `constructor`.
+  // * `recs` pools component objects for you! *
+  // Think of the `construct` method as a `constructor`.
   // This method will be called every time a new component is being created or re-used
   construct(x: number, y: number) {
     this.x = x;
     this.y = y;
-  };
+  }
 }
 
 class Color extends Component {
-  color!: 'red' | 'blue';
+  color!: "red" | "blue";
 
-  construct(color: 'red' | 'blue') {
+  construct(color: "red" | "blue") {
     this.color = color;
-  };
+  }
+}
+
+class CanvasContext extends Component {
+  ctx!: CanvasRenderingContext2D;
+  width!: number;
+  height!: number;
 }
 ```
 
 **3. Create a `System` that looks for entities with the `Position` and `Color` components and draws them!**
 
 ```ts
-const BOX_SIZE = 2;
+const BOX_SIZE = 10;
 
 class DrawSystem extends System {
-  // get a `canvas` element from the page
-  canvas = document.getElementById('example-canvas') as HTMLCanvasElement;
-
   // A `System` can have many queries for entities, filtering by what components they have
-  // this query is called `toDraw`
+  context!: Query;
   toDraw!: Query;
 
   onInit() {
-    // initialise the `toDraw` query
+    // we want to get the canvas context
+    this.context = this.query([CanvasContext]);
+
+    // we want to find entities with a Position and Color
     this.toDraw = this.query({
-      // we want to find entities with all of these components
       all: [Position, Color],
     });
   }
 
   // On each update, let's draw
   onUpdate() {
-    const ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    const context = this.context.first!.get(CanvasContext);
+    const ctx = context.ctx;
+    ctx.clearRect(0, 0, context.width, context.height);
 
-    const xOffset = this.canvas.width / 2;
-    const yOffset = this.canvas.height / 2;
+    const xOffset = context.width / 2;
+    const yOffset = context.height / 2;
 
     // the results of the `toDraw` query are available under
     // `this.toDraw.all`
@@ -114,7 +130,7 @@ class DrawSystem extends System {
         BOX_SIZE
       );
     });
-  };
+  }
 }
 ```
 
@@ -122,8 +138,10 @@ class DrawSystem extends System {
 
 ```ts
 class WalkSystem extends System {
+  // query for walkers
   walkers!: Query;
 
+  // keep track of when our walkers should move again
   movementCountdown = WalkSystem.timeBetweenMovements;
 
   // our random walkers should move every 0.05s
@@ -136,19 +154,22 @@ class WalkSystem extends System {
   }
 
   onUpdate(delta: number) {
+    // count down until walkers should move again
     this.movementCountdown -= delta;
 
+    // if it's time for entities to move again
     if (this.movementCountdown <= 0) {
+      // move all walkers in a random direction
       this.walkers.all.forEach((entity) => {
-        // move the walker in a random direction
         const position = entity.get(Position);
         position.x = position.x + Math.random() * 2 - 1;
         position.y = position.y + Math.random() * 2 - 1;
       });
 
+      // reset the countdown
       this.movementCountdown = WalkSystem.timeBetweenMovements;
     }
-  };
+  }
 }
 ```
 
@@ -165,44 +186,59 @@ Next, let's add the systems we created:
 ```ts
 world.registerSystem(WalkSystem);
 world.registerSystem(DrawSystem);
+world.registerSystem(FlipSystem);
 ```
 
-Now let's create some entities for our random walkers and add `Position` and `Color` components.
+Now let's create some entities for our random walkers with `Position` and `Color` components.
 
 ```ts
-// create a space for our entities
-const space = world.create.space();
-
 // how many entities to create
 const n = 100;
 
-// create entities in the space
+// create entities in the world
 for (let i = 0; i < n; i++) {
-  const entity = space.create.entity();
-  entity.addComponent(
-    Position,
-    Math.random() * 10 - 5,
-    Math.random() * 10 - 5
-  );
-  entity.addComponent(Color, i % 2 === 0 ? 'red' : 'blue');
+  const entity = world.build.entity()
+    .addComponent(Position, Math.random() * 10 - 5, Math.random() * 10 - 5);
+    .addComponent(Color, i % 2 === 0 ? "red" : "blue")
+    .build();
 }
+
+// create an entity with a component containing the canvas context
+const context = world.create.entity();
+
+const canvas = document.querySelector("#example-canvas") as HTMLCanvasElement;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const canvasComponent = context.addComponent(CanvasContext);
+canvasComponent.ctx = canvas.getContext("2d")!;
+canvasComponent.width = canvas.width;
+canvasComponent.height = canvas.height;
+
+// handle resizing
+window.addEventListener(
+  "resize",
+  () => {
+    canvasComponent.width = canvas.width = window.innerWidth;
+    canvasComponent.height = canvas.height = window.innerHeight;
+  },
+  false
+);
 ```
 
 **6. The loop**
 
-Finally, lets start our simulation!
+Finally, let's create a loop to run our simulation!
 
 ```ts
 world.init();
 
-let lastCall = 0;
-const loop = (now: number) => {
-  const elapsed = now - lastCall;
-  world.update(elapsed);
-  lastCall = now;
-
-  requestAnimationFrame((elapsedMs) => loop(elapsedMs / 1000));
-};
-
-loop(0);
+let lastTime = performance.now() / 1000;
+function update() {
+  const time = performance.now() / 1000;
+  const delta = time - lastTime;
+  lastTime = time;
+  world.update(delta);
+  requestAnimationFrame(update);
+}
 ```
