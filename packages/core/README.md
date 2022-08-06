@@ -2,6 +2,9 @@
 
 recs is _Reminiscent [of an] Entity Component System_
 
+**Under active alpha development! Minor version bumps will have breaking changes. Stable release coming soon :)**
+
+
 - 🚀 ‎ Aims to provide a simple but performant API
 - 💪 ‎ Flexible and extensible
 - 🗑️ ‎ Avoids garbage collection without making you think too hard
