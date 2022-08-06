@@ -2,9 +2,10 @@
 
 recs is _Reminiscent [of an] Entity Component System_
 
-- 🚀 ‎ Simple to use and performant
+- 🚀 ‎ Aims to provide a simple but performant API
 - 💪 ‎ Flexible and extensible
-- 🗑️ ‎ Avoids garbage collection without making you think too hard 🗑️
+- 🗑️ ‎ Avoids garbage collection without making you think too hard
+- 🪶 ‎ The core library has **_zero_** dependencies
 - 🖇 ‎ Easy integration with React - [`@recs/react`](https://github.com/isaac-mason/recs/tree/main/packages/react)
 
 ## Packages
