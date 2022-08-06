@@ -55,8 +55,11 @@ class DrawSystem extends System {
 
   // On each update, let's draw
   onUpdate() {
+    // get the first entity from our canvas context query
     const context = this.context.first!.get(CanvasContext);
     const ctx = context.ctx;
+
+    // clear the canvas
     ctx.clearRect(0, 0, context.width, context.height);
 
     const xOffset = context.width / 2;
@@ -66,7 +69,7 @@ class DrawSystem extends System {
     // `this.toDraw.all`
     // We can also check `this.toDraw.added` and this.toDraw.removed`
     // to get entities that have been matched and unmatched from the query
-    this.toDraw.all.forEach((entity) => {
+    for (const entity of this.toDraw.all) {
       // let's get the position of the random walker
       const { x, y } = entity.get(Position);
 
@@ -82,32 +85,38 @@ class DrawSystem extends System {
         BOX_SIZE,
         BOX_SIZE
       );
-    });
+    }
   }
 }
 
 class WalkSystem extends System {
   walkers!: Query;
 
-  onInit(): void {
-    this.walkers = this.query(Queries.WalkerPosition);
-  }
-
+  // keep track of when our walkers should move again
   static timeBetweenMovements = 0.05;
 
+  // our random walkers should move every 0.05s
   movementCountdown = WalkSystem.timeBetweenMovements;
 
+  onInit(): void {
+    // query for walkers
+    this.walkers = this.query(Queries.WalkerPosition);
+  }
+  
   onUpdate(delta: number) {
+    // count down until walkers should move again
     this.movementCountdown -= delta;
 
+    // if it's time for entities to move again
     if (this.movementCountdown <= 0) {
-      this.walkers.all.forEach((entity) => {
-        // move the walker in a random direction
+      // move all walkers in a random direction
+      for (const entity of this.walkers.all) {
         const position = entity.get(Position)
         position.x = position.x + (Math.random() - 0.5) * 3;
         position.y = position.y + (Math.random() - 0.5) * 3;
-      });
+      }
 
+      // reset the countdown
       this.movementCountdown = WalkSystem.timeBetweenMovements;
     }
   }

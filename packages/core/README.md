@@ -107,18 +107,20 @@ class DrawSystem extends System {
 
   // On each update, let's draw
   onUpdate() {
+    // get the first entity from our canvas context query
     const context = this.context.first!.get(CanvasContext);
     const ctx = context.ctx;
+
+    // clear the canvas
     ctx.clearRect(0, 0, context.width, context.height);
 
     const xOffset = context.width / 2;
     const yOffset = context.height / 2;
 
-    // the results of the `toDraw` query are available under
-    // `this.toDraw.all`
-    // We can also check `this.toDraw.added` and this.toDraw.removed`
-    // to get entities that have been matched and unmatched from the query
-    this.toDraw.all.forEach((entity) => {
+    // the results of the `toDraw` query are available under `this.toDraw.all`
+    // We can also check `this.toDraw.added` and this.toDraw.removed` to get
+    // entities that have been added and remove since the last system update.
+    for (const entity of this.toDraw.all) {
       // let's get the position of the random walker
       const { x, y } = entity.get(Position);
 
@@ -133,7 +135,7 @@ class DrawSystem extends System {
         BOX_SIZE,
         BOX_SIZE
       );
-    });
+    }
   }
 }
 ```
@@ -164,11 +166,11 @@ class WalkSystem extends System {
     // if it's time for entities to move again
     if (this.movementCountdown <= 0) {
       // move all walkers in a random direction
-      this.walkers.all.forEach((entity) => {
-        const position = entity.get(Position);
-        position.x = position.x + Math.random() * 2 - 1;
-        position.y = position.y + Math.random() * 2 - 1;
-      });
+      for (const entity of this.walkers.all) {
+        const position = entity.get(Position)
+        position.x = position.x + (Math.random() - 0.5) * 3;
+        position.y = position.y + (Math.random() - 0.5) * 3;
+      }
 
       // reset the countdown
       this.movementCountdown = WalkSystem.timeBetweenMovements;
