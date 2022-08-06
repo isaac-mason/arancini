@@ -32,8 +32,8 @@ export type SpaceProps = {
   children?: React.ReactNode;
 };
 
-export type SystemProps = {
-  system: R.SystemClass;
+export type SystemProps<T extends R.System> = {
+  system: R.SystemClass<T>;
   priority?: number;
 };
 
@@ -86,30 +86,18 @@ export const createWorld = () => {
     );
   };
 
-  const Space = ({ id, children }: SpaceProps) => {
-    const [space, setSpace] = useState<R.Space>(null!);
+  const SystemImpl = <T extends R.System>(
+    { system, priority }: SystemProps<T>,
+    ref: ForwardedRef<T>
+  ) => {
+    const [sys, setSystem] = useState<T>();
 
-    useEffect(() => {
-      const newSpace = world.create.space({ id });
-      setSpace(newSpace);
+    useImperativeHandle(ref, () => sys as T);
 
-      return () => {
-        newSpace.destroy();
-      };
-    }, []);
-
-    return (
-      space && (
-        <SpaceContext.Provider value={{ space }}>
-          {children}
-        </SpaceContext.Provider>
-      )
-    );
-  };
-
-  const System = ({ system, priority }: SystemProps) => {
     useEffect(() => {
       world.registerSystem(system, { priority });
+      const newSystem = world.getSystem(system);
+      setSystem(newSystem);
 
       return () => {
         world.unregisterSystem(system);
@@ -118,6 +106,36 @@ export const createWorld = () => {
 
     return null;
   };
+
+  const System = React.forwardRef(SystemImpl) as <T extends R.System>(
+    props: SystemProps<T>,
+    ref: ForwardedRef<T>
+  ) => null;
+
+  const Space = React.forwardRef<R.Space, SpaceProps>(
+    ({ id, children }, ref) => {
+      const [space, setSpace] = useState<R.Space>(null!);
+
+      useImperativeHandle(ref, () => space);
+
+      useEffect(() => {
+        const newSpace = world.create.space({ id });
+        setSpace(newSpace);
+
+        return () => {
+          newSpace.destroy();
+        };
+      }, []);
+
+      return (
+        space && (
+          <SpaceContext.Provider value={{ space }}>
+            {children}
+          </SpaceContext.Provider>
+        )
+      );
+    }
+  );
 
   const Entity = React.forwardRef<R.Entity, EntityProps>(
     ({ children }, ref) => {

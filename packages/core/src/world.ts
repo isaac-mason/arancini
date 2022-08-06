@@ -252,8 +252,8 @@ export class World {
    * @param clazz the System class
    * @returns the System, or undefined if it is not registerd
    */
-  getSystem(clazz: SystemClass): System | undefined {
-    return this.systemManager.systems.get(clazz);
+  getSystem<S extends System>(clazz: SystemClass<S>): S | undefined {
+    return this.systemManager.systems.get(clazz) as S | undefined;
   }
 
   /**
