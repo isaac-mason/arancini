@@ -9,7 +9,7 @@ recs is _Reminiscent [of an] Entity Component System_
 
 ## Packages
 
-### **`@recs/core`**
+### [**`@recs/core`**](https://github.com/isaac-mason/recs/tree/main/packages/core)
 
 [![Version](https://img.shields.io/npm/v/@recs/core)](https://www.npmjs.com/package/@recs/core)
 
@@ -19,7 +19,7 @@ The core library!
 > yarn add @recs/core
 ```
 
-### **`@recs/react`**
+### [**`@recs/react`**](https://github.com/isaac-mason/recs/tree/main/packages/react)
 
 [![Version](https://img.shields.io/npm/v/@recs/react)](https://www.npmjs.com/package/@recs/react)
 
