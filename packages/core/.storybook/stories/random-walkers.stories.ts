@@ -20,32 +20,47 @@ class Position extends Component {
 class Red extends Component {}
 class Blue extends Component {}
 
-const BOX_SIZE = 2;
+export class CanvasContext extends Component {
+  ctx: CanvasRenderingContext2D;
+  width: number;
+  height: number;
+}
+
+const Queries = {
+  ToDraw: {
+    all: [Position],
+    any: [Red, Blue],
+  },
+  Context: [CanvasContext],
+  WalkerPosition: [Position],
+  Color: {
+    any: [Red, Blue],
+  }
+}
+
+const BOX_SIZE = 10;
 
 class DrawSystem extends System {
-  // get a `canvas` element from the page
-  canvas = document.getElementById('example-canvas') as HTMLCanvasElement;
+  // get the canvas context
+  context: Query;
 
   // A `System` can have many queries for entities, filtering by what components they have
   // this query is called `toDraw`
   toDraw!: Query;
   
   onInit(): void {
-    this.toDraw = this.query({
-      // we want to find entities with a position
-      all: [Position],
-      // we want to find entities that are either red or blue
-      any: [Red, Blue],
-    });
+    this.context = this.query(Queries.Context);
+    this.toDraw = this.query(Queries.ToDraw);
   }
 
   // On each update, let's draw
   onUpdate() {
-    const ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    const context = this.context.first!.get(CanvasContext);
+    const ctx = context.ctx;
+    ctx.clearRect(0, 0, context.width, context.height);
 
-    const xOffset = this.canvas.width / 2;
-    const yOffset = this.canvas.height / 2;
+    const xOffset = context.width / 2;
+    const yOffset = context.height / 2;
 
     // the results of the `toDraw` query are available under
     // `this.toDraw.all`
@@ -60,6 +75,7 @@ class DrawSystem extends System {
 
       // draw the box
       ctx.fillStyle = color;
+
       ctx.fillRect(
         xOffset + (x - BOX_SIZE / 2),
         yOffset + (y - BOX_SIZE / 2),
@@ -74,7 +90,7 @@ class WalkSystem extends System {
   walkers!: Query;
 
   onInit(): void {
-    this.walkers = this.query([Position]);
+    this.walkers = this.query(Queries.WalkerPosition);
   }
 
   static timeBetweenMovements = 0.05;
@@ -87,9 +103,9 @@ class WalkSystem extends System {
     if (this.movementCountdown <= 0) {
       this.walkers.all.forEach((entity) => {
         // move the walker in a random direction
-        const position = entity.get(Position);
-        position.x = position.x + Math.random() * 2 - 1;
-        position.y = position.y + Math.random() * 2 - 1;
+        const position = entity.get(Position)
+        position.x = position.x + (Math.random() - 0.5) * 3;
+        position.y = position.y + (Math.random() - 0.5) * 3;
       });
 
       this.movementCountdown = WalkSystem.timeBetweenMovements;
@@ -101,9 +117,7 @@ class FlipSystem extends System {
   walkers!: Query;
 
   onInit(): void {
-    this.walkers = this.query({
-      any: [Red, Blue],
-    });
+    this.walkers = this.query(Queries.Color);
   }
 
   onUpdate() {
@@ -138,24 +152,56 @@ export const RandomColorChangingWalkers = () => {
       const entity = world.create.entity();
       entity.addComponent(
         Position,
-        Math.random() * 10 - 5,
-        Math.random() * 10 - 5
+        (Math.random() - 0.5) * 300,
+        (Math.random() - 0.5) * 300
       );
       entity.addComponent(i % 2 === 0 ? Red : Blue);
     }
 
+    const context = world.build
+      .entity()
+      .addComponent(CanvasContext)
+      .build();
+
+    const canvas = document.querySelector(
+      '#example-canvas'
+    ) as HTMLCanvasElement;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const canvasComponent = context.get(CanvasContext);
+    canvasComponent.ctx = canvas.getContext('2d')!;
+    canvasComponent.width = canvas.width;
+    canvasComponent.height = canvas.height;
+
+    window.addEventListener(
+      'resize',
+      () => {
+        canvasComponent.width = canvas.width = window.innerWidth;
+        canvasComponent.height = canvas.height = window.innerHeight;
+      },
+      false
+    );
+
     world.init();
 
-    let lastCall = 0;
-    const loop = (now: number) => {
-      const elapsed = now - lastCall;
-      world.update(elapsed);
-      lastCall = now;
+    let running = true;
+    let lastTime = performance.now();
+    function update() {
+      if (!running) return;
+      const time = performance.now();
+      const delta = time - lastTime;
+      lastTime = time;
+      world.update(delta);
+      requestAnimationFrame(update);
+    }
 
-      requestAnimationFrame((elapsedMs) => loop(elapsedMs / 1000));
-    };
+    update();
 
-    loop(0);
+    return () => {
+      running = false;
+      world.destroy();
+    }
   });
 
   return `

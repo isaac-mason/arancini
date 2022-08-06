@@ -1,6 +1,5 @@
 import { useEffect } from '@storybook/client-api';
-import { Component, Query, System, World } from '@recs/core';
-
+import { Component, Entity, Query, System, World } from '@recs/core';
 
 type InventoryEvent = {
   topic: 'inventory-event';
@@ -17,11 +16,15 @@ class Inventory extends Component {
   items: Map<string, number> = new Map();
 }
 
+const Queries = {
+  Inventories: [Inventory]
+}
+
 class InventorySystem extends System {
   inventories!: Query;
 
   onInit(): void {
-    this.inventories = this.query([Inventory]);
+    this.inventories = this.query(Queries.Inventories);
 
     this.world.on<InventoryEvent>('inventory-event', (e) => {
       const entity = this.inventories.all.find(
@@ -47,7 +50,7 @@ class InventorySystem extends System {
   }
 }
 
-export const PlayerInventory = () => {
+export const PlayerInventoryEvents = () => {
   useEffect(() => {
     const world = new World();
     world.registerSystem(InventorySystem);
@@ -98,8 +101,10 @@ export const PlayerInventory = () => {
       });
     });
 
+    let running = true;
     let lastCall = 0;
     const loop = (now: number) => {
+      if (!running) return;
       const elapsed = now - lastCall;
       world.update(elapsed);
       lastCall = now;
@@ -113,10 +118,15 @@ export const PlayerInventory = () => {
     };
 
     loop(0);
+
+    return () => {
+      running = false;
+      world.destroy();
+    }
   });
 
   return `
-    <div>
+    <div style="padding: 1em;">
       <div id="inventory" style="color: white; margin-bottom: 1em;"></div>
       <div>
         <button id="add-apple">add apple</button>
@@ -129,6 +139,6 @@ export const PlayerInventory = () => {
 };
 
 export default {
-  name: 'PlayerInventory',
-  component: PlayerInventory,
+  name: 'Player Inventory Events',
+  component: PlayerInventoryEvents,
 };
