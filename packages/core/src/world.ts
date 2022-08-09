@@ -105,9 +105,9 @@ export class World {
   }
 
   /**
-   * Retrives World builders
+   * World builders
    */
-  get build(): {
+  get builder(): {
     /**
      * Returns an EntityBuilder, used for creating an Entity with multiple Components
      * @returns an EntityBuilder

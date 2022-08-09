@@ -18,7 +18,7 @@ describe('World', () => {
 
     expect(world.defaultSpace.entities.get(entityOne.id)).toBe(entityOne);
 
-    const entityTwo = world.build.entity().build();
+    const entityTwo = world.builder.entity().build();
 
     expect(world.defaultSpace.entities.get(entityTwo.id)).toBe(entityTwo);
   });

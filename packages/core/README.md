@@ -203,7 +203,7 @@ const n = 100;
 
 // create entities in the world
 for (let i = 0; i < n; i++) {
-  const entity = world.build.entity()
+  world.builder.entity()
     .addComponent(Position, Math.random() * 10 - 5, Math.random() * 10 - 5);
     .addComponent(Color, i % 2 === 0 ? "red" : "blue")
     .build();
