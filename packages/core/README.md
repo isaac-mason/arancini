@@ -27,7 +27,7 @@ The core library!
 
 [![Version](https://img.shields.io/npm/v/@recs/react)](https://www.npmjs.com/package/@recs/react)
 
-React glue for `recs`.
+React glue for `@recs/core`
 
 ```bash
 > yarn add @recs/react
@@ -51,7 +51,10 @@ import { Component, Query, System, World } from "@recs/core";
 
 **2. Create a few simple components to store some data**
 
-First, let's create a component that can store a position, and a component that can store a color.
+First, let's create a few components. We'll create:
+- a component that stores a position
+- a component that stores a color
+- a component that stores the html canvas context
 
 ```ts
 class Position extends Component {
@@ -187,29 +190,37 @@ First, create a new recs `World`:
 const world = new World();
 ```
 
-Next, let's add the systems we created:
+Next, let's register the components and systems we created:
 
 ```ts
+// register components
+world.registerComponent(Position);
+world.registerComponent(Color);
+world.registerComponent(CanvasContext);
+
+// register systems
 world.registerSystem(WalkSystem);
 world.registerSystem(DrawSystem);
 world.registerSystem(FlipSystem);
 ```
 
-Now let's create some entities for our random walkers with `Position` and `Color` components.
+Now let's create some random walkers. These will be entities with the `Position` and `Color` components.
 
 ```ts
-// how many entities to create
+// create 100 random walkers!
 const n = 100;
-
-// create entities in the world
 for (let i = 0; i < n; i++) {
   world.builder.entity()
     .addComponent(Position, Math.random() * 10 - 5, Math.random() * 10 - 5);
     .addComponent(Color, i % 2 === 0 ? "red" : "blue")
     .build();
 }
+```
 
-// create an entity with a component containing the canvas context
+Next we'll create an entity with the `CanvasContext` component, which will contain the HTML canvas context. We'll also add a handler for window resizing.
+
+```ts
+// create an entity with the CanvasContext component
 const context = world.create.entity();
 
 const canvas = document.querySelector("#example-canvas") as HTMLCanvasElement;
