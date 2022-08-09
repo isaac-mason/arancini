@@ -4,7 +4,7 @@
   "packageManager": "yarn@3.2.1",
   "author": "Isaac Mason <isaac@isaacmason.com>",
   "license": "MIT",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -48,12 +48,12 @@
     }
   },
   "dependencies": {
-    "@recs/core": "0.0.4",
+    "@recs/core": "0.0.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "peerDependencies": {
-    "@recs/core": "0.0.4",
+    "@recs/core": "0.0.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   }

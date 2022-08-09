@@ -1,5 +1,11 @@
 # @recs/core
 
+## 0.0.5
+
+### Patch Changes
+
+- 883314e: Rename `world.build` to `world.builder`
+
 ## 0.0.4
 
 ### Patch Changes
