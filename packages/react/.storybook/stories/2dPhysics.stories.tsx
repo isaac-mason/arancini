@@ -8,6 +8,12 @@ import { Repeat } from 'timeline-composer';
 
 // todo - collision events
 
+const boxMaterial = new P2.Material();
+const groundMaterial = new P2.Material();
+
+const boxGroundContactMaterial = new P2.ContactMaterial(boxMaterial, groundMaterial, { friction: 0.75 })
+const boxBoxContactMaterial = new P2.ContactMaterial(boxMaterial, groundMaterial, { friction: 0.75 })
+
 let R = createWorld();
 
 const R3FStepper = () => {
@@ -49,9 +55,13 @@ class PhysicsSystemState extends Component {
 
   construct(params: { gravity?: [number, number]; stepSize?: number }) {
     this.physicsWorld = new P2.World();
+    
     if (params?.gravity) {
       this.physicsWorld.gravity = params.gravity;
     }
+
+    this.physicsWorld.addContactMaterial(boxGroundContactMaterial);
+    this.physicsWorld.addContactMaterial(boxBoxContactMaterial);
 
     this.stepSize = params.stepSize ?? 1 / 60;
 
@@ -96,6 +106,7 @@ class PhysicsSystem extends System {
 
       const { body } = entity.get(Collider);
       transform.group.position.set(body.position[0], body.position[1], 0);
+      transform.group.rotation.set(0, 0, body.angle)
     }
   }
 }
@@ -136,8 +147,8 @@ const Plane = () => (
       type={Collider}
       args={[
         () => {
-          const plane = new P2.Plane();
-          const body = new P2.Body();
+          const plane = new P2.Plane({ material: groundMaterial });
+          const body = new P2.Body();  
           body.position = [0, -3];
           body.addShape(plane);
           return body;
@@ -160,7 +171,7 @@ const Box = ({ position }: { position: [number, number] }) => (
       type={Collider}
       args={[
         () => {
-          const box = new P2.Box({ width: 0.5, height: 0.5 });
+          const box = new P2.Box({ width: 0.5, height: 0.5, material: boxMaterial });
           const body = new P2.Body({ mass: 1 });
           body.position = [...position];
           body.addShape(box);
@@ -191,6 +202,8 @@ const App = () => {
         <Box position={[0, 0]} />
         <Box position={[-0.2, 1]} />
         <Box position={[0.2, 2]} />
+        <Box position={[-0.2, 3]} />
+        <Box position={[0.2, 4]} />
       </Repeat>
     </>
   );
@@ -198,7 +211,7 @@ const App = () => {
 
 export const Example = () => {
   return (
-    <Canvas camera={{ position: [0, 0, -5] }}>
+    <Canvas camera={{ position: [0, 0, -10], fov: 50 }}>
       <R.World>
         <App />
       </R.World>
