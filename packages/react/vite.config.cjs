@@ -19,17 +19,11 @@ export default defineConfig({
       fileName: (format) => `index.${format}.js`,
     },
     rollupOptions: {
-      external: [
-        'react',
-        'react-dom',
-        'react-jsx-runtime',
-        '@react-three/fiber',
-      ],
+      external: ['react', 'react-dom', 'react-jsx-runtime', '@recs/core'],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
-          '@react-three/fiber': 'R3F',
         },
       },
     },
