@@ -1,5 +1,11 @@
 # @recs/react
 
+## 0.0.6
+
+### Patch Changes
+
+- c8964f9: Update build config - remove @react-three/fiber, make @recs/core external
+
 ## 0.0.5
 
 ### Patch Changes
