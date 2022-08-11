@@ -1,5 +1,12 @@
 # @recs/core
 
+## 0.0.7
+
+### Patch Changes
+
+- 4a48358: Rename `entity.addComponent` to `entity.add`, `entity.removeComponent` to `entity.remove`
+- 4a48358: fix: rename `space.build` to `space.builder`, consistent with `world.builder`
+
 ## 0.0.6
 
 ### Patch Changes

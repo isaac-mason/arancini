@@ -1,5 +1,13 @@
 # @recs/react
 
+## 0.0.8
+
+### Patch Changes
+
+- Updated dependencies [4a48358]
+- Updated dependencies [4a48358]
+  - @recs/core@0.0.7
+
 ## 0.0.7
 
 ### Patch Changes
