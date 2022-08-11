@@ -1,5 +1,13 @@
 # @recs/core
 
+## 0.0.6
+
+### Patch Changes
+
+- 2e4892e: Recycle entities and components at the end of an update instead of at the beginning
+- 2e4892e: fix: entities not getting removed from query entitySet on destroy
+- 2e4892e: Set entity.alive to false on destroy before removing components
+
 ## 0.0.5
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # @recs/react
 
+## 0.0.7
+
+### Patch Changes
+
+- 2e4892e: Check if entity is alive before removing component in `Component`
+- Updated dependencies [2e4892e]
+- Updated dependencies [2e4892e]
+- Updated dependencies [2e4892e]
+  - @recs/core@0.0.6
+
 ## 0.0.6
 
 ### Patch Changes
