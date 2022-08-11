@@ -188,12 +188,12 @@ export const createWorld = () => {
       setComponent(comp as T);
 
       return () => {
-        if (comp && entity.has(comp.__recs.class)) {
+        if (entity.alive && entity.has(comp.__recs.class)) {
           entity.removeComponent(comp);
           setComponent(null!);
         }
       };
-    }, [args, children, entity, type]);
+    }, [args, children, type]);
 
     return null;
   };
@@ -216,6 +216,7 @@ export const createWorld = () => {
 
       return () => {
         queryRerenderHooks.delete(rerender);
+        query.destroy();
       };
     }, []);
 

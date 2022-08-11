@@ -141,6 +141,7 @@ export class QueryManager {
       if (index !== -1) {
         dedupedQuery.entities.splice(index, 1);
       }
+      dedupedQuery.entitySet.delete(entity);
 
       for (const queryInstance of dedupedQuery.instances) {
         queryInstance.removed.push(entity);

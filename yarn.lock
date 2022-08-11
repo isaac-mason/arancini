@@ -2878,9 +2878,11 @@ __metadata:
     "@types/three": ^0.141.0
     "@vitejs/plugin-react": ^1.3.2
     babel-loader: ^8.2.5
+    p2-es: ^1.1.6
     react: ^18.2.0
     react-dom: ^18.2.0
     three: ^0.142.0
+    timeline-composer: ^0.1.5
     typescript: ^4.5.4
     vite: ^2.9.9
     vite-plugin-dts: ^1.2.0
@@ -13798,6 +13800,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"p2-es@npm:^1.1.6":
+  version: 1.1.6
+  resolution: "p2-es@npm:1.1.6"
+  dependencies:
+    poly-decomp-es: 0.4.1
+  checksum: 650a28e23dca9108d2416872370d0602579d9676f272ae27c9e7dc5a9dc508ada6086ac5a658df0c20d59e275a48a09b3f4b524152dfde92e5678f46b0d86426
+  languageName: node
+  linkType: hard
+
 "pako@npm:~1.0.5":
   version: 1.0.11
   resolution: "pako@npm:1.0.11"
@@ -14140,6 +14151,13 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.17.8
   checksum: 97fb927dc55cd34aeb11b31ae2a3332463f114351c86e8aa6580d7755864a0120164fdc3770e6160c8b1775052f0eda14db9a6e34402cd4b08ab2d658a593725
+  languageName: node
+  linkType: hard
+
+"poly-decomp-es@npm:0.4.1":
+  version: 0.4.1
+  resolution: "poly-decomp-es@npm:0.4.1"
+  checksum: 86eabb1ebbb39673503fe346dd71fed72b969680a60e9ea9c68b5478388f466b75b634f311e0d5dc36fd6aae1cac48073872d7d4419a13ef6bce5adc87b6f184
   languageName: node
   linkType: hard
 
@@ -16734,6 +16752,16 @@ __metadata:
     readable-stream: ~2.3.6
     xtend: ~4.0.1
   checksum: beb0f338aa2931e5660ec7bf3ad949e6d2e068c31f4737b9525e5201b824ac40cac6a337224856b56bd1ddd866334bbfb92a9f57cd6f66bc3f18d3d86fc0fe50
+  languageName: node
+  linkType: hard
+
+"timeline-composer@npm:^0.1.5":
+  version: 0.1.5
+  resolution: "timeline-composer@npm:0.1.5"
+  peerDependencies:
+    react: ^18.2.0
+    react-dom: ^18.2.0
+  checksum: 9335bca50e0036533d996aa7ce0699318515b70a132ab0833608daaece294dc3f99d266e641b8325d44dd503f5520d6f50acd01e267483c81b5973424e96586c
   languageName: node
   linkType: hard
 

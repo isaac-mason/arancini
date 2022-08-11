@@ -256,13 +256,13 @@ export class SpaceManager {
    * @param entity the entity to release
    */
   removeEntity(entity: Entity, space: Space): void {
+    entity.alive = false;
     space.entities.delete(entity.id);
 
     for (const component of entity.components.values()) {
       this.removeComponentFromEntity(entity, component);
     }
 
-    entity.alive = false;
     this.world.queryManager.onEntityRemoved(entity);
 
     // stage the entity for cleanup and reset on the next update

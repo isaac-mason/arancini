@@ -212,9 +212,21 @@ describe('Query', () => {
       expect(system.test.added.includes(entity)).toBeTruthy();
       expect(system.test.removed.includes(entity)).toBeFalsy();
 
+      expect(
+        world.queryManager.dedupedQueries
+          .get(system.test.key)
+          ?.entitySet.has(entity)
+      ).toBe(true);
+
       world.update();
 
       entity.removeComponent(TestComponentOne);
+
+      expect(
+        world.queryManager.dedupedQueries
+          .get(system.test.key)
+          ?.entitySet.has(entity)
+      ).toBe(false);
 
       expect(system.test.added.length).toBe(0);
       expect(system.test.all.length).toBe(0);
@@ -242,6 +254,12 @@ describe('Query', () => {
       const entity = space.create.entity();
       entity.addComponent(TestComponentTwo);
 
+      expect(
+        world.queryManager.dedupedQueries
+          .get(system.test.key)
+          ?.entitySet.has(entity)
+      ).toBe(true);
+
       expect(system.test.added.length).toBe(1);
       expect(system.test.all.length).toBe(1);
       expect(system.test.removed.length).toBe(0);
@@ -253,6 +271,12 @@ describe('Query', () => {
       world.update();
 
       entity.addComponent(TestComponentOne);
+
+      expect(
+        world.queryManager.dedupedQueries
+          .get(system.test.key)
+          ?.entitySet.has(entity)
+      ).toBe(false);
 
       expect(system.test.added.length).toBe(0);
       expect(system.test.all.length).toBe(0);
@@ -284,6 +308,12 @@ describe('Query', () => {
       entity.addComponent(TestComponentTwo);
       entity.addComponent(TestComponentThree);
 
+      expect(
+        world.queryManager.dedupedQueries
+          .get(system.test.key)
+          ?.entitySet.has(entity)
+      ).toBe(true);
+
       expect(system.test.added.length).toBe(1);
       expect(system.test.all.length).toBe(1);
       expect(system.test.removed.length).toBe(0);
@@ -295,6 +325,12 @@ describe('Query', () => {
       world.update();
 
       entity.removeComponent(TestComponentThree);
+
+      expect(
+        world.queryManager.dedupedQueries
+          .get(system.test.key)
+          ?.entitySet.has(entity)
+      ).toBe(false);
 
       expect(system.test.added.length).toBe(0);
       expect(system.test.all.length).toBe(0);
@@ -326,6 +362,12 @@ describe('Query', () => {
       entity.addComponent(TestComponentTwo);
       entity.addComponent(TestComponentFour);
 
+      expect(
+        world.queryManager.dedupedQueries
+          .get(system.test.key)
+          ?.entitySet.has(entity)
+      ).toBe(true);
+
       expect(system.test.added.length).toBe(1);
       expect(system.test.all.length).toBe(1);
       expect(system.test.removed.length).toBe(0);
@@ -353,6 +395,18 @@ describe('Query', () => {
       entityTwo.addComponent(TestComponentOne);
       entityTwo.addComponent(TestComponentTwo);
 
+      expect(
+        world.queryManager.dedupedQueries
+          .get(query.key)
+          ?.entitySet.has(entityOne)
+      ).toBe(true);
+
+      expect(
+        world.queryManager.dedupedQueries
+          .get(query.key)
+          ?.entitySet.has(entityTwo)
+      ).toBe(true);
+
       expect(query.all.length).toBe(2);
       expect(query.all.includes(entityOne)).toBeTruthy();
       expect(query.all.includes(entityTwo)).toBeTruthy();
@@ -362,6 +416,18 @@ describe('Query', () => {
 
       // destroy entityOne, removing it from the query
       entityOne.destroy();
+
+      expect(
+        world.queryManager.dedupedQueries
+          .get(query.key)
+          ?.entitySet.has(entityOne)
+      ).toBe(false);
+
+      expect(
+        world.queryManager.dedupedQueries
+          .get(query.key)
+          ?.entitySet.has(entityTwo)
+      ).toBe(true);
 
       expect(query.all.length).toBe(1);
       expect(query.all.includes(entityOne)).toBeFalsy();

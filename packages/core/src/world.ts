@@ -170,9 +170,9 @@ export class World {
    */
   update(delta = 0): void {
     this.time += delta;
-    this.spaceManager.recycle();
     this.spaceManager.updateComponents(delta, this.time);
     this.systemManager.update(delta, this.time);
+    this.spaceManager.recycle();
   }
 
   /**
