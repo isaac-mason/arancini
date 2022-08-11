@@ -34,84 +34,151 @@ describe('Query', () => {
     world.registerComponent(TestComponentSix);
   });
 
-  describe('Query', () => {
-    it('should throw an error when attempting to create a query with no conditions', () => {
-      expect(() => {
-        world.create.query({});
-      }).toThrow();
-    });
+  it('should throw an error when attempting to create a query with no conditions', () => {
+    expect(() => {
+      world.create.query({});
+    }).toThrow();
+  });
 
-    it('should be populated with existing entities on creation', () => {
-      // query for TestComponentOne
-      const description: QueryDescription = {
-        all: [TestComponentOne],
+  it('should be populated with existing entities on creation', () => {
+    // query for TestComponentOne
+    const description: QueryDescription = {
+      all: [TestComponentOne],
+    };
+
+    // create entity matching query
+    const entity = space.create.entity();
+    entity.addComponent(TestComponentOne);
+
+    // create query
+    const query = world.create.query(description);
+
+    // query is populated with existing entity
+    expect(query).toBeTruthy();
+    expect(query.all.length).toBe(1);
+    expect(query.all.includes(entity)).toBeTruthy();
+  });
+
+  it('should reuse existing equivalent queries', () => {
+    const descriptionOne: QueryDescription = {
+      all: [TestComponentOne],
+    };
+
+    const descriptionTwo: QueryDescription = [TestComponentOne];
+
+    const queryOne = world.create.query(descriptionOne);
+    const queryTwo = world.create.query(descriptionTwo);
+
+    expect(queryOne).toBeTruthy();
+    expect(queryTwo).toBeTruthy();
+
+    expect(queryOne).toEqual(queryTwo);
+  });
+
+  it('can be removed from a world', () => {
+    // query for TestComponentOne
+    const description: QueryDescription = {
+      all: [TestComponentOne],
+    };
+    const query = world.create.query(description);
+
+    // create entity matching the query
+    const entityOne = space.create.entity();
+    entityOne.addComponent(TestComponentOne);
+
+    // entity should be updated
+    expect(query).toBeTruthy();
+    expect(query.all.length).toBe(1);
+    expect(query.all.includes(entityOne)).toBeTruthy();
+
+    // remove the query
+    query.destroy();
+
+    // creating an entity matching the removed query should not update the query
+    const entityTwo = space.build
+      .entity()
+      .addComponent(TestComponentOne)
+      .build();
+    expect(query).toBeTruthy();
+    expect(query.all.length).toBe(1);
+    expect(query.all.includes(entityOne)).toBeTruthy();
+    expect(query.all.includes(entityTwo)).toBeFalsy();
+
+    // removing a query that isn't in the world is swallowed silently
+    world.queryManager.removeQuery(
+      new Query({} as World, 'some key not in the query manager')
+    );
+
+    // removing an already removed query is swallowed silently
+    world.queryManager.removeQuery(query);
+  });
+
+  describe('getKey', () => {
+    it('should contain class names', () => {
+      const queryOne: QueryDescription = {
+        all: [TestComponentOne, TestComponentTwo],
       };
 
-      // create entity matching query
-      const entity = space.create.entity();
-      entity.addComponent(TestComponentOne);
-
-      // create query
-      const query = world.create.query(description);
-
-      // query is populated with existing entity
-      expect(query).toBeTruthy();
-      expect(query.all.length).toBe(1);
-      expect(query.all.includes(entity)).toBeTruthy();
-    });
-
-    it('should reuse existing equivalent queries', () => {
-      const descriptionOne: QueryDescription = {
-        all: [TestComponentOne],
-      };
-
-      const descriptionTwo: QueryDescription = [TestComponentOne];
-
-      const queryOne = world.create.query(descriptionOne);
-      const queryTwo = world.create.query(descriptionTwo);
-
-      expect(queryOne).toBeTruthy();
-      expect(queryTwo).toBeTruthy();
-
-      expect(queryOne).toEqual(queryTwo);
-    });
-
-    it('can be removed from a world', () => {
-      // query for TestComponentOne
-      const description: QueryDescription = {
-        all: [TestComponentOne],
-      };
-      const query = world.create.query(description);
-
-      // create entity matching the query
-      const entityOne = space.create.entity();
-      entityOne.addComponent(TestComponentOne);
-
-      // entity should be updated
-      expect(query).toBeTruthy();
-      expect(query.all.length).toBe(1);
-      expect(query.all.includes(entityOne)).toBeTruthy();
-
-      // remove the query
-      query.destroy();
-
-      // creating an entity matching the removed query should not update the query
-      const entityTwo = space.build
-        .entity()
-        .addComponent(TestComponentOne)
-        .build();
-      expect(query).toBeTruthy();
-      expect(query.all.length).toBe(1);
-      expect(query.all.includes(entityOne)).toBeTruthy();
-      expect(query.all.includes(entityTwo)).toBeFalsy();
-
-      // removing a query that isn't in the world is swallowed silently
-      world.queryManager.removeQuery(
-        new Query({} as World, 'some key not in the query manager')
+      expect(Query.getDescriptionDedupeString(queryOne)).toEqual(
+        'TestComponentOne&TestComponentTwo'
       );
+    });
 
-      // removing an already removed query is swallowed silently
-      world.queryManager.removeQuery(query);
+    it('should return the same key for two matching query descriptions', () => {
+      const queryOne: QueryDescription = {
+        any: [TestComponentOne, TestComponentTwo],
+        all: [TestComponentThree, TestComponentFour],
+        not: [TestComponentFive, TestComponentSix],
+      };
+
+      const queryTwo: QueryDescription = {
+        not: [TestComponentSix, TestComponentFive],
+        all: [TestComponentFour, TestComponentThree],
+        any: [TestComponentTwo, TestComponentOne],
+      };
+
+      expect(Query.getDescriptionDedupeString(queryOne)).toEqual(
+        Query.getDescriptionDedupeString(queryTwo)
+      );
+    });
+
+    it('should return a different key for two different query descriptions', () => {
+      const differentComponentsOne: QueryDescription = {
+        all: [TestComponentOne, TestComponentTwo],
+      };
+
+      const differentComponentsTwo: QueryDescription = {
+        all: [TestComponentOne],
+      };
+
+      expect(
+        Query.getDescriptionDedupeString(differentComponentsOne)
+      ).not.toEqual(Query.getDescriptionDedupeString(differentComponentsTwo));
+
+      const differentConditionOne: QueryDescription = {
+        all: [TestComponentOne],
+      };
+
+      const differentConditionTwo: QueryDescription = {
+        not: [TestComponentOne],
+      };
+
+      expect(
+        Query.getDescriptionDedupeString(differentConditionOne)
+      ).not.toEqual(Query.getDescriptionDedupeString(differentConditionTwo));
+
+      const partiallyDifferentOne: QueryDescription = {
+        all: [TestComponentOne],
+      };
+
+      const partiallyDifferentTwo: QueryDescription = {
+        all: [TestComponentOne],
+        not: [TestComponentTwo],
+      };
+
+      expect(
+        Query.getDescriptionDedupeString(partiallyDifferentOne)
+      ).not.toEqual(Query.getDescriptionDedupeString(partiallyDifferentTwo));
     });
   });
 
