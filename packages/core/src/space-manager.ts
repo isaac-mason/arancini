@@ -7,7 +7,7 @@ import { isSubclassMethodOverridden, uniqueId } from './utils';
 import { World } from './world';
 
 export type EntityBuilder = {
-  addComponent: <T extends Component>(
+  add: <T extends Component>(
     clazz: ComponentClass<T>,
     ...args: Parameters<T['construct']>
   ) => EntityBuilder;
@@ -82,30 +82,6 @@ export class SpaceManager {
   }
 
   /**
-   * Adds a component to an entity
-   * @param entity the entity to add to
-   * @param clazz the component to add
-   */
-  addComponentToEntity<T extends Component>(
-    entity: Entity,
-    clazz: ComponentClass<T>,
-    args: Parameters<T['construct']>
-  ): T {
-    const component = this.componentPool.request(clazz);
-    component.entity = entity;
-    component.construct(...args);
-
-    entity.components.set(clazz, component);
-    entity.componentsBitSet.add(component.__recs.classIndex);
-
-    if (entity.initialised) {
-      this.initialiseComponent(component);
-    }
-
-    return component as T;
-  }
-
-  /**
    * Creates a new space in the SpaceManager
    * @param params params for the space
    * @returns the new space
@@ -123,6 +99,28 @@ export class SpaceManager {
     }
 
     return space;
+  }
+
+  /**
+   * Initialises a space
+   * @param space the space to initialise
+   */
+  initialiseSpace(space: Space): void {
+    space.initialised = true;
+    for (const entity of space.entities.values()) {
+      this.initialiseEntity(entity);
+    }
+  }
+
+  /**
+   * Remove a space
+   * @param space the space to remove
+   */
+  removeSpace(space: Space): void {
+    this.spaces.delete(space.id);
+    for (const entity of space.entities.values()) {
+      this.removeEntity(entity, space);
+    }
   }
 
   /**
@@ -156,28 +154,6 @@ export class SpaceManager {
   }
 
   /**
-   * Remove a space
-   * @param space the space to remove
-   */
-  removeSpace(space: Space): void {
-    this.spaces.delete(space.id);
-    for (const entity of space.entities.values()) {
-      this.removeEntity(entity, space);
-    }
-  }
-
-  /**
-   * Initialises a space
-   * @param space the space to initialise
-   */
-  initialiseSpace(space: Space): void {
-    space.initialised = true;
-    for (const entity of space.entities.values()) {
-      this.initialiseEntity(entity);
-    }
-  }
-
-  /**
    * Initialises an entity
    * @param entity the entity to initialise
    */
@@ -194,6 +170,64 @@ export class SpaceManager {
   }
 
   /**
+   * Removes an entity from a space and releases it to the entity object pool
+   * @param entity the entity to release
+   */
+  removeEntity(entity: Entity, space: Space): void {
+    entity.alive = false;
+    space.entities.delete(entity.id);
+
+    for (const component of entity.components.values()) {
+      this.removeComponentFromEntity(entity, component);
+    }
+
+    this.world.queryManager.onEntityRemoved(entity);
+
+    // stage the entity for cleanup and reset on the next update
+    this.entitiesToCleanup.push(entity);
+  }
+
+  /**
+   * Adds a component to an entity
+   * @param entity the entity to add to
+   * @param clazz the component to add
+   */
+  addComponentToEntity<T extends Component>(
+    entity: Entity,
+    clazz: ComponentClass<T>,
+    args: Parameters<T['construct']>
+  ): T {
+    const component = this.componentPool.request(clazz);
+    component.entity = entity;
+    component.construct(...args);
+
+    entity.components.set(clazz, component);
+    entity.componentsBitSet.add(component.__recs.classIndex);
+
+    if (entity.initialised) {
+      this.initialiseComponent(component);
+    }
+
+    return component as T;
+  }
+
+  /**
+   * Removes a component from an entity
+   * @param entity the entity to remove from
+   * @param component the component to remove
+   */
+  removeComponentFromEntity(entity: Entity, component: Component): void {
+    component.onDestroy();
+
+    this.componentsToUpdate.delete(component.id);
+    entity.components.delete(component.__recs.class);
+    entity.componentsBitSet.remove(component.__recs.classIndex);
+
+    // stage the component for cleanup on the next update
+    this.componentsToCleanup.push(component);
+  }
+
+  /**
    * Initialises a component
    * @param component the component to initialise
    */
@@ -202,6 +236,17 @@ export class SpaceManager {
 
     if (isSubclassMethodOverridden(component.__recs.class, 'onUpdate')) {
       this.componentsToUpdate.set(component.id, component);
+    }
+  }
+
+  /**
+   * Run update `onUpdate` methods for all components that have them defined
+   * @param delta the time elapsed in seconds
+   * @param time the current time in seconds
+   */
+  updateComponents(delta: number, time: number): void {
+    for (const component of this.componentsToUpdate.values()) {
+      component.onUpdate(delta, time);
     }
   }
 
@@ -236,51 +281,6 @@ export class SpaceManager {
   }
 
   /**
-   * Removes a component from an entity
-   * @param entity the entity to remove from
-   * @param component the component to remove
-   */
-  removeComponentFromEntity(entity: Entity, component: Component): void {
-    component.onDestroy();
-
-    this.componentsToUpdate.delete(component.id);
-    entity.components.delete(component.__recs.class);
-    entity.componentsBitSet.remove(component.__recs.classIndex);
-
-    // stage the component for cleanup on the next update
-    this.componentsToCleanup.push(component);
-  }
-
-  /**
-   * Removes an entity from a space and releases it to the entity object pool
-   * @param entity the entity to release
-   */
-  removeEntity(entity: Entity, space: Space): void {
-    entity.alive = false;
-    space.entities.delete(entity.id);
-
-    for (const component of entity.components.values()) {
-      this.removeComponentFromEntity(entity, component);
-    }
-
-    this.world.queryManager.onEntityRemoved(entity);
-
-    // stage the entity for cleanup and reset on the next update
-    this.entitiesToCleanup.push(entity);
-  }
-
-  /**
-   * Run update `onUpdate` methods for all components that have them defined
-   * @param delta the time elapsed in seconds
-   * @param time the current time in seconds
-   */
-  updateComponents(delta: number, time: number): void {
-    for (const component of this.componentsToUpdate.values()) {
-      component.onUpdate(delta, time);
-    }
-  }
-
-  /**
    * Creates an EntityBuilder for a given Space
    * @param space the Space
    * @returns the EntityBuilder
@@ -289,7 +289,7 @@ export class SpaceManager {
     const components: { clazz: ComponentClass; args: unknown[] }[] = [];
 
     const builder = {
-      addComponent: <T extends Component>(
+      add: <T extends Component>(
         clazz: ComponentClass<T>,
         ...args: Parameters<T['construct']>
       ) => {

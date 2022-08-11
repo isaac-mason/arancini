@@ -60,7 +60,7 @@ export type ComponentClass<T extends Component | Component = Component> = {
  * // add the example component to the entity
  * const x = 1;
  * const y = 2;
- * entity.addComponent(ExampleComponent, x, y);
+ * entity.add(ExampleComponent, x, y);
  * ```
  */
 export abstract class Component {

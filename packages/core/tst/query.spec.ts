@@ -48,7 +48,7 @@ describe('Query', () => {
 
     // create entity matching query
     const entity = space.create.entity();
-    entity.addComponent(TestComponentOne);
+    entity.add(TestComponentOne);
 
     // create query
     const query = world.create.query(description);
@@ -84,7 +84,7 @@ describe('Query', () => {
 
     // create entity matching the query
     const entityOne = space.create.entity();
-    entityOne.addComponent(TestComponentOne);
+    entityOne.add(TestComponentOne);
 
     // entity should be updated
     expect(query).toBeTruthy();
@@ -95,10 +95,7 @@ describe('Query', () => {
     query.destroy();
 
     // creating an entity matching the removed query should not update the query
-    const entityTwo = space.build
-      .entity()
-      .addComponent(TestComponentOne)
-      .build();
+    const entityTwo = space.builder.entity().add(TestComponentOne).build();
     expect(query).toBeTruthy();
     expect(query.all.length).toBe(1);
     expect(query.all.includes(entityOne)).toBeTruthy();
@@ -188,15 +185,9 @@ describe('Query', () => {
         all: [TestComponentOne],
       };
 
-      const entityOne = space.build
-        .entity()
-        .addComponent(TestComponentOne)
-        .build();
+      const entityOne = space.builder.entity().add(TestComponentOne).build();
 
-      const entityTwo = space.build
-        .entity()
-        .addComponent(TestComponentOne)
-        .build();
+      const entityTwo = space.builder.entity().add(TestComponentOne).build();
 
       const query = world.create.query(description);
 
@@ -217,11 +208,11 @@ describe('Query', () => {
 
       // create an entity matching the query
       const entityOne = space.create.entity();
-      entityOne.addComponent(TestComponentOne);
+      entityOne.add(TestComponentOne);
 
       // create another entity that matches the query
       const entityTwo = space.create.entity();
-      entityTwo.addComponent(TestComponentOne);
+      entityTwo.add(TestComponentOne);
 
       // get query results
       const queryResults = world.query(description);
@@ -237,14 +228,14 @@ describe('Query', () => {
       };
 
       const entityOne = space.create.entity();
-      entityOne.addComponent(TestComponentOne);
+      entityOne.add(TestComponentOne);
 
       const activeQuery = world.create.query(description);
 
       world.update();
 
       const entityTwo = space.create.entity();
-      entityTwo.addComponent(TestComponentOne);
+      entityTwo.add(TestComponentOne);
 
       const onceOffQueryResults = world.query(description);
 
@@ -269,7 +260,7 @@ describe('Query', () => {
       const system = world.getSystem(TestSystem) as TestSystem;
 
       const entity = space.create.entity();
-      entity.addComponent(TestComponentOne);
+      entity.add(TestComponentOne);
 
       expect(system.test.added.length).toBe(1);
       expect(system.test.all.length).toBe(1);
@@ -287,7 +278,7 @@ describe('Query', () => {
 
       world.update();
 
-      entity.removeComponent(TestComponentOne);
+      entity.remove(TestComponentOne);
 
       expect(
         world.queryManager.dedupedQueries
@@ -319,7 +310,7 @@ describe('Query', () => {
       const system = world.getSystem(TestSystem) as TestSystem;
 
       const entity = space.create.entity();
-      entity.addComponent(TestComponentTwo);
+      entity.add(TestComponentTwo);
 
       expect(
         world.queryManager.dedupedQueries
@@ -337,7 +328,7 @@ describe('Query', () => {
 
       world.update();
 
-      entity.addComponent(TestComponentOne);
+      entity.add(TestComponentOne);
 
       expect(
         world.queryManager.dedupedQueries
@@ -371,9 +362,9 @@ describe('Query', () => {
       const system = world.getSystem(TestSystem) as TestSystem;
 
       const entity = space.create.entity();
-      entity.addComponent(TestComponentOne);
-      entity.addComponent(TestComponentTwo);
-      entity.addComponent(TestComponentThree);
+      entity.add(TestComponentOne);
+      entity.add(TestComponentTwo);
+      entity.add(TestComponentThree);
 
       expect(
         world.queryManager.dedupedQueries
@@ -391,7 +382,7 @@ describe('Query', () => {
 
       world.update();
 
-      entity.removeComponent(TestComponentThree);
+      entity.remove(TestComponentThree);
 
       expect(
         world.queryManager.dedupedQueries
@@ -425,9 +416,9 @@ describe('Query', () => {
       const system = world.getSystem(TestSystem) as TestSystem;
 
       const entity = space.create.entity();
-      entity.addComponent(TestComponentOne);
-      entity.addComponent(TestComponentTwo);
-      entity.addComponent(TestComponentFour);
+      entity.add(TestComponentOne);
+      entity.add(TestComponentTwo);
+      entity.add(TestComponentFour);
 
       expect(
         world.queryManager.dedupedQueries
@@ -455,12 +446,12 @@ describe('Query', () => {
 
       // create entity that matches query
       const entityOne = space.create.entity();
-      entityOne.addComponent(TestComponentOne);
+      entityOne.add(TestComponentOne);
 
       // create another entity that matches query
       const entityTwo = space.create.entity();
-      entityTwo.addComponent(TestComponentOne);
-      entityTwo.addComponent(TestComponentTwo);
+      entityTwo.add(TestComponentOne);
+      entityTwo.add(TestComponentTwo);
 
       expect(
         world.queryManager.dedupedQueries

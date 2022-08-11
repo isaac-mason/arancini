@@ -29,7 +29,7 @@ import { World } from './world';
  * entity.get(ExampleComponent) // throws Error
  *
  * // add ExampleComponent to the entity
- * const exampleComponent = entity.addComponent(ExampleComponent);
+ * const exampleComponent = entity.add(ExampleComponent);
  *
  * entity.has(ExampleComponent); // returns `true`
  * entity.get(ExampleComponent) // returns `exampleComponent`
@@ -47,7 +47,7 @@ import { World } from './world';
  * });
  *
  * // remove the component
- * entity.removeComponent(ExampleComponent);
+ * entity.remove(ExampleComponent);
  *
  * // destroy the entity
  * entity.destroy();
@@ -100,7 +100,7 @@ export class Entity {
    * Adds a component to the entity
    * @param clazz the component to add
    */
-  addComponent<T extends Component>(
+  add<T extends Component>(
     clazz: ComponentClass<T>,
     ...args: Parameters<T['construct']>
   ): T {
@@ -190,7 +190,7 @@ export class Entity {
    * The value can either be a Component constructor, or the component instance itself
    * @param value the component to remove and destroy
    */
-  removeComponent(value: Component | ComponentClass): Entity {
+  remove(value: Component | ComponentClass): Entity {
     let component: Component | undefined;
 
     if (value instanceof Component) {

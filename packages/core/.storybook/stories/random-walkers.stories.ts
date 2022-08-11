@@ -134,11 +134,11 @@ class FlipSystem extends System {
       // small chance of changing color
       if (Math.random() >= 0.95) {
         if (entity.has(Blue)) {
-          entity.removeComponent(Blue);
-          entity.addComponent(Red);
+          entity.remove(Blue);
+          entity.add(Red);
         } else {
-          entity.removeComponent(Red);
-          entity.addComponent(Blue);
+          entity.remove(Red);
+          entity.add(Blue);
         }
       }
     });
@@ -159,12 +159,12 @@ export const RandomColorChangingWalkers = () => {
     // create entities in the World's default space
     for (let i = 0; i < n; i++) {
       const entity = world.create.entity();
-      entity.addComponent(
+      entity.add(
         Position,
         (Math.random() - 0.5) * 300,
         (Math.random() - 0.5) * 300
       );
-      entity.addComponent(i % 2 === 0 ? Red : Blue);
+      entity.add(i % 2 === 0 ? Red : Blue);
     }
 
     // create an entity with a component containing the canvas context
@@ -176,7 +176,7 @@ export const RandomColorChangingWalkers = () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const canvasComponent = context.addComponent(CanvasContext);
+    const canvasComponent = context.add(CanvasContext);
     canvasComponent.ctx = canvas.getContext('2d')!;
     canvasComponent.width = canvas.width;
     canvasComponent.height = canvas.height;

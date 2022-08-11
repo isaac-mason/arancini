@@ -211,8 +211,8 @@ Now let's create some random walkers. These will be entities with the `Position`
 const n = 100;
 for (let i = 0; i < n; i++) {
   world.builder.entity()
-    .addComponent(Position, Math.random() * 10 - 5, Math.random() * 10 - 5);
-    .addComponent(Color, i % 2 === 0 ? "red" : "blue")
+    .add(Position, Math.random() * 10 - 5, Math.random() * 10 - 5);
+    .add(Color, i % 2 === 0 ? "red" : "blue")
     .build();
 }
 ```
@@ -227,7 +227,7 @@ const canvas = document.querySelector("#example-canvas") as HTMLCanvasElement;
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const canvasComponent = context.addComponent(CanvasContext);
+const canvasComponent = context.add(CanvasContext);
 canvasComponent.ctx = canvas.getContext("2d")!;
 canvasComponent.width = canvas.width;
 canvasComponent.height = canvas.height;

@@ -48,16 +48,16 @@ export const recs = {
     return this.space.create.entity();
   },
   addPositionComponent(entity) {
-      entity.addComponent(Position);
+      entity.add(Position);
   },
   addVelocityComponent(entity) {
-      entity.addComponent(Velocity);
+      entity.add(Velocity);
   },
   removePositionComponent(entity) {
-      entity.removeComponent(Position);
+      entity.remove(Position);
   },
   removeVelocityComponent(entity) {
-      entity.removeComponent(Velocity);
+      entity.remove(Velocity);
   },
   destroyEntity(entity) {
       entity.destroy();

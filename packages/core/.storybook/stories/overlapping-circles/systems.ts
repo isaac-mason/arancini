@@ -88,7 +88,7 @@ export class IntersectionSystem extends System {
         const intersect = intersection(circle, circleB);
         if (intersect !== false) {
           if (!entity.has(Intersecting)) {
-            entity.addComponent(Intersecting);
+            entity.add(Intersecting);
           }
           const intersectComponent = entity.get(Intersecting);
           intersectComponent.points.push(intersect);
@@ -98,7 +98,7 @@ export class IntersectionSystem extends System {
         entity.has(Intersecting) &&
         entity.get(Intersecting).points.length === 0
       ) {
-        entity.removeComponent(Intersecting);
+        entity.remove(Intersecting);
       }
     }
   }

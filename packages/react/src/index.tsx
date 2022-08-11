@@ -180,16 +180,16 @@ export const createWorld = () => {
         const childrenArray = (
           !Array.isArray(children) ? [children] : children
         ) as Parameters<T['construct']>;
-        comp = entity.addComponent(type, ...childrenArray);
+        comp = entity.add(type, ...childrenArray);
       } else {
-        comp = entity.addComponent(type, ...(args ?? ([] as never)));
+        comp = entity.add(type, ...(args ?? ([] as never)));
       }
 
       setComponent(comp as T);
 
       return () => {
         if (entity.alive && entity.has(comp.__recs.class)) {
-          entity.removeComponent(comp);
+          entity.remove(comp);
           setComponent(null!);
         }
       };

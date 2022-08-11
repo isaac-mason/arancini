@@ -65,8 +65,8 @@ describe('System', () => {
 
     // create entity that matches query
     const entity = space.create.entity();
-    entity.addComponent(TestComponentOne);
-    entity.addComponent(TestComponentTwo);
+    entity.add(TestComponentOne);
+    entity.add(TestComponentTwo);
 
     expect(system.testQueryName.added.length).toBe(1);
     expect(system.testQueryName.removed.length).toBe(0);
@@ -76,7 +76,7 @@ describe('System', () => {
     world.update();
 
     // remove component, assert removal is reflected in the query
-    entity.removeComponent(TestComponentOne);
+    entity.remove(TestComponentOne);
 
     expect(system.testQueryName.all.length).toBe(0);
     expect(system.testQueryName.removed.length).toBe(1);
@@ -115,8 +115,8 @@ describe('System', () => {
 
     // create entity that matches the query in both systems
     const entity = space.create.entity();
-    entity.addComponent(TestComponentOne);
-    entity.addComponent(TestComponentTwo);
+    entity.add(TestComponentOne);
+    entity.add(TestComponentTwo);
 
     // entity should be in TestSystemOne query
     expect(testSystemOne.testQueryName.added.length).toBe(1);

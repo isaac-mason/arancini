@@ -57,7 +57,7 @@ export const PlayerInventoryEvents = () => {
 
     const space = world.create.space();
     const player = space.create.entity();
-    player.addComponent(Inventory);
+    player.add(Inventory);
 
     world.init();
 

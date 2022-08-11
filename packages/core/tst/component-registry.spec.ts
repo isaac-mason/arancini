@@ -36,7 +36,7 @@ describe('ComponentRegistry', () => {
     const space = world.create.space();
     const entity = space.create.entity();
 
-    entity.addComponent(ExampleComponent);
+    entity.add(ExampleComponent);
 
     expect(world.componentRegistry.getComponentIndex(ExampleComponent)).toBe(0);
   });

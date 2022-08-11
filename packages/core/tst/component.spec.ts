@@ -26,7 +26,7 @@ describe('Components', () => {
       }
 
       const entity = space.create.entity();
-      entity.addComponent(TestComponent);
+      entity.add(TestComponent);
 
       expect(onInit).toBeCalledTimes(0);
 
@@ -56,7 +56,7 @@ describe('Components', () => {
 
       // onInit
       const entity = space.create.entity();
-      entity.addComponent(TestComponentOne);
+      entity.add(TestComponentOne);
       expect(world.initialised).toBe(true);
       expect(componentInitJestFn).toHaveBeenCalledTimes(1);
 
@@ -104,7 +104,7 @@ describe('Components', () => {
       world.registerComponent(MockComponentExtendedClass as never);
 
       const entity = space.create.entity();
-      entity.addComponent(MockComponentExtendedClass as never);
+      entity.add(MockComponentExtendedClass as never);
 
       world.update();
 
@@ -128,7 +128,7 @@ describe('Components', () => {
     it('should return the component instance if the component is in the entity', () => {
       const entity = space.create.entity();
 
-      entity.addComponent(TestComponentOne);
+      entity.add(TestComponentOne);
 
       expect(entity.get(TestComponentOne)).toBeInstanceOf(TestComponentOne);
     });
@@ -150,7 +150,7 @@ describe('Components', () => {
     it('should return the component instance if the component is in the entity', () => {
       const entity = space.create.entity();
 
-      entity.addComponent(TestComponentOne);
+      entity.add(TestComponentOne);
 
       expect(entity.find(TestComponentOne)).toBeInstanceOf(TestComponentOne);
     });
@@ -168,7 +168,7 @@ describe('Components', () => {
     it('should return true if the entity has the given component', () => {
       const entity = space.create.entity();
 
-      entity.addComponent(TestComponentOne);
+      entity.add(TestComponentOne);
 
       expect(entity.has(TestComponentOne)).toBe(true);
     });
@@ -176,22 +176,22 @@ describe('Components', () => {
     it('should return false if the entity does not have the given component', () => {
       const entity = space.create.entity();
 
-      entity.addComponent(TestComponentOne);
+      entity.add(TestComponentOne);
 
       expect(entity.has(TestComponentOne)).toBe(true);
       expect(entity.has(TestComponentTwo)).toBe(false);
 
-      const componentTwo = entity.addComponent(TestComponentTwo);
+      const componentTwo = entity.add(TestComponentTwo);
 
       expect(entity.has(TestComponentOne)).toBe(true);
       expect(entity.has(TestComponentTwo)).toBe(true);
 
-      entity.removeComponent(TestComponentOne);
+      entity.remove(TestComponentOne);
 
       expect(entity.has(TestComponentOne)).toBe(false);
       expect(entity.has(TestComponentTwo)).toBe(true);
 
-      entity.removeComponent(componentTwo);
+      entity.remove(componentTwo);
 
       expect(entity.has(TestComponentOne)).toBe(false);
       expect(entity.has(TestComponentTwo)).toBe(false);
@@ -204,7 +204,7 @@ describe('Components', () => {
 
     const entity = space.create.entity();
 
-    const component = entity.addComponent(TestComponentOne);
+    const component = entity.add(TestComponentOne);
 
     expect(component.space).toBe(space);
     expect(component.world).toBe(world);
