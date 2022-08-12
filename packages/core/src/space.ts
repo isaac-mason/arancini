@@ -92,7 +92,7 @@ export class Space {
    */
   get builder(): {
     /**
-     * Returns an EntityBuilder, used for creating an entity with multiple components
+     * Returns an EntityBuilder, used for creating an Entity with multiple Components
      * @returns an EntityBuilder
      */
     entity: () => EntityBuilder;

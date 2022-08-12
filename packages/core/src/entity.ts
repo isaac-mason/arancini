@@ -139,13 +139,7 @@ export class Entity {
    * @returns the component if it is found, or undefined
    */
   find<T extends Component>(value: ComponentClass<T>): T | undefined {
-    const component: Component | undefined = this.components.get(value);
-
-    if (component) {
-      return component as T;
-    }
-
-    return undefined;
+    return this.components.get(value) as T | undefined;
   }
 
   /**

@@ -36,12 +36,12 @@ export class SpaceManager {
   /**
    * Components that need recycling
    */
-  private componentsToCleanup: Component[] = [];
+  private componentsToRecycle: Component[] = [];
 
   /**
    * Entities that need queries recycling
    */
-  private entitiesToCleanup: Entity[] = [];
+  private entitiesToRecycle: Entity[] = [];
 
   /**
    * A map of ids to update functions for all components
@@ -184,7 +184,7 @@ export class SpaceManager {
     this.world.queryManager.onEntityRemoved(entity);
 
     // stage the entity for cleanup and reset on the next update
-    this.entitiesToCleanup.push(entity);
+    this.entitiesToRecycle.push(entity);
   }
 
   /**
@@ -224,7 +224,7 @@ export class SpaceManager {
     entity.componentsBitSet.remove(component.__recs.classIndex);
 
     // stage the component for cleanup on the next update
-    this.componentsToCleanup.push(component);
+    this.componentsToRecycle.push(component);
   }
 
   /**
@@ -255,8 +255,8 @@ export class SpaceManager {
    */
   recycle(): void {
     // recycle destroyed entities
-    const entities = this.entitiesToCleanup;
-    this.entitiesToCleanup = [];
+    const entities = this.entitiesToRecycle;
+    this.entitiesToRecycle = [];
 
     for (const entity of entities) {
       // reset the entity
@@ -269,8 +269,8 @@ export class SpaceManager {
     }
 
     // recycle destroyed components
-    const components = this.componentsToCleanup;
-    this.componentsToCleanup = [];
+    const components = this.componentsToRecycle;
+    this.componentsToRecycle = [];
 
     for (const component of components) {
       component.id = uniqueId();
