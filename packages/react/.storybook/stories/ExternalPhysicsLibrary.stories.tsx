@@ -220,5 +220,5 @@ export const Example = () => {
 };
 
 export default {
-  title: '2D Physics',
+  title: 'External Physics Library',
 };
