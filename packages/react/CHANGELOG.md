@@ -1,5 +1,13 @@
 # @recs/react
 
+## 0.0.9
+
+### Patch Changes
+
+- 7777be9: Rename System `system` prop to `type`
+- Updated dependencies [acd1993]
+  - @recs/core@0.0.8
+
 ## 0.0.8
 
 ### Patch Changes

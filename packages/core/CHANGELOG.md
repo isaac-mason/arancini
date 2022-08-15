@@ -1,5 +1,11 @@
 # @recs/core
 
+## 0.0.8
+
+### Patch Changes
+
+- acd1993: Minor refactor of SpaceManager, Entity, Space classes
+
 ## 0.0.7
 
 ### Patch Changes
