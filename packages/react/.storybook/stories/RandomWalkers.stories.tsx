@@ -119,7 +119,7 @@ const App = () => {
       </R.Space>
 
       {/* class system to move the walkers */}
-      <R.System system={WalkingSystem} />
+      <R.System type={WalkingSystem} />
 
       {/* component system to render the walkers */}
       <RendererSystem />

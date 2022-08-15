@@ -33,7 +33,7 @@ export type SpaceProps = {
 };
 
 export type SystemProps<T extends R.System> = {
-  system: R.SystemClass<T>;
+  type: R.SystemClass<T>;
   priority?: number;
 };
 
@@ -87,7 +87,7 @@ export const createWorld = () => {
   };
 
   const SystemImpl = <T extends R.System>(
-    { system, priority }: SystemProps<T>,
+    { type: system, priority }: SystemProps<T>,
     ref: ForwardedRef<T>
   ) => {
     const [sys, setSystem] = useState<T>();

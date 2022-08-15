@@ -131,7 +131,7 @@ const Renderer = () => {
 
 const Physics = () => (
   <>
-    <R.System system={PhysicsSystem} />
+    <R.System type={PhysicsSystem} />
     <R.Entity>
       <R.Component
         type={PhysicsSystemState}
