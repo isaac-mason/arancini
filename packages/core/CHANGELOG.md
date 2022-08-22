@@ -1,5 +1,11 @@
 # @recs/core
 
+## 0.0.9
+
+### Patch Changes
+
+- cc22515: Initialise spaces before systems
+
 ## 0.0.8
 
 ### Patch Changes
