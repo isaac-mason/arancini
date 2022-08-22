@@ -160,8 +160,8 @@ export class World {
    */
   init(): void {
     this.initialised = true;
-    this.systemManager.init();
     this.spaceManager.init();
+    this.systemManager.init();
   }
 
   /**
