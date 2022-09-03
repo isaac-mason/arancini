@@ -237,5 +237,6 @@ export const createWorld = () => {
     useQuery,
     useWorld,
     step,
+    world,
   };
 };
