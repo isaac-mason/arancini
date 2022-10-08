@@ -1,7 +1,7 @@
 import React from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Component, Query, System } from '@recs/core';
-import { createWorld } from '@recs/react';
+import { createECS } from '@recs/react';
 import * as P2 from 'p2-es';
 import { Group } from 'three';
 import { Repeat } from 'timeline-composer';
@@ -14,7 +14,7 @@ const groundMaterial = new P2.Material();
 const boxGroundContactMaterial = new P2.ContactMaterial(boxMaterial, groundMaterial, { friction: 0.75 })
 const boxBoxContactMaterial = new P2.ContactMaterial(boxMaterial, groundMaterial, { friction: 0.75 })
 
-let R = createWorld();
+let R = createECS();
 
 const R3FStepper = () => {
   useFrame((_, delta) => {

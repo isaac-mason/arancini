@@ -4,14 +4,14 @@ import * as RECS from '@recs/core';
 import React from 'react';
 import * as THREE from 'three';
 import { Vector3Tuple } from 'three';
-import { createWorld } from '../../src';
+import { createECS } from '../../src';
 import { Setup } from '../Setup';
 
 export default {
   title: 'Random Walkers',
 };
 
-const R = createWorld();
+const R = createECS();
 
 const R3FStepper = () => {
   useFrame((_, delta) => {

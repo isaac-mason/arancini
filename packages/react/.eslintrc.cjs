@@ -61,6 +61,7 @@ module.exports = {
       'WithStatement',
     ],
     '@typescript-eslint/no-empty-function': 'off',
+    'max-classes-per-file': 'off',
   },
   settings: {
     'import/resolver': {

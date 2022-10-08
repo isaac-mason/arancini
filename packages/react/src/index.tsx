@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 import * as R from '@recs/core';
 import React, {
   createContext,
@@ -50,10 +49,10 @@ export type ComponentProps<T extends R.Component> = {
     : Parameters<T['construct']>;
 };
 
-export const createWorld = () => {
+export const createECS = (existing?: R.World) => {
   const queryRerenderHooks: Map<() => void, R.Query> = new Map();
 
-  class QueryRerenderSystem extends R.System {
+  class ReactQueryHookRerenderSystem extends R.System {
     onUpdate() {
       queryRerenderHooks.forEach((query, rerender) => {
         if (query.added.length > 0 || query.removed.length > 0) {
@@ -64,13 +63,16 @@ export const createWorld = () => {
     }
   }
 
-  const WorldContext = createContext(null! as WorldProviderContext);
-  const SpaceContext = createContext(null! as SpaceProviderContext);
-  const EntityContext = createContext(null! as EntityProviderContext);
+  const worldContext = createContext(null! as WorldProviderContext);
+  const spaceContext = createContext(null! as SpaceProviderContext);
+  const entityContext = createContext(null! as EntityProviderContext);
 
-  const world = new R.World();
-  world.registerSystem(QueryRerenderSystem, { priority: -Infinity });
-  world.init();
+  const world = existing ?? new R.World();
+  world.registerSystem(ReactQueryHookRerenderSystem, { priority: -Infinity });
+
+  if (!existing) {
+    world.init();
+  }
 
   const step = (delta: number) => {
     world.update(delta);
@@ -78,11 +80,11 @@ export const createWorld = () => {
 
   const World = ({ children }: WorldProps) => {
     return (
-      <WorldContext.Provider value={{ world }}>
-        <SpaceContext.Provider value={{ space: world.defaultSpace }}>
+      <worldContext.Provider value={{ world }}>
+        <spaceContext.Provider value={{ space: world.defaultSpace }}>
           {children}
-        </SpaceContext.Provider>
-      </WorldContext.Provider>
+        </spaceContext.Provider>
+      </worldContext.Provider>
     );
   };
 
@@ -129,9 +131,9 @@ export const createWorld = () => {
 
       return (
         space && (
-          <SpaceContext.Provider value={{ space }}>
+          <spaceContext.Provider value={{ space }}>
             {children}
-          </SpaceContext.Provider>
+          </spaceContext.Provider>
         )
       );
     }
@@ -139,7 +141,7 @@ export const createWorld = () => {
 
   const Entity = React.forwardRef<R.Entity, EntityProps>(
     ({ children }, ref) => {
-      const { space } = useContext(SpaceContext);
+      const { space } = useContext(spaceContext);
       const [entity, setEntity] = useState<R.Entity>(null!);
 
       useImperativeHandle(ref, () => entity);
@@ -156,9 +158,9 @@ export const createWorld = () => {
 
       return (
         entity && (
-          <EntityContext.Provider value={{ entity }}>
+          <entityContext.Provider value={{ entity }}>
             {children}
-          </EntityContext.Provider>
+          </entityContext.Provider>
         )
       );
     }
@@ -168,7 +170,7 @@ export const createWorld = () => {
     { args, children, type }: ComponentProps<T>,
     ref: ForwardedRef<T>
   ) => {
-    const { entity } = useContext(EntityContext);
+    const { entity } = useContext(entityContext);
     const [component, setComponent] = useState<T>();
 
     useImperativeHandle(ref, () => component as T);
@@ -224,7 +226,7 @@ export const createWorld = () => {
   };
 
   const useWorld = () => {
-    const { world: worldInstance } = useContext(WorldContext);
+    const { world: worldInstance } = useContext(worldContext);
     return worldInstance;
   };
 

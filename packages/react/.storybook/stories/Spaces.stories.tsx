@@ -2,14 +2,14 @@ import { Text } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as RECS from '@recs/core';
 import React from 'react';
-import { createWorld } from '../../src';
+import { createECS } from '../../src';
 import { Setup } from '../Setup';
 
 export default {
   title: 'Spaces',
 };
 
-const R = createWorld();
+const R = createECS();
 
 class SpaceIdText extends RECS.Component {
   jsx: JSX.Element | undefined = undefined;
