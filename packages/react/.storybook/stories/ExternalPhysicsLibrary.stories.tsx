@@ -70,13 +70,8 @@ class PhysicsSystemState extends Component {
 }
 
 class PhysicsSystem extends System {
-  systemStateQuery!: Query;
-  bodiesQuery!: Query;
-
-  onInit() {
-    this.systemStateQuery = this.query([PhysicsSystemState]);
-    this.bodiesQuery = this.query([Collider]);
-  }
+  systemStateQuery = this.query([PhysicsSystemState]);;
+  bodiesQuery = this.query([Collider]);
 
   onUpdate(delta: number) {
     const state = this.systemStateQuery.first

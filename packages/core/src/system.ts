@@ -2,7 +2,7 @@ import { Query, QueryDescription } from './query';
 import { World } from './world';
 
 export type SystemClass<T extends System = System> = {
-  new (): T;
+  new (world: World): T;
 };
 
 /**
@@ -10,28 +10,35 @@ export type SystemClass<T extends System = System> = {
  *
  * ```ts
  * class ExampleSystem extends System {
- *   // define a property for a query
- *   queryName!: Query;
+ *   // create a query
+ *   queryName = this.query({
+ *     all: [ComponentOne, ComponentTwo],
+ *     one: [ComponentThree, ComponentFour],
+ *     not: [ComponentFive],
+ *   });
  *
+ *   // optionally override the default System constructor
+ *   constructor(world: World) {
+ *     super(world);
+ *
+ *     // constructor logic...
+ *   }
+ *
+ *   // any logic for initialising the system
  *   onInit() {
- *     // logic to run to initialise the system, e.g. creating queries
- *     this.queryName = this.query({
- *       all: [ComponentOne, ComponentTwo],
- *       one: [ComponentThree, ComponentFour],
- *       not: [ComponentFive],
- *     });
+ *     // ...
  *   }
  *
  *   onUpdate(delta: number) {
- *     // do something with the query results
+ *     // do something with the query results!
  *
- *     // added since the last update
+ *     // entities added since the last update
  *     console.log(this.queryName.added)
  *
- *     // removed since the last update
+ *     // entities removed since the last update
  *     console.log(this.queryName.removed)
  *
- *     // all currently matched
+ *     // all entities currently matched
  *     console.log(this.queryName.all)
  *   }
  *
@@ -50,7 +57,7 @@ export abstract class System {
   /**
    * The World the system is in
    */
-  world!: World;
+  world: World;
 
   /**
    * @private used internally, do not use directly
@@ -82,6 +89,10 @@ export abstract class System {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     class: null!,
   };
+
+  constructor(world: World) {
+    this.world = world;
+  }
 
   /**
    * Logic for destruction of the system. Called on removing a System from the RECS.

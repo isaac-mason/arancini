@@ -90,7 +90,7 @@ export class SystemManager {
       throw new Error(`System "${Clazz.name}" has already been registered`);
     }
 
-    const system = new Clazz();
+    const system = new Clazz(this.world);
     system.world = this.world;
     system.__recs.class = Clazz;
     system.__recs.priority = attributes?.priority ?? 0;

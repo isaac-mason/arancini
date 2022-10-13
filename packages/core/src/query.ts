@@ -72,13 +72,9 @@ export type QueryBitSets = {
  *
  * // create a system with a query
  * class ExampleSystem extends System {
- *   exampleQueryName!: Query;
- *
- *   onInit() {
- *     this.exampleQueryName = this.query({
- *       all: [ExampleComponentOne],
- *     });
- *   }
+ *   exampleQueryName = this.query({
+ *     all: [ExampleComponentOne],
+ *   });
  *
  *   onUpdate() {
  *     this.exampleQueryName.all.forEach((entity) => console.log(entity));

@@ -42,11 +42,7 @@ class JSX extends RECS.Component {
 }
 
 class WalkingSystem extends RECS.System {
-  walking!: RECS.Query;
-  
-  onInit() {
-    this.walking = this.query([Transform, Walking]);
-  }
+  walking = this.query([Transform, Walking]);
 
   onUpdate(delta: number) {
     for (const walker of this.walking.all) {

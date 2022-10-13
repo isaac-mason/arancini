@@ -21,11 +21,9 @@ const Queries = {
 }
 
 class InventorySystem extends System {
-  inventories!: Query;
+  inventories = this.query(Queries.Inventories);
 
   onInit(): void {
-    this.inventories = this.query(Queries.Inventories);
-
     this.world.on<InventoryEvent>('inventory-event', (e) => {
       const entity = this.inventories.all.find(
         (entity) => entity.id === e.entity

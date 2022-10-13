@@ -249,11 +249,7 @@ describe('Query', () => {
   describe('Query Evaluation', () => {
     it('updates system query results if an entity matches a query with the ONE condition', () => {
       class TestSystem extends System {
-        test!: Query;
-
-        onInit(): void {
-          this.test = this.query({ any: [TestComponentOne, TestComponentTwo] });
-        }
+        test = this.query({ any: [TestComponentOne, TestComponentTwo] });
       }
 
       world.registerSystem(TestSystem);
@@ -299,11 +295,7 @@ describe('Query', () => {
 
     it('updates system query results if an entity matches a query with the NOT condition', () => {
       class TestSystem extends System {
-        test!: Query;
-
-        onInit(): void {
-          this.test = this.query({ not: [TestComponentOne] });
-        }
+        test = this.query({ not: [TestComponentOne] });
       }
 
       world.registerSystem(TestSystem);
@@ -347,15 +339,11 @@ describe('Query', () => {
 
     it('updates system query results if an entity matches a query with the ALL condition', () => {
       class TestSystem extends System {
-        test!: Query;
-
-        onInit(): void {
-          this.test = this.query([
-            TestComponentOne,
-            TestComponentTwo,
-            TestComponentThree,
-          ]);
-        }
+        test = this.query([
+          TestComponentOne,
+          TestComponentTwo,
+          TestComponentThree,
+        ]);
       }
 
       world.registerSystem(TestSystem);
@@ -401,15 +389,11 @@ describe('Query', () => {
 
     it('updates system query results if an entity matches a query with multiple conditions', () => {
       class TestSystem extends System {
-        test!: Query;
-
-        onInit(): void {
-          this.test = this.query({
-            all: [TestComponentOne, TestComponentTwo],
-            any: [TestComponentThree, TestComponentFour],
-            not: [TestComponentFive, TestComponentSix],
-          });
-        }
+        test = this.query({
+          all: [TestComponentOne, TestComponentTwo],
+          any: [TestComponentThree, TestComponentFour],
+          not: [TestComponentFive, TestComponentSix],
+        });
       }
 
       world.registerSystem(TestSystem);

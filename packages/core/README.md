@@ -95,18 +95,14 @@ const BOX_SIZE = 10;
 
 class DrawSystem extends System {
   // A `System` can have many queries for entities, filtering by what components they have
-  context!: Query;
-  toDraw!: Query;
 
-  onInit() {
-    // we want to get the canvas context
-    this.context = this.query([CanvasContext]);
+  // we want to get the canvas context
+  context = this.query([CanvasContext]);
 
-    // we want to find entities with a Position and Color
-    this.toDraw = this.query({
-      all: [Position, Color],
-    });
-  }
+  // we want to find entities with a Position and Color
+  toDraw = this.query({
+    all: [Position, Color],
+  });
 
   // On each update, let's draw
   onUpdate() {
@@ -148,19 +144,15 @@ class DrawSystem extends System {
 ```ts
 class WalkSystem extends System {
   // query for walkers
-  walkers!: Query;
+  walkers = this.query({
+    all: [Position],
+  });
 
   // keep track of when our walkers should move again
   movementCountdown = WalkSystem.timeBetweenMovements;
 
   // our random walkers should move every 0.05s
   static timeBetweenMovements = 0.05;
-
-  onInit() {
-    this.walkers = this.query({
-      all: [Position],
-    });
-  }
 
   onUpdate(delta: number) {
     // count down until walkers should move again

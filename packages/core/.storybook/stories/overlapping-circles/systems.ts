@@ -15,13 +15,8 @@ const Queries = {
 };
 
 export class MovementSystem extends System {
-  entities: Query;
-  context: Query;
-
-  onInit() {
-    this.entities = this.query(Queries.MovingCircles);
-    this.context = this.query(Queries.Context);
-  }
+  entities = this.query(Queries.MovingCircles);
+  context = this.query(Queries.Context);
 
   onUpdate(delta: number) {
     const context = this.context.first!;
@@ -117,16 +112,10 @@ export class IntersectionSystem extends System {
 }
 
 export class Renderer extends System {
-  circles: Query;
-  intersectingCircles: Query;
-  context: Query;
-
-  onInit() {
-    this.circles = this.query(Queries.Circles);
-    this.intersectingCircles = this.query(Queries.Intersecting);
-    this.context = this.query(Queries.Context);
-  }
-
+  circles = this.query(Queries.Circles);
+  intersectingCircles = this.query(Queries.Intersecting);
+  context =  this.query(Queries.Context);
+  
   onUpdate() {
     const context = this.context.first!;
     let canvasComponent = context.get(CanvasContext);

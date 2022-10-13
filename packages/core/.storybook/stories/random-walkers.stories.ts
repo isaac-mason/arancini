@@ -90,18 +90,14 @@ class DrawSystem extends System {
 }
 
 class WalkSystem extends System {
-  walkers!: Query;
+  // query for walkers
+  walkers = this.query(Queries.WalkerPosition);
 
   // keep track of when our walkers should move again
   static timeBetweenMovements = 0.05;
 
   // our random walkers should move every 0.05s
   movementCountdown = WalkSystem.timeBetweenMovements;
-
-  onInit(): void {
-    // query for walkers
-    this.walkers = this.query(Queries.WalkerPosition);
-  }
   
   onUpdate(delta: number) {
     // count down until walkers should move again
@@ -123,11 +119,7 @@ class WalkSystem extends System {
 }
 
 class FlipSystem extends System {
-  walkers!: Query;
-
-  onInit(): void {
-    this.walkers = this.query(Queries.Color);
-  }
+  walkers = this.query(Queries.Color);
 
   onUpdate() {
     this.walkers.all.forEach((entity) => {

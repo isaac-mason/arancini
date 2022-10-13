@@ -51,13 +51,9 @@ describe('System', () => {
   test('Systems can create Queries for Entities based on Components', () => {
     // system with query for both TestComponentOne and TestComponentTwo
     class TestSystem extends System {
-      testQueryName!: Query;
-
-      onInit(): void {
-        this.testQueryName = this.query({
-          all: [TestComponentOne, TestComponentTwo],
-        });
-      }
+      testQueryName = this.query({
+        all: [TestComponentOne, TestComponentTwo],
+      });
     }
 
     world.registerSystem(TestSystem);
@@ -85,13 +81,9 @@ describe('System', () => {
 
   test('System Queries mainain seperate Query "added" and "removed" event arrays when multiple Systems have the same queries', () => {
     class TestSystemOne extends System {
-      testQueryName!: Query;
-
-      onInit(): void {
-        this.testQueryName = this.query({
-          all: [TestComponentOne, TestComponentTwo],
-        });
-      }
+      testQueryName = this.query({
+        all: [TestComponentOne, TestComponentTwo],
+      });
 
       onUpdate() {
         /* noop, but defined */
@@ -99,13 +91,9 @@ describe('System', () => {
     }
 
     class TestSystemTwo extends System {
-      testQueryName!: Query;
-
-      onInit(): void {
-        this.testQueryName = this.query({
-          all: [TestComponentOne, TestComponentTwo],
-        });
-      }
+      testQueryName = this.query({
+        all: [TestComponentOne, TestComponentTwo],
+      });
     }
 
     // register TestSystemOne
@@ -282,18 +270,10 @@ describe('System', () => {
     };
 
     class TestSystemOne extends System {
-      example!: Query;
-
-      onInit(): void {
-        this.example = this.query(description);
-      }
+      example = this.query(description);
     }
     class TestSystemTwo extends System {
-      example!: Query;
-
-      onInit(): void {
-        this.example = this.query(description);
-      }
+      example = this.query(description);
     }
 
     test('Systems can be removed, and queries will be removed if they are no longer used by any systems', () => {
