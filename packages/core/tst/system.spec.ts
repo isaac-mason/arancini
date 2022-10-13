@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { describe, it, expect } from '@jest/globals';
-import { Component, World, System, Query, Space } from '../src';
+import { Component, World, System, Space } from '../src';
 
 class TestComponentOne extends Component {}
 class TestComponentTwo extends Component {}
