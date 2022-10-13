@@ -1,5 +1,4 @@
 import { Query, QueryDescription } from './query';
-import { uniqueId } from './utils';
 import { World } from './world';
 
 export type SystemClass<T extends System = System> = {
@@ -49,11 +48,6 @@ export abstract class System {
   enabled = true;
 
   /**
-   * The id for the system
-   */
-  id = uniqueId();
-
-  /**
    * The World the system is in
    */
   world!: World;
@@ -68,7 +62,7 @@ export abstract class System {
     class: SystemClass;
 
     /**
-     * A map of query names to query descriptions
+     * A set of queries used by the system
      */
     queries: Set<Query>;
 
@@ -81,8 +75,13 @@ export abstract class System {
      * The order the system was inserted in
      */
     order: number;
+  } = {
+    queries: new Set(),
+    priority: 0,
+    order: 0,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  } = { queries: new Set(), priority: 0, order: 0, class: null! };
+    class: null!,
+  };
 
   /**
    * Logic for destruction of the system. Called on removing a System from the RECS.
