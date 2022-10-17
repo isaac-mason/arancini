@@ -23,9 +23,14 @@ export class SystemManager {
   systems: Map<SystemClass, System> = new Map();
 
   /**
-   * Systems sorted by priority and insertion order
+   * Systems sorted by priority and registration order
    */
   private sortedSystems: System[] = [];
+
+  /**
+   * Counter for the number of systems registered, used to give systems a registration order
+   */
+  private systemCounter = 0;
 
   /**
    * Whether the system manager has been initialised
@@ -50,9 +55,13 @@ export class SystemManager {
    */
   init(): void {
     this.initialised = true;
+
     for (const system of this.systems.values()) {
-      this.initialiseSystem(system);
+      system.onInit();
     }
+
+    this.sortedSystems = [...this.systems.values()];
+    this.sortSystems();
   }
 
   /**
@@ -76,7 +85,7 @@ export class SystemManager {
    */
   destroy(): void {
     for (const system of this.systems.values()) {
-      this.destroySystem(system);
+      system.onDestroy();
       this.systems.delete(system.__recs.class);
     }
   }
@@ -90,16 +99,19 @@ export class SystemManager {
       throw new Error(`System "${Clazz.name}" has already been registered`);
     }
 
+    this.systemCounter++;
+
     const system = new Clazz(this.world);
-    system.world = this.world;
     system.__recs.class = Clazz;
     system.__recs.priority = attributes?.priority ?? 0;
-    system.__recs.order = this.systems.size;
+    system.__recs.order = this.systemCounter;
 
     this.systems.set(Clazz, system);
 
     if (this.initialised) {
-      this.initialiseSystem(system);
+      system.onInit();
+      this.sortedSystems.push(system);
+      this.sortSystems();
     }
   }
 
@@ -114,23 +126,18 @@ export class SystemManager {
     }
 
     this.systems.delete(clazz);
+    this.sortedSystems = this.sortedSystems.filter(
+      (s) => s.__recs.class !== clazz
+    );
 
     system.__recs.queries.forEach((query: Query) => {
       this.world.queryManager.removeQuery(query);
     });
 
-    this.destroySystem(system);
-  }
-
-  private destroySystem(system: System) {
     system.onDestroy();
   }
 
-  private initialiseSystem(system: System) {
-    system.onInit();
-
-    this.sortedSystems.push(system);
-
+  private sortSystems(): void {
     this.sortedSystems.sort((a, b) => {
       return (
         // higher priority runs first

@@ -217,7 +217,7 @@ describe('System', () => {
       }).toThrowError();
     });
 
-    it('defaults to sorting systems by insertion order', () => {
+    it('defaults to sorting systems by registration order', () => {
       world
         .registerSystem(SystemOne)
         .registerSystem(SystemTwo)
@@ -265,23 +265,51 @@ describe('System', () => {
   });
 
   describe('System unregistration', () => {
-    const description = {
+    const systemUpdateFn = jest.fn();
+    class TestSystemWithOnUpdate extends System {
+      onUpdate(): void {
+        systemUpdateFn(TestSystemWithOnUpdate);
+      }
+    }
+
+    const testSystemQueryDescription = {
       all: [TestComponentOne],
     };
+    class TestSystemWithQuery extends System {
+      exampleQuery = this.query(testSystemQueryDescription);
+    }
+    class AnotherTestSystemWithQuery extends System {
+      exampleQuery = this.query(testSystemQueryDescription);
+    }
 
-    class TestSystemOne extends System {
-      example = this.query(description);
-    }
-    class TestSystemTwo extends System {
-      example = this.query(description);
-    }
+    test('Systems will not be updated after they have been unregistered', () => {
+      world.registerSystem(TestSystemWithOnUpdate);
+
+      expect(world.getSystems().map((s) => s.__recs.class)).toEqual([
+        TestSystemWithOnUpdate,
+      ]);
+
+      world.update();
+
+      expect(systemUpdateFn).toHaveBeenCalledTimes(1);
+      expect(systemUpdateFn).nthCalledWith(1, TestSystemWithOnUpdate);
+
+      world.unregisterSystem(TestSystemWithOnUpdate);
+
+      expect(systemUpdateFn).toHaveBeenCalledTimes(1);
+      expect(systemUpdateFn).nthCalledWith(1, TestSystemWithOnUpdate);
+    });
 
     test('Systems can be removed, and queries will be removed if they are no longer used by any systems', () => {
-      world.registerSystem(TestSystemOne);
-      const systemOne = world.getSystem(TestSystemOne) as TestSystemOne;
+      world.registerSystem(TestSystemWithQuery);
+      const systemOne = world.getSystem(
+        TestSystemWithQuery
+      ) as TestSystemWithQuery;
 
-      world.registerSystem(TestSystemTwo);
-      const systemTwo = world.getSystem(TestSystemTwo) as TestSystemTwo;
+      world.registerSystem(AnotherTestSystemWithQuery);
+      const systemTwo = world.getSystem(
+        AnotherTestSystemWithQuery
+      ) as AnotherTestSystemWithQuery;
 
       expect(
         world.queryManager.hasQuery({
@@ -308,13 +336,17 @@ describe('System', () => {
 
     test('Systems can be removed, and queries will not be removed if they are used standalone outside of systems', () => {
       // use the query outside of a system
-      const query = world.create.query(description);
+      const query = world.create.query(testSystemQueryDescription);
 
-      world.registerSystem(TestSystemOne);
-      const systemOne = world.getSystem(TestSystemOne) as TestSystemOne;
+      world.registerSystem(TestSystemWithQuery);
+      const systemOne = world.getSystem(
+        TestSystemWithQuery
+      ) as TestSystemWithQuery;
 
-      world.registerSystem(TestSystemTwo);
-      const systemTwo = world.getSystem(TestSystemTwo) as TestSystemTwo;
+      world.registerSystem(AnotherTestSystemWithQuery);
+      const systemTwo = world.getSystem(
+        AnotherTestSystemWithQuery
+      ) as AnotherTestSystemWithQuery;
 
       // assert the query exists
       expect(
