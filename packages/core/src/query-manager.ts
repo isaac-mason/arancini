@@ -103,21 +103,18 @@ export class QueryManager {
    */
   onEntityComponentChange(entity: Entity): void {
     for (const query of this.dedupedQueries.values()) {
-      const currentlyInQuery = query.entitySet.has(entity);
+      const entityInQuery = query.entitySet.has(entity);
 
-      const shouldBeInQuery = this.matchesQueryConditions(
-        query.bitSets,
-        entity
-      );
+      const matchesQuery = this.matchesQueryConditions(query.bitSets, entity);
 
-      if (shouldBeInQuery && !currentlyInQuery) {
+      if (matchesQuery && !entityInQuery) {
         query.entities.push(entity);
         query.entitySet.add(entity);
 
         for (const queryInstance of query.instances) {
           queryInstance.added.push(entity);
         }
-      } else if (!shouldBeInQuery && currentlyInQuery) {
+      } else if (!matchesQuery && entityInQuery) {
         const index = query.entities.indexOf(entity, 0);
         if (index !== -1) {
           query.entities.splice(index, 1);

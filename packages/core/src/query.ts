@@ -139,7 +139,7 @@ export class Query {
   /**
    * Clears the added and removed entity arrays.
    * Must be called manually for standalone Queries created with `world.query(...)`.
-   * Called automatically for Queries in Systems.
+   * Called automatically for Queries in Systems after the onUpdate method is called.
    */
   clearEvents(): void {
     this.added = [];
