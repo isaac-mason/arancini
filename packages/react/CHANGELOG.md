@@ -1,5 +1,19 @@
 # @recs/react
 
+## 0.0.12
+
+### Patch Changes
+
+- fec263a: Rename createWorld function to createECS
+- fec263a: Add optional parameter to createECS for providing an existing recs world
+- Updated dependencies [091bcfd]
+- Updated dependencies [c0878a6]
+- Updated dependencies [49cd9b6]
+- Updated dependencies [e31bd7d]
+- Updated dependencies [e31bd7d]
+- Updated dependencies [c0878a6]
+  - @recs/core@0.0.10
+
 ## 0.0.11
 
 ### Patch Changes

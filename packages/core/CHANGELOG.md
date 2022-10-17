@@ -1,5 +1,16 @@
 # @recs/core
 
+## 0.0.10
+
+### Patch Changes
+
+- 091bcfd: Remove redundant `id` property from System class
+- c0878a6: fix: don't call System `onUpdate` after unregistering a System
+- 49cd9b6: Simplify System query creation, add world as System constructor argument
+- e31bd7d: Refactor `QueryManager` `onEntityComponentChange` method
+- e31bd7d: Improve jsdoc for `Query` `clearEvents` method
+- c0878a6: Don't re-sort system update order before the world has been initialised
+
 ## 0.0.9
 
 ### Patch Changes
