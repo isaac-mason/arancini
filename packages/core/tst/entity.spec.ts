@@ -79,6 +79,15 @@ describe('Entity', () => {
       expect(entityTwo.has(TestComponentTwo)).toBeFalsy();
     });
 
+    it('should throw if adding a component to an entity that already has the component', () => {
+      const entity = space.create.entity();
+      entity.add(TestComponentOne);
+
+      expect(() => {
+        entity.add(TestComponentOne);
+      }).toThrowError();
+    });
+
     it('on re-adding a component to an entity, it will be newly constructed properly', () => {
       class TestComponentWithConstructParams extends Component {
         position!: { x: number; y: number };

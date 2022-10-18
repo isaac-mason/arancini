@@ -104,6 +104,12 @@ export class Entity {
     clazz: ComponentClass<T>,
     ...args: Parameters<T['construct']>
   ): T {
+    if (this.components.has(clazz)) {
+      throw new Error(
+        `Cannot add component ${clazz.name}, entity with id ${this.id} already has this component`
+      );
+    }
+
     // add the component to this entity
     const component = this.world.spaceManager.addComponentToEntity(
       this,
