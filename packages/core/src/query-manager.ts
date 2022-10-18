@@ -80,8 +80,7 @@ export class QueryManager {
     }
 
     const newQueryInstance = new Query(this.world, dedupeString);
-    newQueryInstance.all = dedupedQuery.entities;
-    newQueryInstance.added = [...dedupedQuery.entities];
+    newQueryInstance.entities = dedupedQuery.entities;
 
     dedupedQuery.instances.add(newQueryInstance);
 
@@ -112,7 +111,7 @@ export class QueryManager {
         query.entitySet.add(entity);
 
         for (const queryInstance of query.instances) {
-          queryInstance.added.push(entity);
+          queryInstance.onEntityAdded.emit(entity);
         }
       } else if (!matchesQuery && entityInQuery) {
         const index = query.entities.indexOf(entity, 0);
@@ -122,7 +121,7 @@ export class QueryManager {
         query.entitySet.delete(entity);
 
         for (const queryInstance of query.instances) {
-          queryInstance.removed.push(entity);
+          queryInstance.onEntityRemoved.emit(entity);
         }
       }
     }
@@ -141,7 +140,7 @@ export class QueryManager {
       dedupedQuery.entitySet.delete(entity);
 
       for (const queryInstance of dedupedQuery.instances) {
-        queryInstance.removed.push(entity);
+        queryInstance.onEntityRemoved.emit(entity);
       }
     }
   }
@@ -175,6 +174,8 @@ export class QueryManager {
     }
 
     dedupedQuery.instances.delete(query);
+    query.onEntityAdded.clear();
+    query.onEntityRemoved.clear();
 
     if (dedupedQuery.instances.size === 0) {
       this.dedupedQueries.delete(dedupedQuery.dedupeString);

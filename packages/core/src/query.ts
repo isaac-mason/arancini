@@ -1,5 +1,6 @@
 import { ComponentClass } from './component';
 import { Entity } from './entity';
+import { EventDispatcher } from './events/event-dispatcher';
 import { BitSet } from './utils/bit-set';
 import { World } from './world';
 
@@ -32,7 +33,7 @@ export type QueryBitSets = {
 /**
  * A Query for Entities with specified Components.
  *
- * Queries can contain a minimum of one and a maximum of three conditions, the `all`, `one`, and `not` QueryConditionType conditions.
+ * Queries can contain a minimum of one and a maximum of three conditions, the `entities`, `one`, and `not` QueryConditionType conditions.
  *
  * Queries can either be created as part of Systems, or they can be created standalone.
  *
@@ -77,7 +78,7 @@ export type QueryBitSets = {
  *   });
  *
  *   onUpdate() {
- *     this.exampleQueryName.all.forEach((entity) => console.log(entity));
+ *     this.exampleQueryName.entities.forEach((entity) => console.log(entity));
  *   }
  * }
  *
@@ -93,25 +94,30 @@ export class Query {
   /**
    * The current entities matched by the query
    */
-  all: Entity[] = [];
-
-  /**
-   * Entities added to the query.
-   * @see clearEvents
-   */
-  added: Entity[] = [];
-
-  /**
-   * Entities removed from the query.
-   * @see clearEvents
-   */
-  removed: Entity[] = [];
+  entities: Entity[] = [];
 
   /**
    * Returns the first entity within this archetype.
    * */
   get first(): Entity | undefined {
-    return this.all[0] || undefined;
+    return this.entities[0] || undefined;
+  }
+
+  /**
+   * Event dispatcher for when an Entity is added to the query
+   */
+  onEntityAdded = new EventDispatcher<Entity>();
+
+  /**
+   * Event dispatcher for when an Entity is removed from the query
+   */
+  onEntityRemoved = new EventDispatcher<Entity>();
+
+  /**
+   * Iterator for all entities matched by the query
+   */
+  [Symbol.iterator]() {
+    return this.entities[Symbol.iterator]();
   }
 
   /**
@@ -134,16 +140,6 @@ export class Query {
    */
   destroy(): void {
     this.world.queryManager.removeQuery(this);
-  }
-
-  /**
-   * Clears the added and removed entity arrays.
-   * Must be called manually for standalone Queries created with `world.query(...)`.
-   * Called automatically for Queries in Systems after the onUpdate method is called.
-   */
-  clearEvents(): void {
-    this.added = [];
-    this.removed = [];
   }
 
   /**

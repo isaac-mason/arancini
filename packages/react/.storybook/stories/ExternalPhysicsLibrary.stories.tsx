@@ -48,54 +48,40 @@ class Collider extends Component {
   }
 }
 
-class PhysicsSystemState extends Component {
+class PhysicsSystem extends System {
+  bodiesQuery = this.query([Collider]);
+  
   physicsWorld!: P2.World;
-  stepSize!: number;
   bodies!: Map<string, P2.Body>;
-
-  construct(params: { gravity?: [number, number]; stepSize?: number }) {
-    this.physicsWorld = new P2.World();
-    
-    if (params?.gravity) {
-      this.physicsWorld.gravity = params.gravity;
-    }
-
+  
+  onInit(): void {
+    this.physicsWorld = new P2.World({ gravity: [0, -9.81]});
     this.physicsWorld.addContactMaterial(boxGroundContactMaterial);
     this.physicsWorld.addContactMaterial(boxBoxContactMaterial);
 
-    this.stepSize = params.stepSize ?? 1 / 60;
-
     this.bodies = new Map();
-  }
-}
+    
+    this.bodiesQuery.onEntityAdded.subscribe((added) => {
+      const body = added.get(Collider).body;
+      this.bodies.set(added.id, body);
+      this.physicsWorld.addBody(body);
+    });
 
-class PhysicsSystem extends System {
-  systemStateQuery = this.query([PhysicsSystemState]);;
-  bodiesQuery = this.query([Collider]);
+    this.bodiesQuery.onEntityRemoved.subscribe((removed) => {
+      const body = this.bodies.get(removed.id)!;
+      this.bodies.delete(removed.id);
+      this.physicsWorld.removeBody(body);
+    });
+
+    for (const removed of this.bodiesQuery) {
+      
+    }
+  }
 
   onUpdate(delta: number) {
-    const state = this.systemStateQuery.first
-      ? this.systemStateQuery.first.find(PhysicsSystemState)
-      : undefined;
-    if (!state) return;
+    this.physicsWorld.step(1 / 60, delta, 30);
 
-    const { bodies, physicsWorld: world, stepSize } = state;
-
-    for (const added of this.bodiesQuery.added) {
-      const body = added.get(Collider).body;
-      bodies.set(added.id, body);
-      world.addBody(body);
-    }
-
-    for (const removed of this.bodiesQuery.removed) {
-      const body = bodies.get(removed.id)!;
-      world.removeBody(body);
-      bodies.delete(removed.id);
-    }
-
-    world.step(stepSize, delta, 30);
-
-    for (const entity of this.bodiesQuery.all) {
+    for (const entity of this.bodiesQuery) {
       const transform = entity.find(Transform);
       if (transform === undefined) continue;
 
@@ -107,7 +93,7 @@ class PhysicsSystem extends System {
 }
 
 const Renderer = () => {
-  const { all: entities } = R.useQuery([JSXElement, Transform]);
+  const { entities } = R.useQuery([JSXElement, Transform]);
 
   return (
     <>
@@ -123,18 +109,6 @@ const Renderer = () => {
     </>
   );
 };
-
-const Physics = () => (
-  <>
-    <R.System type={PhysicsSystem} />
-    <R.Entity>
-      <R.Component
-        type={PhysicsSystemState}
-        args={[{ gravity: [0, -9.81], stepSize: 1 / 60 }]}
-      />
-    </R.Entity>
-  </>
-);
 
 const Plane = () => (
   <R.Entity>
@@ -186,8 +160,8 @@ const App = () => {
       {/* render jsx components */}
       <Renderer />
 
-      {/* physics system and physics state */}
-      <Physics />
+      {/* physics system */}
+      <R.System type={PhysicsSystem} />
 
       {/* create the ground */}
       <Plane />

@@ -65,11 +65,9 @@ class DrawSystem extends System {
     const xOffset = context.width / 2;
     const yOffset = context.height / 2;
 
-    // the results of the `toDraw` query are available under
-    // `this.toDraw.all`
-    // We can also check `this.toDraw.added` and this.toDraw.removed`
+    // the results of the `toDraw` query are available in `this.toDraw.entities`
     // to get entities that have been matched and unmatched from the query
-    for (const entity of this.toDraw.all) {
+    for (const entity of this.toDraw) {
       // let's get the position of the random walker
       const { x, y } = entity.get(Position);
 
@@ -106,7 +104,7 @@ class WalkSystem extends System {
     // if it's time for entities to move again
     if (this.movementCountdown <= 0) {
       // move all walkers in a random direction
-      for (const entity of this.walkers.all) {
+      for (const entity of this.walkers) {
         const position = entity.get(Position)
         position.x = position.x + (Math.random() - 0.5) * 3;
         position.y = position.y + (Math.random() - 0.5) * 3;
@@ -122,7 +120,7 @@ class FlipSystem extends System {
   walkers = this.query(Queries.Color);
 
   onUpdate() {
-    this.walkers.all.forEach((entity) => {
+    for (const entity of this.walkers) {
       // small chance of changing color
       if (Math.random() >= 0.95) {
         if (entity.has(Blue)) {
@@ -133,7 +131,7 @@ class FlipSystem extends System {
           entity.add(Blue);
         }
       }
-    });
+    }
   }
 }
 

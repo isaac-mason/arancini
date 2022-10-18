@@ -15,7 +15,7 @@ const Queries = {
 };
 
 export class MovementSystem extends System {
-  entities = this.query(Queries.MovingCircles);
+  movingCircles = this.query(Queries.MovingCircles);
   context = this.query(Queries.Context);
 
   onUpdate(delta: number) {
@@ -25,7 +25,7 @@ export class MovementSystem extends System {
     let canvasHeight = context.get(CanvasContext).height;
     let multiplier = 0.5;
 
-    let entities = this.entities.all;
+    let entities = this.movingCircles.entities;
     for (let i = 0; i < entities.length; i++) {
       let entity = entities[i];
       let circle = entity.get(Circle);
@@ -59,14 +59,14 @@ export class MovementSystem extends System {
 }
 
 export class IntersectionSystem extends System {
-  entities!: Query;
+  circles!: Query;
 
   onInit() {
-    this.entities = this.query(Queries.Circles);
+    this.circles = this.query(Queries.Circles);
   }
 
   onUpdate() {
-    let entities = this.entities.all;
+    let entities = this.circles.entities;
 
     for (let i = 0; i < entities.length; i++) {
       let entity = entities[i];
@@ -100,7 +100,7 @@ export class IntersectionSystem extends System {
 
   onDestroy() {
     // Clean up interesection when stopping
-    let entities = this.entities.all;
+    let entities = this.circles.entities;
 
     for (let i = 0; i < entities.length; i++) {
       let entity = entities[i];
@@ -126,7 +126,7 @@ export class Renderer extends System {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    let circles = this.circles.all;
+    let circles = this.circles.entities;
     for (let i = 0; i < circles.length; i++) {
       let circle = circles[i].get(Circle);
 
@@ -144,7 +144,7 @@ export class Renderer extends System {
       ctx.stroke();
     }
 
-    let intersectingCircles = this.intersectingCircles.all;
+    let intersectingCircles = this.intersectingCircles.entities;
     for (let i = 0; i < intersectingCircles.length; i++) {
       let intersect = intersectingCircles[i].get(Intersecting);
       for (let j = 0; j < intersect.points.length; j++) {

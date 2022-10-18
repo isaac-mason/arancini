@@ -50,25 +50,11 @@ export type ComponentProps<T extends R.Component> = {
 };
 
 export const createECS = (existing?: R.World) => {
-  const queryRerenderHooks: Map<() => void, R.Query> = new Map();
-
-  class ReactQueryHookRerenderSystem extends R.System {
-    onUpdate() {
-      queryRerenderHooks.forEach((query, rerender) => {
-        if (query.added.length > 0 || query.removed.length > 0) {
-          rerender();
-        }
-        query.clearEvents();
-      });
-    }
-  }
-
   const worldContext = createContext(null! as WorldProviderContext);
   const spaceContext = createContext(null! as SpaceProviderContext);
   const entityContext = createContext(null! as EntityProviderContext);
 
   const world = existing ?? new R.World();
-  world.registerSystem(ReactQueryHookRerenderSystem, { priority: -Infinity });
 
   if (!existing) {
     world.init();
@@ -214,10 +200,15 @@ export const createECS = (existing?: R.World) => {
     const rerender = useRerender();
 
     useEffect(() => {
-      queryRerenderHooks.set(rerender, query);
+      query.onEntityAdded.subscribe(() => {
+        rerender();
+      });
+
+      query.onEntityRemoved.subscribe(() => {
+        rerender();
+      });
 
       return () => {
-        queryRerenderHooks.delete(rerender);
         query.destroy();
       };
     }, []);

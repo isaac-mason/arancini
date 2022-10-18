@@ -31,15 +31,7 @@ export type SystemClass<T extends System = System> = {
  *
  *   onUpdate(delta: number) {
  *     // do something with the query results!
- *
- *     // entities added since the last update
- *     console.log(this.queryName.added)
- *
- *     // entities removed since the last update
- *     console.log(this.queryName.removed)
- *
- *     // all entities currently matched
- *     console.log(this.queryName.all)
+ *     console.log(this.queryName.entities)
  *   }
  *
  *   onDestroy() {

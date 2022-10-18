@@ -45,7 +45,7 @@ class WalkingSystem extends RECS.System {
   walking = this.query([Transform, Walking]);
 
   onUpdate(delta: number) {
-    for (const walker of this.walking.all) {
+    for (const walker of this.walking) {
       const { group } = walker.get(Transform);
 
       group.position.x += (Math.random() - 0.5) * 2 * delta;
@@ -60,7 +60,7 @@ class WalkingSystem extends RECS.System {
 }
 
 const RendererSystem = () => {
-  const { all: entities } = R.useQuery([JSX]);
+  const { entities } = R.useQuery([JSX]);
   return (
     <>
       {entities.map((entity) => {

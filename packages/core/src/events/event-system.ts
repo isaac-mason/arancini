@@ -1,4 +1,4 @@
-import { uniqueId } from '../utils/uniqueId';
+import { EventDispatcher, EventSubscription } from './event-dispatcher';
 
 /**
  * An event that can be broadcast and consumed by entities and components
@@ -6,14 +6,6 @@ import { uniqueId } from '../utils/uniqueId';
 export interface Event {
   topic: string;
 }
-
-/**
- * An event subscription
- */
-export type EventSubscription = {
-  id: string;
-  unsubscribe: () => void;
-};
 
 /**
  * An event handler that takes an event or a type that extends the event type
@@ -36,14 +28,14 @@ export type EventSystemParams = {
  */
 export class EventSystem {
   /**
-   * The events that will be processed on the next update
+   * The events that will be processed on the next update, if the event system is queued
    */
   private buffer: Event[] = [];
 
   /**
-   * The event handlers
+   * The event dispatchers
    */
-  private handlers: Map<string, Map<string, EventHandler<Event>>> = new Map();
+  private dispatchers: Map<string, EventDispatcher<never>> = new Map();
 
   /**
    * If true, events will be queued and processed on calling `.tick()`. If false, events will be processed immediately on emit.
@@ -79,20 +71,14 @@ export class EventSystem {
     eventName: string,
     handler: EventHandler<E>
   ): EventSubscription {
-    const id = uniqueId();
-    let eventHandlers = this.handlers.get(eventName);
+    let eventDispatcher = this.dispatchers.get(eventName);
 
-    if (eventHandlers === undefined) {
-      eventHandlers = new Map<string, EventHandler<Event>>();
-      this.handlers.set(eventName, eventHandlers);
+    if (eventDispatcher === undefined) {
+      eventDispatcher = new EventDispatcher();
+      this.dispatchers.set(eventName, eventDispatcher);
     }
 
-    eventHandlers.set(id, handler as EventHandler<Event>);
-
-    return {
-      id,
-      unsubscribe: () => this.removeHandler(eventName, id),
-    };
+    return eventDispatcher.subscribe(handler);
   }
 
   /**
@@ -101,9 +87,9 @@ export class EventSystem {
    * @param handlerId the id of the event handler
    */
   removeHandler(eventName: string, handlerId: string): void {
-    const eventHandlers = this.handlers.get(eventName);
+    const eventHandlers = this.dispatchers.get(eventName);
     if (eventHandlers !== undefined) {
-      eventHandlers.delete(handlerId);
+      eventHandlers.unsubscribe(handlerId);
     }
   }
 
@@ -124,7 +110,7 @@ export class EventSystem {
    * Resets the event system
    */
   reset(): void {
-    this.handlers.clear();
+    this.dispatchers.clear();
     this.buffer = [];
   }
 
@@ -133,9 +119,9 @@ export class EventSystem {
    * @param event the event to process
    */
   private process(event: Event): void {
-    const eventHandlers = this.handlers.get(event.topic);
-    if (eventHandlers !== undefined) {
-      eventHandlers.forEach((handler: EventHandler<Event>) => handler(event));
+    const dispatcher = this.dispatchers.get(event.topic);
+    if (dispatcher !== undefined) {
+      dispatcher.emit(event as never);
     }
   }
 }

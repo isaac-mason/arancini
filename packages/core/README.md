@@ -116,10 +116,8 @@ class DrawSystem extends System {
     const xOffset = context.width / 2;
     const yOffset = context.height / 2;
 
-    // the results of the `toDraw` query are available under `this.toDraw.all`
-    // We can also check `this.toDraw.added` and this.toDraw.removed` to get
-    // entities that have been added and remove since the last system update.
-    for (const entity of this.toDraw.all) {
+    // the results of the `toDraw` query are available under `this.toDraw.entities`
+    for (const entity of this.toDraw.entities) {
       // let's get the position of the random walker
       const { x, y } = entity.get(Position);
 
@@ -161,7 +159,7 @@ class WalkSystem extends System {
     // if it's time for entities to move again
     if (this.movementCountdown <= 0) {
       // move all walkers in a random direction
-      for (const entity of this.walkers.all) {
+      for (const entity of this.walkers.entities) {
         const position = entity.get(Position)
         position.x = position.x + (Math.random() - 0.5) * 3;
         position.y = position.y + (Math.random() - 0.5) * 3;

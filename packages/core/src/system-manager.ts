@@ -73,9 +73,6 @@ export class SystemManager {
     for (const system of this.sortedSystems.values()) {
       if (system.enabled) {
         system.onUpdate(delta, time);
-        for (const query of system.__recs.queries) {
-          query.clearEvents();
-        }
       }
     }
   }

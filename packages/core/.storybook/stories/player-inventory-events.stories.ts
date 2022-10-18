@@ -25,7 +25,7 @@ class InventorySystem extends System {
 
   onInit(): void {
     this.world.on<InventoryEvent>('inventory-event', (e) => {
-      const entity = this.inventories.all.find(
+      const entity = this.inventories.entities.find(
         (entity) => entity.id === e.entity
       );
 

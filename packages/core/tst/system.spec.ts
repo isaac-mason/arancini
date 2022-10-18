@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { describe, it, expect } from '@jest/globals';
-import { Component, World, System, Space } from '../src';
+import { Component, World, System, Space, Entity } from '../src';
 
 class TestComponentOne extends Component {}
 class TestComponentTwo extends Component {}
@@ -50,10 +50,25 @@ describe('System', () => {
 
   test('Systems can create Queries for Entities based on Components', () => {
     // system with query for both TestComponentOne and TestComponentTwo
+    const onAddedFn = jest.fn();
+    const onRemovedFn = jest.fn();
     class TestSystem extends System {
-      testQueryName = this.query({
+      testQuery = this.query({
         all: [TestComponentOne, TestComponentTwo],
       });
+
+      onInit(): void {
+        this.testQuery.onEntityAdded.subscribe((e) => this.onAdded(e));
+        this.testQuery.onEntityRemoved.subscribe((e) => this.onRemoved(e));
+      }
+
+      onAdded(entity: Entity): void {
+        onAddedFn(entity);
+      }
+
+      onRemoved(entity: Entity): void {
+        onRemovedFn(entity);
+      }
     }
 
     world.registerSystem(TestSystem);
@@ -64,9 +79,9 @@ describe('System', () => {
     entity.add(TestComponentOne);
     entity.add(TestComponentTwo);
 
-    expect(system.testQueryName.added.length).toBe(1);
-    expect(system.testQueryName.removed.length).toBe(0);
-    expect(system.testQueryName.all.length).toBe(1);
+    expect(onAddedFn.mock.calls.length).toBe(1);
+    expect(onRemovedFn.mock.calls.length).toBe(0);
+    expect(system.testQuery.entities.length).toBe(1);
 
     // update, clearing added and removed arrays
     world.update();
@@ -74,57 +89,9 @@ describe('System', () => {
     // remove component, assert removal is reflected in the query
     entity.remove(TestComponentOne);
 
-    expect(system.testQueryName.all.length).toBe(0);
-    expect(system.testQueryName.removed.length).toBe(1);
-    expect(system.testQueryName.all.length).toBe(0);
-  });
-
-  test('System Queries mainain seperate Query "added" and "removed" event arrays when multiple Systems have the same queries', () => {
-    class TestSystemOne extends System {
-      testQueryName = this.query({
-        all: [TestComponentOne, TestComponentTwo],
-      });
-
-      onUpdate() {
-        /* noop, but defined */
-      }
-    }
-
-    class TestSystemTwo extends System {
-      testQueryName = this.query({
-        all: [TestComponentOne, TestComponentTwo],
-      });
-    }
-
-    // register TestSystemOne
-    world.registerSystem(TestSystemOne);
-
-    const testSystemOne = world.getSystem(TestSystemOne) as TestSystemOne;
-
-    // create entity that matches the query in both systems
-    const entity = space.create.entity();
-    entity.add(TestComponentOne);
-    entity.add(TestComponentTwo);
-
-    // entity should be in TestSystemOne query
-    expect(testSystemOne.testQueryName.added.length).toBe(1);
-    expect(testSystemOne.testQueryName.removed.length).toBe(0);
-    expect(testSystemOne.testQueryName.all.length).toBe(1);
-
-    // update, should clear added and removed for TestSystemOne
-    world.update();
-    expect(testSystemOne.testQueryName.added.length).toBe(0);
-    expect(testSystemOne.testQueryName.removed.length).toBe(0);
-    expect(testSystemOne.testQueryName.all.length).toBe(1);
-
-    // register TestSystemTwo
-    world.registerSystem(TestSystemTwo);
-    const testSystemTwo = world.getSystem(TestSystemTwo) as TestSystemTwo;
-
-    // TestSystemTwo should have 1 entity in added
-    expect(testSystemTwo.testQueryName.added.length).toBe(1);
-    expect(testSystemTwo.testQueryName.removed.length).toBe(0);
-    expect(testSystemTwo.testQueryName.all.length).toBe(1);
+    expect(system.testQuery.entities.length).toBe(0);
+    expect(onAddedFn.mock.calls.length).toBe(1);
+    expect(onRemovedFn.mock.calls.length).toBe(1);
   });
 
   test('Systems will have onInit, onUpdate, and onDestroy lifecycle methods called', () => {

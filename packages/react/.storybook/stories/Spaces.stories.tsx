@@ -32,10 +32,10 @@ const R3FStepper = () => {
 };
 
 const Renderer = () => {
-  const entities = R.useQuery([SpaceIdText]);
+  const spaceText = R.useQuery([SpaceIdText]);
   return (
     <>
-      {entities.all.map((entity) => (
+      {spaceText.entities.map((entity) => (
         <group key={entity.id}>
           {entity.get(SpaceIdText).jsx}
         </group>
