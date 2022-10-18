@@ -24,11 +24,11 @@ export const WORLD_DEFAULT_SPACE_ID = '__recs_default_world_space';
  * world.init();
  *
  * // update the world without specifying time elapsed
- * // (delta in Components and Systems will be 0)
+ * // (Systems will be called with a delta of 0)
  * world.update();
  *
  * // update the world with a specified time elapsed
- * // (delta in Components and Systems will be set to this value)
+ * // (Systems will be called with a delta of 0.1)
  * world.update(0.1);
  *
  * // subscribe to a world event
@@ -170,7 +170,6 @@ export class World {
    */
   update(delta = 0): void {
     this.time += delta;
-    this.spaceManager.updateComponents(delta, this.time);
     this.systemManager.update(delta, this.time);
     this.spaceManager.recycle();
   }
@@ -217,7 +216,6 @@ export class World {
    * Registers a Component class. Must be called before using a Component.
    * @param component the Component class.
    * @returns the World, for chaining
-   * @todo pool configuration - initial pool size, target size
    */
   registerComponent(component: ComponentClass): World {
     this.componentRegistry.registerComponent(component);

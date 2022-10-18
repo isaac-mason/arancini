@@ -6,8 +6,6 @@ import * as P2 from 'p2-es';
 import { Group } from 'three';
 import { Repeat } from 'timeline-composer';
 
-// todo - collision events
-
 const boxMaterial = new P2.Material();
 const groundMaterial = new P2.Material();
 

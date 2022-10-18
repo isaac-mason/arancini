@@ -35,9 +35,9 @@ React glue for `@recs/core`
 
 ## Introduction
 
-As mentioned above, `recs` is _kind-of_ an Entity Component System. It's structure was inspired by how SimonDev structures games in his YouTube tutorial videos. If you haven't his videos before, [check them out](https://www.youtube.com/channel/UCEwhtpXrg5MmwlH04ANpL8A)!
+As mentioned above, `recs` is an object based Entity Component System. You can use `recs` to structure games and other demanding applications.
 
-You can use `recs` as _~more_ of a pure ECS with data-only `Components` belonging to `Entities` that are managed by `Systems` with `Queries`. You can also optionally add behavior to Components for unity-like Game Objects.
+If you don't know what an Entity Component System is, have a wikipedia article: https://en.wikipedia.org/wiki/Entity_component_system
 
 ## Getting Started
 

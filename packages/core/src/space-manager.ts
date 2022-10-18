@@ -3,7 +3,7 @@ import type { Entity } from './entity';
 import { ComponentPool, EntityPool } from './pools';
 import type { SpaceParams } from './space';
 import { Space } from './space';
-import { isSubclassMethodOverridden, uniqueId } from './utils';
+import { uniqueId } from './utils';
 import { World } from './world';
 
 export type EntityBuilder = {
@@ -42,11 +42,6 @@ export class SpaceManager {
    * Entities that need queries recycling
    */
   private entitiesToRecycle: Entity[] = [];
-
-  /**
-   * A map of ids to update functions for all components
-   */
-  private componentsToUpdate: Map<string, Component> = new Map();
 
   /**
    * The World the entity manager is part of
@@ -219,7 +214,6 @@ export class SpaceManager {
   removeComponentFromEntity(entity: Entity, component: Component): void {
     component.onDestroy();
 
-    this.componentsToUpdate.delete(component.id);
     entity.components.delete(component.__recs.class);
     entity.componentsBitSet.remove(component.__recs.classIndex);
 
@@ -233,21 +227,6 @@ export class SpaceManager {
    */
   initialiseComponent(component: Component): void {
     component.onInit();
-
-    if (isSubclassMethodOverridden(component.__recs.class, 'onUpdate')) {
-      this.componentsToUpdate.set(component.id, component);
-    }
-  }
-
-  /**
-   * Run update `onUpdate` methods for all components that have them defined
-   * @param delta the time elapsed in seconds
-   * @param time the current time in seconds
-   */
-  updateComponents(delta: number, time: number): void {
-    for (const component of this.componentsToUpdate.values()) {
-      component.onUpdate(delta, time);
-    }
   }
 
   /**

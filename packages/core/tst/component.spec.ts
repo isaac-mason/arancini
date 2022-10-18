@@ -35,80 +35,28 @@ describe('Components', () => {
       expect(onInit).toBeCalledTimes(1);
     });
 
-    it('will call component onInit, onUpdate, and onDestroy methods if they have been extended', () => {
+    it('will call component onInit and onDestroy methods', () => {
       const componentInitJestFn = jest.fn();
-      const componentUpdateJestFn = jest.fn();
       const componentDestroyJestFn = jest.fn();
 
       class TestComponentOne extends Component {
-        onDestroy(): void {
-          componentDestroyJestFn();
-        }
-
         onInit(): void {
           componentInitJestFn();
         }
 
-        onUpdate(delta: number, time: number): void {
-          componentUpdateJestFn(delta, time);
+        onDestroy(): void {
+          componentDestroyJestFn();
         }
       }
 
-      // onInit
       const entity = space.create.entity();
       entity.add(TestComponentOne);
       expect(world.initialised).toBe(true);
       expect(componentInitJestFn).toHaveBeenCalledTimes(1);
 
-      // onUpdate
-      const delta = 100;
-      world.update(delta);
-      world.update(delta);
-
-      expect(componentUpdateJestFn).toHaveBeenCalledTimes(2);
-      expect(componentUpdateJestFn.mock.calls[0][0]).toBe(delta);
-      expect(componentUpdateJestFn.mock.calls[0][1]).toBe(delta);
-      expect(componentUpdateJestFn.mock.calls[1][0]).toBe(delta);
-      expect(componentUpdateJestFn.mock.calls[1][1]).toBe(delta * 2);
-
       entity.destroy();
-      world.update(delta);
-      expect(componentUpdateJestFn).toHaveBeenCalledTimes(2);
+      world.update(0);
       expect(componentDestroyJestFn).toHaveBeenCalledTimes(1);
-    });
-
-    it('will not call component onUpdate method on world update if it has not been extended', () => {
-      const componentInitJestFn = jest.fn();
-      const componentUpdateJestFn = jest.fn();
-      const componentDestroyJestFn = jest.fn();
-
-      class MockComponent {
-        onDestroy(): void {
-          componentDestroyJestFn();
-        }
-
-        onInit(): void {
-          componentInitJestFn();
-        }
-
-        onUpdate(): void {
-          componentUpdateJestFn();
-        }
-      }
-
-      class MockComponentExtendedClass extends MockComponent {
-        construct() {}
-      }
-
-      world.registerComponent(MockComponent as never);
-      world.registerComponent(MockComponentExtendedClass as never);
-
-      const entity = space.create.entity();
-      entity.add(MockComponentExtendedClass as never);
-
-      world.update();
-
-      expect(componentUpdateJestFn).toHaveBeenCalledTimes(0);
     });
   });
 

@@ -1,6 +1,7 @@
 import { Query } from './query';
 import { World } from './world';
 import { System, SystemClass } from './system';
+import { isSubclassMethodOverridden } from './utils';
 
 export type SystemAttributes = {
   priority?: number;
@@ -60,7 +61,6 @@ export class SystemManager {
       system.onInit();
     }
 
-    this.sortedSystems = [...this.systems.values()];
     this.sortSystems();
   }
 
@@ -105,10 +105,19 @@ export class SystemManager {
 
     this.systems.set(Clazz, system);
 
+    const hasOnUpdate = isSubclassMethodOverridden(Clazz, 'onUpdate');
+
+    if (hasOnUpdate) {
+      this.sortedSystems.push(system);
+    }
+
     if (this.initialised) {
       system.onInit();
-      this.sortedSystems.push(system);
-      this.sortSystems();
+
+      if (hasOnUpdate) {
+        // if the system manager is not initialised, systems will be sorted on initialisation
+        this.sortSystems();
+      }
     }
   }
 

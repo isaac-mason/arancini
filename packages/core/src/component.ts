@@ -8,13 +8,9 @@ export type ComponentClass<T extends Component | Component = Component> = {
 };
 
 /**
- * Components can have both data and behavior, and belong to a single Entity.
+ * Components in recs implement the abstract class `Component`, and can have any properties and methods. A component, belongs to a single Entity.
  *
- * If you are looking to use recs as more of a traditional ECS, Components should only contain data. If the `onUpdate` method is not overridden, the method will not be executed in world updates.
- *
- * The `onUpdate` method is only recommended for use on Components that will not have many instances, for example, player controller Components.
- *
- * A constructor should not be added to classes extending `Component`, as Component objects are reused. See the documentation for the `construct` method for initializing properties.
+ * Component objects are reused. See the documentation for the `construct` method for initializing properties.
  *
  * ```ts
  * import { Component, World } from "@recs/core";
@@ -36,11 +32,6 @@ export type ComponentClass<T extends Component | Component = Component> = {
  *
  *   onInit() {
  *     // called on component init
- *   }
- *
- *   onUpdate(delta: number, currentTime: number) {
- *     // called on component updates
- *     // if this method is not overridden, it will not be executed
  *   }
  *
  *   onDestroy() {
@@ -115,7 +106,7 @@ export abstract class Component {
    * which will be executed as part of component reuse to return it to the starting state.
    *
    * The recommended way to handle this in TypeScript is to use the not-null operator for added properties, acting as a 'late-init' syntax for properties.
-   * This is safe as the `construct` method will always be run before `onUpdate` and `onDestroy`, and the component will not be accessible by system queries until `construct` has run.
+   * This is safe as the `construct` method will always be run before `onInit` and `onDestroy`, and the component will not be accessible by system queries until `construct` has run.
    * For example:
    *
    * ```ts
@@ -126,7 +117,7 @@ export abstract class Component {
    *     this.exampleProperty = 1; // here we initialise the value of exampleProperty
    *   }
    *
-   *   onUpdate(): void {
+   *   onInit(): void {
    *     // because we used the not-null operator `!:` the type of `this.exampleProperty` here will be `number`, as opposed to `number | undefined`
    *     this.exampleProperty += 1;
    *   }
@@ -145,12 +136,4 @@ export abstract class Component {
    * Initialisation logic
    */
   onInit(): void {}
-
-  /**
-   * Update logic for the component
-   * If this method is not implemented in a component it will not be added to the update job pool
-   * @param _delta the time since the last update for this component in seconds
-   * @param _time the current time in seconds
-   */
-  onUpdate(_delta: number, _time: number) {}
 }
