@@ -9,7 +9,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "storybook": "start-storybook -p 6006",
+    "storybook": "start-storybook -p 6008",
     "build-storybook": "build-storybook"
   },
   "devDependencies": {

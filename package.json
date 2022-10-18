@@ -9,9 +9,11 @@
     "test": "(cd packages/core && yarn test)",
     "change": "yarn changeset",
     "version": "yarn changeset version",
-    "release": "yarn build && yarn test && changeset publish"
+    "release": "yarn build && yarn test && changeset publish",
+    "storybook": "concurrently \"cd ./packages/core && yarn storybook\" \"cd ./packages/react && yarn storybook\""
   },
   "devDependencies": {
-    "@changesets/cli": "^2.23.0"
+    "@changesets/cli": "^2.23.0",
+    "concurrently": "^7.4.0"
   }
 }
