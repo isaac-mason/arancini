@@ -216,11 +216,6 @@ export const createECS = (existing?: R.World) => {
     return query;
   };
 
-  const useWorld = () => {
-    const { world: worldInstance } = useContext(worldContext);
-    return worldInstance;
-  };
-
   return {
     World,
     Space,
@@ -228,7 +223,6 @@ export const createECS = (existing?: R.World) => {
     Entity,
     Component,
     useQuery,
-    useWorld,
     step,
     world,
   };
