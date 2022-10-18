@@ -1,3 +1,3 @@
 export * from './bit-set';
 export * from './is-subclass-method-overriden';
-export * from './uniqueId';
+export * from './unique-id';
