@@ -22,8 +22,8 @@ class MovementSystem extends System {
   }
 
   onUpdate() {
-    for (let i = 0; i < this.movement.all.length; i++) {
-      const e = this.movement.all[i];
+    for (let i = 0; i < this.movement.entities.length; i++) {
+      const e = this.movement.entities[i];
 
       const velocity = e.get(Velocity);
       const position = e.get(Position);
