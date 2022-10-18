@@ -1,5 +1,14 @@
 # @recs/react
 
+## 0.0.13
+
+### Patch Changes
+
+- Updated dependencies [ef5036a]
+- Updated dependencies [d2cdfdb]
+- Updated dependencies [ef5036a]
+  - @recs/core@0.0.11
+
 ## 0.0.12
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @recs/core
 
+## 0.0.11
+
+### Patch Changes
+
+- ef5036a: Rename Query 'all' array to 'entities'
+- d2cdfdb: Remove Component 'onUpdate' method. If this is desired, it can be implemented in user-land with a System that calls a method on a Component.
+- ef5036a: Remove Query 'added' and 'removed' arrays, add onEntityAdded and onEntityRemoved event dispatchers
+
 ## 0.0.10
 
 ### Patch Changes
