@@ -48,27 +48,27 @@ export const recs = {
     return this.space.create.entity();
   },
   addPositionComponent(entity) {
-      entity.add(Position);
+    entity.add(Position);
   },
   addVelocityComponent(entity) {
-      entity.add(Velocity);
+    entity.add(Velocity);
   },
   removePositionComponent(entity) {
-      entity.remove(Position);
+    entity.remove(Position);
   },
   removeVelocityComponent(entity) {
-      entity.remove(Velocity);
+    entity.remove(Velocity);
   },
   destroyEntity(entity) {
-      entity.destroy();
+    entity.destroy();
   },
   cleanup() {
-      this.world.destroy();
+    this.world.destroy();
   },
   updateMovementSystem() {
-      this.world.update();
+    this.world.update();
   },
   getMovementSystemUpdateCount() {
-      return updateCount;
-  }
+    return updateCount;
+  },
 };
