@@ -6,7 +6,7 @@
   ],
   "scripts": {
     "build": "(cd packages/core && yarn build) && (cd packages/react && yarn build)",
-    "test": "(cd packages/core && yarn test)",
+    "test": "(cd packages/core && yarn test) && (cd packages/react && yarn test)",
     "change": "yarn changeset",
     "version": "yarn changeset version",
     "release": "yarn build && yarn test && changeset publish",
