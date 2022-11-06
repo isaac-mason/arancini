@@ -2,8 +2,7 @@ import { OrbitControls } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as RECS from '@recs/core';
 import React from 'react';
-import * as THREE from 'three';
-import { Vector3Tuple } from 'three';
+import { Object3D } from 'three';
 import { createECS } from '../../src';
 import { Setup } from '../Setup';
 
@@ -21,60 +20,33 @@ const R3FStepper = () => {
   return null;
 };
 
-class Walking extends RECS.Component {}
+class WalkingComponent extends RECS.Component {}
 
-class Transform extends RECS.Component {
-  group!: THREE.Group;
+class Object3DComponent extends RECS.Component {
+  object3D!: THREE.Object3D;
 
-  construct(props: { position?: Vector3Tuple; rotation?: Vector3Tuple }) {
-    this.group = new THREE.Group();
-    this.group.position.set(...(props.position ?? [0, 0, 0]));
-    this.group.rotation.set(...(props.rotation ?? [0, 0, 0]));
-  }
-}
-
-class JSX extends RECS.Component {
-  jsx!: JSX.Element;
-
-  construct(jsx: JSX.Element): void {
-    this.jsx = jsx;
+  construct(object3D: THREE.Object3D): void {
+    this.object3D = object3D;
   }
 }
 
 class WalkingSystem extends RECS.System {
-  walking = this.query([Transform, Walking]);
+  walking = this.query([Object3DComponent, WalkingComponent]);
 
   onUpdate(delta: number) {
     for (const walker of this.walking) {
-      const { group } = walker.get(Transform);
+      const { object3D } = walker.get(Object3DComponent);
 
-      group.position.x += (Math.random() - 0.5) * 2 * delta;
-      group.position.y += (Math.random() - 0.5) * 2 * delta;
-      group.position.z += (Math.random() - 0.5) * 2 * delta;
+      object3D.position.x += (Math.random() - 0.5) * 2 * delta;
+      object3D.position.y += (Math.random() - 0.5) * 2 * delta;
+      object3D.position.z += (Math.random() - 0.5) * 2 * delta;
 
-      group.rotation.x += (Math.random() - 0.5) * 2 * delta;
-      group.rotation.y += (Math.random() - 0.5) * 2 * delta;
-      group.rotation.z += (Math.random() - 0.5) * 2 * delta;
+      object3D.rotation.x += (Math.random() - 0.5) * 2 * delta;
+      object3D.rotation.y += (Math.random() - 0.5) * 2 * delta;
+      object3D.rotation.z += (Math.random() - 0.5) * 2 * delta;
     }
   }
 }
-
-const RendererSystem = () => {
-  const { entities } = R.useQuery([JSX]);
-  return (
-    <>
-      {entities.map((entity) => {
-        const { jsx } = entity.get(JSX);
-        const { group } = entity.get(Transform);
-        return (
-          <primitive key={entity.id} object={group}>
-            {jsx}
-          </primitive>
-        );
-      })}
-    </>
-  );
-};
 
 const App = () => {
   return (
@@ -86,39 +58,29 @@ const App = () => {
       <R.Space>
         {Array.from({ length: 10 }).map((_, idx) => (
           <R.Entity key={idx}>
-            {/* initial position */}
-            <R.Component
-              type={Transform}
-              args={[
-                {
-                  position: [
-                    (Math.random() - 0.5) * 4,
-                    (Math.random() - 0.5) * 4,
-                    (Math.random() - 0.5) * 4,
-                  ],
-                },
-              ]}
-            />
-
             {/* how the walker should be displayed */}
-            <R.Component type={JSX}>
-              <mesh>
+            <R.Component type={Object3DComponent}>
+              <mesh
+                // initial position
+                position={[
+                  (Math.random() - 0.5) * 4,
+                  (Math.random() - 0.5) * 4,
+                  (Math.random() - 0.5) * 4,
+                ]}
+              >
                 <boxBufferGeometry args={[1, 1, 1]} />
                 <meshNormalMaterial />
               </mesh>
             </R.Component>
 
             {/* tag component */}
-            <R.Component type={Walking} />
+            <R.Component type={WalkingComponent} />
           </R.Entity>
         ))}
       </R.Space>
 
       {/* class system to move the walkers */}
       <R.System type={WalkingSystem} />
-
-      {/* component system to render the walkers */}
-      <RendererSystem />
 
       <OrbitControls />
     </>
@@ -129,9 +91,7 @@ export const Example = () => {
   return (
     <>
       <Setup cameraPosition={[0, 0, -10]}>
-        <R.World>
-          <App />
-        </R.World>
+        <App />
       </Setup>
     </>
   );

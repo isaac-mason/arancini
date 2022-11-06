@@ -22,23 +22,15 @@ const R3FStepper = () => {
   return null;
 };
 
-class Transform extends Component {
-  group!: Group;
+class Object3DComponent extends Component {
+  object3D!: THREE.Object3D;
 
-  construct() {
-    this.group = new Group();
+  construct(object3D: THREE.Object3D) {
+    this.object3D = object3D;
   }
 }
 
-class JSXElement extends Component {
-  jsx!: JSX.Element | JSX.Element[];
-
-  construct(jsx: JSX.Element | JSX.Element[]) {
-    this.jsx = jsx;
-  }
-}
-
-class Collider extends Component {
+class ColliderComponent extends Component {
   body!: P2.Body;
 
   construct(body: () => P2.Body) {
@@ -47,7 +39,7 @@ class Collider extends Component {
 }
 
 class PhysicsSystem extends System {
-  bodiesQuery = this.query([Collider]);
+  bodiesQuery = this.query([ColliderComponent]);
   
   physicsWorld!: P2.World;
   bodies!: Map<string, P2.Body>;
@@ -59,13 +51,13 @@ class PhysicsSystem extends System {
 
     this.bodies = new Map();
     
-    this.bodiesQuery.onEntityAdded.subscribe((added) => {
-      const body = added.get(Collider).body;
+    this.bodiesQuery.onEntityAdded.add((added) => {
+      const body = added.get(ColliderComponent).body;
       this.bodies.set(added.id, body);
       this.physicsWorld.addBody(body);
     });
 
-    this.bodiesQuery.onEntityRemoved.subscribe((removed) => {
+    this.bodiesQuery.onEntityRemoved.add((removed) => {
       const body = this.bodies.get(removed.id)!;
       this.bodies.delete(removed.id);
       this.physicsWorld.removeBody(body);
@@ -80,38 +72,20 @@ class PhysicsSystem extends System {
     this.physicsWorld.step(1 / 60, delta, 30);
 
     for (const entity of this.bodiesQuery) {
-      const transform = entity.find(Transform);
-      if (transform === undefined) continue;
+      const object3DComponent = entity.find(Object3DComponent);
+      if (object3DComponent === undefined) continue;
 
-      const { body } = entity.get(Collider);
-      transform.group.position.set(body.position[0], body.position[1], 0);
-      transform.group.rotation.set(0, 0, body.angle)
+      const { body } = entity.get(ColliderComponent);
+      object3DComponent.object3D.position.set(body.position[0], body.position[1], 0);
+      object3DComponent.object3D.rotation.set(0, 0, body.angle)
     }
   }
 }
 
-const Renderer = () => {
-  const { entities } = R.useQuery([JSXElement, Transform]);
-
-  return (
-    <>
-      {entities.map((entity) => {
-        const { jsx } = entity.get(JSXElement);
-        const { group } = entity.get(Transform);
-        return (
-          <primitive key={entity.id} object={group}>
-            {jsx}
-          </primitive>
-        );
-      })}
-    </>
-  );
-};
-
 const Plane = () => (
   <R.Entity>
     <R.Component
-      type={Collider}
+      type={ColliderComponent}
       args={[
         () => {
           const plane = new P2.Plane({ material: groundMaterial });
@@ -127,15 +101,14 @@ const Plane = () => (
 
 const Box = ({ position }: { position: [number, number] }) => (
   <R.Entity>
-    <R.Component type={Transform} />
-    <R.Component type={JSXElement}>
+    <R.Component type={Object3DComponent}>
       <mesh>
         <meshNormalMaterial />
         <boxBufferGeometry args={[0.5, 0.5, 0.5]} />
       </mesh>
     </R.Component>
     <R.Component
-      type={Collider}
+      type={ColliderComponent}
       args={[
         () => {
           const box = new P2.Box({ width: 0.5, height: 0.5, material: boxMaterial });
@@ -154,9 +127,6 @@ const App = () => {
     <>
       {/* loop for r3f */}
       <R3FStepper />
-
-      {/* render jsx components */}
-      <Renderer />
 
       {/* physics system */}
       <R.System type={PhysicsSystem} />
@@ -179,9 +149,7 @@ const App = () => {
 export const Example = () => {
   return (
     <Canvas camera={{ position: [0, 0, -10], fov: 50 }}>
-      <R.World>
-        <App />
-      </R.World>
+      <App />
     </Canvas>
   );
 };

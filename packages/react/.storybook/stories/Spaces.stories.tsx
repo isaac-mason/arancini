@@ -19,7 +19,7 @@ class SpaceIdText extends RECS.Component {
       <>
         <Text color="white">{this.space.id}</Text>
       </>
-    )
+    );
   }
 }
 
@@ -33,16 +33,17 @@ const R3FStepper = () => {
 
 const Renderer = () => {
   const spaceText = R.useQuery([SpaceIdText]);
+  console.log(spaceText.entities);
+  console.log(R.world.defaultSpace.entities);
+
   return (
     <>
       {spaceText.entities.map((entity) => (
-        <group key={entity.id}>
-          {entity.get(SpaceIdText).jsx}
-        </group>
+        <group key={entity.id}>{entity.get(SpaceIdText).jsx}</group>
       ))}
     </>
   );
-}
+};
 
 export const DefaultSpace = () => {
   return (
@@ -50,20 +51,17 @@ export const DefaultSpace = () => {
       <Setup cameraPosition={[0, 0, 2]}>
         <R3FStepper />
 
-        <R.World>
+        {/* Entity in default World Space */}
+        <R.Entity>
+          <R.Component type={SpaceIdText} />
+        </R.Entity>
 
-          {/* Entity in default World Space */}
-          <R.Entity>
-            <R.Component type={SpaceIdText} />
-          </R.Entity>
-
-          {/* Render JSX Components */}
-          <Renderer />
-        </R.World>
+        {/* Render JSX Components */}
+        <Renderer />
       </Setup>
     </>
-  )
-}
+  );
+};
 
 export const ExplicitSpace = () => {
   return (
@@ -71,23 +69,17 @@ export const ExplicitSpace = () => {
       <Setup cameraPosition={[0, 0, 2]}>
         <R3FStepper />
 
-        <R.World>
+        {/* Seperate Space */}
+        <R.Space id="some-other-space">
+          {/* Entity in explicitly defined Space */}
+          <R.Entity>
+            <R.Component type={SpaceIdText} />
+          </R.Entity>
+        </R.Space>
 
-          {/* Seperate Space */}
-          <R.Space id="some-other-space">
-
-            {/* Entity in explicitly defined Space */}
-            <R.Entity>
-              <R.Component type={SpaceIdText} />
-            </R.Entity>
-
-          </R.Space>
-
-          {/* Render JSX Components */}
-          <Renderer />
-
-        </R.World>
+        {/* Render JSX Components */}
+        <Renderer />
       </Setup>
     </>
   );
-}
+};

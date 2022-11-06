@@ -1,18 +1,16 @@
 import * as R from '@recs/core';
 import React, {
   createContext,
-  ForwardedRef,
+  memo,
+  ReactNode,
   useContext,
-  useEffect,
-  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
   useState,
 } from 'react';
-import { useData } from './hooks/use-data';
 import { useRerender } from './hooks/use-rerender';
-
-type WorldProviderContext = {
-  world: R.World;
-};
+import { mergeRefs } from './merge-refs';
 
 type SpaceProviderContext = {
   space: R.Space;
@@ -38,19 +36,27 @@ export type SystemProps<T extends R.System> = {
 
 export type EntityProps = {
   name?: string;
+  entity?: R.Entity;
   children?: React.ReactNode;
+};
+
+export type EntitiesProps = {
+  entities: R.Entity[];
+  children: ReactNode;
+};
+
+export type QueryEntitiesProps = {
+  query: R.QueryDescription;
+  children: ReactNode;
 };
 
 export type ComponentProps<T extends R.Component> = {
   type: R.ComponentClass<T>;
   args?: Parameters<T['construct']>;
-  children?: Parameters<T['construct']> extends [unknown]
-    ? Parameters<T['construct']>[0]
-    : Parameters<T['construct']>;
+  children?: ReactNode;
 };
 
 export const createECS = (existing?: R.World) => {
-  const worldContext = createContext(null! as WorldProviderContext);
   const spaceContext = createContext(null! as SpaceProviderContext);
   const entityContext = createContext(null! as EntityProviderContext);
 
@@ -64,142 +70,84 @@ export const createECS = (existing?: R.World) => {
     world.update(delta);
   };
 
-  const World = ({ children }: WorldProps) => {
+  const useCurrentEntity = () => useContext(entityContext);
+
+  const useCurrentSpace = () => {
+    const context = useContext(spaceContext);
+    return !context ? world.defaultSpace : context.space;
+  };
+
+  const Space = ({ id, children }: SpaceProps) => {
+    const [space, setSpace] = useState<R.Space>(null!);
+
+    useLayoutEffect(() => {
+      const newSpace = world.create.space({ id });
+      setSpace(newSpace);
+
+      return () => {
+        newSpace.destroy();
+      };
+    }, [id]);
+
     return (
-      <worldContext.Provider value={{ world }}>
-        <spaceContext.Provider value={{ space: world.defaultSpace }}>
-          {children}
-        </spaceContext.Provider>
-      </worldContext.Provider>
+      <spaceContext.Provider value={{ space }}>
+        {children}
+      </spaceContext.Provider>
     );
   };
 
-  const SystemImpl = <T extends R.System>(
-    { type: system, priority }: SystemProps<T>,
-    ref: ForwardedRef<T>
-  ) => {
-    const [sys, setSystem] = useState<T>();
+  const EntityImpl = ({ children, entity: existingEntity }: EntityProps) => {
+    const space = useCurrentSpace();
+    const [entity, setEntity] = useState<R.Entity>(null!);
 
-    useImperativeHandle(ref, () => sys as T);
-
-    useEffect(() => {
-      world.registerSystem(system, { priority });
-      const newSystem = world.getSystem(system);
-      setSystem(newSystem);
-
-      return () => {
-        world.unregisterSystem(system);
-      };
-    }, [system, priority]);
-
-    return null;
-  };
-
-  const System = React.forwardRef(SystemImpl) as <T extends R.System>(
-    props: SystemProps<T>,
-    ref: ForwardedRef<T>
-  ) => null;
-
-  const Space = React.forwardRef<R.Space, SpaceProps>(
-    ({ id, children }, ref) => {
-      const [space, setSpace] = useState<R.Space>(null!);
-
-      useImperativeHandle(ref, () => space);
-
-      useEffect(() => {
-        const newSpace = world.create.space({ id });
-        setSpace(newSpace);
-
-        return () => {
-          newSpace.destroy();
-        };
-      }, []);
-
-      return (
-        space && (
-          <spaceContext.Provider value={{ space }}>
-            {children}
-          </spaceContext.Provider>
-        )
-      );
-    }
-  );
-
-  const Entity = React.forwardRef<R.Entity, EntityProps>(
-    ({ children }, ref) => {
-      const { space } = useContext(spaceContext);
-      const [entity, setEntity] = useState<R.Entity>(null!);
-
-      useImperativeHandle(ref, () => entity);
-
-      useEffect(() => {
-        const newEntity = space.create.entity();
-        setEntity(newEntity);
-
-        return () => {
-          newEntity.destroy();
-          setEntity(null!);
-        };
-      }, []);
-
-      return (
-        entity && (
-          <entityContext.Provider value={{ entity }}>
-            {children}
-          </entityContext.Provider>
-        )
-      );
-    }
-  );
-
-  const ComponentImpl = <T extends R.Component>(
-    { args, children, type }: ComponentProps<T>,
-    ref: ForwardedRef<T>
-  ) => {
-    const { entity } = useContext(entityContext);
-    const [component, setComponent] = useState<T>();
-
-    useImperativeHandle(ref, () => component as T);
-
-    useEffect(() => {
-      let comp: R.Component;
-
-      if (children) {
-        const childrenArray = (
-          !Array.isArray(children) ? [children] : children
-        ) as Parameters<T['construct']>;
-        comp = entity.add(type, ...childrenArray);
-      } else {
-        comp = entity.add(type, ...(args ?? ([] as never)));
+    useLayoutEffect(() => {
+      if (!space) {
+        return;
       }
 
-      setComponent(comp as T);
+      if (existingEntity) {
+        setEntity(existingEntity);
+        return;
+      }
+
+      const newEntity = space.create.entity();
+      setEntity(newEntity);
 
       return () => {
-        if (entity.alive && entity.has(comp.__recs.class)) {
-          entity.remove(comp);
-          setComponent(null!);
-        }
+        newEntity.destroy();
       };
-    }, [args, children, type]);
+    }, [space]);
 
-    return null;
+    return (
+      <entityContext.Provider value={{ entity }}>
+        {children}
+      </entityContext.Provider>
+    );
   };
 
-  const Component = React.forwardRef(ComponentImpl) as <T extends R.Component>(
-    props: ComponentProps<T>,
-    ref: ForwardedRef<T>
-  ) => null;
+  const Entity = memo(EntityImpl) as typeof EntityImpl;
+
+  const Entities = ({ entities, children }: EntitiesProps) => (
+    <>
+      {entities.map((entity) => (
+        <Entity key={entity.id} entity={entity}>
+          {children}
+        </Entity>
+      ))}
+    </>
+  );
 
   const useQuery = (queryDescription: R.QueryDescription) => {
-    const query = useData(
+    const query = useMemo(
       () => world.create.query(queryDescription),
       [queryDescription]
     );
 
     const rerender = useRerender();
 
-    useEffect(() => {
+    useLayoutEffect(() => {
+      rerender();
+
       query.onEntityAdded.add(() => {
         rerender();
       });
@@ -216,14 +164,84 @@ export const createECS = (existing?: R.World) => {
     return query;
   };
 
+  const QueryEntities = ({
+    query: queryDescription,
+    children,
+  }: QueryEntitiesProps) => {
+    const query = useQuery(queryDescription);
+
+    return <Entities entities={query.entities}>{children}</Entities>;
+  };
+
+  const Component = <T extends R.Component>({
+    args,
+    children,
+    type,
+  }: ComponentProps<T>) => {
+    const ref = useRef<Parameters<T['construct']>>(null);
+
+    const { entity } = useContext(entityContext);
+
+    useLayoutEffect(() => {
+      if (!entity) {
+        return;
+      }
+
+      let newComponent: R.Component;
+
+      if (children) {
+        // if a child is passed in, use them as the component's args
+        newComponent = entity.add(type, ...([ref.current] as never));
+      } else {
+        // otherwise, use the args prop
+        newComponent = entity.add(type, ...(args ?? ([] as never)));
+      }
+
+      return () => {
+        // check if the entity has the component before removing it
+        if (entity.has(newComponent.__recs.class)) {
+          entity.remove(newComponent);
+        }
+      };
+    }, [entity, args, children, type]);
+
+    // capture ref of child
+    if (children) {
+      const child = React.Children.only(children) as React.ReactElement;
+
+      return React.cloneElement(child, {
+        ref: mergeRefs([(child as any).ref, ref]),
+      });
+    }
+
+    return null;
+  };
+
+  const System = <T extends R.System>({ type, priority }: SystemProps<T>) => {
+    useLayoutEffect(() => {
+      world.registerSystem(type, { priority });
+
+      return () => {
+        world.unregisterSystem(type);
+      };
+    }, [type, priority]);
+
+    return null;
+  };
+
   return {
-    World,
     Space,
-    System,
     Entity,
+    Entities,
+    QueryEntities,
     Component,
+    System,
     useQuery,
+    useCurrentEntity,
+    useCurrentSpace,
     step,
     world,
+    spaceContext,
+    entityContext,
   };
 };

@@ -51,9 +51,7 @@ export const ExistingWorld = () => {
       <Setup cameraPosition={[0, 0, 2]}>
         <R3FStepper />
 
-        <R.World>
-          <R.Entity />
-        </R.World>
+        <R.Entity />
 
         <Repeat seconds={4}>
           <Lifetime seconds={2}>

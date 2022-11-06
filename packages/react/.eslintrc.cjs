@@ -62,6 +62,7 @@ module.exports = {
     ],
     '@typescript-eslint/no-empty-function': 'off',
     'max-classes-per-file': 'off',
+    'consistent-return': 'off',
   },
   settings: {
     'import/resolver': {
