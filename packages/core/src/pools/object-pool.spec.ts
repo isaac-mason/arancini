@@ -9,14 +9,14 @@ describe('ObjectPool', () => {
     const factory = () => new ExampleClass();
 
     const poolWithoutSize = new ObjectPool(factory);
-    expect(poolWithoutSize.totalSize).toBe(0);
-    expect(poolWithoutSize.totalFree).toBe(0);
-    expect(poolWithoutSize.totalUsed).toBe(0);
+    expect(poolWithoutSize.size).toBe(0);
+    expect(poolWithoutSize.free).toBe(0);
+    expect(poolWithoutSize.used).toBe(0);
 
     const poolWithSize = new ObjectPool(factory, 1);
-    expect(poolWithSize.totalSize).toBe(1);
-    expect(poolWithSize.totalFree).toBe(1);
-    expect(poolWithSize.totalUsed).toBe(0);
+    expect(poolWithSize.size).toBe(1);
+    expect(poolWithSize.free).toBe(1);
+    expect(poolWithSize.used).toBe(0);
   });
 
   it('should provide an object on request', () => {
@@ -29,9 +29,9 @@ describe('ObjectPool', () => {
     const object = pool.request();
 
     expect(object instanceof ExampleClass).toBeTruthy();
-    expect(pool.totalSize).toBe(1);
-    expect(pool.totalFree).toBe(0);
-    expect(pool.totalUsed).toBe(1);
+    expect(pool.size).toBe(1);
+    expect(pool.free).toBe(0);
+    expect(pool.used).toBe(1);
   });
 
   it('should reuse released objects', () => {
@@ -43,27 +43,27 @@ describe('ObjectPool', () => {
 
     const objectOne = pool.request();
 
-    expect(pool.totalSize).toBe(1);
-    expect(pool.totalFree).toBe(0);
-    expect(pool.totalUsed).toBe(1);
+    expect(pool.size).toBe(1);
+    expect(pool.free).toBe(0);
+    expect(pool.used).toBe(1);
 
     pool.release(objectOne);
 
-    expect(pool.totalSize).toBe(1);
-    expect(pool.totalFree).toBe(1);
-    expect(pool.totalUsed).toBe(0);
+    expect(pool.size).toBe(1);
+    expect(pool.free).toBe(1);
+    expect(pool.used).toBe(0);
 
     const objectTwo = pool.request();
 
-    expect(pool.totalSize).toBe(1);
-    expect(pool.totalFree).toBe(0);
-    expect(pool.totalUsed).toBe(1);
+    expect(pool.size).toBe(1);
+    expect(pool.free).toBe(0);
+    expect(pool.used).toBe(1);
 
     pool.release(objectTwo);
 
-    expect(pool.totalSize).toBe(1);
-    expect(pool.totalFree).toBe(1);
-    expect(pool.totalUsed).toBe(0);
+    expect(pool.size).toBe(1);
+    expect(pool.free).toBe(1);
+    expect(pool.used).toBe(0);
   });
 
   it('should grow the pool on request if there are no objects available', () => {
@@ -77,14 +77,14 @@ describe('ObjectPool', () => {
       pool.request();
     }
 
-    expect(pool.totalSize).toBe(10);
-    expect(pool.totalFree).toBe(0);
-    expect(pool.totalUsed).toBe(10);
+    expect(pool.size).toBe(10);
+    expect(pool.free).toBe(0);
+    expect(pool.used).toBe(10);
 
     pool.request();
 
-    expect(pool.totalSize).toBe(13); // grow by 20% - ((10 * 0.2) + 1) = 13
-    expect(pool.totalFree).toBe(2);
-    expect(pool.totalUsed).toBe(11);
+    expect(pool.size).toBe(13); // grow by 20% - ((10 * 0.2) + 1) = 13
+    expect(pool.free).toBe(2);
+    expect(pool.used).toBe(11);
   });
 });

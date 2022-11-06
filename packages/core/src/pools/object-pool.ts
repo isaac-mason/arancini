@@ -1,6 +1,23 @@
 /**
  * ObjectPool manages a pool of objects of a given type
  *
+ * @param T the type of object to pool
+ *
+ * @example
+ * ```ts
+ * // create a new pool
+ * const pool = new ObjectPool(() => new MyObject());
+ *
+ * // expand the pool
+ * pool.expand(10);
+ *
+ * // request an object from the pool
+ * const object = pool.request();
+ *
+ * // release the object back into the pool
+ * pool.release(object);
+ * ```
+ *
  * @private internal class, do not use directly
  */
 export class ObjectPool<T> {
@@ -15,30 +32,23 @@ export class ObjectPool<T> {
   factory: () => T;
 
   /**
-   * Returns the total size of the object pool
-   */
-  get totalSize(): number {
-    return this.count;
-  }
-
-  /**
    * Returns the number of available objects in the object pool
    */
-  get totalFree(): number {
+  get free(): number {
     return this.availableObjects.length;
   }
 
   /**
    * Returns the number of used objects in the object pool
    */
-  get totalUsed(): number {
-    return this.count - this.availableObjects.length;
+  get used(): number {
+    return this.size - this.availableObjects.length;
   }
 
   /**
    * The number of objects in the pool
    */
-  private count = 0;
+  size = 0;
 
   /**
    * Constructor for a new object pool
@@ -59,16 +69,7 @@ export class ObjectPool<T> {
     for (let i = 0; i < count; i++) {
       this.availableObjects.push(this.factory());
     }
-    this.count += count;
-  }
-
-  /**
-   * Releases an object into the object pool
-   * @param object the object to release into the object pool
-   */
-  release(object: T): void {
-    // push the object back into the pool as-is
-    this.availableObjects.push(object);
+    this.size += count;
   }
 
   /**
@@ -78,9 +79,18 @@ export class ObjectPool<T> {
   request(): T {
     // grow the list by ~20% if there are no more available objects
     if (this.availableObjects.length <= 0) {
-      this.expand(Math.round(this.count * 0.2) + 1);
+      this.expand(Math.round(this.size * 0.2) + 1);
     }
 
     return this.availableObjects.pop() as T;
+  }
+
+  /**
+   * Releases an object into the object pool
+   * @param object the object to release into the object pool
+   */
+  release(object: T): void {
+    // push the object back into the pool as-is
+    this.availableObjects.push(object);
   }
 }

@@ -16,35 +16,35 @@ export class ComponentPool {
   }
 
   /**
-   * The total size of the component pool
+   * The total size of all component object pools
    */
-  get totalSize(): number {
+  get size(): number {
     let total = 0;
-    this.objectPools.forEach((p) => {
-      total += p.totalSize;
-    });
+    for (const pool of this.objectPools.values()) {
+      total += pool.size;
+    }
     return total;
   }
 
   /**
-   * The number of available objects in the component pool
+   * The number of available objects in the component object pools
    */
-  get totalFree(): number {
+  get free(): number {
     let total = 0;
-    this.objectPools.forEach((p) => {
-      total += p.totalFree;
-    });
+    for (const pool of this.objectPools.values()) {
+      total += pool.free;
+    }
     return total;
   }
 
   /**
-   * The number of used objects in the component pool
+   * The number of used objects in the component object pools
    */
-  get totalUsed(): number {
+  get used(): number {
     let total = 0;
-    this.objectPools.forEach((p) => {
-      total += p.totalUsed;
-    });
+    for (const pool of this.objectPools.values()) {
+      total += pool.used;
+    }
     return total;
   }
 
@@ -64,18 +64,6 @@ export class ComponentPool {
    */
   constructor(world: World) {
     this.world = world;
-  }
-
-  /**
-   * Releases a component from the component pool
-   * @param component the component to release
-   */
-  release(component: Component): void {
-    const pool = this.objectPools.get(component.__recs.class);
-
-    if (pool !== undefined) {
-      pool.release(component);
-    }
   }
 
   /**
@@ -100,5 +88,17 @@ export class ComponentPool {
     }
 
     return pool.request() as T;
+  }
+
+  /**
+   * Releases a component from the component pool
+   * @param component the component to release
+   */
+  release(component: Component): void {
+    const pool = this.objectPools.get(component.__recs.class);
+
+    if (pool !== undefined) {
+      pool.release(component);
+    }
   }
 }

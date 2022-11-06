@@ -181,12 +181,10 @@ describe('Query', () => {
 
       const query = world.create.query([TestComponentOne]);
 
-      query.onEntityAdded.subscribe((e) => onAddedHandlerOne(e));
-      query.onEntityRemoved.subscribe((e) => onRemovedHandlerOne(e));
-      const { unsubscribe: unsubscribeOnAddedHandlerTwo } =
-        query.onEntityAdded.subscribe((e) => onAddedHandlerTwo(e));
-      const { unsubscribe: unsubscribeOnRemovedHandlerTwo } =
-        query.onEntityRemoved.subscribe((e) => onRemovedHandlerTwo(e));
+      query.onEntityAdded.add(onAddedHandlerOne);
+      query.onEntityRemoved.add(onRemovedHandlerOne);
+      query.onEntityAdded.add(onAddedHandlerTwo);
+      query.onEntityRemoved.add(onRemovedHandlerTwo);
 
       const entityOne = world.create.entity();
       entityOne.add(TestComponentOne);
@@ -203,8 +201,8 @@ describe('Query', () => {
       expect(onRemovedHandlerTwo.mock.calls.length).toBe(1);
       expect(onRemovedHandlerTwo.mock.calls[0][0]).toBe(entityOne);
 
-      unsubscribeOnAddedHandlerTwo();
-      unsubscribeOnRemovedHandlerTwo();
+      query.onEntityAdded.remove(onAddedHandlerTwo);
+      query.onEntityRemoved.remove(onRemovedHandlerTwo);
 
       const entityTwo = world.create.entity();
       entityTwo.add(TestComponentOne);
@@ -227,8 +225,8 @@ describe('Query', () => {
         testQuery = this.query({ any: [TestComponentOne, TestComponentTwo] });
 
         onInit(): void {
-          this.testQuery.onEntityAdded.subscribe((e) => this.onAdded(e));
-          this.testQuery.onEntityRemoved.subscribe((e) => this.onRemoved(e));
+          this.testQuery.onEntityAdded.add((e) => this.onAdded(e));
+          this.testQuery.onEntityRemoved.add((e) => this.onRemoved(e));
         }
 
         onAdded(entity: Entity): void {
@@ -276,8 +274,8 @@ describe('Query', () => {
         testQuery = this.query({ not: [TestComponentOne] });
 
         onInit(): void {
-          this.testQuery.onEntityAdded.subscribe((e) => this.onAdded(e));
-          this.testQuery.onEntityRemoved.subscribe((e) => this.onRemoved(e));
+          this.testQuery.onEntityAdded.add((e) => this.onAdded(e));
+          this.testQuery.onEntityRemoved.add((e) => this.onRemoved(e));
         }
 
         onAdded(entity: Entity): void {
@@ -323,8 +321,8 @@ describe('Query', () => {
         ]);
 
         onInit(): void {
-          this.testQuery.onEntityAdded.subscribe((e) => this.onAdded(e));
-          this.testQuery.onEntityRemoved.subscribe((e) => this.onRemoved(e));
+          this.testQuery.onEntityAdded.add((e) => this.onAdded(e));
+          this.testQuery.onEntityRemoved.add((e) => this.onRemoved(e));
         }
 
         onAdded(entity: Entity): void {
@@ -372,8 +370,8 @@ describe('Query', () => {
         });
 
         onInit(): void {
-          this.testQuery.onEntityAdded.subscribe((e) => this.onAdded(e));
-          this.testQuery.onEntityRemoved.subscribe((e) => this.onRemoved(e));
+          this.testQuery.onEntityAdded.add((e) => this.onAdded(e));
+          this.testQuery.onEntityRemoved.add((e) => this.onRemoved(e));
         }
 
         onAdded(entity: Entity): void {

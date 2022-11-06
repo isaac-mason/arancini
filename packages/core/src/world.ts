@@ -213,9 +213,10 @@ export class World {
   }
 
   /**
-   * Registers a Component class. Must be called before using a Component.
-   * @param component the Component class.
-   * @returns the World, for chaining
+   * Registers a Component class.
+   * For best performance, register all Component classes before initialising the World.
+   * @param component the Component class to register
+   * @returns the World
    */
   registerComponent(component: ComponentClass): World {
     this.componentRegistry.registerComponent(component);
@@ -225,7 +226,7 @@ export class World {
   /**
    * Adds a system to the World
    * @param system the system to add to the World
-   * @returns the World, for chaining
+   * @returns the World
    */
   registerSystem<T extends System>(
     system: SystemClass<T>,
@@ -238,7 +239,7 @@ export class World {
   /**
    * Adds a System to the World
    * @param system the System to add to the World
-   * @returns the World, for chaining
+   * @returns the World
    */
   unregisterSystem<T extends System>(system: SystemClass<T>): World {
     this.systemManager.unregisterSystem(system);

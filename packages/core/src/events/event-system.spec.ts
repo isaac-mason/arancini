@@ -56,14 +56,14 @@ describe('EventSystem', () => {
         data: 'data',
       };
 
-      const subscription = eventSystem.on(eventName, handler);
+      eventSystem.on(eventName, handler);
 
       eventSystem.emit(event);
 
       expect(handler).toBeCalledTimes(1);
       expect(handler).toBeCalledWith(event);
 
-      subscription.unsubscribe();
+      eventSystem.unsubscribe(eventName, handler);
 
       eventSystem.emit(event);
 

@@ -1,36 +1,25 @@
-import { uniqueId } from '../utils';
-
-export type EventSubscription = {
-  id: string;
-  unsubscribe: () => void;
-};
-
 export class EventDispatcher<E> {
-  listeners: Map<string, (event: E) => void> = new Map();
+  listeners: Set<(event: E) => void> = new Set();
 
   /**
    * Subscribe to events
    * @param handler the handler for the event
    * @returns a function to unsubscribe from the event
    */
-  subscribe(handler: (event: E) => void): EventSubscription {
-    const id = uniqueId();
-    this.listeners.set(id, handler);
+  add(handler: (event: E) => void): this {
+    this.listeners.add(handler);
 
-    return {
-      id,
-      unsubscribe: () => {
-        this.unsubscribe(id);
-      },
-    };
+    return this;
   }
 
   /**
    * Unsubscribe to events
-   * @param handlerId the id of the handler to unsubscribe
+   * @param handler the handler to unsubscribe
    */
-  unsubscribe(handlerId: string): void {
-    this.listeners.delete(handlerId);
+  remove(handler: (event: E) => void): this {
+    this.listeners.delete(handler);
+
+    return this;
   }
 
   /**

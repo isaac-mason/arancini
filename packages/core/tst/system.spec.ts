@@ -58,8 +58,8 @@ describe('System', () => {
       });
 
       onInit(): void {
-        this.testQuery.onEntityAdded.subscribe((e) => this.onAdded(e));
-        this.testQuery.onEntityRemoved.subscribe((e) => this.onRemoved(e));
+        this.testQuery.onEntityAdded.add((e) => this.onAdded(e));
+        this.testQuery.onEntityRemoved.add((e) => this.onRemoved(e));
       }
 
       onAdded(entity: Entity): void {

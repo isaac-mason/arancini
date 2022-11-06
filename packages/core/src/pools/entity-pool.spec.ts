@@ -10,38 +10,38 @@ describe('EntityPool', () => {
   });
 
   it('should return an entity on request', () => {
-    expect(pool.totalSize).toBe(0);
-    expect(pool.totalFree).toBe(0);
-    expect(pool.totalUsed).toBe(0);
+    expect(pool.size).toBe(0);
+    expect(pool.free).toBe(0);
+    expect(pool.used).toBe(0);
 
     const entity = pool.request();
 
     expect(entity).toBeTruthy();
     expect(entity instanceof Entity).toBeTruthy();
 
-    expect(pool.totalSize).toBe(1);
-    expect(pool.totalFree).toBe(0);
-    expect(pool.totalUsed).toBe(1);
+    expect(pool.size).toBe(1);
+    expect(pool.free).toBe(0);
+    expect(pool.used).toBe(1);
   });
 
   it('should release an entity', () => {
-    expect(pool.totalSize).toBe(0);
-    expect(pool.totalFree).toBe(0);
-    expect(pool.totalUsed).toBe(0);
+    expect(pool.size).toBe(0);
+    expect(pool.free).toBe(0);
+    expect(pool.used).toBe(0);
 
     const entity = pool.request();
 
     expect(entity).toBeTruthy();
     expect(entity instanceof Entity).toBeTruthy();
 
-    expect(pool.totalSize).toBe(1);
-    expect(pool.totalFree).toBe(0);
-    expect(pool.totalUsed).toBe(1);
+    expect(pool.size).toBe(1);
+    expect(pool.free).toBe(0);
+    expect(pool.used).toBe(1);
 
     pool.release(entity);
 
-    expect(pool.totalSize).toBe(1);
-    expect(pool.totalFree).toBe(1);
-    expect(pool.totalUsed).toBe(0);
+    expect(pool.size).toBe(1);
+    expect(pool.free).toBe(1);
+    expect(pool.used).toBe(0);
   });
 });

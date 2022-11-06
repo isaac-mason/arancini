@@ -13,24 +13,31 @@ export class EntityPool {
   private objectPool = new ObjectPool<Entity>(() => new Entity());
 
   /**
-   * The total size of the entity pool
+   * The size of the entity pool
    */
-  get totalSize(): number {
-    return this.objectPool.totalSize;
+  get size(): number {
+    return this.objectPool.size;
   }
 
   /**
    * The number of available objects in the entity pool
    */
-  get totalFree(): number {
-    return this.objectPool.totalFree;
+  get free(): number {
+    return this.objectPool.free;
   }
 
   /**
    * The number of used objects in the entity pool
    */
-  get totalUsed(): number {
-    return this.objectPool.totalUsed;
+  get used(): number {
+    return this.objectPool.used;
+  }
+
+  /**
+   * Requests an entity from the entity pool
+   */
+  request(): Entity {
+    return this.objectPool.request();
   }
 
   /**
@@ -39,12 +46,5 @@ export class EntityPool {
    */
   release(e: Entity): void {
     this.objectPool.release(e);
-  }
-
-  /**
-   * Requests an entity from the entity pool
-   */
-  request(): Entity {
-    return this.objectPool.request();
   }
 }

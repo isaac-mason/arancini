@@ -1,4 +1,4 @@
-import { EventDispatcher, EventSubscription } from './event-dispatcher';
+import { EventDispatcher } from './event-dispatcher';
 
 /**
  * An event that can be broadcast and consumed by entities and components
@@ -10,7 +10,14 @@ export interface Event {
 /**
  * An event handler that takes an event or a type that extends the event type
  */
-export type EventHandler<E extends Event | Event> = (event: E) => void;
+export type EventHandler<E extends Event = Event> = (event: E) => void;
+
+/**
+ * A subscription to an event
+ */
+export type EventSubscription = {
+  unsubscribe: () => void;
+};
 
 /**
  * Params for creating an EventSystem
@@ -30,7 +37,7 @@ export class EventSystem {
   /**
    * The events that will be processed on the next update, if the event system is queued
    */
-  private buffer: Event[] = [];
+  private queue: Event[] = [];
 
   /**
    * The event dispatchers
@@ -53,11 +60,11 @@ export class EventSystem {
   }
 
   /**
-   * Processes all events currently in the buffer
+   * Processes all events currently in the queue
    */
   tick(): void {
-    this.buffer
-      .splice(0, this.buffer.length)
+    this.queue
+      .splice(0, this.queue.length)
       .forEach((e: Event) => this.process(e));
   }
 
@@ -78,18 +85,22 @@ export class EventSystem {
       this.dispatchers.set(eventName, eventDispatcher);
     }
 
-    return eventDispatcher.subscribe(handler);
+    eventDispatcher.add(handler);
+
+    return {
+      unsubscribe: () => this.unsubscribe(eventName, handler),
+    };
   }
 
   /**
    * Removes an event handler by handler id
    * @param eventName the name of the event
-   * @param handlerId the id of the event handler
+   * @param handler the event handler
    */
-  removeHandler(eventName: string, handlerId: string): void {
+  unsubscribe(eventName: string, handler: EventHandler<never>): void {
     const eventHandlers = this.dispatchers.get(eventName);
     if (eventHandlers !== undefined) {
-      eventHandlers.unsubscribe(handlerId);
+      eventHandlers.remove(handler);
     }
   }
 
@@ -100,7 +111,7 @@ export class EventSystem {
    */
   emit(event: Event): void {
     if (this.queued) {
-      this.buffer.push(event);
+      this.queue.push(event);
     } else {
       this.process(event);
     }
@@ -111,7 +122,7 @@ export class EventSystem {
    */
   reset(): void {
     this.dispatchers.clear();
-    this.buffer = [];
+    this.queue = [];
   }
 
   /**
