@@ -200,11 +200,11 @@ export const createECS = (existing?: R.World) => {
     const rerender = useRerender();
 
     useEffect(() => {
-      query.onEntityAdded.subscribe(() => {
+      query.onEntityAdded.add(() => {
         rerender();
       });
 
-      query.onEntityRemoved.subscribe(() => {
+      query.onEntityRemoved.add(() => {
         rerender();
       });
 
