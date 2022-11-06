@@ -210,6 +210,7 @@ export const createECS = (existing?: R.World) => {
       const child = React.Children.only(children) as React.ReactElement;
 
       return React.cloneElement(child, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ref: mergeRefs([(child as any).ref, ref]),
       });
     }

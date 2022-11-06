@@ -3,6 +3,6 @@ export const mergeRefs =
   (v: T) => {
     refs.forEach((ref) => {
       if (typeof ref === 'function') ref(v);
-      else if (ref) (ref as any).current = v;
+      else if (ref) (ref as { current: unknown }).current = v;
     });
   };
