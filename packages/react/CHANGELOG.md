@@ -1,5 +1,28 @@
 # @recs/react
 
+## 0.0.14
+
+### Patch Changes
+
+- 966c895: fix react strict mode
+- 966c895: Add useCurrentEntity and useCurrentSpace hooks
+- 4890772: Remove `useWorld` hook, `createECS` already returns the recs World
+- 966c895: Add Entities component that renders a list of entities
+- 966c895: Add QueryEntities component that renders all entities of a given archetype
+- 966c895: feat(Component): capture child ref as component args if present
+- 82f6cef: fix usage of EventDispatcher
+- c517eb7: fix(@recs/react) fallback to useEffect on server
+- 1e984a1: reorganise hooks
+- 966c895: Remove <World> component and world context
+- Updated dependencies [abdb3b6]
+- Updated dependencies [1e984a1]
+- Updated dependencies [f1f9fe5]
+- Updated dependencies [32c30ed]
+- Updated dependencies [f1f9fe5]
+- Updated dependencies [abdb3b6]
+- Updated dependencies [abdb3b6]
+  - @recs/core@0.0.12
+
 ## 0.0.13
 
 ### Patch Changes

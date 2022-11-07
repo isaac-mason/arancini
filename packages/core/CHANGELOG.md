@@ -1,5 +1,17 @@
 # @recs/core
 
+## 0.0.12
+
+### Patch Changes
+
+- abdb3b6: refactor object pools
+- 1e984a1: on entity destruction, clear entity `space` and set `initialised` to false
+- f1f9fe5: use `import type`
+- 32c30ed: Throw an error when adding a component to an entity that already has the component
+- f1f9fe5: kill `world.builder.entity`, add optional `components` argument to `world.create.entity`
+- abdb3b6: rename EventSystem `removeHandler` to `unsubscribe`
+- abdb3b6: rename EventDispatcher `subscribe` and `unsubscribe` methods to `add` and `remove`
+
 ## 0.0.11
 
 ### Patch Changes
