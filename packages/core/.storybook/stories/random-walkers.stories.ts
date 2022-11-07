@@ -42,16 +42,11 @@ const BOX_SIZE = 10;
 
 class DrawSystem extends System {
   // get the canvas context
-  context: Query;
+  context = this.query(Queries.Context);
 
   // A `System` can have many queries for entities, filtering by what components they have
   // this query is called `toDraw`
-  toDraw!: Query;
-  
-  onInit(): void {
-    this.context = this.query(Queries.Context);
-    this.toDraw = this.query(Queries.ToDraw);
-  }
+  toDraw = this.query(Queries.ToDraw);
 
   // On each update, let's draw
   onUpdate() {
