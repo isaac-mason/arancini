@@ -2,7 +2,6 @@ import { OrbitControls } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as RECS from '@recs/core';
 import React from 'react';
-import { Object3D } from 'three';
 import { createECS } from '../../src';
 import { Setup } from '../Setup';
 
@@ -54,30 +53,32 @@ const App = () => {
       {/* stepper for r3f */}
       <R3FStepper />
 
-      {/* space for the walkers */}
-      <R.Space>
-        {Array.from({ length: 10 }).map((_, idx) => (
-          <R.Entity key={idx}>
-            {/* how the walker should be displayed */}
-            <R.Component type={Object3DComponent}>
-              <mesh
-                // initial position
-                position={[
-                  (Math.random() - 0.5) * 4,
-                  (Math.random() - 0.5) * 4,
-                  (Math.random() - 0.5) * 4,
-                ]}
-              >
-                <boxBufferGeometry args={[1, 1, 1]} />
-                <meshNormalMaterial />
-              </mesh>
-            </R.Component>
+      {/* create some walkers */}
+      {Array.from({ length: 10 }).map((_, idx) => (
+        <R.Entity key={idx}>
+          {/* give the walkers the "walking" tag component */}
+          <R.Component type={WalkingComponent} />
+        </R.Entity>
+      ))}
 
-            {/* tag component */}
-            <R.Component type={WalkingComponent} />
-          </R.Entity>
-        ))}
-      </R.Space>
+      {/* render the walkers */}
+      <R.QueryEntities query={[WalkingComponent]}>
+        {() => (
+          <R.Component type={Object3DComponent}>
+            <mesh
+              // random initial position
+              position={[
+                (Math.random() - 0.5) * 4,
+                (Math.random() - 0.5) * 4,
+                (Math.random() - 0.5) * 4,
+              ]}
+            >
+              <boxBufferGeometry args={[1, 1, 1]} />
+              <meshNormalMaterial />
+            </mesh>
+          </R.Component>
+        )}
+      </R.QueryEntities>
 
       {/* class system to move the walkers */}
       <R.System type={WalkingSystem} />

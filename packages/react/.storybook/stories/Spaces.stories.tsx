@@ -1,4 +1,4 @@
-import { Text } from '@react-three/drei';
+import { Html } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as RECS from '@recs/core';
 import React from 'react';
@@ -11,18 +11,6 @@ export default {
 
 const R = createECS();
 
-class SpaceIdText extends RECS.Component {
-  jsx: JSX.Element | undefined = undefined;
-
-  onInit(): void {
-    this.jsx = (
-      <>
-        <Text color="white">{this.space.id}</Text>
-      </>
-    );
-  }
-}
-
 const R3FStepper = () => {
   useFrame((_, delta) => {
     R.step(delta);
@@ -31,33 +19,43 @@ const R3FStepper = () => {
   return null;
 };
 
-const Renderer = () => {
-  const spaceText = R.useQuery([SpaceIdText]);
-  console.log(spaceText.entities);
-  console.log(R.world.defaultSpace.entities);
+class ExampleTagComponent extends RECS.Component {}
 
-  return (
-    <>
-      {spaceText.entities.map((entity) => (
-        <group key={entity.id}>{entity.get(SpaceIdText).jsx}</group>
-      ))}
-    </>
-  );
-};
+class Object3DComponent extends RECS.Component {
+  object3D!: THREE.Object3D;
+
+  construct(object3D: THREE.Object3D): void {
+    this.object3D = object3D;
+  }
+}
+
+const EntitiesAndTheirSpaces = () => (
+  <R.QueryEntities query={[ExampleTagComponent]}>
+    {(entity) => (
+      <R.Component type={Object3DComponent}>
+        <Html center style={{ color: 'white', width: '200px' }}>
+          entity {entity.id} is in space {entity.space.id}
+        </Html>
+      </R.Component>
+    )}
+  </R.QueryEntities>
+);
 
 export const DefaultSpace = () => {
   return (
     <>
       <Setup cameraPosition={[0, 0, 2]}>
-        <R3FStepper />
+        <>
+          <R3FStepper />
 
-        {/* Entity in default World Space */}
-        <R.Entity>
-          <R.Component type={SpaceIdText} />
-        </R.Entity>
+          {/* create an entity in default space */}
+          <R.Entity>
+            <R.Component type={ExampleTagComponent} />
+          </R.Entity>
 
-        {/* Render JSX Components */}
-        <Renderer />
+          {/* render entity space ids */}
+          <EntitiesAndTheirSpaces />
+        </>
       </Setup>
     </>
   );
@@ -67,18 +65,19 @@ export const ExplicitSpace = () => {
   return (
     <>
       <Setup cameraPosition={[0, 0, 2]}>
-        <R3FStepper />
+        <>
+          <R3FStepper />
 
-        {/* Seperate Space */}
-        <R.Space id="some-other-space">
-          {/* Entity in explicitly defined Space */}
-          <R.Entity>
-            <R.Component type={SpaceIdText} />
-          </R.Entity>
-        </R.Space>
+          {/* create a space */}
+          <R.Space id="some-other-space">
+            <R.Entity>
+              <R.Component type={ExampleTagComponent} />
+            </R.Entity>
+          </R.Space>
 
-        {/* Render JSX Components */}
-        <Renderer />
+          {/* render entity space ids */}
+          <EntitiesAndTheirSpaces />
+        </>
       </Setup>
     </>
   );

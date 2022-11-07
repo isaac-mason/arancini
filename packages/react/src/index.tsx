@@ -4,14 +4,11 @@ import React, {
   memo,
   ReactNode,
   useContext,
-  useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
-import { useRerender } from './hooks/use-rerender';
-import { mergeRefs } from './merge-refs';
+import { mergeRefs, useIsomorphicLayoutEffect, useRerender } from './hooks';
 
 type SpaceProviderContext = {
   space: R.Space;
@@ -43,12 +40,12 @@ export type EntityProps = {
 
 export type EntitiesProps = {
   entities: R.Entity[];
-  children: ReactNode;
+  children: ReactNode | ((entity: R.Entity) => ReactNode);
 };
 
 export type QueryEntitiesProps = {
   query: R.QueryDescription;
-  children: ReactNode;
+  children: ReactNode | ((entity: R.Entity) => ReactNode);
 };
 
 export type ComponentProps<T extends R.Component> = {
@@ -56,9 +53,6 @@ export type ComponentProps<T extends R.Component> = {
   args?: Parameters<T['construct']>;
   children?: ReactNode;
 };
-
-const useIsomorphicLayoutEffect =
-  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export const createECS = (existing?: R.World) => {
   const spaceContext = createContext(null! as SpaceProviderContext);
@@ -89,6 +83,7 @@ export const createECS = (existing?: R.World) => {
       setSpace(newSpace);
 
       return () => {
+        setSpace(null!);
         newSpace.destroy();
       };
     }, [id]);
@@ -105,12 +100,12 @@ export const createECS = (existing?: R.World) => {
     const [entity, setEntity] = useState<R.Entity>(null!);
 
     useIsomorphicLayoutEffect(() => {
-      if (!space) {
+      if (existingEntity) {
+        setEntity(existingEntity);
         return;
       }
 
-      if (existingEntity) {
-        setEntity(existingEntity);
+      if (!space) {
         return;
       }
 
@@ -118,7 +113,10 @@ export const createECS = (existing?: R.World) => {
       setEntity(newEntity);
 
       return () => {
-        newEntity.destroy();
+        setEntity(null!);
+        if (newEntity.alive) {
+          newEntity.destroy();
+        }
       };
     }, [space]);
 
@@ -135,35 +133,30 @@ export const createECS = (existing?: R.World) => {
     <>
       {entities.map((entity) => (
         <Entity key={entity.id} entity={entity}>
-          {children}
+          {typeof children === 'function' ? children(entity) : children}
         </Entity>
       ))}
     </>
   );
 
   const useQuery = (queryDescription: R.QueryDescription) => {
-    const query = useMemo(
-      () => world.create.query(queryDescription),
-      [queryDescription]
-    );
+    const query = useMemo(() => {
+      return world.create.query(queryDescription);
+    }, [queryDescription]);
 
     const rerender = useRerender();
 
     useIsomorphicLayoutEffect(() => {
-      rerender();
-
-      query.onEntityAdded.add(() => {
-        rerender();
-      });
-
-      query.onEntityRemoved.add(() => {
-        rerender();
-      });
+      query.onEntityAdded.add(rerender);
+      query.onEntityRemoved.add(rerender);
 
       return () => {
-        query.destroy();
+        query.onEntityAdded.remove(rerender);
+        query.onEntityRemoved.remove(rerender);
       };
-    }, []);
+    }, [rerender]);
+
+    useIsomorphicLayoutEffect(rerender, []);
 
     return query;
   };
@@ -174,7 +167,7 @@ export const createECS = (existing?: R.World) => {
   }: QueryEntitiesProps) => {
     const query = useQuery(queryDescription);
 
-    return <Entities entities={query.entities}>{children}</Entities>;
+    return <Entities entities={query.entities} children={children} />;
   };
 
   const Component = <T extends R.Component>({
@@ -187,7 +180,7 @@ export const createECS = (existing?: R.World) => {
     const { entity } = useContext(entityContext);
 
     useIsomorphicLayoutEffect(() => {
-      if (!entity) {
+      if (!entity || !entity.alive) {
         return;
       }
 

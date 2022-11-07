@@ -2,7 +2,7 @@ import { Text } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { World } from '@recs/core';
 import React, { useEffect, useState } from 'react';
-import { Delay, Lifetime, Repeat } from 'timeline-composer';
+import { Lifetime, Repeat } from 'timeline-composer';
 import { createECS } from '../../src';
 import { Setup } from '../Setup';
 

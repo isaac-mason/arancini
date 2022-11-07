@@ -1,9 +1,8 @@
 import React from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Component, Query, System } from '@recs/core';
+import { Component, System } from '@recs/core';
 import { createECS } from '@recs/react';
 import * as P2 from 'p2-es';
-import { Group } from 'three';
 import { Repeat } from 'timeline-composer';
 
 const boxMaterial = new P2.Material();
@@ -62,10 +61,6 @@ class PhysicsSystem extends System {
       this.bodies.delete(removed.id);
       this.physicsWorld.removeBody(body);
     });
-
-    for (const removed of this.bodiesQuery) {
-      
-    }
   }
 
   onUpdate(delta: number) {
