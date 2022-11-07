@@ -1,5 +1,5 @@
 import { useEffect } from '@storybook/client-api';
-import { Component, Query, System, World } from '@recs/core';
+import { Component, System, World } from '@recs/core';
 
 class Position extends Component {
   // * note the not null `!:` syntax! *

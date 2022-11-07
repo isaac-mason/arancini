@@ -1,5 +1,5 @@
 import { useEffect } from '@storybook/client-api';
-import { Component, Entity, Query, System, World } from '@recs/core';
+import { Component, System, World } from '@recs/core';
 
 type InventoryEvent = {
   topic: 'inventory-event';
