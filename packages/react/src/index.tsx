@@ -4,6 +4,7 @@ import React, {
   memo,
   ReactNode,
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -56,6 +57,9 @@ export type ComponentProps<T extends R.Component> = {
   children?: ReactNode;
 };
 
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
 export const createECS = (existing?: R.World) => {
   const spaceContext = createContext(null! as SpaceProviderContext);
   const entityContext = createContext(null! as EntityProviderContext);
@@ -80,7 +84,7 @@ export const createECS = (existing?: R.World) => {
   const Space = ({ id, children }: SpaceProps) => {
     const [space, setSpace] = useState<R.Space>(null!);
 
-    useLayoutEffect(() => {
+    useIsomorphicLayoutEffect(() => {
       const newSpace = world.create.space({ id });
       setSpace(newSpace);
 
@@ -100,7 +104,7 @@ export const createECS = (existing?: R.World) => {
     const space = useCurrentSpace();
     const [entity, setEntity] = useState<R.Entity>(null!);
 
-    useLayoutEffect(() => {
+    useIsomorphicLayoutEffect(() => {
       if (!space) {
         return;
       }
@@ -145,7 +149,7 @@ export const createECS = (existing?: R.World) => {
 
     const rerender = useRerender();
 
-    useLayoutEffect(() => {
+    useIsomorphicLayoutEffect(() => {
       rerender();
 
       query.onEntityAdded.add(() => {
@@ -182,7 +186,7 @@ export const createECS = (existing?: R.World) => {
 
     const { entity } = useContext(entityContext);
 
-    useLayoutEffect(() => {
+    useIsomorphicLayoutEffect(() => {
       if (!entity) {
         return;
       }
@@ -219,7 +223,7 @@ export const createECS = (existing?: R.World) => {
   };
 
   const System = <T extends R.System>({ type, priority }: SystemProps<T>) => {
-    useLayoutEffect(() => {
+    useIsomorphicLayoutEffect(() => {
       world.registerSystem(type, { priority });
 
       return () => {
