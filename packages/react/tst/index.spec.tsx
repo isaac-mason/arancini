@@ -1,7 +1,7 @@
 import * as R from '@recs/core';
 import '@testing-library/jest-dom';
-import { render, renderHook } from '@testing-library/react';
-import React from 'react';
+import { act, render, renderHook } from '@testing-library/react';
+import React, { forwardRef, useImperativeHandle } from 'react';
 import { createECS } from '../src';
 
 class ExampleComponent extends R.Component {}
@@ -81,19 +81,30 @@ describe('<QueryEntities>', () => {
       ECS.world.create.entity(),
     ];
 
-    entities.forEach((e) => {
-      e.add(ExampleComponent);
-    });
+    entities[0].add(ExampleComponent);
+    entities[1].add(ExampleComponent);
 
     render(
       <ECS.QueryEntities query={[ExampleComponent]}>
-        <ECS.Component type={ExampleComponentWithArgs} args={['example']} />
+        <ECS.Component type={ExampleComponentWithArgs} />
       </ECS.QueryEntities>
     );
 
-    expect(
-      entities.every((entity) => entity.has(ExampleComponentWithArgs))
-    ).toBe(true);
+    expect(entities[0].has(ExampleComponentWithArgs)).toBe(true);
+    expect(entities[1].has(ExampleComponentWithArgs)).toBe(true);
+    expect(entities[2].has(ExampleComponentWithArgs)).toBe(false);
+
+    act(() => {
+      entities[2].add(ExampleComponent);
+    });
+
+    expect(entities[2].has(ExampleComponentWithArgs)).toBe(true);
+
+    act(() => {
+      entities[2].remove(ExampleComponent);
+    });
+
+    expect(entities[2].has(ExampleComponentWithArgs)).toBe(false);
   });
 });
 
@@ -102,7 +113,7 @@ describe('<Space>', () => {
     const ECS = createECS();
 
     const testSpaceName = 'testSpaceName';
-    render(
+    const { unmount } = render(
       <ECS.Space id={testSpaceName}>
         <ECS.Entity />
       </ECS.Space>
@@ -111,21 +122,33 @@ describe('<Space>', () => {
     expect(ECS.world.defaultSpace.entities.size).toBe(0);
     expect(ECS.world.spaceManager.spaces.size).toBe(2);
     expect(ECS.world.getSpace('testSpaceName')!.entities.size).toBe(1);
+
+    act(() => {
+      unmount();
+    });
+
+    expect(ECS.world.spaceManager.spaces.size).toBe(1);
   });
 });
 
 describe('<Component>', () => {
-  it('should add the given component to an entity', () => {
+  it('should add and remove the given component to an entity', () => {
     const ECS = createECS();
     const entity = ECS.world.create.entity();
 
-    render(
+    const { unmount } = render(
       <ECS.Entity entity={entity}>
         <ECS.Component type={ExampleComponent} />
       </ECS.Entity>
     );
 
     expect(entity.get(ExampleComponent)).toBeInstanceOf(ExampleComponent);
+
+    act(() => {
+      unmount();
+    });
+
+    expect(entity.has(ExampleComponent)).toBe(false);
   });
 
   it('should call construct with the args prop', () => {
@@ -140,16 +163,45 @@ describe('<Component>', () => {
 
     expect(entity.get(ExampleComponentWithArgs).exampleProperty).toBe('test');
   });
+
+  it('should capture child ref and use it as a component arg', () => {
+    const ECS = createECS();
+    const entity = ECS.world.create.entity();
+
+    const refValue = 'refValue';
+
+    const TestComponentWithRef = forwardRef((_props, ref) => {
+      useImperativeHandle(ref, () => refValue);
+      return null;
+    });
+
+    render(
+      <ECS.Entity entity={entity}>
+        <ECS.Component type={ExampleComponentWithArgs}>
+          <TestComponentWithRef />
+        </ECS.Component>
+      </ECS.Entity>
+    );
+
+    expect(entity.get(ExampleComponentWithArgs).exampleProperty).toBe(refValue);
+  });
 });
 
 describe('<System>', () => {
-  it('should add the given system to the world', () => {
+  it('should register and unregister the given system', () => {
     const ECS = createECS();
 
-    render(<ECS.System type={ExampleSystem} />);
+    const { unmount } = render(<ECS.System type={ExampleSystem} />);
 
     expect(ECS.world.systemManager.systems.size).toBe(1);
     expect(ECS.world.systemManager.systems.has(ExampleSystem)).toBe(true);
+
+    act(() => {
+      unmount();
+    });
+
+    expect(ECS.world.systemManager.systems.size).toBe(0);
+    expect(ECS.world.systemManager.systems.has(ExampleSystem)).toBe(false);
   });
 });
 
@@ -170,6 +222,12 @@ describe('useQuery', () => {
     const { result } = renderHook(() => ECS.useQuery([ExampleComponent]));
 
     expect(result.current.entities).toEqual(entities);
+
+    act(() => {
+      entities[2].remove(ExampleComponent);
+    });
+
+    expect(result.current.entities).toEqual([entities[0], entities[1]]);
   });
 });
 
@@ -188,7 +246,7 @@ describe('useCurrentEntity', () => {
   });
 });
 
-describe('useCurrentEntity', () => {
+describe('useCurrentSpace', () => {
   it('should return the default space when not wrapped in a space', () => {
     const ECS = createECS();
 
