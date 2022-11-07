@@ -200,10 +200,9 @@ Now let's create some random walkers. These will be entities with the `Position`
 // create 100 random walkers!
 const n = 100;
 for (let i = 0; i < n; i++) {
-  world.builder.entity()
-    .add(Position, Math.random() * 10 - 5, Math.random() * 10 - 5);
-    .add(Color, i % 2 === 0 ? "red" : "blue")
-    .build();
+  const entity = world.create.entity();
+  entity.add(Position, Math.random() * 10 - 5, Math.random() * 10 - 5);
+  entity.add(Color, i % 2 === 0 ? "red" : "blue");
 }
 ```
 

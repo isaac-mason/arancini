@@ -1,5 +1,5 @@
-import { Component, ComponentClass } from '../component';
-import { World } from '../world';
+import type { Component, ComponentClass } from '../component';
+import type { World } from '../world';
 import { ObjectPool } from './object-pool';
 
 /**

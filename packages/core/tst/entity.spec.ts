@@ -21,7 +21,9 @@ describe('Entity', () => {
       expect(entity).toBeTruthy();
       expect(entity.components.size).toBe(0);
 
-      const otherEntity = space.builder.entity().add(TestComponentOne).build();
+      const otherEntity = world.create.entity([
+        { type: TestComponentOne, args: [2] },
+      ]);
 
       expect(otherEntity).toBeTruthy();
       expect(otherEntity.components.size).toBe(1);

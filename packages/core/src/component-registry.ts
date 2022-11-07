@@ -1,5 +1,5 @@
 import type { ComponentClass } from './component';
-import { World } from './world';
+import type { World } from './world';
 
 /**
  * ComponentRegistry that manages Component registration

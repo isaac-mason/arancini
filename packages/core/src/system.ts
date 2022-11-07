@@ -1,5 +1,6 @@
-import { Query, QueryDescription } from './query';
-import { World } from './world';
+import type { QueryDescription } from './query';
+import { Query } from './query';
+import type { World } from './world';
 
 export type SystemClass<T extends System = System> = {
   new (world: World): T;

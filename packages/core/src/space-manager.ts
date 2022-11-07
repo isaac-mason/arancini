@@ -1,18 +1,10 @@
-import type { Component, ComponentClass } from './component';
+import type { Component, ComponentClass, ComponentDetails } from './component';
 import type { Entity } from './entity';
 import { ComponentPool, EntityPool } from './pools';
 import type { SpaceParams } from './space';
 import { Space } from './space';
 import { uniqueId } from './utils';
 import { World } from './world';
-
-export type EntityBuilder = {
-  add: <T extends Component>(
-    clazz: ComponentClass<T>,
-    ...args: Parameters<T['construct']>
-  ) => EntityBuilder;
-  build: () => Entity;
-};
 
 /**
  * SpaceManager that manages Spaces that contain Entities, Entities themselves, and Components
@@ -120,13 +112,11 @@ export class SpaceManager {
 
   /**
    * Creates a new entity in a space
-   * @param space the ppace to create a new entity in
+   * @param space the space to create a new entity in
+   * @param components the components to add to the entity
    * @returns the new entity
    */
-  createEntity(
-    space: Space,
-    components: { clazz: ComponentClass; args: unknown[] }[] = []
-  ): Entity {
+  createEntity(space: Space, components: ComponentDetails[] = []): Entity {
     const entity = this.entityPool.request();
     entity.space = space;
     space.entities.set(entity.id, entity);
@@ -134,8 +124,8 @@ export class SpaceManager {
     for (const component of components) {
       this.world.spaceManager.addComponentToEntity(
         entity,
-        component.clazz,
-        component.args
+        component.type,
+        component.args ?? []
       );
     }
 
@@ -259,29 +249,5 @@ export class SpaceManager {
 
       this.componentPool.release(component);
     }
-  }
-
-  /**
-   * Creates an EntityBuilder for a given Space
-   * @param space the Space
-   * @returns the EntityBuilder
-   */
-  createEntityBuilder(space: Space): EntityBuilder {
-    const components: { clazz: ComponentClass; args: unknown[] }[] = [];
-
-    const builder = {
-      add: <T extends Component>(
-        clazz: ComponentClass<T>,
-        ...args: Parameters<T['construct']>
-      ) => {
-        components.push({ clazz, args });
-        return builder;
-      },
-      build: (): Entity => {
-        return this.createEntity(space, components);
-      },
-    };
-
-    return builder;
   }
 }

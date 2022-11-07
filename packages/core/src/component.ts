@@ -3,6 +3,11 @@ import { Space } from './space';
 import { uniqueId } from './utils';
 import { World } from './world';
 
+export type ComponentDetails = {
+  type: ComponentClass;
+  args?: unknown[];
+};
+
 export type ComponentClass<T extends Component | Component = Component> = {
   new (...args: never[]): T;
 };

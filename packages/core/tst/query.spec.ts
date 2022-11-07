@@ -89,7 +89,8 @@ describe('Query', () => {
     query.destroy();
 
     // creating an entity matching the removed query should not update the query
-    const entityTwo = space.builder.entity().add(TestComponentOne).build();
+    const entityTwo = space.create.entity();
+    entityTwo.add(TestComponentOne);
     expect(query).toBeTruthy();
     expect(query.entities.length).toBe(1);
     expect(query.entities.includes(entityOne)).toBeTruthy();
@@ -110,9 +111,11 @@ describe('Query', () => {
         all: [TestComponentOne],
       };
 
-      const entityOne = space.builder.entity().add(TestComponentOne).build();
+      const entityOne = space.create.entity();
+      entityOne.add(TestComponentOne);
 
-      const entityTwo = space.builder.entity().add(TestComponentOne).build();
+      const entityTwo = space.create.entity();
+      entityTwo.add(TestComponentOne);
 
       const query = world.create.query(description);
 

@@ -1,13 +1,15 @@
-import { ComponentClass } from './component';
+import type { ComponentClass, ComponentDetails } from './component';
 import { ComponentRegistry } from './component-registry';
-import { Entity } from './entity';
-import { Event, EventHandler, EventSubscription, EventSystem } from './events';
-import { Query, QueryDescription } from './query';
+import type { Entity } from './entity';
+import type { Event, EventHandler, EventSubscription } from './events';
+import { EventSystem } from './events';
+import type { Query, QueryDescription } from './query';
 import { QueryManager } from './query-manager';
-import { Space, SpaceParams } from './space';
-import { EntityBuilder, SpaceManager } from './space-manager';
-import { System, SystemClass } from './system';
-import { SystemAttributes, SystemManager } from './system-manager';
+import type { Space, SpaceParams } from './space';
+import { SpaceManager } from './space-manager';
+import type { System, SystemClass } from './system';
+import type { SystemAttributes } from './system-manager';
+import { SystemManager } from './system-manager';
 import { uniqueId } from './utils';
 
 export const WORLD_DEFAULT_SPACE_ID = '__recs_default_world_space';
@@ -105,21 +107,6 @@ export class World {
   }
 
   /**
-   * World builders
-   */
-  get builder(): {
-    /**
-     * Returns an EntityBuilder, used for creating an Entity with multiple Components
-     * @returns an EntityBuilder
-     */
-    entity: () => EntityBuilder;
-  } {
-    return {
-      entity: () => this.spaceManager.createEntityBuilder(this.defaultSpace),
-    };
-  }
-
-  /**
    * Retrieves World factories
    */
   get create(): {
@@ -128,7 +115,7 @@ export class World {
      * @see defaultSpace
      * @returns a new Entity
      */
-    entity: () => Entity;
+    entity: (components?: ComponentDetails[]) => Entity;
     /**
      * Creates a Space in the Qorld
      * @param params the params for the space
@@ -143,8 +130,8 @@ export class World {
     query: (queryDescription: QueryDescription) => Query;
   } {
     return {
-      entity: () => {
-        return this.spaceManager.createEntity(this.defaultSpace);
+      entity: (components) => {
+        return this.spaceManager.createEntity(this.defaultSpace, components);
       },
       space: (params) => {
         return this.spaceManager.createSpace(params);

@@ -17,7 +17,8 @@ export const OverlappingCircles = () => {
       .registerSystem(Renderer)
       .registerSystem(IntersectionSystem);
 
-    const context = world.builder.entity().add(CanvasContext).build();
+    const contextEntity = world.create.entity();
+    contextEntity.add(CanvasContext)
 
     const canvas = document.querySelector(
       '#example-canvas'
@@ -25,17 +26,15 @@ export const OverlappingCircles = () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const canvasComponent = context.get(CanvasContext);
+    const canvasComponent = contextEntity.get(CanvasContext);
     canvasComponent.ctx = canvas.getContext('2d')!;
     canvasComponent.width = canvas.width;
     canvasComponent.height = canvas.height;
 
     for (let i = 0; i < 30; i++) {
-      const entity = world.builder
-        .entity()
-        .add(Circle)
-        .add(Movement)
-        .build();
+      const entity = world.create.entity()
+      entity.add(Circle);
+      entity.add(Movement);
 
       const circle = entity.get(Circle);
       circle.position.set(random(0, canvas.width), random(0, canvas.height));

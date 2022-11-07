@@ -1,10 +1,11 @@
 import type { ComponentClass } from './component';
 import { Component } from './component';
-import { Event, EventHandler, EventSubscription, EventSystem } from './events';
-import { Space } from './space';
+import type { Event, EventHandler, EventSubscription } from './events';
+import { EventSystem } from './events';
+import type { Space } from './space';
 import { uniqueId } from './utils';
 import { BitSet } from './utils/bit-set';
-import { World } from './world';
+import type { World } from './world';
 
 /**
  * An Entity is a collection of Components with a unique id.

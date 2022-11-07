@@ -1,8 +1,9 @@
-import { Entity } from './entity';
-import { Event, EventHandler, EventSubscription, EventSystem } from './events';
-import { EntityBuilder } from './space-manager';
+import type { ComponentDetails } from './component';
+import type { Entity } from './entity';
+import type { Event, EventHandler, EventSubscription } from './events';
+import { EventSystem } from './events';
 import { uniqueId } from './utils';
-import { World } from './world';
+import type { World } from './world';
 
 /**
  * Params for creating a new Space
@@ -88,21 +89,6 @@ export class Space {
   }
 
   /**
-   * Retrives space builders
-   */
-  get builder(): {
-    /**
-     * Returns an EntityBuilder, used for creating an Entity with multiple Components
-     * @returns an EntityBuilder
-     */
-    entity: () => EntityBuilder;
-  } {
-    return {
-      entity: () => this.world.spaceManager.createEntityBuilder(this),
-    };
-  }
-
-  /**
    * Retrieves space factories
    */
   get create(): {
@@ -110,11 +96,11 @@ export class Space {
      * Creates a new entity in the space
      * @returns a new entity
      */
-    entity: () => Entity;
+    entity: (components?: ComponentDetails[]) => Entity;
   } {
     return {
-      entity: () => {
-        return this.world.spaceManager.createEntity(this);
+      entity: (components) => {
+        return this.world.spaceManager.createEntity(this, components);
       },
     };
   }

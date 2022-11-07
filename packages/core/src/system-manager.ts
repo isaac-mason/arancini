@@ -1,7 +1,7 @@
-import { Query } from './query';
-import { World } from './world';
-import { System, SystemClass } from './system';
+import type { Query } from './query';
+import type { System, SystemClass } from './system';
 import { isSubclassMethodOverridden } from './utils';
+import type { World } from './world';
 
 export type SystemAttributes = {
   priority?: number;

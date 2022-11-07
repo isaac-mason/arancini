@@ -1,7 +1,8 @@
-import { Entity } from './entity';
-import { Query, QueryBitSets, QueryDescription } from './query';
+import type { Entity } from './entity';
+import type { QueryBitSets, QueryDescription } from './query';
+import { Query } from './query';
 import { BitSet } from './utils/bit-set';
-import { World } from './world';
+import type { World } from './world';
 
 type DedupedQuery = {
   dedupeString: string;

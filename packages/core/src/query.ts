@@ -1,8 +1,8 @@
-import { ComponentClass } from './component';
-import { Entity } from './entity';
+import type { ComponentClass } from './component';
+import type { Entity } from './entity';
 import { EventDispatcher } from './events/event-dispatcher';
-import { BitSet } from './utils/bit-set';
-import { World } from './world';
+import type { BitSet } from './utils/bit-set';
+import type { World } from './world';
 
 /**
  * Enum for query condition types
