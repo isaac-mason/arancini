@@ -34,6 +34,8 @@ describe('Entity', () => {
       entityOne.destroy();
 
       expect(entityOne.alive).toBe(false);
+      expect(entityOne.initialised).toBe(false);
+      expect(entityOne.space).toBeFalsy();
       expect(space.entities.has(entityOne.id)).toBe(false);
     });
   });

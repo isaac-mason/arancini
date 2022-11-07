@@ -170,6 +170,8 @@ export class SpaceManager {
    */
   removeEntity(entity: Entity, space: Space): void {
     entity.alive = false;
+    entity.space = null as never;
+    entity.initialised = false;
     space.entities.delete(entity.id);
 
     for (const component of entity.components.values()) {
