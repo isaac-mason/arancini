@@ -1,4 +1,4 @@
-# @recs/react 🦖
+# @recs/react
 
 recs - *Reminiscent [of an] Entity Component System*
 

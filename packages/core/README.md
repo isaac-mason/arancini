@@ -1,9 +1,8 @@
-# recs 🦖
+# recs
 
 recs is _Reminiscent [of an] Entity Component System_
 
 **Under active alpha development! Minor version bumps will have breaking changes. Stable release coming soon :)**
-
 
 - 🚀 ‎ Aims to provide a simple but performant API
 - 💪 ‎ Flexible and extensible
@@ -222,14 +221,12 @@ canvasComponent.width = canvas.width;
 canvasComponent.height = canvas.height;
 
 // handle resizing
-window.addEventListener(
-  "resize",
-  () => {
-    canvasComponent.width = canvas.width = window.innerWidth;
-    canvasComponent.height = canvas.height = window.innerHeight;
-  },
-  false
-);
+const resize = () => {
+  canvasComponent.width = canvas.width = window.innerWidth;
+  canvasComponent.height = canvas.height = window.innerHeight;
+};
+window.addEventListener("resize", resize, false);
+resize();
 ```
 
 **6. The loop**
@@ -239,12 +236,19 @@ Finally, let's create a loop to run our simulation!
 ```ts
 world.init();
 
-let lastTime = performance.now() / 1000;
-function update() {
-  const time = performance.now() / 1000;
+const now = () => performance.now() / 1000;
+
+let lastTime = now();
+
+const update = () => {
+  requestAnimationFrame(update);
+  
+  const time = now();
   const delta = time - lastTime;
   lastTime = time;
+
   world.update(delta);
-  requestAnimationFrame(update);
 }
+
+update();
 ```

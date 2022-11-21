@@ -35,8 +35,8 @@ const Queries = {
   WalkerPosition: [Position],
   Color: {
     any: [Red, Blue],
-  }
-}
+  },
+};
 
 const BOX_SIZE = 10;
 
@@ -91,7 +91,7 @@ class WalkSystem extends System {
 
   // our random walkers should move every 0.05s
   movementCountdown = WalkSystem.timeBetweenMovements;
-  
+
   onUpdate(delta: number) {
     // count down until walkers should move again
     this.movementCountdown -= delta;
@@ -100,7 +100,7 @@ class WalkSystem extends System {
     if (this.movementCountdown <= 0) {
       // move all walkers in a random direction
       for (const entity of this.walkers) {
-        const position = entity.get(Position)
+        const position = entity.get(Position);
         position.x = position.x + (Math.random() - 0.5) * 3;
         position.y = position.y + (Math.random() - 0.5) * 3;
       }
@@ -153,7 +153,7 @@ export const RandomColorChangingWalkers = () => {
     }
 
     // create an entity with a component containing the canvas context
-    const context = world.create.entity()
+    const context = world.create.entity();
 
     const canvas = document.querySelector(
       '#example-canvas'
@@ -167,34 +167,38 @@ export const RandomColorChangingWalkers = () => {
     canvasComponent.height = canvas.height;
 
     // handle resizing
-    window.addEventListener(
-      'resize',
-      () => {
-        canvasComponent.width = canvas.width = window.innerWidth;
-        canvasComponent.height = canvas.height = window.innerHeight;
-      },
-      false
-    );
+    const resize = () => {
+      canvasComponent.width = canvas.width = window.innerWidth;
+      canvasComponent.height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener("resize", resize, false);
+    resize();
 
     world.init();
 
+    const now = () => performance.now() / 1000;
+
     let running = true;
-    let lastTime = performance.now() / 1000;
-    function update() {
+    let lastTime = now();
+
+    const update = () => {
       if (!running) return;
-      const time = performance.now() / 1000;
+
+      requestAnimationFrame(update);
+
+      const time = now();
       const delta = time - lastTime;
       lastTime = time;
+
       world.update(delta);
-      requestAnimationFrame(update);
-    }
+    };
 
     update();
 
     return () => {
       running = false;
       world.destroy();
-    }
+    };
   });
 
   return `

@@ -99,23 +99,29 @@ export const PlayerInventoryEvents = () => {
       });
     });
 
+    const now = () => performance.now() / 1000;
+
     let running = true;
-    let lastCall = 0;
-    const loop = (now: number) => {
+    let lastTime = now();
+
+    const update = () => {
       if (!running) return;
-      const elapsed = now - lastCall;
-      world.update(elapsed);
-      lastCall = now;
+
+      requestAnimationFrame(update);
+
+      const time = now();
+      const delta = time - lastTime;
+      lastTime = time;
+
+      world.update(delta);
 
       document.querySelector('#inventory')!.innerHTML = JSON.stringify({
         id: player.id,
         inventory: Array.from(player.get(Inventory).items.entries()),
       });
-
-      requestAnimationFrame((elapsedMs) => loop(elapsedMs / 1000));
     };
 
-    loop(0);
+    update();
 
     return () => {
       running = false;
