@@ -1,5 +1,12 @@
 {
   "name": "@arancini/react",
+  "description": "React glue for the 'arancini' object based Entity Component System",
+  "keywords": [
+    "react",
+    "gamedev",
+    "ecs",
+    "entity-component-system"
+  ],
   "type": "module",
   "packageManager": "yarn@3.2.1",
   "author": "Isaac Mason <isaac@isaacmason.com>",
