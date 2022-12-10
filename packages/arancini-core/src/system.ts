@@ -1,10 +1,10 @@
-import type { QueryDescription } from './query';
-import { Query } from './query';
-import type { World } from './world';
+import type { QueryDescription } from './query'
+import { Query } from './query'
+import type { World } from './world'
 
 export type SystemClass<T extends System = System> = {
-  new (world: World): T;
-};
+  new (world: World): T
+}
 
 /**
  * Systems contain queries for entities and have lifecycle methods `onInit`, `onUpdate` and `onDestroy` that can add logic to a world.
@@ -45,12 +45,12 @@ export abstract class System {
   /**
    * Whether the system is enabled and should update
    */
-  enabled = true;
+  enabled = true
 
   /**
    * The World the system is in
    */
-  world: World;
+  world: World
 
   /**
    * @private used internally, do not use directly
@@ -59,32 +59,32 @@ export abstract class System {
     /**
      * The System class
      */
-    class: SystemClass;
+    class: SystemClass
 
     /**
      * A set of queries used by the system
      */
-    queries: Set<Query>;
+    queries: Set<Query>
 
     /**
      * The priority of the system, determines system run order.
      */
-    priority: number;
+    priority: number
 
     /**
      * The order the system was inserted in
      */
-    order: number;
+    order: number
   } = {
     queries: new Set(),
     priority: 0,
     order: 0,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     class: null!,
-  };
+  }
 
   constructor(world: World) {
-    this.world = world;
+    this.world = world
   }
 
   /**
@@ -108,7 +108,7 @@ export abstract class System {
    * Destroys the system and removes it from the World
    */
   destroy(): void {
-    this.world.unregisterSystem(this.__internal.class);
+    this.world.unregisterSystem(this.__internal.class)
   }
 
   /**
@@ -117,9 +117,9 @@ export abstract class System {
    * @returns the query
    */
   protected query(queryDescription: QueryDescription): Query {
-    const query = this.world.queryManager.createQuery(queryDescription);
-    this.__internal.queries.add(query);
+    const query = this.world.queryManager.createQuery(queryDescription)
+    this.__internal.queries.add(query)
 
-    return query;
+    return query
   }
 }

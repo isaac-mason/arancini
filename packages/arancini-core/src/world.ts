@@ -1,18 +1,18 @@
-import type { ComponentClass, ComponentDetails } from './component';
-import { ComponentRegistry } from './component-registry';
-import type { Entity } from './entity';
-import type { Event, EventHandler, EventSubscription } from './events';
-import { EventSystem } from './events';
-import type { Query, QueryDescription } from './query';
-import { QueryManager } from './query-manager';
-import type { Space, SpaceParams } from './space';
-import { SpaceManager } from './space-manager';
-import type { System, SystemClass } from './system';
-import type { SystemAttributes } from './system-manager';
-import { SystemManager } from './system-manager';
-import { uniqueId } from './utils';
+import type { ComponentClass, ComponentDetails } from './component'
+import { ComponentRegistry } from './component-registry'
+import type { Entity } from './entity'
+import type { Event, EventHandler, EventSubscription } from './events'
+import { EventSystem } from './events'
+import type { Query, QueryDescription } from './query'
+import { QueryManager } from './query-manager'
+import type { Space, SpaceParams } from './space'
+import { SpaceManager } from './space-manager'
+import type { System, SystemClass } from './system'
+import type { SystemAttributes } from './system-manager'
+import { SystemManager } from './system-manager'
+import { uniqueId } from './utils'
 
-export const WORLD_DEFAULT_SPACE_ID = '__arancini_default_world_space';
+export const WORLD_DEFAULT_SPACE_ID = '__arancini_default_world_space'
 
 /**
  * A World that can contain Spaces with Entities, Systems, and Queries.
@@ -48,62 +48,62 @@ export class World {
   /**
    * A unique id for the World
    */
-  id = uniqueId();
+  id = uniqueId()
 
   /**
    * Whether the World has been initialised
    */
-  initialised = false;
+  initialised = false
 
   /**
    * The current World time
    */
-  time = 0;
+  time = 0
 
   /**
    * The default Space for the World
    */
-  defaultSpace: Space;
+  defaultSpace: Space
 
   /**
    * The World EventSystem
    */
-  events: EventSystem;
+  events: EventSystem
 
   /**
    * The SpaceManager for the World
    * Manages Spaces, Entities and Components
    */
-  spaceManager: SpaceManager;
+  spaceManager: SpaceManager
 
   /**
    * The QueryManager for the World
    * Manages and updates Queries
    */
-  queryManager: QueryManager;
+  queryManager: QueryManager
 
   /**
    * The SystemManager for the World
    * Manages System lifecycles
    */
-  systemManager: SystemManager;
+  systemManager: SystemManager
 
   /**
    * The ComponentRegistry for the World
    * Maintains a mapping of Component classes to Component indices
    */
-  componentRegistry: ComponentRegistry;
+  componentRegistry: ComponentRegistry
 
   /**
    * Constructor for a World
    */
   constructor() {
-    this.events = new EventSystem();
-    this.componentRegistry = new ComponentRegistry(this);
-    this.spaceManager = new SpaceManager(this);
-    this.queryManager = new QueryManager(this);
-    this.systemManager = new SystemManager(this);
-    this.defaultSpace = this.create.space({ id: WORLD_DEFAULT_SPACE_ID });
+    this.events = new EventSystem()
+    this.componentRegistry = new ComponentRegistry(this)
+    this.spaceManager = new SpaceManager(this)
+    this.queryManager = new QueryManager(this)
+    this.systemManager = new SystemManager(this)
+    this.defaultSpace = this.create.space({ id: WORLD_DEFAULT_SPACE_ID })
   }
 
   /**
@@ -115,40 +115,40 @@ export class World {
      * @see defaultSpace
      * @returns a new Entity
      */
-    entity: (components?: ComponentDetails[]) => Entity;
+    entity: (components?: ComponentDetails[]) => Entity
     /**
      * Creates a Space in the Qorld
      * @param params the params for the space
      * @returns the new Space
      */
-    space: (params?: SpaceParams) => Space;
+    space: (params?: SpaceParams) => Space
     /**
      * Creates a Query from a given query description
      * @param queryDescription the query description
      * @returns the Query
      */
-    query: (queryDescription: QueryDescription) => Query;
+    query: (queryDescription: QueryDescription) => Query
   } {
     return {
       entity: (components) => {
-        return this.spaceManager.createEntity(this.defaultSpace, components);
+        return this.spaceManager.createEntity(this.defaultSpace, components)
       },
       space: (params) => {
-        return this.spaceManager.createSpace(params);
+        return this.spaceManager.createSpace(params)
       },
       query: (queryDescription) => {
-        return this.queryManager.createQuery(queryDescription);
+        return this.queryManager.createQuery(queryDescription)
       },
-    };
+    }
   }
 
   /**
    * Initialises the World
    */
   init(): void {
-    this.initialised = true;
-    this.spaceManager.init();
-    this.systemManager.init();
+    this.initialised = true
+    this.spaceManager.init()
+    this.systemManager.init()
   }
 
   /**
@@ -156,17 +156,17 @@ export class World {
    * @param delta the time elapsed in seconds, uses 0 if not specified
    */
   update(delta = 0): void {
-    this.time += delta;
-    this.systemManager.update(delta, this.time);
-    this.spaceManager.recycle();
+    this.time += delta
+    this.systemManager.update(delta, this.time)
+    this.spaceManager.recycle()
   }
 
   /**
    * Destroys the World
    */
   destroy(): void {
-    this.systemManager.destroy();
-    this.spaceManager.destroy();
+    this.systemManager.destroy()
+    this.spaceManager.destroy()
   }
 
   /**
@@ -174,7 +174,7 @@ export class World {
    * @param event the event to broadcast in the World
    */
   emit<E extends Event | Event>(event: E): void {
-    this.events.emit(event);
+    this.events.emit(event)
   }
 
   /**
@@ -187,7 +187,7 @@ export class World {
     eventName: string,
     handler: EventHandler<E>
   ): EventSubscription {
-    return this.events.on(eventName, handler);
+    return this.events.on(eventName, handler)
   }
 
   /**
@@ -196,7 +196,7 @@ export class World {
    * @returns an array of matching entities
    */
   query(queryDescription: QueryDescription): Entity[] {
-    return this.queryManager.query(queryDescription);
+    return this.queryManager.query(queryDescription)
   }
 
   /**
@@ -206,8 +206,8 @@ export class World {
    * @returns the World
    */
   registerComponent(component: ComponentClass): World {
-    this.componentRegistry.registerComponent(component);
-    return this;
+    this.componentRegistry.registerComponent(component)
+    return this
   }
 
   /**
@@ -219,8 +219,8 @@ export class World {
     system: SystemClass<T>,
     attributes?: SystemAttributes
   ): World {
-    this.systemManager.registerSystem(system, attributes);
-    return this;
+    this.systemManager.registerSystem(system, attributes)
+    return this
   }
 
   /**
@@ -229,8 +229,8 @@ export class World {
    * @returns the World
    */
   unregisterSystem<T extends System>(system: SystemClass<T>): World {
-    this.systemManager.unregisterSystem(system);
-    return this;
+    this.systemManager.unregisterSystem(system)
+    return this
   }
 
   /**
@@ -239,7 +239,7 @@ export class World {
    * @returns the System, or undefined if it is not registerd
    */
   getSystem<S extends System>(clazz: SystemClass<S>): S | undefined {
-    return this.systemManager.systems.get(clazz) as S | undefined;
+    return this.systemManager.systems.get(clazz) as S | undefined
   }
 
   /**
@@ -247,7 +247,7 @@ export class World {
    * @returns all Systems in the world
    */
   getSystems(): System[] {
-    return Array.from(this.systemManager.systems.values());
+    return Array.from(this.systemManager.systems.values())
   }
 
   /**
@@ -256,6 +256,6 @@ export class World {
    * @returns the Space, or undefined if a Space with the given id is not in the World
    */
   getSpace(id: string): Space | undefined {
-    return this.spaceManager.spaces.get(id);
+    return this.spaceManager.spaces.get(id)
   }
 }

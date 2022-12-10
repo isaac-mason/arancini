@@ -1,23 +1,23 @@
-import { EventDispatcher } from './event-dispatcher';
+import { EventDispatcher } from './event-dispatcher'
 
 /**
  * An event that can be broadcast and consumed by entities and components
  */
 export interface Event {
-  topic: string;
+  topic: string
 }
 
 /**
  * An event handler that takes an event or a type that extends the event type
  */
-export type EventHandler<E extends Event = Event> = (event: E) => void;
+export type EventHandler<E extends Event = Event> = (event: E) => void
 
 /**
  * A subscription to an event
  */
 export type EventSubscription = {
-  unsubscribe: () => void;
-};
+  unsubscribe: () => void
+}
 
 /**
  * Params for creating an EventSystem
@@ -27,8 +27,8 @@ export type EventSystemParams = {
    * If true, events will be queued and processed on calling `.tick()`. If false, events will be processed immediately on emit
    * @see EventSystem.queued
    */
-  queued: boolean;
-};
+  queued: boolean
+}
 
 /**
  * EventSystem that can register event handlers and process events, either immediately or by queuing events
@@ -37,26 +37,26 @@ export class EventSystem {
   /**
    * The events that will be processed on the next update, if the event system is queued
    */
-  private queue: Event[] = [];
+  private queue: Event[] = []
 
   /**
    * The event dispatchers
    */
-  private dispatchers: Map<string, EventDispatcher<never>> = new Map();
+  private dispatchers: Map<string, EventDispatcher<never>> = new Map()
 
   /**
    * If true, events will be queued and processed on calling `.tick()`. If false, events will be processed immediately on emit.
    * By default, this will be `false`; events will be processed immediately.
    * @see EventSystemParams.queued
    */
-  private queued: boolean;
+  private queued: boolean
 
   /**
    * Constructor for an EventSystem
    * @param params params for creating the event system
    */
   constructor(params?: EventSystemParams) {
-    this.queued = params?.queued || false;
+    this.queued = params?.queued || false
   }
 
   /**
@@ -65,7 +65,7 @@ export class EventSystem {
   tick(): void {
     this.queue
       .splice(0, this.queue.length)
-      .forEach((e: Event) => this.process(e));
+      .forEach((e: Event) => this.process(e))
   }
 
   /**
@@ -78,18 +78,18 @@ export class EventSystem {
     eventName: string,
     handler: EventHandler<E>
   ): EventSubscription {
-    let eventDispatcher = this.dispatchers.get(eventName);
+    let eventDispatcher = this.dispatchers.get(eventName)
 
     if (eventDispatcher === undefined) {
-      eventDispatcher = new EventDispatcher();
-      this.dispatchers.set(eventName, eventDispatcher);
+      eventDispatcher = new EventDispatcher()
+      this.dispatchers.set(eventName, eventDispatcher)
     }
 
-    eventDispatcher.add(handler);
+    eventDispatcher.add(handler)
 
     return {
       unsubscribe: () => this.unsubscribe(eventName, handler),
-    };
+    }
   }
 
   /**
@@ -98,9 +98,9 @@ export class EventSystem {
    * @param handler the event handler
    */
   unsubscribe(eventName: string, handler: EventHandler<never>): void {
-    const eventHandlers = this.dispatchers.get(eventName);
+    const eventHandlers = this.dispatchers.get(eventName)
     if (eventHandlers !== undefined) {
-      eventHandlers.remove(handler);
+      eventHandlers.remove(handler)
     }
   }
 
@@ -111,9 +111,9 @@ export class EventSystem {
    */
   emit(event: Event): void {
     if (this.queued) {
-      this.queue.push(event);
+      this.queue.push(event)
     } else {
-      this.process(event);
+      this.process(event)
     }
   }
 
@@ -121,8 +121,8 @@ export class EventSystem {
    * Resets the event system
    */
   reset(): void {
-    this.dispatchers.clear();
-    this.queue = [];
+    this.dispatchers.clear()
+    this.queue = []
   }
 
   /**
@@ -130,9 +130,9 @@ export class EventSystem {
    * @param event the event to process
    */
   private process(event: Event): void {
-    const dispatcher = this.dispatchers.get(event.topic);
+    const dispatcher = this.dispatchers.get(event.topic)
     if (dispatcher !== undefined) {
-      dispatcher.emit(event as never);
+      dispatcher.emit(event as never)
     }
   }
 }

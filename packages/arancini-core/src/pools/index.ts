@@ -1,2 +1,2 @@
-export * from './component-pool';
-export * from './entity-pool';
+export * from './component-pool'
+export * from './entity-pool'

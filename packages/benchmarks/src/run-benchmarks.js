@@ -1,8 +1,8 @@
-import { arancini } from './arancini.js';
-import { addRemove } from './suites/add-remove.js';
-import { addition } from './suites/addition.js';
-import { destroy } from './suites/destroy.js';
-import { velocity } from './suites/velocity.js';
+import { arancini } from './arancini.js'
+import { addRemove } from './suites/add-remove.js'
+import { addition } from './suites/addition.js'
+import { destroy } from './suites/destroy.js'
+import { velocity } from './suites/velocity.js'
 
 /**
  * Runs benchmarks
@@ -10,35 +10,35 @@ import { velocity } from './suites/velocity.js';
  */
 export const runBenchmarks = (now) => {
   const bench = (suite) => {
-    suite.setup(arancini);
+    suite.setup(arancini)
 
-    let sum = 0;
+    let sum = 0
 
     for (let i = 0; i < suite.iterations; i++) {
-      const start = now();
+      const start = now()
 
-      suite.perform(arancini);
+      suite.perform(arancini)
 
-      sum += now() - start;
+      sum += now() - start
     }
 
-    const average = sum / suite.iterations;
-    const updates = arancini.getMovementSystemUpdateCount();
+    const average = sum / suite.iterations
+    const updates = arancini.getMovementSystemUpdateCount()
 
-    const nameTxt = suite.name.padEnd(12, ' ');
-    const sumText = `${sum.toFixed(6)}`.padStart(20, ' ') + ' micro seconds';
+    const nameTxt = suite.name.padEnd(12, ' ')
+    const sumText = `${sum.toFixed(6)}`.padStart(20, ' ') + ' micro seconds'
     const averageText =
-      `${average.toFixed(6)}`.padStart(20 + ' ') + ' micro seconds';
-    const updateText = updates > 0 ? `${updates} updates`.padStart(20) : '';
+      `${average.toFixed(6)}`.padStart(20 + ' ') + ' micro seconds'
+    const updateText = updates > 0 ? `${updates} updates`.padStart(20) : ''
 
-    console.log(`${nameTxt} ${averageText} ${sumText} ${updateText}`);
-  };
+    console.log(`${nameTxt} ${averageText} ${sumText} ${updateText}`)
+  }
 
-  console.log('\nrunning benchmarks...\n');
+  console.log('\nrunning benchmarks...\n')
 
   setTimeout(() => {
-    [addRemove, addition, destroy, velocity].forEach((suite) => {
-      bench(suite);
-    });
-  });
-};
+    ;[addRemove, addition, destroy, velocity].forEach((suite) => {
+      bench(suite)
+    })
+  })
+}

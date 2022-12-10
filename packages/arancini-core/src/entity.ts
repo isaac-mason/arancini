@@ -1,11 +1,11 @@
-import type { ComponentClass } from './component';
-import { Component } from './component';
-import type { Event, EventHandler, EventSubscription } from './events';
-import { EventSystem } from './events';
-import type { Space } from './space';
-import { uniqueId } from './utils';
-import { BitSet } from './utils/bit-set';
-import type { World } from './world';
+import type { ComponentClass } from './component'
+import { Component } from './component'
+import type { Event, EventHandler, EventSubscription } from './events'
+import { EventSystem } from './events'
+import type { Space } from './space'
+import { uniqueId } from './utils'
+import { BitSet } from './utils/bit-set'
+import type { World } from './world'
 
 /**
  * An Entity is a collection of Components with a unique id.
@@ -58,43 +58,43 @@ export class Entity {
   /**
    * The unique ID of the entity
    */
-  id = uniqueId();
+  id = uniqueId()
 
   /**
    * Whether the entity is alive. If false, the entity will be destroyed on the next update
    */
-  alive = true;
+  alive = true
 
   /**
    * Map of component classes to components
    */
-  components: Map<{ new (...args: never[]): Component }, Component> = new Map();
+  components: Map<{ new (...args: never[]): Component }, Component> = new Map()
 
   /**
    * BitSet containing component indices for Components in this Entitiy
    */
-  componentsBitSet = new BitSet();
+  componentsBitSet = new BitSet()
 
   /**
    * The event system for the entity
    */
-  events = new EventSystem();
+  events = new EventSystem()
 
   /**
    * Whether the entity has been initialised
    */
-  initialised = false;
+  initialised = false
 
   /**
    * The space the entity is in
    */
-  space!: Space;
+  space!: Space
 
   /**
    * The World the entity is in
    */
   get world(): World {
-    return this.space.world;
+    return this.space.world
   }
 
   /**
@@ -108,7 +108,7 @@ export class Entity {
     if (this.components.has(clazz)) {
       throw new Error(
         `Cannot add component ${clazz.name}, entity with id ${this.id} already has this component`
-      );
+      )
     }
 
     // add the component to this entity
@@ -116,20 +116,20 @@ export class Entity {
       this,
       clazz,
       args
-    );
+    )
 
     // inform the query manager that the component has been initialised
-    this.world.queryManager.onEntityComponentChange(this);
+    this.world.queryManager.onEntityComponentChange(this)
 
-    return component;
+    return component
   }
 
   /**
    * Destroy the Entity's components and remove the Entity from the space
    */
   destroy(): void {
-    this.world.spaceManager.removeEntity(this, this.space);
-    this.alive = false;
+    this.world.spaceManager.removeEntity(this, this.space)
+    this.alive = false
   }
 
   /**
@@ -137,7 +137,7 @@ export class Entity {
    * @param event the event to broadcast
    */
   emit<E extends Event | Event>(event: E): void {
-    this.events.emit(event);
+    this.events.emit(event)
   }
 
   /**
@@ -146,7 +146,7 @@ export class Entity {
    * @returns the component if it is found, or undefined
    */
   find<T extends Component>(value: ComponentClass<T>): T | undefined {
-    return this.components.get(value) as T | undefined;
+    return this.components.get(value) as T | undefined
   }
 
   /**
@@ -155,13 +155,13 @@ export class Entity {
    * @returns the component
    */
   get<T extends Component>(value: ComponentClass<T>): T {
-    const component: Component | undefined = this.components.get(value);
+    const component: Component | undefined = this.components.get(value)
 
     if (component !== undefined) {
-      return component as T;
+      return component as T
     }
 
-    throw new Error(`Component ${value}} not in entity ${this.id}`);
+    throw new Error(`Component ${value}} not in entity ${this.id}`)
   }
 
   /**
@@ -170,7 +170,7 @@ export class Entity {
    * @returns whether the entity contains the given component
    */
   has(value: ComponentClass): boolean {
-    return this.components.has(value);
+    return this.components.has(value)
   }
 
   /**
@@ -183,7 +183,7 @@ export class Entity {
     eventName: string,
     handler: EventHandler<E>
   ): EventSubscription {
-    return this.events.on(eventName, handler);
+    return this.events.on(eventName, handler)
   }
 
   /**
@@ -192,23 +192,23 @@ export class Entity {
    * @param value the component to remove and destroy
    */
   remove(value: Component | ComponentClass): Entity {
-    let component: Component | undefined;
+    let component: Component | undefined
 
     if (value instanceof Component) {
       if (!this.components.has(value.__internal.class)) {
-        throw new Error('Component instance does not exist in Entity');
+        throw new Error('Component instance does not exist in Entity')
       }
-      component = value;
+      component = value
     } else {
-      component = this.find(value);
+      component = this.find(value)
       if (component === undefined) {
-        throw new Error('Component does not exist in Entity');
+        throw new Error('Component does not exist in Entity')
       }
     }
 
-    this.world.spaceManager.removeComponentFromEntity(this, component);
-    this.world.queryManager.onEntityComponentChange(this);
+    this.world.spaceManager.removeComponentFromEntity(this, component)
+    this.world.queryManager.onEntityComponentChange(this)
 
-    return this;
+    return this
   }
 }

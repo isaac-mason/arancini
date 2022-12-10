@@ -1,5 +1,5 @@
-import type { ComponentClass } from './component';
-import type { World } from './world';
+import type { ComponentClass } from './component'
+import type { World } from './world'
 
 /**
  * ComponentRegistry that manages Component registration
@@ -10,20 +10,20 @@ export class ComponentRegistry {
   /**
    * Component classes to component ids
    */
-  components: Map<ComponentClass, number> = new Map();
+  components: Map<ComponentClass, number> = new Map()
 
   /**
    * The current component index. Increments when a new component is registered.
    */
-  currentComponentIndex = -1;
+  currentComponentIndex = -1
 
   /**
    * The World the ComponentRegistry is in
    */
-  private world: World;
+  private world: World
 
   constructor(world: World) {
-    this.world = world;
+    this.world = world
   }
 
   /**
@@ -32,13 +32,13 @@ export class ComponentRegistry {
    * @returns the component index
    */
   getComponentIndex(component: ComponentClass): number {
-    const index = this.components.get(component);
+    const index = this.components.get(component)
 
     if (index === undefined) {
-      return this.registerComponent(component);
+      return this.registerComponent(component)
     }
 
-    return index;
+    return index
   }
 
   /**
@@ -47,25 +47,25 @@ export class ComponentRegistry {
    * @returns the component index
    */
   registerComponent(component: ComponentClass): number {
-    let componentIndex = this.components.get(component);
+    let componentIndex = this.components.get(component)
     if (componentIndex !== undefined) {
-      return componentIndex;
+      return componentIndex
     }
 
-    this.currentComponentIndex++;
-    componentIndex = this.currentComponentIndex;
+    this.currentComponentIndex++
+    componentIndex = this.currentComponentIndex
 
-    this.components.set(component, componentIndex);
+    this.components.set(component, componentIndex)
 
     // if the world has already been initialised, resize all entity components bitsets
     if (this.world.initialised) {
       for (const space of this.world.spaceManager.spaces.values()) {
         for (const entity of space.entities.values()) {
-          entity.componentsBitSet.resize(this.currentComponentIndex);
+          entity.componentsBitSet.resize(this.currentComponentIndex)
         }
       }
     }
 
-    return componentIndex;
+    return componentIndex
   }
 }

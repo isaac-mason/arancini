@@ -1,8 +1,8 @@
-import type { ComponentClass } from './component';
-import type { Entity } from './entity';
-import { EventDispatcher } from './events/event-dispatcher';
-import type { BitSet } from './utils/bit-set';
-import type { World } from './world';
+import type { ComponentClass } from './component'
+import type { Entity } from './entity'
+import { EventDispatcher } from './events/event-dispatcher'
+import type { BitSet } from './utils/bit-set'
+import type { World } from './world'
 
 /**
  * Enum for query condition types
@@ -11,7 +11,7 @@ export const QueryConditionType = {
   ALL: 'all',
   ANY: 'any',
   NOT: 'not',
-} as const;
+} as const
 
 /**
  * Type for query conditions
@@ -19,16 +19,16 @@ export const QueryConditionType = {
 export type QueryDescription =
   | ComponentClass[]
   | {
-      [QueryConditionType.ALL]?: ComponentClass[];
-      [QueryConditionType.NOT]?: ComponentClass[];
-      [QueryConditionType.ANY]?: ComponentClass[];
-    };
+      [QueryConditionType.ALL]?: ComponentClass[]
+      [QueryConditionType.NOT]?: ComponentClass[]
+      [QueryConditionType.ANY]?: ComponentClass[]
+    }
 
 export type QueryBitSets = {
-  all?: BitSet;
-  any?: BitSet;
-  not?: BitSet;
-};
+  all?: BitSet
+  any?: BitSet
+  not?: BitSet
+}
 
 /**
  * A Query for Entities with specified Components.
@@ -89,24 +89,24 @@ export class Query {
   /**
    * The query dedupe string
    */
-  key: string;
+  key: string
 
   /**
    * The current entities matched by the query
    */
-  entities: Entity[] = [];
+  entities: Entity[] = []
 
   /**
    * Returns the first entity within this archetype.
    * */
   get first(): Entity | undefined {
-    return this.entities[0] || undefined;
+    return this.entities[0] || undefined
   }
 
   /**
    * Event dispatcher for when an Entity is added to the query
    */
-  onEntityAdded = new EventDispatcher<Entity>();
+  onEntityAdded = new EventDispatcher<Entity>()
 
   /**
    * Event dispatcher for when an Entity is removed from the query
@@ -117,13 +117,13 @@ export class Query {
    * Iterator for all entities matched by the query
    */
   [Symbol.iterator]() {
-    return this.entities[Symbol.iterator]();
+    return this.entities[Symbol.iterator]()
   }
 
   /**
    * The World the Query is in
    */
-  private world: World;
+  private world: World
 
   /**
    * Constructor for a new query instance
@@ -131,15 +131,15 @@ export class Query {
    * @param queryKey the key for the query
    */
   constructor(world: World, queryKey: string) {
-    this.world = world;
-    this.key = queryKey;
+    this.world = world
+    this.key = queryKey
   }
 
   /**
    * Destroys the Query
    */
   destroy(): void {
-    this.world.queryManager.removeQuery(this);
+    this.world.queryManager.removeQuery(this)
   }
 
   /**
@@ -152,18 +152,18 @@ export class Query {
     queryDescription: QueryDescription
   ): string {
     if (Array.isArray(queryDescription)) {
-      return queryDescription.map((c) => `${c.name}`).join('&');
+      return queryDescription.map((c) => `${c.name}`).join('&')
     }
 
     return Object.entries(queryDescription)
       .flatMap(([type, components]) => {
         if (type === QueryConditionType.ALL) {
-          return components.map((c) => `${c.name}`).sort();
+          return components.map((c) => `${c.name}`).sort()
         }
 
-        return [`${type}:${components.sort().map((c) => c.name)}`];
+        return [`${type}:${components.sort().map((c) => c.name)}`]
       })
       .sort()
-      .join('&');
+      .join('&')
   }
 }

@@ -1,4 +1,4 @@
-import * as A from '@arancini/core';
+import * as A from '@arancini/core'
 import React, {
   createContext,
   memo,
@@ -7,127 +7,127 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import { mergeRefs, useIsomorphicLayoutEffect, useRerender } from './hooks';
+} from 'react'
+import { mergeRefs, useIsomorphicLayoutEffect, useRerender } from './hooks'
 
 type SpaceProviderContext = {
-  space: A.Space;
-};
+  space: A.Space
+}
 
 type EntityProviderContext = {
-  entity: A.Entity;
-};
+  entity: A.Entity
+}
 
 export type WorldProps = {
-  children?: React.ReactNode;
-};
+  children?: React.ReactNode
+}
 
 export type SpaceProps = {
-  id?: string;
-  children?: React.ReactNode;
-};
+  id?: string
+  children?: React.ReactNode
+}
 
 export type SystemProps<T extends A.System> = {
-  type: A.SystemClass<T>;
-  priority?: number;
-};
+  type: A.SystemClass<T>
+  priority?: number
+}
 
 export type EntityProps = {
-  name?: string;
-  entity?: A.Entity;
-  children?: React.ReactNode;
-};
+  name?: string
+  entity?: A.Entity
+  children?: React.ReactNode
+}
 
 export type EntitiesProps = {
-  entities: A.Entity[];
-  children: ReactNode | ((entity: A.Entity) => ReactNode);
-};
+  entities: A.Entity[]
+  children: ReactNode | ((entity: A.Entity) => ReactNode)
+}
 
 export type QueryEntitiesProps = {
-  query: A.QueryDescription;
-  children: ReactNode | ((entity: A.Entity) => ReactNode);
-};
+  query: A.QueryDescription
+  children: ReactNode | ((entity: A.Entity) => ReactNode)
+}
 
 export type ComponentProps<T extends A.Component> = {
-  type: A.ComponentClass<T>;
-  args?: Parameters<T['construct']>;
-  children?: ReactNode;
-};
+  type: A.ComponentClass<T>
+  args?: Parameters<T['construct']>
+  children?: ReactNode
+}
 
 export const createECS = (existing?: A.World) => {
-  const spaceContext = createContext(null! as SpaceProviderContext);
-  const entityContext = createContext(null! as EntityProviderContext);
+  const spaceContext = createContext(null! as SpaceProviderContext)
+  const entityContext = createContext(null! as EntityProviderContext)
 
-  const world = existing ?? new A.World();
+  const world = existing ?? new A.World()
 
   if (!existing) {
-    world.init();
+    world.init()
   }
 
   const step = (delta: number) => {
-    world.update(delta);
-  };
+    world.update(delta)
+  }
 
-  const useCurrentEntity = () => useContext(entityContext);
+  const useCurrentEntity = () => useContext(entityContext)
 
   const useCurrentSpace = () => {
-    const context = useContext(spaceContext);
-    return !context ? world.defaultSpace : context.space;
-  };
+    const context = useContext(spaceContext)
+    return !context ? world.defaultSpace : context.space
+  }
 
   const Space = ({ id, children }: SpaceProps) => {
-    const [space, setSpace] = useState<A.Space>(null!);
+    const [space, setSpace] = useState<A.Space>(null!)
 
     useIsomorphicLayoutEffect(() => {
-      const newSpace = world.create.space({ id });
-      setSpace(newSpace);
+      const newSpace = world.create.space({ id })
+      setSpace(newSpace)
 
       return () => {
-        setSpace(null!);
-        newSpace.destroy();
-      };
-    }, [id]);
+        setSpace(null!)
+        newSpace.destroy()
+      }
+    }, [id])
 
     return (
       <spaceContext.Provider value={{ space }}>
         {children}
       </spaceContext.Provider>
-    );
-  };
+    )
+  }
 
   const EntityImpl = ({ children, entity: existingEntity }: EntityProps) => {
-    const space = useCurrentSpace();
-    const [entity, setEntity] = useState<A.Entity>(null!);
+    const space = useCurrentSpace()
+    const [entity, setEntity] = useState<A.Entity>(null!)
 
     useIsomorphicLayoutEffect(() => {
       if (existingEntity) {
-        setEntity(existingEntity);
-        return;
+        setEntity(existingEntity)
+        return
       }
 
       if (!space) {
-        return;
+        return
       }
 
-      const newEntity = space.create.entity();
-      setEntity(newEntity);
+      const newEntity = space.create.entity()
+      setEntity(newEntity)
 
       return () => {
-        setEntity(null!);
+        setEntity(null!)
         if (newEntity.alive) {
-          newEntity.destroy();
+          newEntity.destroy()
         }
-      };
-    }, [space]);
+      }
+    }, [space])
 
     return (
       <entityContext.Provider value={{ entity }}>
         {children}
       </entityContext.Provider>
-    );
-  };
+    )
+  }
 
-  const Entity = memo(EntityImpl) as typeof EntityImpl;
+  const Entity = memo(EntityImpl) as typeof EntityImpl
 
   const Entities = ({ entities, children }: EntitiesProps) => (
     <>
@@ -137,95 +137,95 @@ export const createECS = (existing?: A.World) => {
         </Entity>
       ))}
     </>
-  );
+  )
 
   const useQuery = (queryDescription: A.QueryDescription) => {
     const query = useMemo(() => {
-      return world.create.query(queryDescription);
-    }, [queryDescription]);
+      return world.create.query(queryDescription)
+    }, [queryDescription])
 
-    const rerender = useRerender();
+    const rerender = useRerender()
 
     useIsomorphicLayoutEffect(() => {
-      query.onEntityAdded.add(rerender);
-      query.onEntityRemoved.add(rerender);
+      query.onEntityAdded.add(rerender)
+      query.onEntityRemoved.add(rerender)
 
       return () => {
-        query.onEntityAdded.remove(rerender);
-        query.onEntityRemoved.remove(rerender);
-      };
-    }, [rerender]);
+        query.onEntityAdded.remove(rerender)
+        query.onEntityRemoved.remove(rerender)
+      }
+    }, [rerender])
 
-    useIsomorphicLayoutEffect(rerender, []);
+    useIsomorphicLayoutEffect(rerender, [])
 
-    return query;
-  };
+    return query
+  }
 
   const QueryEntities = ({
     query: queryDescription,
     children,
   }: QueryEntitiesProps) => {
-    const query = useQuery(queryDescription);
+    const query = useQuery(queryDescription)
 
-    return <Entities entities={query.entities} children={children} />;
-  };
+    return <Entities entities={query.entities} children={children} />
+  }
 
   const Component = <T extends A.Component>({
     args,
     children,
     type,
   }: ComponentProps<T>) => {
-    const ref = useRef<Parameters<T['construct']>>(null);
+    const ref = useRef<Parameters<T['construct']>>(null)
 
-    const { entity } = useContext(entityContext);
+    const { entity } = useContext(entityContext)
 
     useIsomorphicLayoutEffect(() => {
       if (!entity || !entity.alive) {
-        return;
+        return
       }
 
-      let newComponent: A.Component;
+      let newComponent: A.Component
 
       if (children) {
         // if a child is passed in, use them as the component's args
-        newComponent = entity.add(type, ...([ref.current] as never));
+        newComponent = entity.add(type, ...([ref.current] as never))
       } else {
         // otherwise, use the args prop
-        newComponent = entity.add(type, ...(args ?? ([] as never)));
+        newComponent = entity.add(type, ...(args ?? ([] as never)))
       }
 
       return () => {
         // check if the entity has the component before removing it
         if (entity.has(newComponent.__internal.class)) {
-          entity.remove(newComponent);
+          entity.remove(newComponent)
         }
-      };
-    }, [entity, args, children, type]);
+      }
+    }, [entity, args, children, type])
 
     // capture ref of child
     if (children) {
-      const child = React.Children.only(children) as React.ReactElement;
+      const child = React.Children.only(children) as React.ReactElement
 
       return React.cloneElement(child, {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ref: mergeRefs([(child as any).ref, ref]),
-      });
+      })
     }
 
-    return null;
-  };
+    return null
+  }
 
   const System = <T extends A.System>({ type, priority }: SystemProps<T>) => {
     useIsomorphicLayoutEffect(() => {
-      world.registerSystem(type, { priority });
+      world.registerSystem(type, { priority })
 
       return () => {
-        world.unregisterSystem(type);
-      };
-    }, [type, priority]);
+        world.unregisterSystem(type)
+      }
+    }, [type, priority])
 
-    return null;
-  };
+    return null
+  }
 
   return {
     Space,
@@ -241,5 +241,5 @@ export const createECS = (existing?: A.World) => {
     world,
     spaceContext,
     entityContext,
-  };
-};
+  }
+}

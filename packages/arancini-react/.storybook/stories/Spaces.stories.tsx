@@ -1,31 +1,31 @@
-import * as A from '@arancini/core';
-import { Html } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
-import React from 'react';
-import { createECS } from '../../src';
-import { Setup } from '../Setup';
+import * as A from '@arancini/core'
+import { Html } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
+import React from 'react'
+import { createECS } from '../../src'
+import { Setup } from '../Setup'
 
 export default {
   title: 'Spaces',
-};
+}
 
-const ECS = createECS();
+const ECS = createECS()
 
 const R3FStepper = () => {
   useFrame((_, delta) => {
-    ECS.step(delta);
-  });
+    ECS.step(delta)
+  })
 
-  return null;
-};
+  return null
+}
 
 class ExampleTagComponent extends A.Component {}
 
 class Object3DComponent extends A.Component {
-  object3D!: THREE.Object3D;
+  object3D!: THREE.Object3D
 
   construct(object3D: THREE.Object3D): void {
-    this.object3D = object3D;
+    this.object3D = object3D
   }
 }
 
@@ -39,7 +39,7 @@ const EntitiesAndTheirSpaces = () => (
       </ECS.Component>
     )}
   </ECS.QueryEntities>
-);
+)
 
 export const DefaultSpace = () => {
   return (
@@ -58,8 +58,8 @@ export const DefaultSpace = () => {
         </>
       </Setup>
     </>
-  );
-};
+  )
+}
 
 export const ExplicitSpace = () => {
   return (
@@ -80,5 +80,5 @@ export const ExplicitSpace = () => {
         </>
       </Setup>
     </>
-  );
-};
+  )
+}

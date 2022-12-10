@@ -2,12 +2,12 @@ export const addition = {
   name: 'Addition',
   iterations: 100000,
   setup(ctx) {
-    ctx.setup();
+    ctx.setup()
   },
   perform(ctx) {
-    const entity = ctx.createEntity();
+    const entity = ctx.createEntity()
 
-    ctx.addPositionComponent(entity);
-    ctx.addVelocityComponent(entity);
+    ctx.addPositionComponent(entity)
+    ctx.addVelocityComponent(entity)
   },
-};
+}

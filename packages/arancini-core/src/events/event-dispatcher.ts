@@ -1,5 +1,5 @@
 export class EventDispatcher<E> {
-  listeners: Set<(event: E) => void> = new Set();
+  listeners: Set<(event: E) => void> = new Set()
 
   /**
    * Subscribe to events
@@ -7,9 +7,9 @@ export class EventDispatcher<E> {
    * @returns a function to unsubscribe from the event
    */
   add(handler: (event: E) => void): this {
-    this.listeners.add(handler);
+    this.listeners.add(handler)
 
-    return this;
+    return this
   }
 
   /**
@@ -17,9 +17,9 @@ export class EventDispatcher<E> {
    * @param handler the handler to unsubscribe
    */
   remove(handler: (event: E) => void): this {
-    this.listeners.delete(handler);
+    this.listeners.delete(handler)
 
-    return this;
+    return this
   }
 
   /**
@@ -28,7 +28,7 @@ export class EventDispatcher<E> {
    */
   emit(event: E): void {
     for (const handler of this.listeners.values()) {
-      handler(event);
+      handler(event)
     }
   }
 
@@ -36,6 +36,6 @@ export class EventDispatcher<E> {
    * Clears all event listeners
    */
   clear(): void {
-    this.listeners.clear();
+    this.listeners.clear()
   }
 }

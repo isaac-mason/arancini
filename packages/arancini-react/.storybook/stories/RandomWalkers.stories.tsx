@@ -1,48 +1,48 @@
-import * as A from '@arancini/core';
-import { OrbitControls } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
-import React from 'react';
-import { createECS } from '../../src';
-import { Setup } from '../Setup';
+import * as A from '@arancini/core'
+import { OrbitControls } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
+import React from 'react'
+import { createECS } from '../../src'
+import { Setup } from '../Setup'
 
 export default {
   title: 'Random Walkers',
-};
+}
 
-const R = createECS();
+const R = createECS()
 
 const R3FStepper = () => {
   useFrame((_, delta) => {
-    R.step(delta);
-  });
+    R.step(delta)
+  })
 
-  return null;
-};
+  return null
+}
 
 class WalkingComponent extends A.Component {}
 
 class Object3DComponent extends A.Component {
-  object3D!: THREE.Object3D;
+  object3D!: THREE.Object3D
 
   construct(object3D: THREE.Object3D): void {
-    this.object3D = object3D;
+    this.object3D = object3D
   }
 }
 
 class WalkingSystem extends A.System {
-  walking = this.query([Object3DComponent, WalkingComponent]);
+  walking = this.query([Object3DComponent, WalkingComponent])
 
   onUpdate(delta: number) {
     for (const walker of this.walking) {
-      const { object3D } = walker.get(Object3DComponent);
+      const { object3D } = walker.get(Object3DComponent)
 
-      object3D.position.x += (Math.random() - 0.5) * 2 * delta;
-      object3D.position.y += (Math.random() - 0.5) * 2 * delta;
-      object3D.position.z += (Math.random() - 0.5) * 2 * delta;
+      object3D.position.x += (Math.random() - 0.5) * 2 * delta
+      object3D.position.y += (Math.random() - 0.5) * 2 * delta
+      object3D.position.z += (Math.random() - 0.5) * 2 * delta
 
-      object3D.rotation.x += (Math.random() - 0.5) * 2 * delta;
-      object3D.rotation.y += (Math.random() - 0.5) * 2 * delta;
-      object3D.rotation.z += (Math.random() - 0.5) * 2 * delta;
+      object3D.rotation.x += (Math.random() - 0.5) * 2 * delta
+      object3D.rotation.y += (Math.random() - 0.5) * 2 * delta
+      object3D.rotation.z += (Math.random() - 0.5) * 2 * delta
     }
   }
 }
@@ -85,8 +85,8 @@ const App = () => {
 
       <OrbitControls />
     </>
-  );
-};
+  )
+}
 
 export const Example = () => {
   return (
@@ -95,5 +95,5 @@ export const Example = () => {
         <App />
       </Setup>
     </>
-  );
-};
+  )
+}

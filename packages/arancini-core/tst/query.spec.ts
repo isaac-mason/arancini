@@ -1,7 +1,7 @@
 /* eslint-disable max-classes-per-file */
-import { describe, expect, it } from '@jest/globals';
-import type { Entity, QueryDescription, Space } from '../src';
-import { Component, Query, System, World } from '../src';
+import { describe, expect, it } from '@jest/globals'
+import type { Entity, QueryDescription, Space } from '../src'
+import { Component, Query, System, World } from '../src'
 
 class TestComponentOne extends Component {}
 class TestComponentTwo extends Component {}
@@ -11,521 +11,521 @@ class TestComponentFive extends Component {}
 class TestComponentSix extends Component {}
 
 describe('Query', () => {
-  let world: World;
-  let space: Space;
+  let world: World
+  let space: Space
 
   beforeEach(() => {
-    world = new World();
-    world.init();
+    world = new World()
+    world.init()
 
-    space = world.create.space();
+    space = world.create.space()
 
-    world.registerComponent(TestComponentOne);
-    world.registerComponent(TestComponentTwo);
-    world.registerComponent(TestComponentThree);
-    world.registerComponent(TestComponentFour);
-    world.registerComponent(TestComponentFive);
-    world.registerComponent(TestComponentSix);
-  });
+    world.registerComponent(TestComponentOne)
+    world.registerComponent(TestComponentTwo)
+    world.registerComponent(TestComponentThree)
+    world.registerComponent(TestComponentFour)
+    world.registerComponent(TestComponentFive)
+    world.registerComponent(TestComponentSix)
+  })
 
   it('should throw an error when attempting to create a query with no conditions', () => {
     expect(() => {
-      world.create.query({});
-    }).toThrow();
-  });
+      world.create.query({})
+    }).toThrow()
+  })
 
   it('should be populated with existing entities on creation', () => {
     // query for TestComponentOne
     const description: QueryDescription = {
       all: [TestComponentOne],
-    };
+    }
 
     // create entity matching query
-    const entity = space.create.entity();
-    entity.add(TestComponentOne);
+    const entity = space.create.entity()
+    entity.add(TestComponentOne)
 
     // create query
-    const query = world.create.query(description);
+    const query = world.create.query(description)
 
     // query is populated with existing entity
-    expect(query).toBeTruthy();
-    expect(query.entities.length).toBe(1);
-    expect(query.entities.includes(entity)).toBeTruthy();
-  });
+    expect(query).toBeTruthy()
+    expect(query.entities.length).toBe(1)
+    expect(query.entities.includes(entity)).toBeTruthy()
+  })
 
   it('should reuse existing equivalent queries', () => {
     const descriptionOne: QueryDescription = {
       all: [TestComponentOne],
-    };
+    }
 
-    const descriptionTwo: QueryDescription = [TestComponentOne];
+    const descriptionTwo: QueryDescription = [TestComponentOne]
 
-    const queryOne = world.create.query(descriptionOne);
-    const queryTwo = world.create.query(descriptionTwo);
+    const queryOne = world.create.query(descriptionOne)
+    const queryTwo = world.create.query(descriptionTwo)
 
-    expect(queryOne).toBeTruthy();
-    expect(queryTwo).toBeTruthy();
+    expect(queryOne).toBeTruthy()
+    expect(queryTwo).toBeTruthy()
 
-    expect(queryOne).toEqual(queryTwo);
-  });
+    expect(queryOne).toEqual(queryTwo)
+  })
 
   it('can be removed from a world', () => {
     // query for TestComponentOne
     const description: QueryDescription = {
       all: [TestComponentOne],
-    };
-    const query = world.create.query(description);
+    }
+    const query = world.create.query(description)
 
     // create entity matching the query
-    const entityOne = space.create.entity();
-    entityOne.add(TestComponentOne);
+    const entityOne = space.create.entity()
+    entityOne.add(TestComponentOne)
 
     // entity should be updated
-    expect(query).toBeTruthy();
-    expect(query.entities.length).toBe(1);
-    expect(query.entities.includes(entityOne)).toBeTruthy();
+    expect(query).toBeTruthy()
+    expect(query.entities.length).toBe(1)
+    expect(query.entities.includes(entityOne)).toBeTruthy()
 
     // remove the query
-    query.destroy();
+    query.destroy()
 
     // creating an entity matching the removed query should not update the query
-    const entityTwo = space.create.entity();
-    entityTwo.add(TestComponentOne);
-    expect(query).toBeTruthy();
-    expect(query.entities.length).toBe(1);
-    expect(query.entities.includes(entityOne)).toBeTruthy();
-    expect(query.entities.includes(entityTwo)).toBeFalsy();
+    const entityTwo = space.create.entity()
+    entityTwo.add(TestComponentOne)
+    expect(query).toBeTruthy()
+    expect(query.entities.length).toBe(1)
+    expect(query.entities.includes(entityOne)).toBeTruthy()
+    expect(query.entities.includes(entityTwo)).toBeFalsy()
 
     // removing a query that isn't in the world is swallowed silently
     world.queryManager.removeQuery(
       new Query({} as World, 'some key not in the query manager')
-    );
+    )
 
     // removing an already removed query is swallowed silently
-    world.queryManager.removeQuery(query);
-  });
+    world.queryManager.removeQuery(query)
+  })
 
   describe('first', () => {
     it('should retrieve the first Entity in the Query, or null if no Entities match the query', () => {
       const description: QueryDescription = {
         all: [TestComponentOne],
-      };
+      }
 
-      const entityOne = space.create.entity();
-      entityOne.add(TestComponentOne);
+      const entityOne = space.create.entity()
+      entityOne.add(TestComponentOne)
 
-      const entityTwo = space.create.entity();
-      entityTwo.add(TestComponentOne);
+      const entityTwo = space.create.entity()
+      entityTwo.add(TestComponentOne)
 
-      const query = world.create.query(description);
+      const query = world.create.query(description)
 
-      expect(query.first).toBe(entityOne);
+      expect(query.first).toBe(entityOne)
 
-      entityOne.destroy();
-      entityTwo.destroy();
+      entityOne.destroy()
+      entityTwo.destroy()
 
-      expect(query.first).toBe(undefined);
-    });
-  });
+      expect(query.first).toBe(undefined)
+    })
+  })
 
   describe('query creation', () => {
     it('should generate new query results if the same query does not already exists', () => {
       const description: QueryDescription = {
         all: [TestComponentOne],
-      };
+      }
 
       // create an entity matching the query
-      const entityOne = space.create.entity();
-      entityOne.add(TestComponentOne);
+      const entityOne = space.create.entity()
+      entityOne.add(TestComponentOne)
 
       // create another entity that matches the query
-      const entityTwo = space.create.entity();
-      entityTwo.add(TestComponentOne);
+      const entityTwo = space.create.entity()
+      entityTwo.add(TestComponentOne)
 
       // get query results
-      const queryResults = world.query(description);
-      expect(queryResults).toBeTruthy();
-      expect(queryResults.length).toBe(2);
-      expect(queryResults.includes(entityOne)).toBeTruthy();
-      expect(queryResults.includes(entityTwo)).toBeTruthy();
-    });
+      const queryResults = world.query(description)
+      expect(queryResults).toBeTruthy()
+      expect(queryResults.length).toBe(2)
+      expect(queryResults.includes(entityOne)).toBeTruthy()
+      expect(queryResults.includes(entityTwo)).toBeTruthy()
+    })
 
     it('should reuse query results if the same query already exists', () => {
       const description: QueryDescription = {
         all: [TestComponentOne],
-      };
+      }
 
-      const entityOne = space.create.entity();
-      entityOne.add(TestComponentOne);
+      const entityOne = space.create.entity()
+      entityOne.add(TestComponentOne)
 
-      const activeQuery = world.create.query(description);
+      const activeQuery = world.create.query(description)
 
-      world.update();
+      world.update()
 
-      const entityTwo = space.create.entity();
-      entityTwo.add(TestComponentOne);
+      const entityTwo = space.create.entity()
+      entityTwo.add(TestComponentOne)
 
-      const onceOffQueryResults = world.query(description);
+      const onceOffQueryResults = world.query(description)
 
       // once-off query results should be the same as the active query results
-      expect(onceOffQueryResults).toBeTruthy();
-      expect(onceOffQueryResults.includes(entityOne)).toBeTruthy();
-      expect(onceOffQueryResults.length).toBe(activeQuery.entities.length);
-    });
-  });
+      expect(onceOffQueryResults).toBeTruthy()
+      expect(onceOffQueryResults.includes(entityOne)).toBeTruthy()
+      expect(onceOffQueryResults.length).toBe(activeQuery.entities.length)
+    })
+  })
 
   describe('query evaluation', () => {
     it('should emit events when entities are added and removed from a query', () => {
-      const onAddedHandlerOne = jest.fn();
-      const onAddedHandlerTwo = jest.fn();
+      const onAddedHandlerOne = jest.fn()
+      const onAddedHandlerTwo = jest.fn()
 
-      const onRemovedHandlerOne = jest.fn();
-      const onRemovedHandlerTwo = jest.fn();
+      const onRemovedHandlerOne = jest.fn()
+      const onRemovedHandlerTwo = jest.fn()
 
-      const query = world.create.query([TestComponentOne]);
+      const query = world.create.query([TestComponentOne])
 
-      query.onEntityAdded.add(onAddedHandlerOne);
-      query.onEntityRemoved.add(onRemovedHandlerOne);
-      query.onEntityAdded.add(onAddedHandlerTwo);
-      query.onEntityRemoved.add(onRemovedHandlerTwo);
+      query.onEntityAdded.add(onAddedHandlerOne)
+      query.onEntityRemoved.add(onRemovedHandlerOne)
+      query.onEntityAdded.add(onAddedHandlerTwo)
+      query.onEntityRemoved.add(onRemovedHandlerTwo)
 
-      const entityOne = world.create.entity();
-      entityOne.add(TestComponentOne);
+      const entityOne = world.create.entity()
+      entityOne.add(TestComponentOne)
 
-      expect(onAddedHandlerOne.mock.calls.length).toBe(1);
-      expect(onAddedHandlerOne.mock.calls[0][0]).toBe(entityOne);
-      expect(onAddedHandlerTwo.mock.calls.length).toBe(1);
-      expect(onAddedHandlerTwo.mock.calls[0][0]).toBe(entityOne);
+      expect(onAddedHandlerOne.mock.calls.length).toBe(1)
+      expect(onAddedHandlerOne.mock.calls[0][0]).toBe(entityOne)
+      expect(onAddedHandlerTwo.mock.calls.length).toBe(1)
+      expect(onAddedHandlerTwo.mock.calls[0][0]).toBe(entityOne)
 
-      entityOne.remove(TestComponentOne);
+      entityOne.remove(TestComponentOne)
 
-      expect(onRemovedHandlerOne.mock.calls.length).toBe(1);
-      expect(onRemovedHandlerOne.mock.calls[0][0]).toBe(entityOne);
-      expect(onRemovedHandlerTwo.mock.calls.length).toBe(1);
-      expect(onRemovedHandlerTwo.mock.calls[0][0]).toBe(entityOne);
+      expect(onRemovedHandlerOne.mock.calls.length).toBe(1)
+      expect(onRemovedHandlerOne.mock.calls[0][0]).toBe(entityOne)
+      expect(onRemovedHandlerTwo.mock.calls.length).toBe(1)
+      expect(onRemovedHandlerTwo.mock.calls[0][0]).toBe(entityOne)
 
-      query.onEntityAdded.remove(onAddedHandlerTwo);
-      query.onEntityRemoved.remove(onRemovedHandlerTwo);
+      query.onEntityAdded.remove(onAddedHandlerTwo)
+      query.onEntityRemoved.remove(onRemovedHandlerTwo)
 
-      const entityTwo = world.create.entity();
-      entityTwo.add(TestComponentOne);
+      const entityTwo = world.create.entity()
+      entityTwo.add(TestComponentOne)
 
-      expect(onAddedHandlerOne.mock.calls.length).toBe(2);
-      expect(onAddedHandlerOne.mock.calls[1][0]).toBe(entityTwo);
-      expect(onAddedHandlerTwo.mock.calls.length).toBe(1);
+      expect(onAddedHandlerOne.mock.calls.length).toBe(2)
+      expect(onAddedHandlerOne.mock.calls[1][0]).toBe(entityTwo)
+      expect(onAddedHandlerTwo.mock.calls.length).toBe(1)
 
-      entityTwo.remove(TestComponentOne);
+      entityTwo.remove(TestComponentOne)
 
-      expect(onRemovedHandlerOne.mock.calls.length).toBe(2);
-      expect(onRemovedHandlerOne.mock.calls[1][0]).toBe(entityTwo);
-      expect(onRemovedHandlerTwo.mock.calls.length).toBe(1);
-    });
+      expect(onRemovedHandlerOne.mock.calls.length).toBe(2)
+      expect(onRemovedHandlerOne.mock.calls[1][0]).toBe(entityTwo)
+      expect(onRemovedHandlerTwo.mock.calls.length).toBe(1)
+    })
 
     it('updates system query results if an entity matches a query with the ANY condition', () => {
-      const onAddedFn = jest.fn();
-      const onRemovedFn = jest.fn();
+      const onAddedFn = jest.fn()
+      const onRemovedFn = jest.fn()
       class TestSystem extends System {
-        testQuery = this.query({ any: [TestComponentOne, TestComponentTwo] });
+        testQuery = this.query({ any: [TestComponentOne, TestComponentTwo] })
 
         onInit(): void {
-          this.testQuery.onEntityAdded.add((e) => this.onAdded(e));
-          this.testQuery.onEntityRemoved.add((e) => this.onRemoved(e));
+          this.testQuery.onEntityAdded.add((e) => this.onAdded(e))
+          this.testQuery.onEntityRemoved.add((e) => this.onRemoved(e))
         }
 
         onAdded(entity: Entity): void {
-          onAddedFn(entity);
+          onAddedFn(entity)
         }
 
         onRemoved(entity: Entity): void {
-          onRemovedFn(entity);
+          onRemovedFn(entity)
         }
       }
 
-      world.registerSystem(TestSystem);
-      const system = world.getSystem(TestSystem) as TestSystem;
+      world.registerSystem(TestSystem)
+      const system = world.getSystem(TestSystem) as TestSystem
 
-      const entity = space.create.entity();
-      entity.add(TestComponentOne);
+      const entity = space.create.entity()
+      entity.add(TestComponentOne)
 
-      expect(system.testQuery.entities.length).toBe(1);
-      expect(system.testQuery.entities.includes(entity)).toBeTruthy();
+      expect(system.testQuery.entities.length).toBe(1)
+      expect(system.testQuery.entities.includes(entity)).toBeTruthy()
 
-      expect(onAddedFn.mock.calls.length).toBe(1);
-      expect(onAddedFn.mock.calls[0][0]).toBe(entity);
-      expect(onRemovedFn.mock.calls.length).toBe(0);
+      expect(onAddedFn.mock.calls.length).toBe(1)
+      expect(onAddedFn.mock.calls[0][0]).toBe(entity)
+      expect(onRemovedFn.mock.calls.length).toBe(0)
 
-      entity.remove(TestComponentOne);
+      entity.remove(TestComponentOne)
 
       expect(
         world.queryManager.dedupedQueries
           .get(system.testQuery.key)
           ?.entitySet.has(entity)
-      ).toBe(false);
+      ).toBe(false)
 
-      expect(system.testQuery.entities.length).toBe(0);
-      expect(system.testQuery.entities.includes(entity)).toBeFalsy();
+      expect(system.testQuery.entities.length).toBe(0)
+      expect(system.testQuery.entities.includes(entity)).toBeFalsy()
 
-      expect(onAddedFn.mock.calls.length).toBe(1);
-      expect(onRemovedFn.mock.calls.length).toBe(1);
-      expect(onRemovedFn.mock.calls[0][0]).toBe(entity);
-    });
+      expect(onAddedFn.mock.calls.length).toBe(1)
+      expect(onRemovedFn.mock.calls.length).toBe(1)
+      expect(onRemovedFn.mock.calls[0][0]).toBe(entity)
+    })
 
     it('updates system query results if an entity matches a query with the NOT condition', () => {
-      const onAddedFn = jest.fn();
-      const onRemovedFn = jest.fn();
+      const onAddedFn = jest.fn()
+      const onRemovedFn = jest.fn()
       class TestSystem extends System {
-        testQuery = this.query({ not: [TestComponentOne] });
+        testQuery = this.query({ not: [TestComponentOne] })
 
         onInit(): void {
-          this.testQuery.onEntityAdded.add((e) => this.onAdded(e));
-          this.testQuery.onEntityRemoved.add((e) => this.onRemoved(e));
+          this.testQuery.onEntityAdded.add((e) => this.onAdded(e))
+          this.testQuery.onEntityRemoved.add((e) => this.onRemoved(e))
         }
 
         onAdded(entity: Entity): void {
-          onAddedFn(entity);
+          onAddedFn(entity)
         }
 
         onRemoved(entity: Entity): void {
-          onRemovedFn(entity);
+          onRemovedFn(entity)
         }
       }
 
-      world.registerSystem(TestSystem);
-      const system = world.getSystem(TestSystem) as TestSystem;
+      world.registerSystem(TestSystem)
+      const system = world.getSystem(TestSystem) as TestSystem
 
-      const entity = space.create.entity();
-      entity.add(TestComponentTwo);
+      const entity = space.create.entity()
+      entity.add(TestComponentTwo)
 
-      expect(system.testQuery.entities.length).toBe(1);
-      expect(system.testQuery.entities.includes(entity)).toBeTruthy();
+      expect(system.testQuery.entities.length).toBe(1)
+      expect(system.testQuery.entities.includes(entity)).toBeTruthy()
 
-      expect(onAddedFn.mock.calls.length).toBe(1);
-      expect(onAddedFn.mock.calls[0][0]).toBe(entity);
-      expect(onRemovedFn.mock.calls.length).toBe(0);
+      expect(onAddedFn.mock.calls.length).toBe(1)
+      expect(onAddedFn.mock.calls[0][0]).toBe(entity)
+      expect(onRemovedFn.mock.calls.length).toBe(0)
 
-      entity.add(TestComponentOne);
+      entity.add(TestComponentOne)
 
-      expect(system.testQuery.entities.length).toBe(0);
-      expect(system.testQuery.entities.includes(entity)).toBeFalsy();
+      expect(system.testQuery.entities.length).toBe(0)
+      expect(system.testQuery.entities.includes(entity)).toBeFalsy()
 
-      expect(onAddedFn.mock.calls.length).toBe(1);
-      expect(onRemovedFn.mock.calls.length).toBe(1);
-      expect(onRemovedFn.mock.calls[0][0]).toBe(entity);
-    });
+      expect(onAddedFn.mock.calls.length).toBe(1)
+      expect(onRemovedFn.mock.calls.length).toBe(1)
+      expect(onRemovedFn.mock.calls[0][0]).toBe(entity)
+    })
 
     it('updates system query results if an entity matches a query with the ALL condition', () => {
-      const onAddedFn = jest.fn();
-      const onRemovedFn = jest.fn();
+      const onAddedFn = jest.fn()
+      const onRemovedFn = jest.fn()
       class TestSystem extends System {
         testQuery = this.query([
           TestComponentOne,
           TestComponentTwo,
           TestComponentThree,
-        ]);
+        ])
 
         onInit(): void {
-          this.testQuery.onEntityAdded.add((e) => this.onAdded(e));
-          this.testQuery.onEntityRemoved.add((e) => this.onRemoved(e));
+          this.testQuery.onEntityAdded.add((e) => this.onAdded(e))
+          this.testQuery.onEntityRemoved.add((e) => this.onRemoved(e))
         }
 
         onAdded(entity: Entity): void {
-          onAddedFn(entity);
+          onAddedFn(entity)
         }
 
         onRemoved(entity: Entity): void {
-          onRemovedFn(entity);
+          onRemovedFn(entity)
         }
       }
 
-      world.registerSystem(TestSystem);
-      const system = world.getSystem(TestSystem) as TestSystem;
+      world.registerSystem(TestSystem)
+      const system = world.getSystem(TestSystem) as TestSystem
 
-      const entity = space.create.entity();
-      entity.add(TestComponentOne);
-      entity.add(TestComponentTwo);
-      entity.add(TestComponentThree);
+      const entity = space.create.entity()
+      entity.add(TestComponentOne)
+      entity.add(TestComponentTwo)
+      entity.add(TestComponentThree)
 
-      expect(system.testQuery.entities.length).toBe(1);
-      expect(system.testQuery.entities.includes(entity)).toBeTruthy();
+      expect(system.testQuery.entities.length).toBe(1)
+      expect(system.testQuery.entities.includes(entity)).toBeTruthy()
 
-      expect(onAddedFn.mock.calls.length).toBe(1);
-      expect(onAddedFn.mock.calls[0][0]).toBe(entity);
-      expect(onRemovedFn.mock.calls.length).toBe(0);
+      expect(onAddedFn.mock.calls.length).toBe(1)
+      expect(onAddedFn.mock.calls[0][0]).toBe(entity)
+      expect(onRemovedFn.mock.calls.length).toBe(0)
 
-      entity.remove(TestComponentThree);
+      entity.remove(TestComponentThree)
 
-      expect(system.testQuery.entities.length).toBe(0);
-      expect(system.testQuery.entities.includes(entity)).toBeFalsy();
+      expect(system.testQuery.entities.length).toBe(0)
+      expect(system.testQuery.entities.includes(entity)).toBeFalsy()
 
-      expect(onAddedFn.mock.calls.length).toBe(1);
-      expect(onRemovedFn.mock.calls.length).toBe(1);
-      expect(onRemovedFn.mock.calls[0][0]).toBe(entity);
-    });
+      expect(onAddedFn.mock.calls.length).toBe(1)
+      expect(onRemovedFn.mock.calls.length).toBe(1)
+      expect(onRemovedFn.mock.calls[0][0]).toBe(entity)
+    })
 
     it('updates system query results if an entity matches a query with multiple conditions', () => {
-      const onAddedFn = jest.fn();
-      const onRemovedFn = jest.fn();
+      const onAddedFn = jest.fn()
+      const onRemovedFn = jest.fn()
       class TestSystem extends System {
         testQuery = this.query({
           all: [TestComponentOne, TestComponentTwo],
           any: [TestComponentThree, TestComponentFour],
           not: [TestComponentFive, TestComponentSix],
-        });
+        })
 
         onInit(): void {
-          this.testQuery.onEntityAdded.add((e) => this.onAdded(e));
-          this.testQuery.onEntityRemoved.add((e) => this.onRemoved(e));
+          this.testQuery.onEntityAdded.add((e) => this.onAdded(e))
+          this.testQuery.onEntityRemoved.add((e) => this.onRemoved(e))
         }
 
         onAdded(entity: Entity): void {
-          onAddedFn(entity);
+          onAddedFn(entity)
         }
 
         onRemoved(entity: Entity): void {
-          onRemovedFn(entity);
+          onRemovedFn(entity)
         }
       }
 
-      world.registerSystem(TestSystem);
-      const system = world.getSystem(TestSystem) as TestSystem;
+      world.registerSystem(TestSystem)
+      const system = world.getSystem(TestSystem) as TestSystem
 
-      const entity = space.create.entity();
-      entity.add(TestComponentOne);
-      entity.add(TestComponentTwo);
-      entity.add(TestComponentFour);
+      const entity = space.create.entity()
+      entity.add(TestComponentOne)
+      entity.add(TestComponentTwo)
+      entity.add(TestComponentFour)
 
-      expect(system.testQuery.entities.length).toBe(1);
-      expect(system.testQuery.entities.includes(entity)).toBeTruthy();
+      expect(system.testQuery.entities.length).toBe(1)
+      expect(system.testQuery.entities.includes(entity)).toBeTruthy()
 
-      expect(onAddedFn.mock.calls.length).toBe(1);
-      expect(onAddedFn.mock.calls[0][0]).toBe(entity);
-      expect(onRemovedFn.mock.calls.length).toBe(0);
-    });
+      expect(onAddedFn.mock.calls.length).toBe(1)
+      expect(onAddedFn.mock.calls[0][0]).toBe(entity)
+      expect(onRemovedFn.mock.calls.length).toBe(0)
+    })
 
     it('should remove destroyed entities from all queries', () => {
       // query for TestComponentOne
       const description: QueryDescription = {
         all: [TestComponentOne],
-      };
-      const query = world.create.query(description);
+      }
+      const query = world.create.query(description)
 
-      expect(query.entities.length).toBe(0);
+      expect(query.entities.length).toBe(0)
 
       // create entity that matches query
-      const entityOne = space.create.entity();
-      entityOne.add(TestComponentOne);
+      const entityOne = space.create.entity()
+      entityOne.add(TestComponentOne)
 
       // create another entity that matches query
-      const entityTwo = space.create.entity();
-      entityTwo.add(TestComponentOne);
-      entityTwo.add(TestComponentTwo);
+      const entityTwo = space.create.entity()
+      entityTwo.add(TestComponentOne)
+      entityTwo.add(TestComponentTwo)
 
       expect(
         world.queryManager.dedupedQueries
           .get(query.key)
           ?.entitySet.has(entityOne)
-      ).toBe(true);
+      ).toBe(true)
 
       expect(
         world.queryManager.dedupedQueries
           .get(query.key)
           ?.entitySet.has(entityTwo)
-      ).toBe(true);
+      ).toBe(true)
 
-      expect(query.entities.length).toBe(2);
-      expect(query.entities.includes(entityOne)).toBeTruthy();
-      expect(query.entities.includes(entityTwo)).toBeTruthy();
+      expect(query.entities.length).toBe(2)
+      expect(query.entities.includes(entityOne)).toBeTruthy()
+      expect(query.entities.includes(entityTwo)).toBeTruthy()
 
       // update, flushing added and removed
-      world.update();
+      world.update()
 
       // destroy entityOne, removing it from the query
-      entityOne.destroy();
+      entityOne.destroy()
 
       expect(
         world.queryManager.dedupedQueries
           .get(query.key)
           ?.entitySet.has(entityOne)
-      ).toBe(false);
+      ).toBe(false)
 
       expect(
         world.queryManager.dedupedQueries
           .get(query.key)
           ?.entitySet.has(entityTwo)
-      ).toBe(true);
+      ).toBe(true)
 
-      expect(query.entities.length).toBe(1);
-      expect(query.entities.includes(entityOne)).toBeFalsy();
-      expect(query.entities.includes(entityTwo)).toBeTruthy();
-    });
-  });
+      expect(query.entities.length).toBe(1)
+      expect(query.entities.includes(entityOne)).toBeFalsy()
+      expect(query.entities.includes(entityTwo)).toBeTruthy()
+    })
+  })
 
   describe('getDescriptionDedupeString', () => {
     it('should contain class names', () => {
       const queryOne: QueryDescription = {
         all: [TestComponentOne, TestComponentTwo],
-      };
+      }
 
       expect(Query.getDescriptionDedupeString(queryOne)).toEqual(
         'TestComponentOne&TestComponentTwo'
-      );
-    });
+      )
+    })
 
     it('should return the same key for two matching query descriptions', () => {
       const queryOne: QueryDescription = {
         any: [TestComponentOne, TestComponentTwo],
         all: [TestComponentThree, TestComponentFour],
         not: [TestComponentFive, TestComponentSix],
-      };
+      }
 
       const queryTwo: QueryDescription = {
         not: [TestComponentSix, TestComponentFive],
         all: [TestComponentFour, TestComponentThree],
         any: [TestComponentTwo, TestComponentOne],
-      };
+      }
 
       expect(Query.getDescriptionDedupeString(queryOne)).toEqual(
         Query.getDescriptionDedupeString(queryTwo)
-      );
-    });
+      )
+    })
 
     it('should return a different key for two different query descriptions', () => {
       const differentComponentsOne: QueryDescription = {
         all: [TestComponentOne, TestComponentTwo],
-      };
+      }
 
       const differentComponentsTwo: QueryDescription = {
         all: [TestComponentOne],
-      };
+      }
 
       expect(
         Query.getDescriptionDedupeString(differentComponentsOne)
-      ).not.toEqual(Query.getDescriptionDedupeString(differentComponentsTwo));
+      ).not.toEqual(Query.getDescriptionDedupeString(differentComponentsTwo))
 
       const differentConditionOne: QueryDescription = {
         all: [TestComponentOne],
-      };
+      }
 
       const differentConditionTwo: QueryDescription = {
         not: [TestComponentOne],
-      };
+      }
 
       expect(
         Query.getDescriptionDedupeString(differentConditionOne)
-      ).not.toEqual(Query.getDescriptionDedupeString(differentConditionTwo));
+      ).not.toEqual(Query.getDescriptionDedupeString(differentConditionTwo))
 
       const partiallyDifferentOne: QueryDescription = {
         all: [TestComponentOne],
-      };
+      }
 
       const partiallyDifferentTwo: QueryDescription = {
         all: [TestComponentOne],
         not: [TestComponentTwo],
-      };
+      }
 
       expect(
         Query.getDescriptionDedupeString(partiallyDifferentOne)
-      ).not.toEqual(Query.getDescriptionDedupeString(partiallyDifferentTwo));
-    });
-  });
-});
+      ).not.toEqual(Query.getDescriptionDedupeString(partiallyDifferentTwo))
+    })
+  })
+})

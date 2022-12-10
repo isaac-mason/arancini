@@ -1,17 +1,17 @@
-import type { Entity } from './entity';
-import type { QueryBitSets, QueryDescription } from './query';
-import { Query } from './query';
-import { BitSet } from './utils/bit-set';
-import type { World } from './world';
+import type { Entity } from './entity'
+import type { QueryBitSets, QueryDescription } from './query'
+import { Query } from './query'
+import { BitSet } from './utils/bit-set'
+import type { World } from './world'
 
 type DedupedQuery = {
-  dedupeString: string;
-  instances: Set<Query>;
-  description: QueryDescription;
-  bitSets: QueryBitSets;
-  entities: Entity[];
-  entitySet: Set<Entity>;
-};
+  dedupeString: string
+  instances: Set<Query>
+  description: QueryDescription
+  bitSets: QueryBitSets
+  entities: Entity[]
+  entitySet: Set<Entity>
+}
 
 /**
  * QueryManager is an internal class that manages Query instances
@@ -22,19 +22,19 @@ export class QueryManager {
   /**
    * Deduped Queries in the QueryManager
    */
-  dedupedQueries: Map<string, DedupedQuery> = new Map();
+  dedupedQueries: Map<string, DedupedQuery> = new Map()
 
   /**
    * The World the QueryManager is in
    */
-  private world: World;
+  private world: World
 
   /**
    * Constructor for a QueryManager
    * @param world the World the QueryManager is in
    */
   constructor(world: World) {
-    this.world = world;
+    this.world = world
   }
 
   /**
@@ -42,12 +42,12 @@ export class QueryManager {
    * @param queryDescription the description of the query to create
    */
   createQuery(queryDescription: QueryDescription): Query {
-    const dedupeString = Query.getDescriptionDedupeString(queryDescription);
+    const dedupeString = Query.getDescriptionDedupeString(queryDescription)
 
-    let dedupedQuery = this.dedupedQueries.get(dedupeString);
+    let dedupedQuery = this.dedupedQueries.get(dedupeString)
 
     if (dedupedQuery === undefined) {
-      const isArray = Array.isArray(queryDescription);
+      const isArray = Array.isArray(queryDescription)
       if (
         (isArray && queryDescription.length === 0) ||
         (!isArray &&
@@ -58,7 +58,7 @@ export class QueryManager {
             (queryDescription.any && queryDescription.any.length === 0) ||
             (queryDescription.not && queryDescription.not.length === 0)))
       ) {
-        throw new Error('Query must have at least one condition');
+        throw new Error('Query must have at least one condition')
       }
 
       dedupedQuery = {
@@ -68,24 +68,24 @@ export class QueryManager {
         bitSets: this.getQueryBitSets(queryDescription),
         entities: [],
         entitySet: new Set(),
-      };
-
-      const matches = this.getQueryResults(dedupedQuery.bitSets);
-
-      for (const entity of matches.values()) {
-        dedupedQuery.entities.push(entity);
-        dedupedQuery.entitySet.add(entity);
       }
 
-      this.dedupedQueries.set(dedupeString, dedupedQuery);
+      const matches = this.getQueryResults(dedupedQuery.bitSets)
+
+      for (const entity of matches.values()) {
+        dedupedQuery.entities.push(entity)
+        dedupedQuery.entitySet.add(entity)
+      }
+
+      this.dedupedQueries.set(dedupeString, dedupedQuery)
     }
 
-    const newQueryInstance = new Query(this.world, dedupeString);
-    newQueryInstance.entities = dedupedQuery.entities;
+    const newQueryInstance = new Query(this.world, dedupeString)
+    newQueryInstance.entities = dedupedQuery.entities
 
-    dedupedQuery.instances.add(newQueryInstance);
+    dedupedQuery.instances.add(newQueryInstance)
 
-    return newQueryInstance;
+    return newQueryInstance
   }
 
   /**
@@ -93,8 +93,8 @@ export class QueryManager {
    * @param queryDescription the query description to check for
    */
   hasQuery(queryDescription: QueryDescription): boolean {
-    const dedupeString = Query.getDescriptionDedupeString(queryDescription);
-    return this.dedupedQueries.has(dedupeString);
+    const dedupeString = Query.getDescriptionDedupeString(queryDescription)
+    return this.dedupedQueries.has(dedupeString)
   }
 
   /**
@@ -103,26 +103,26 @@ export class QueryManager {
    */
   onEntityComponentChange(entity: Entity): void {
     for (const query of this.dedupedQueries.values()) {
-      const entityInQuery = query.entitySet.has(entity);
+      const entityInQuery = query.entitySet.has(entity)
 
-      const matchesQuery = this.matchesQueryConditions(query.bitSets, entity);
+      const matchesQuery = this.matchesQueryConditions(query.bitSets, entity)
 
       if (matchesQuery && !entityInQuery) {
-        query.entities.push(entity);
-        query.entitySet.add(entity);
+        query.entities.push(entity)
+        query.entitySet.add(entity)
 
         for (const queryInstance of query.instances) {
-          queryInstance.onEntityAdded.emit(entity);
+          queryInstance.onEntityAdded.emit(entity)
         }
       } else if (!matchesQuery && entityInQuery) {
-        const index = query.entities.indexOf(entity, 0);
+        const index = query.entities.indexOf(entity, 0)
         if (index !== -1) {
-          query.entities.splice(index, 1);
+          query.entities.splice(index, 1)
         }
-        query.entitySet.delete(entity);
+        query.entitySet.delete(entity)
 
         for (const queryInstance of query.instances) {
-          queryInstance.onEntityRemoved.emit(entity);
+          queryInstance.onEntityRemoved.emit(entity)
         }
       }
     }
@@ -134,14 +134,14 @@ export class QueryManager {
    */
   onEntityRemoved(entity: Entity): void {
     for (const dedupedQuery of this.dedupedQueries.values()) {
-      const index = dedupedQuery.entities.indexOf(entity, 0);
+      const index = dedupedQuery.entities.indexOf(entity, 0)
       if (index !== -1) {
-        dedupedQuery.entities.splice(index, 1);
+        dedupedQuery.entities.splice(index, 1)
       }
-      dedupedQuery.entitySet.delete(entity);
+      dedupedQuery.entitySet.delete(entity)
 
       for (const queryInstance of dedupedQuery.instances) {
-        queryInstance.onEntityRemoved.emit(entity);
+        queryInstance.onEntityRemoved.emit(entity)
       }
     }
   }
@@ -153,15 +153,15 @@ export class QueryManager {
    * @param queryDescription the query description
    */
   query(queryDescription: QueryDescription): Entity[] {
-    const key = Query.getDescriptionDedupeString(queryDescription);
+    const key = Query.getDescriptionDedupeString(queryDescription)
 
-    const query = this.dedupedQueries.get(key);
+    const query = this.dedupedQueries.get(key)
 
     if (query) {
-      return query.entities;
+      return query.entities
     }
 
-    return this.getQueryResults(this.getQueryBitSets(queryDescription));
+    return this.getQueryResults(this.getQueryBitSets(queryDescription))
   }
 
   /**
@@ -169,17 +169,17 @@ export class QueryManager {
    * @param query the query to remove
    */
   removeQuery(query: Query): void {
-    const dedupedQuery = this.dedupedQueries.get(query.key);
+    const dedupedQuery = this.dedupedQueries.get(query.key)
     if (dedupedQuery === undefined || !dedupedQuery.instances.has(query)) {
-      return;
+      return
     }
 
-    dedupedQuery.instances.delete(query);
-    query.onEntityAdded.clear();
-    query.onEntityRemoved.clear();
+    dedupedQuery.instances.delete(query)
+    query.onEntityAdded.clear()
+    query.onEntityRemoved.clear()
 
     if (dedupedQuery.instances.size === 0) {
-      this.dedupedQueries.delete(dedupedQuery.dedupeString);
+      this.dedupedQueries.delete(dedupedQuery.dedupeString)
     }
   }
 
@@ -191,45 +191,45 @@ export class QueryManager {
       queryBitSets.all &&
       !entity.componentsBitSet.containsAll(queryBitSets.all)
     ) {
-      return false;
+      return false
     }
 
     if (
       queryBitSets.any &&
       !entity.componentsBitSet.containsAny(queryBitSets.any)
     ) {
-      return false;
+      return false
     }
 
     if (
       queryBitSets.not &&
       entity.componentsBitSet.containsAny(queryBitSets.not)
     ) {
-      return false;
+      return false
     }
 
-    return true;
+    return true
   }
 
   private getQueryResults(queryBitSets: QueryBitSets): Entity[] {
-    const matches: Entity[] = [];
+    const matches: Entity[] = []
     for (const space of this.world.spaceManager.spaces.values()) {
       for (const entity of space.entities.values()) {
         if (this.matchesQueryConditions(queryBitSets, entity)) {
-          matches.push(entity);
+          matches.push(entity)
         }
       }
     }
 
-    return matches;
+    return matches
   }
 
   private getQueryBitSets(queryDescription: QueryDescription): QueryBitSets {
     const { all, any, not } = Array.isArray(queryDescription)
       ? { all: queryDescription, any: undefined, not: undefined }
-      : queryDescription;
+      : queryDescription
 
-    const queryBitSets: QueryBitSets = {};
+    const queryBitSets: QueryBitSets = {}
 
     queryBitSets.all = all
       ? new BitSet(
@@ -237,7 +237,7 @@ export class QueryManager {
             this.world.componentRegistry.getComponentIndex(component)
           )
         )
-      : undefined;
+      : undefined
 
     queryBitSets.any = any
       ? new BitSet(
@@ -245,7 +245,7 @@ export class QueryManager {
             this.world.componentRegistry.getComponentIndex(component)
           )
         )
-      : undefined;
+      : undefined
 
     queryBitSets.not = not
       ? new BitSet(
@@ -253,8 +253,8 @@ export class QueryManager {
             this.world.componentRegistry.getComponentIndex(component)
           )
         )
-      : undefined;
+      : undefined
 
-    return queryBitSets;
+    return queryBitSets
   }
 }

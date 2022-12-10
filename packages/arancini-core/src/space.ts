@@ -1,9 +1,9 @@
-import type { ComponentDetails } from './component';
-import type { Entity } from './entity';
-import type { Event, EventHandler, EventSubscription } from './events';
-import { EventSystem } from './events';
-import { uniqueId } from './utils';
-import type { World } from './world';
+import type { ComponentDetails } from './component'
+import type { Entity } from './entity'
+import type { Event, EventHandler, EventSubscription } from './events'
+import { EventSystem } from './events'
+import { uniqueId } from './utils'
+import type { World } from './world'
 
 /**
  * Params for creating a new Space
@@ -12,8 +12,8 @@ export type SpaceParams = {
   /**
    * An id for the space, must be unique
    */
-  id?: string;
-};
+  id?: string
+}
 
 /**
  * Spaces are containers for Entities that can be added and removed from a world.
@@ -56,27 +56,27 @@ export class Space {
   /**
    * A unique ID for the space
    */
-  id: string;
+  id: string
 
   /**
    * Entities in the space
    */
-  entities: Map<string, Entity> = new Map();
+  entities: Map<string, Entity> = new Map()
 
   /**
    * The spaces event system
    */
-  events = new EventSystem();
+  events = new EventSystem()
 
   /**
    * Whether the space has been initialised
    */
-  initialised = false;
+  initialised = false
 
   /**
    * The world the space is in
    */
-  world: World;
+  world: World
 
   /**
    * Constructor for the Space
@@ -84,8 +84,8 @@ export class Space {
    * @param params the parameters for the space
    */
   constructor(world: World, params?: SpaceParams) {
-    this.world = world;
-    this.id = params?.id || uniqueId();
+    this.world = world
+    this.id = params?.id || uniqueId()
   }
 
   /**
@@ -96,13 +96,13 @@ export class Space {
      * Creates a new entity in the space
      * @returns a new entity
      */
-    entity: (components?: ComponentDetails[]) => Entity;
+    entity: (components?: ComponentDetails[]) => Entity
   } {
     return {
       entity: (components) => {
-        return this.world.spaceManager.createEntity(this, components);
+        return this.world.spaceManager.createEntity(this, components)
       },
-    };
+    }
   }
 
   /**
@@ -110,7 +110,7 @@ export class Space {
    * @param event the event to broadcast in the Space
    */
   emit<E extends Event | Event>(event: E): void {
-    this.events.emit(event);
+    this.events.emit(event)
   }
 
   /**
@@ -123,13 +123,13 @@ export class Space {
     eventName: string,
     handler: EventHandler<E>
   ): EventSubscription {
-    return this.events.on(eventName, handler);
+    return this.events.on(eventName, handler)
   }
 
   /**
    * Destroys the space and removes it from the World
    */
   destroy(): void {
-    this.world.spaceManager.removeSpace(this);
+    this.world.spaceManager.removeSpace(this)
   }
 }

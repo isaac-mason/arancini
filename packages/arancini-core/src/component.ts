@@ -1,16 +1,16 @@
-import { Entity } from './entity';
-import { Space } from './space';
-import { uniqueId } from './utils';
-import { World } from './world';
+import { Entity } from './entity'
+import { Space } from './space'
+import { uniqueId } from './utils'
+import { World } from './world'
 
 export type ComponentDetails = {
-  type: ComponentClass;
-  args?: unknown[];
-};
+  type: ComponentClass
+  args?: unknown[]
+}
 
 export type ComponentClass<T extends Component | Component = Component> = {
-  new (...args: never[]): T;
-};
+  new (...args: never[]): T
+}
 
 /**
  * Arancini Components implement the abstract class `Component`, and can have any properties and methods. A component, belongs to a single Entity.
@@ -63,25 +63,25 @@ export abstract class Component {
   /**
    * This component instances unique id
    */
-  id: string = uniqueId();
+  id: string = uniqueId()
 
   /**
    * The entity this component belongs to.
    */
-  entity!: Entity;
+  entity!: Entity
 
   /**
    * The Space the components entity is in
    */
   get space(): Space {
-    return this.entity.space;
+    return this.entity.space
   }
 
   /**
    * The World the components entity is in
    */
   get world(): World {
-    return this.entity.world;
+    return this.entity.world
   }
 
   /**
@@ -91,13 +91,13 @@ export abstract class Component {
     /**
      * The class the component was constructed from
      */
-    class: ComponentClass;
+    class: ComponentClass
 
     /**
      * The unique index for the component class
      */
-    classIndex: number;
-  };
+    classIndex: number
+  }
 
   /**
    * Method for "constructing" a component instance.
