@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@recs/core": "workspace:^"
+    "arancini": "workspace:^"
   },
   "devDependencies": {
     "prettier": "^2.7.1",

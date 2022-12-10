@@ -5,12 +5,12 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "(cd packages/core && yarn build) && (cd packages/react && yarn build)",
-    "test": "(cd packages/core && yarn test) && (cd packages/react && yarn test)",
+    "build": "(cd packages/arancini-core && yarn build) && (cd packages/arancini-react && yarn build) && (cd packages/arancini && yarn build)",
+    "test": "(cd packages/arancini-core && yarn test) && (cd packages/arancini-react && yarn test)",
     "change": "yarn changeset",
     "version": "yarn changeset version",
     "release": "yarn build && yarn test && changeset publish",
-    "storybook": "concurrently \"cd ./packages/core && yarn storybook\" \"cd ./packages/react && yarn storybook\""
+    "storybook": "concurrently \"cd ./packages/arancini-core && yarn storybook\" \"cd ./packages/arancini-react && yarn storybook\""
   },
   "devDependencies": {
     "@changesets/cli": "^2.23.0",
