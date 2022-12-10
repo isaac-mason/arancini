@@ -4,7 +4,7 @@
   "packageManager": "yarn@3.2.1",
   "author": "Isaac Mason <isaac@isaacmason.com>",
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -56,12 +56,12 @@
     }
   },
   "dependencies": {
-    "@arancini/core": "0.1.0",
+    "@arancini/core": "0.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "peerDependencies": {
-    "arancini": "0.1.0",
+    "arancini": "0.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   }

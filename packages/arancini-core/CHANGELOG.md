@@ -1,5 +1,11 @@
 # @arancini/core
 
+## 0.1.1
+
+### Patch Changes
+
+- afcd3c0: Update README.md
+
 ## 0.1.0
 
 ### Minor Changes
