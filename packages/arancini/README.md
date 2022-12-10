@@ -1,6 +1,6 @@
 # arancini
 
-Arancini is an object based Entity Component System. You can use Arancini to structure games and other similarly demanding applications.
+Arancini is an object based Entity Component System. You can use arancini to structure games and other similarly demanding applications.
 
 ## Features
 

@@ -1,5 +1,6 @@
 ---
 "arancini": patch
+"@arancini/core": patch
 "@arancini/react": patch
 ---
 

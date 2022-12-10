@@ -1,5 +1,11 @@
 {
   "name": "@arancini/core",
+  "description": "An object based Entity Component System",
+  "keywords": [
+    "gamedev",
+    "ecs",
+    "entity-component-system"
+  ],
   "type": "module",
   "packageManager": "yarn@3.2.1",
   "author": "Isaac Mason <isaac@isaacmason.com>",
