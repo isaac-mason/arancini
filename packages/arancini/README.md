@@ -38,7 +38,7 @@ Let's use arancini to make a simple random walk simulation!
 ### 1. Import everything we need
 
 ```ts
-import { Component, Query, System, World } from "arancini";
+import { Component, Query, System, World } from 'arancini';
 ```
 
 ### 2. Create components to store data
@@ -181,12 +181,12 @@ Next we'll create an entity with the `CanvasContext` component, which will conta
 ```ts
 const canvasContext = world.create.entity()
 
-const canvasElement = document.querySelector("#example-canvas") as HTMLCanvasElement
+const canvasElement = document.querySelector('#example-canvas') as HTMLCanvasElement
 canvasElement.width = window.innerWidth
 canvasElement.height = window.innerHeight
 
 const canvasComponent = canvasContext.add(CanvasContext)
-canvasComponent.ctx = canvasElement.getContext("2d")!
+canvasComponent.ctx = canvasElement.getContext('2d')!
 canvasComponent.width = canvasElement.width
 canvasComponent.height = canvasElement.height
 
