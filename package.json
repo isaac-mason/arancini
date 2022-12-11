@@ -8,7 +8,7 @@
     "build": "(cd packages/arancini-core && yarn build) && (cd packages/arancini-react && yarn build) && (cd packages/arancini && yarn build)",
     "test": "(cd packages/arancini-core && yarn test) && (cd packages/arancini-react && yarn test)",
     "change": "yarn changeset",
-    "version": "yarn changeset version",
+    "version": "yarn changeset version && yarn install --mode update-lockfile",
     "release": "yarn build && yarn test && changeset publish",
     "storybook": "concurrently \"cd ./packages/arancini-core && yarn storybook\" \"cd ./packages/arancini-react && yarn storybook\""
   },
