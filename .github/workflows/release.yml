@@ -28,7 +28,7 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          version: yarn run version && yarn install --mode update-lockfile
+          version: ./.github/workflows/release/version.sh
           publish: yarn release
           commit: "chore(changeset): release packages"
         env:
