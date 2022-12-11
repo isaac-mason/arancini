@@ -1,12 +1,13 @@
 # arancini
 
-Arancini is an object based Entity Component System. You can use arancini to structure games and other similarly demanding applications.
+Arancini is an object based Entity Component System. You can use arancini to structure demanding applications, such as games.
 
 ## Features
 
 - 💪 ‎ Flexible and extensible
-- 🗑️ ‎ Helps you avoid garbage collection
-- 🪶 ‎ Lightweight! the core library has **_zero_** dependencies
+- 🔍 ‎ Reactive queries that update on entity composition changes
+- 🗑️ ‎ Built-in object pooling to help avoid garbage collection
+- 🍃 ‎ Less than 4kB minified + gzipped
 - 🖇 ‎ Easy integration with React via [`@arancini/react`](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-react)
 
 ## Packages
@@ -31,14 +32,24 @@ React glue for arancini
 > yarn add @arancini/react
 ```
 
-## Getting Started
+## Overview
+
+Arancini is an object based Entity Component System implementation. If you aren't familiar with Entity Component Systems, this is a good read: https://github.com/SanderMertens/ecs-faq
+
+TL;DR: ECS is a data-oriented architecture for structuring your application.
+
+In arancini, components are objects that contain data and can be added to entities. You can then use queries to find entities that have certain components, and run logic on them.
+
+Arancini also has a built-in notion of Systems, but you can also use queries alone to create your own "System" logic if you prefer.
+
+## Example Usage
 
 Let's use arancini to make a simple random walk simulation!
 
 ### 1. Import everything we need
 
 ```ts
-import { Component, Query, System, World } from 'arancini';
+import { Component, Query, System, World } from 'arancini'
 ```
 
 ### 2. Create components to store data
