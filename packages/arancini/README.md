@@ -25,7 +25,7 @@ The core library!
 
 [![Version](https://img.shields.io/npm/v/@arancini/react)](https://www.npmjs.com/package/@arancini/react)
 
-React glue for `arancini`
+React glue for arancini
 
 ```bash
 > yarn add @arancini/react
