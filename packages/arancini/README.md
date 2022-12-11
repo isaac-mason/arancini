@@ -204,7 +204,7 @@ canvasComponent.height = canvasElement.height
 const resize = () => {
   canvasComponent.width = canvasElement.width = window.innerWidth
   canvasComponent.height = canvasElement.height = window.innerHeight
-};
+}
 window.addEventListener('resize', resize, false)
 resize()
 ```

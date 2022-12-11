@@ -48,15 +48,12 @@ class ColliderComponent extends A.Component {
 class PhysicsSystem extends A.System {
   bodiesQuery = this.query([ColliderComponent])
 
-  physicsWorld!: P2.World
-  bodies!: Map<string, P2.Body>
+  physicsWorld = new P2.World({ gravity: [0, -9.81] })
+  bodies = new Map<string, P2.Body>()
 
   onInit(): void {
-    this.physicsWorld = new P2.World({ gravity: [0, -9.81] })
     this.physicsWorld.addContactMaterial(boxGroundContactMaterial)
     this.physicsWorld.addContactMaterial(boxBoxContactMaterial)
-
-    this.bodies = new Map()
 
     this.bodiesQuery.onEntityAdded.add((added) => {
       const body = added.get(ColliderComponent).body
@@ -72,7 +69,9 @@ class PhysicsSystem extends A.System {
   }
 
   onUpdate(delta: number) {
-    this.physicsWorld.step(1 / 60, delta, 30)
+    const stepSize = 1 / 60
+    const maxSubSteps = 30
+    this.physicsWorld.step(stepSize, delta, maxSubSteps)
 
     for (const entity of this.bodiesQuery) {
       const object3DComponent = entity.find(Object3DComponent)
