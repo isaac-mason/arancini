@@ -208,8 +208,6 @@ const EnhanceExistingEntities = () => (
     }}
   </ECS.QueryEntities>
 )
-
-const
 ```
 
 ### Capturing React Component refs
