@@ -61,7 +61,7 @@ export class ComponentRegistry {
     if (this.world.initialised) {
       for (const space of this.world.spaceManager.spaces.values()) {
         for (const entity of space.entities.values()) {
-          entity.componentsBitSet.resize(this.currentComponentIndex)
+          entity.__internal.componentsBitSet.resize(this.currentComponentIndex)
         }
       }
     }

@@ -26,16 +26,6 @@ export class SpaceManager {
   entityPool: EntityPool
 
   /**
-   * Components that need recycling
-   */
-  private componentsToRecycle: Component[] = []
-
-  /**
-   * Entities that need queries recycling
-   */
-  private entitiesToRecycle: Entity[] = []
-
-  /**
    * The World the entity manager is part of
    */
   private world: World
@@ -145,7 +135,7 @@ export class SpaceManager {
   initialiseEntity(entity: Entity): void {
     entity.initialised = true
 
-    entity.componentsBitSet.resize(
+    entity.__internal.componentsBitSet.resize(
       this.world.componentRegistry.currentComponentIndex
     )
 
@@ -159,7 +149,6 @@ export class SpaceManager {
    * @param entity the entity to release
    */
   removeEntity(entity: Entity, space: Space): void {
-    entity.alive = false
     entity.space = null as never
     entity.initialised = false
     space.entities.delete(entity.id)
@@ -170,8 +159,12 @@ export class SpaceManager {
 
     this.world.queryManager.onEntityRemoved(entity)
 
-    // stage the entity for cleanup and reset on the next update
-    this.entitiesToRecycle.push(entity)
+    // reset and recycle the entity object
+    entity.id = uniqueId()
+    entity.events.reset()
+    entity.__internal.componentsBitSet.reset()
+
+    this.entityPool.release(entity)
   }
 
   /**
@@ -189,7 +182,7 @@ export class SpaceManager {
     component.construct(...args)
 
     entity.components.set(clazz, component)
-    entity.componentsBitSet.add(component.__internal.classIndex)
+    entity.__internal.componentsBitSet.add(component.__internal.classIndex)
 
     if (entity.initialised) {
       this.initialiseComponent(component)
@@ -207,10 +200,12 @@ export class SpaceManager {
     component.onDestroy()
 
     entity.components.delete(component.__internal.class)
-    entity.componentsBitSet.remove(component.__internal.classIndex)
+    entity.__internal.componentsBitSet.remove(component.__internal.classIndex)
 
-    // stage the component for cleanup on the next update
-    this.componentsToRecycle.push(component)
+    // reset and recycle the component object
+    component.id = uniqueId()
+    ;(component.entity as unknown) = undefined
+    this.componentPool.release(component)
   }
 
   /**
@@ -219,35 +214,5 @@ export class SpaceManager {
    */
   initialiseComponent(component: Component): void {
     component.onInit()
-  }
-
-  /**
-   * Recycles destroyed entities and components
-   */
-  recycle(): void {
-    // recycle destroyed entities
-    const entities = this.entitiesToRecycle
-    this.entitiesToRecycle = []
-
-    for (const entity of entities) {
-      // reset the entity
-      entity.id = uniqueId()
-      entity.events.reset()
-      entity.componentsBitSet.reset()
-      entity.alive = true
-
-      this.entityPool.release(entity)
-    }
-
-    // recycle destroyed components
-    const components = this.componentsToRecycle
-    this.componentsToRecycle = []
-
-    for (const component of components) {
-      component.id = uniqueId()
-      ;(component.entity as unknown) = undefined
-
-      this.componentPool.release(component)
-    }
   }
 }

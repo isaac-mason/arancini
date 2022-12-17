@@ -61,19 +61,9 @@ export class Entity {
   id = uniqueId()
 
   /**
-   * Whether the entity is alive. If false, the entity will be destroyed on the next update
-   */
-  alive = true
-
-  /**
    * Map of component classes to components
    */
   components: Map<{ new (...args: never[]): Component }, Component> = new Map()
-
-  /**
-   * BitSet containing component indices for Components in this Entitiy
-   */
-  componentsBitSet = new BitSet()
 
   /**
    * The event system for the entity
@@ -89,6 +79,13 @@ export class Entity {
    * The space the entity is in
    */
   space!: Space
+
+  /**
+   * @private used internally, do not use directly
+   */
+  __internal = {
+    componentsBitSet: new BitSet(),
+  }
 
   /**
    * The World the entity is in
@@ -129,7 +126,6 @@ export class Entity {
    */
   destroy(): void {
     this.world.spaceManager.removeEntity(this, this.space)
-    this.alive = false
   }
 
   /**

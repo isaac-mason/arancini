@@ -49,8 +49,6 @@ describe('Space', () => {
 
     space.destroy()
 
-    expect(entity.alive).toBeFalsy()
-
     // only the world's default space
     expect(world.spaceManager.spaces.size).toBe(1)
   })

@@ -189,21 +189,21 @@ export class QueryManager {
   ): boolean {
     if (
       queryBitSets.all &&
-      !entity.componentsBitSet.containsAll(queryBitSets.all)
+      !entity.__internal.componentsBitSet.containsAll(queryBitSets.all)
     ) {
       return false
     }
 
     if (
       queryBitSets.any &&
-      !entity.componentsBitSet.containsAny(queryBitSets.any)
+      !entity.__internal.componentsBitSet.containsAny(queryBitSets.any)
     ) {
       return false
     }
 
     if (
       queryBitSets.not &&
-      entity.componentsBitSet.containsAny(queryBitSets.not)
+      entity.__internal.componentsBitSet.containsAny(queryBitSets.not)
     ) {
       return false
     }

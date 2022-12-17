@@ -112,9 +112,13 @@ export const createECS = (existing?: A.World) => {
       const newEntity = space.create.entity()
       setEntity(newEntity)
 
+      const { id } = newEntity
+
       return () => {
         setEntity(null!)
-        if (newEntity.alive) {
+
+        // if the entity hasn't already been recycled
+        if (id === newEntity.id) {
           newEntity.destroy()
         }
       }
@@ -180,7 +184,7 @@ export const createECS = (existing?: A.World) => {
     const { entity } = useContext(entityContext)
 
     useIsomorphicLayoutEffect(() => {
-      if (!entity || !entity.alive) {
+      if (!entity) {
         return
       }
 

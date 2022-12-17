@@ -158,7 +158,6 @@ export class World {
   update(delta = 0): void {
     this.time += delta
     this.systemManager.update(delta, this.time)
-    this.spaceManager.recycle()
   }
 
   /**

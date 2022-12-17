@@ -69,9 +69,6 @@ const Example = () => {
     // or update a particular system
     const exampleSystem = ECS.world.getSystem(ExampleSystem)
     exampleSystem.update(delta, elapsedTime)
-
-    // recycle entity and component objects
-    ECS.world.spaceManager.recycle()
   })
 }
 ```
