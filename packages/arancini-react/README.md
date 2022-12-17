@@ -59,8 +59,6 @@ const Stepper = () => {
 If arancini needs to be integrated into an existing game loop, instead of calling `step`, you can decide when to update parts of the world.
 
 ```tsx
-import * as A from 'arancini'
-
 const ECS = createECS()
 
 const Example = () => {
