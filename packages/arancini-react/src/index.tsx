@@ -64,7 +64,7 @@ export const createECS = (existing?: A.World) => {
     world.init()
   }
 
-  const step = (delta: number) => {
+  const update = (delta: number) => {
     world.update(delta)
   }
 
@@ -241,7 +241,7 @@ export const createECS = (existing?: A.World) => {
     useQuery,
     useCurrentEntity,
     useCurrentSpace,
-    step,
+    update,
     world,
     spaceContext,
     entityContext,

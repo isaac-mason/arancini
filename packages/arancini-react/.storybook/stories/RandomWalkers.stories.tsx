@@ -13,7 +13,7 @@ const R = createECS()
 
 const R3FStepper = () => {
   useFrame((_, delta) => {
-    R.step(delta)
+    R.update(delta)
   })
 
   return null

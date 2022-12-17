@@ -284,10 +284,10 @@ describe('step', () => {
 
     const delta = 0.01
 
-    ECS.step(delta)
+    ECS.update(delta)
     expect(onUpdate).toBeCalledWith(delta, delta)
 
-    ECS.step(delta)
+    ECS.update(delta)
     expect(onUpdate).toBeCalledWith(delta, delta * 2)
   })
 })

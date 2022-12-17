@@ -49,7 +49,7 @@ import { useFrame } from '@react-three/fiber'
 
 const Stepper = () => {
   useFrame((_, delta) => {
-    ECS.step(delta)
+    ECS.update(delta)
   })
 
   return null

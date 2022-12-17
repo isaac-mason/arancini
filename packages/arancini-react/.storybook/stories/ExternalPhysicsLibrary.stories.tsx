@@ -23,7 +23,7 @@ let ECS = createECS()
 
 const R3FStepper = () => {
   useFrame((_, delta) => {
-    ECS.step(delta)
+    ECS.update(delta)
   })
 
   return null
