@@ -48,12 +48,19 @@ Arancini can be dropped into any javascript or typescript project, the core libr
 
 ### 🌎 World
 
-A world represents your game or simulation. It maintains the entities, components, spaces, queries and systems in the ECS, and is the entrypoint for creating resources in the ECS.
+A world represents your game or simulation. It maintains the entities, components, spaces, queries and systems in the ECS.
+
+After creating a world, you should register components and systems, then initialise the world. This can be done after initialising the world, but doing so will cause a small performance hit as internal data structures need to be updated.
 
 ```ts
 import { World } from 'arancini'
 
 const world = new World()
+
+// register components and systems
+// ... 
+
+world.init()
 ```
 
 If you have systems registered in the world, you can use `world.update()` to run the systems. If you don't have any systems registered, you don't need to call `update`! Arancini is fully reactive, queries will be updated as the composition of entities change.
@@ -75,7 +82,7 @@ const space = world.create.space()
 
 ### 🍱 Entity
 
-An entity is a container for components. You can either create an entity in the default space, or in a specific space.
+An entity is a container for components. You can either create an entity in the default world space, or in a given space.
 
 ```ts
 const entity = world.create.entity()
@@ -89,13 +96,13 @@ You can use `entity.destroy()` to remove all components from an Entity and remov
 entity.destroy()
 ```
 
-⚠️ You should avoid storing references to entities and components. Use queries to find entities that have certain components, run logic on them, and then discard the references.
-
-If you store references to entity or component objects, then that entity or component is destroyed and recycled, you will be storing a reference to a pooled object which may have been re-used.
+> **Note ⚠️** You should avoid storing references to entities and components. Use queries to find entities that have certain components, run logic on them, and then discard the references. If you store a reference to an entity or component object, then that entity or component is destroyed and recycled, you will be storing a reference to a pooled object which may have been re-used.
 
 ### 📦 Component
 
-In arancini, components are defined as classes that extend the `Component` class. You can define a `construct` method on your components, which will be called every time a component object is created or re-used.
+In arancini, components are classes that extend the `Component` class. You can define a `construct` method on your components, which will be called every time a component object is created or re-used.
+
+Note the not null `!:` syntax! Use this in typescript to indicate that the property will be defined, even if it's not defined in the constructor.
 
 ```ts
 class Position extends Component {
@@ -116,14 +123,16 @@ entity.remove(Position)
 
 ### 🔎 Query
 
-You can use queries to find entities that have certain components. Queries support `all`, `one`, and `none` filters. You can also pass in an array of components as shorthand for an `all` query.
+You can use queries to find entities that have certain components. Queries support `all`, `one`, and `none` filters. Queries with the same filters are deduplicated by arancini, so you can create multiple queries with the same filters without performance penalty.
+
+The `Query` class has a `Symbol.iterator` method which can be used to iterate over all entities that match the query in reverse order.
 
 ```ts
 const basicQuery = world.create.query([Position])
 
 const advancedQuery = world.create.query({
   all: [Position, Velocity],
-  one: [ComponentOne, ComponentTwo],
+  one: [EitherThisComponent, OrThisComponent],
   none: [NotThisComponent],
 })
 
@@ -132,7 +141,7 @@ for (const entity of basicQuery) {
 }
 ```
 
-Queries are reactive, and can emit when entities are added or removed from the query.
+Queries are reactive and can emit events when entities are added or removed from the query.
 
 ```ts
 const query = world.create.query([Position])
@@ -154,7 +163,7 @@ Arancini has built-in support for systems, but you can also use queries alone to
 
 Systems have lifecycle methods that are called when the system is added and removed from the world, and when the world is updated.
 
-You can use `this.query` to create a query that will be updated every time the world is updated, and will automatically be destroyed when the system is destroyed.
+You can use `this.query` to create a query linked to the system. These queries will automatically be destroyed when the system is destroyed.
 
 ```ts
 class MovementSystem extends System {
@@ -180,7 +189,7 @@ class MovementSystem extends System {
 }
 ```
 
-Systems can be registered with a priority which determines the order in which they are updated. The order systems run is determined by priority, then by the order systems were added to the world.
+Systems can be registered with a priority. The order systems run in is first determined by priority, then by the order systems were registered.
 
 ```ts
 const priority = 10
@@ -198,12 +207,6 @@ import { Component, Query, System, World } from 'arancini'
 ```
 
 ### 2. Create components to store data
-
-Let's create a few components.
-
-Note that Arancini will pool and re-use objects for you! This helps avoid garbage collection and improves performance. We'll define a `construct` method, which will be called every time a component object is created or re-used.
-
-Note the not null `!:` syntax! Use this in typescript to indicate that the property will be defined, even if it's not defined in the constructor.
 
 ```ts
 class Position extends Component {
@@ -304,8 +307,6 @@ const world = new World()
 ```
 
 Next, let's register the Components and Systems we created.
-
-Components can be used without being registered first, but this will cause a small performance hit as internal data structures need to be updated.
 
 ```ts
 world.registerComponent(Position)
