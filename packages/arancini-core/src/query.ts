@@ -114,10 +114,27 @@ export class Query {
   onEntityRemoved = new EventDispatcher<Entity>();
 
   /**
-   * Iterator for all entities matched by the query
+   * Iterator for entities matched by the query. Iterates over matching entities in reverse order.
    */
   [Symbol.iterator]() {
-    return this.entities[Symbol.iterator]()
+    let index = this.entities.length
+
+    const result: {
+      value: Entity
+      done: boolean
+    } = {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      value: undefined!,
+      done: false,
+    }
+
+    return {
+      next: () => {
+        result.value = this.entities[--index]
+        result.done = index < 0
+        return result
+      },
+    }
   }
 
   /**
