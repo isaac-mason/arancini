@@ -1,6 +1,6 @@
 # arancini
 
-Arancini is an object based Entity Component System. You can use arancini to structure demanding applications, such as games.
+Arancini is an object based Entity Component System. You can use arancini to structure demanding applications such as games and simulations.
 
 ## Features
 
@@ -34,15 +34,162 @@ React glue for arancini
 
 ## Overview
 
-Arancini is an object based Entity Component System implementation. If you aren't familiar with Entity Component Systems, this is a good read: https://github.com/SanderMertens/ecs-faq
+Arancini is an object based Entity Component System. If you aren't familiar with Entity Component Systems, this is a good read: https://github.com/SanderMertens/ecs-faq
 
 TL;DR: ECS is a data-oriented architecture for structuring your application.
 
-In arancini, components are objects that contain data and can be added to entities. You can then use queries to find entities that have certain components, and run logic on them.
+In arancini, components are defined as classes and can contain data. You can then use queries to find entities that have certain components, and run logic on them. Arancini also has built-in support for Systems, but you can also use queries alone to roll your own "System" logic.
 
-Arancini also has a built-in notion of Systems, but you can also use queries alone to create your own "System" logic if you prefer.
+Object-pooling is a core feature of arancini. Arancini will pool and re-use entity and component objects for you! This helps avoid garbage collection and improves performance.
 
-## Example Usage
+## Getting Started
+
+Arancini can be dropped into any javascript or typescript project, the core library has no dependencies. You can use the react glue in `@arancini/react` to integrate with React, but arancini itself has no dependencies on React. See the [`@arancini/react` README.md](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-react) for more details.
+
+### 🌎 World
+
+A World represents your game or simulation. It maintains the entities, components, spaces, queries and systems in the ECS, and is the entry point for creating resources in the ECS.
+
+```ts
+import { World } from 'arancini'
+
+const world = new World()
+```
+
+If you have Systems registered in the World, you can use `world.update()` to run the systems.
+
+If you don't have any Systems registered, you don't need to call `update`! Arancini is fully reactive, queries will be updated as the composition of entities change.
+
+```ts
+const delta = 1 / 60
+world.update(delta)
+```
+
+### 🌐 Space
+
+Spaces are containers for Entities. You can create multiple Spaces in a World, and use them to separate entities into different groups.
+
+You might use different Spaces for different game levels, for example. They offer a convenient way to initialise and destroy groups of entities.
+
+```ts
+const space = world.create.space()
+```
+
+### 🍱 Entity
+
+An Entity is a container for Components. You can either create an Entity in the default space, or in a specific space.
+
+```ts
+const entity = world.create.entity()
+const entityInSpace = space.create.entity()
+```
+
+You can use `entity.destroy()` to remove all components from an Entity and remove it from it's Space.
+
+```ts
+// destroy an entity
+entity.destroy()
+```
+
+It's important to note that if you store references to entity or component objects, then that entity or component is destroyed and recycled, you will be storing a reference to a pooled object. This pooled objectmay be re-used at any time.
+
+You should avoid storing references to entities or components, and instead use queries to find entities that have certain components, run logic on them, and then discard the references.
+
+### 📦 Component
+
+In arancini, components are defined as classes that extend the `Component` class. You can define a `construct` method on your components, which will be called every time a component object is created or re-used.
+
+```ts
+class Position extends Component {
+  x!: number
+  y!: number
+
+  construct(x: number, y: number) {
+    this.x = x
+    this.y = y
+  }
+}
+
+world.registerComponent(Position)
+
+entity.add(Position, 10, 20)
+entity.remove(Position)
+```
+
+### 🔎 Query
+
+You can use queries to find entities that have certain components. Queries support `all`, `one`, and `none` filters. You can also pass in an array of components as shorthand for an `all` query.
+
+```ts
+const basicQuery = world.create.query([Position])
+
+const advancedQuery = world.create.query({
+  all: [Position, Velocity],
+  one: [ComponentOne, ComponentTwo],
+  none: [NotThisComponent],
+})
+
+for (const entity of basicQuery) {
+  // ...
+}
+```
+
+Queries are reactive, and can emit when entities are added or removed from the query.
+
+```ts
+const query = world.create.query([Position])
+
+const handler = (entity) => {
+  // ...
+}
+
+query.onEntityAdded.add(handler)
+query.onEntityRemoved.add(handler)
+
+query.onEntityAdded.remove(handler)
+query.onEntityRemoved.remove(handler)
+```
+
+### 🧠 Systems
+
+Systems are used to run logic on entities. Arancini has a built-in notion of Systems, but you can also use queries alone to create your own "System" logic if you prefer. Systems are just a convenient way to organise your logic.
+
+Systems have lifecycle methods that are called when the system is added and removed from the world, and when the world is updated.
+
+You can use `this.query` to create a query that will be updated every time the world is updated, and will automatically be destroyed when the system is destroyed.
+
+```ts
+class MovementSystem extends System {
+  moving = this.query([Position, Velocity])
+
+  onInit() {
+    // ...
+  }
+
+  onUpdate() {
+    for (const entity of this.moving) {
+      const position = entity.get(Position)
+      const velocity = entity.get(Velocity)
+
+      position.x += velocity.x
+      position.y += velocity.y
+    }
+  }
+
+  onDestroy() {
+    // ...
+  }
+}
+```
+
+Systems can be registered with a priority, which determines the order in which they are updated. Systems execute in order of priority, then by the order in which they were added to the world.
+
+```ts
+const priority = 10
+world.registerSystem(MovementSystem, priority)
+```
+
+## Example
 
 Let's use arancini to make a simple random walk simulation!
 
