@@ -44,11 +44,11 @@ Object-pooling is a core feature of arancini. Arancini will pool and re-use enti
 
 ## Getting Started
 
-Arancini can be dropped into any javascript or typescript project, the core library has no dependencies. You can use the react glue in `@arancini/react` to integrate with React, but arancini itself has no dependencies on React. See the [`@arancini/react` README.md](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-react) for more details.
+Arancini can be dropped into any javascript or typescript project, the core library has no dependencies. You can use `@arancini/react` to integrate with React, but arancini itself has no dependencies on React. See the [`@arancini/react` README.md](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-react) for more details.
 
 ### 🌎 World
 
-A World represents your game or simulation. It maintains the entities, components, spaces, queries and systems in the ECS, and is the entry point for creating resources in the ECS.
+A world represents your game or simulation. It maintains the entities, components, spaces, queries and systems in the ECS, and is the entrypoint for creating resources in the ECS.
 
 ```ts
 import { World } from 'arancini'
@@ -56,9 +56,7 @@ import { World } from 'arancini'
 const world = new World()
 ```
 
-If you have Systems registered in the World, you can use `world.update()` to run the systems.
-
-If you don't have any Systems registered, you don't need to call `update`! Arancini is fully reactive, queries will be updated as the composition of entities change.
+If you have systems registered in the world, you can use `world.update()` to run the systems. If you don't have any systems registered, you don't need to call `update`! Arancini is fully reactive, queries will be updated as the composition of entities change.
 
 ```ts
 const delta = 1 / 60
@@ -67,9 +65,9 @@ world.update(delta)
 
 ### 🌐 Space
 
-Spaces are containers for Entities. You can create multiple Spaces in a World, and use them to separate entities into different groups.
+Spaces are containers for entities. You can create multiple spaces in a world, and use them to separate entities into different groups.
 
-You might use different Spaces for different game levels, for example. They offer a convenient way to initialise and destroy groups of entities.
+You might use different spaces for different game levels, for example. They offer a convenient way to initialise and destroy groups of entities.
 
 ```ts
 const space = world.create.space()
@@ -77,7 +75,7 @@ const space = world.create.space()
 
 ### 🍱 Entity
 
-An Entity is a container for Components. You can either create an Entity in the default space, or in a specific space.
+An entity is a container for components. You can either create an entity in the default space, or in a specific space.
 
 ```ts
 const entity = world.create.entity()
@@ -91,9 +89,9 @@ You can use `entity.destroy()` to remove all components from an Entity and remov
 entity.destroy()
 ```
 
-It's important to note that if you store references to entity or component objects, then that entity or component is destroyed and recycled, you will be storing a reference to a pooled object. This pooled objectmay be re-used at any time.
+⚠️ You should avoid storing references to entities and components. Use queries to find entities that have certain components, run logic on them, and then discard the references.
 
-You should avoid storing references to entities or components, and instead use queries to find entities that have certain components, run logic on them, and then discard the references.
+If you store references to entity or component objects, then that entity or component is destroyed and recycled, you will be storing a reference to a pooled object which may have been re-used.
 
 ### 📦 Component
 
@@ -152,7 +150,7 @@ query.onEntityRemoved.remove(handler)
 
 ### 🧠 Systems
 
-Systems are used to run logic on entities. Arancini has a built-in notion of Systems, but you can also use queries alone to create your own "System" logic if you prefer. Systems are just a convenient way to organise your logic.
+Arancini has built-in support for systems, but you can also use queries alone to create your own "System" logic if you prefer. Systems are just a convenient way to organise your logic.
 
 Systems have lifecycle methods that are called when the system is added and removed from the world, and when the world is updated.
 
@@ -182,7 +180,7 @@ class MovementSystem extends System {
 }
 ```
 
-Systems can be registered with a priority, which determines the order in which they are updated. Systems execute in order of priority, then by the order in which they were added to the world.
+Systems can be registered with a priority which determines the order in which they are updated. The order systems run is determined by priority, then by the order systems were added to the world.
 
 ```ts
 const priority = 10
