@@ -96,7 +96,7 @@ You can use `entity.destroy()` to remove all components from an Entity and remov
 entity.destroy()
 ```
 
-> **Note ⚠️** You should avoid storing references to entities and components. Use queries to find entities that have certain components, run logic on them, and then discard the references. If you store a reference to an entity or component object, then that entity or component is destroyed and recycled, you will be storing a reference to a pooled object which may have been re-used.
+> **Note:** You should avoid storing references to entities and components. Use queries to find entities that have certain components, run logic on them, and then discard the references. If you store a reference to an entity or component object, then that entity or component is destroyed and recycled, you will be storing a reference to a pooled object which may have been re-used.
 
 ### 📦 Component
 
