@@ -54,7 +54,7 @@ export class SpaceManager {
    */
   destroy(): void {
     for (const space of this.spaces.values()) {
-      this.removeSpace(space)
+      this.destroySpace(space)
     }
   }
 
@@ -90,13 +90,13 @@ export class SpaceManager {
   }
 
   /**
-   * Remove a space
-   * @param space the space to remove
+   * Destroys a space
+   * @param space the space to destroy
    */
-  removeSpace(space: Space): void {
+  destroySpace(space: Space): void {
     this.spaces.delete(space.id)
     for (const entity of space.entities.values()) {
-      this.removeEntity(entity, space)
+      this.destroyEntity(entity, space)
     }
   }
 
@@ -145,10 +145,10 @@ export class SpaceManager {
   }
 
   /**
-   * Removes an entity from a space and releases it to the entity object pool
+   * Destroys an entity and releases it to the entity object pool
    * @param entity the entity to release
    */
-  removeEntity(entity: Entity, space: Space): void {
+  destroyEntity(entity: Entity, space: Space): void {
     entity.space = null as never
     entity.initialised = false
     space.entities.delete(entity.id)

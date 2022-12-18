@@ -125,7 +125,7 @@ export class Entity {
    * Destroy the Entity's components and remove the Entity from the space
    */
   destroy(): void {
-    this.world.spaceManager.removeEntity(this, this.space)
+    this.world.spaceManager.destroyEntity(this, this.space)
   }
 
   /**
