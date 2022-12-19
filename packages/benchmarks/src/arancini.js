@@ -39,7 +39,12 @@ class MovementSystem extends System {
 export const arancini = {
   setup() {
     this.world = new World()
+    
+    this.world.registerComponent(Position)
+    this.world.registerComponent(Velocity)
+
     this.world.registerSystem(MovementSystem)
+
     this.space = this.world.create.space()
     this.world.init()
     updateCount = 0
