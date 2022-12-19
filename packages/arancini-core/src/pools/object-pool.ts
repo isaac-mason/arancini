@@ -6,16 +6,16 @@
  * @example
  * ```ts
  * // create a new pool
- * const pool = new ObjectPool(() => new MyObject());
+ * const pool = new ObjectPool(() => new MyObject())
  *
  * // expand the pool
- * pool.expand(10);
+ * pool.expand(10)
  *
  * // request an object from the pool
- * const object = pool.request();
+ * const object = pool.request()
  *
  * // release the object back into the pool
- * pool.release(object);
+ * pool.release(object)
  * ```
  *
  * @private internal class, do not use directly

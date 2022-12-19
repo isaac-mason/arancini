@@ -26,30 +26,30 @@ export type SpaceParams = {
  * Aside from containing Entities, Spaces also have an event system.
  *
  * ```ts
- * import { World } from "@arancini/core";
+ * import { World } from '@arancini/core'
  *
  * // create a new world
- * const world = new World();
+ * const world = new World()
  *
  * // create a space in the world
- * const space = world.create.space();
+ * const space = world.create.space()
  *
  * // create an entity in the space
- * const entity = space.create.entity();
+ * const entity = space.create.entity()
  *
  * // subscribe to a space event
- * space.on("event-name", (event) => {
+ * space.on('event-name', (event) => {
  *   console.log(event);
- * });
+ * })
  *
  * // emit a space event
  * space.emit({
- *   topic: "event-name",
+ *   topic: 'event-name',
  *   data: { x: 0, y: 0 },
- * });
+ * })
  *
  * // destroy the space and all entities in it
- * space.destroy();
+ * space.destroy()
  * ```
  */
 export class Space {

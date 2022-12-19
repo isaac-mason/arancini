@@ -15,35 +15,35 @@ import type { World } from './world'
  * Aside from containing Components, Entities also have an event system that can be used to share data.
  *
  * ```ts
- * import { Component, World } from '@arancini/core';
+ * import { Component, World } from '@arancini/core'
  *
  * // example tag component without any data or behavior
  * class ExampleComponent extends Component {}
  *
  * // create a world, space, and an entity
- * const world = new World();
- * const space = world.create.space();
- * const entity = world.create.entity();
+ * const world = new World()
+ * const space = world.create.space()
+ * const entity = world.create.entity()
  *
  * // try retrieving a component that isn't in the entity
  * entity.find(ExampleComponent) // returns `undefined`
  * entity.get(ExampleComponent) // throws Error
  *
  * // add ExampleComponent to the entity
- * const exampleComponent = entity.add(ExampleComponent);
+ * const exampleComponent = entity.add(ExampleComponent)
  *
- * entity.has(ExampleComponent); // returns `true`
+ * entity.has(ExampleComponent) // returns `true`
  * entity.get(ExampleComponent) // returns `exampleComponent`
  * entity.get(ExampleComponent) // returns `exampleComponent`
  *
  * // subscribe to an entity event
- * space.on("event-name", (event) => {
- *   console.log(event);
+ * space.on('event-name', (event) => {
+ *   console.log(event)
  * });
  *
  * // emit an entity event
  * space.emit({
- *   topic: "event-name",
+ *   topic: 'event-name',
  *   data: { x: 0, y: 0 },
  * });
  *

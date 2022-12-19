@@ -18,25 +18,25 @@ export const WORLD_DEFAULT_SPACE_ID = '__arancini_default_world_space'
  * A World that can contain Spaces with Entities, Systems, and Queries.
  *
  * ```ts
- * import { World } from "@arancini/core";
+ * import { World } from '@arancini/core'
  *
- * const world = new World();
+ * const world = new World()
  *
  * // initialise the world
- * world.init();
+ * world.init()
  *
  * // update the world without specifying time elapsed
  * // (Systems will be called with a delta of 0)
- * world.update();
+ * world.update()
  *
  * // update the world with a specified time elapsed
  * // (Systems will be called with a delta of 0.1)
- * world.update(0.1);
+ * world.update(0.1)
  *
  * // subscribe to a world event
  * world.on('message', (e) => {
  *   // ...
- * });
+ * })
  *
  * // emit a world event
  * world.emit({

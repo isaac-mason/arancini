@@ -16,11 +16,11 @@ export type SystemClass<T extends System = System> = {
  *     all: [ComponentOne, ComponentTwo],
  *     one: [ComponentThree, ComponentFour],
  *     not: [ComponentFive],
- *   });
+ *   })
  *
  *   // optionally override the default System constructor
  *   constructor(world: World) {
- *     super(world);
+ *     super(world)
  *
  *     // constructor logic...
  *   }

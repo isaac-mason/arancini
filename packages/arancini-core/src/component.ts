@@ -18,21 +18,21 @@ export type ComponentClass<T extends Component | Component = Component> = {
  * Component objects are reused. See the documentation for the `construct` method for initializing properties.
  *
  * ```ts
- * import { Component, World } from "@arancini/core";
+ * import { Component, World } from '@arancini/core'
  *
  * class ExampleComponent extends Component {
  *   // When using typescript, the `!:` not null assertion can be used as a "late-init" syntax.
  *   // You must take care to set all class properties in the `construct` method.
- *   x!: number;
- *   y!: number;
+ *   x!: number
+ *   y!: number
  *
  *   // Think of the `construct` method as a constructor.
  *   // Component objects are re-used, and this `construct` method is run on reuse.
  *   // If properties should be set from "constructor" arguments, or have default values,
  *   // those properties should be set here.
  *   construct(x: number, y: number) {
- *     this.x = x;
- *     this.y = y;
+ *     this.x = x
+ *     this.y = y
  *   }
  *
  *   onInit() {
@@ -45,18 +45,18 @@ export type ComponentClass<T extends Component | Component = Component> = {
  * }
  *
  * // create a world
- * const world = new World();
+ * const world = new World()
  *
  * // create a space
- * const space = world.create.space();
+ * const space = world.create.space()
  *
  * // create an entity in the space
- * const entity = space.create.entity();
+ * const entity = space.create.entity()
  *
  * // add the example component to the entity
- * const x = 1;
- * const y = 2;
- * entity.add(ExampleComponent, x, y);
+ * const x = 1
+ * const y = 2
+ * entity.add(ExampleComponent, x, y)
  * ```
  */
 export abstract class Component {

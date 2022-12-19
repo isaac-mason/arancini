@@ -42,10 +42,10 @@ export type QueryBitSets = {
  * Query results can also be retrieved once-off without creating a persistent query with `world.query(...)`.
  *
  * ```ts
- * import { Component, System, World, QueryDescription } from "@arancini/core";
+ * import { Component, System, World, QueryDescription } from '@arancini/core'
  *
  * // create a world
- * const world = new World();
+ * const world = new World()
  *
  * // create some example components
  * class ExampleComponentOne extends Component {}
@@ -54,35 +54,35 @@ export type QueryBitSets = {
  * class ExampleComponentFour extends Component {}
  *
  * // create a simple query description
- * const simpleQueryDescription: QueryDescription = [ExampleComponentOne, ExampleComponentTwo];
+ * const simpleQueryDescription: QueryDescription = [ExampleComponentOne, ExampleComponentTwo]
  *
  * // create a complex query description
  * const queryDescription: QueryDescription = {
  *   all: [ExampleComponentOne],
  *   any: [ExampleComponentOne, ExampleComponentTwo],
  *   not: [ExampleComponentFour],
- * };
+ * }
  *
  * // get once-off query results, re-using existing query results if available
- * world.query(simpleQueryDescription);
+ * world.query(simpleQueryDescription)
  *
  * // get a query that will update every world update
  * const query = world.create.query({
  *   all: [ExampleComponentOne]
- * });
+ * })
  *
  * // create a system with a query
  * class ExampleSystem extends System {
  *   exampleQueryName = this.query({
  *     all: [ExampleComponentOne],
- *   });
+ *   })
  *
  *   onUpdate() {
- *     this.exampleQueryName.entities.forEach((entity) => console.log(entity));
+ *     this.exampleQueryName.entities.forEach((entity) => console.log(entity))
  *   }
  * }
  *
- * world.registerSystem(ExampleSystem);
+ * world.registerSystem(ExampleSystem)
  * ```
  */
 export class Query {
