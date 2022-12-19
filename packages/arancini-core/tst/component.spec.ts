@@ -150,7 +150,7 @@ describe('Components', () => {
     })
   })
 
-  describe('getComponents', () => {
+  describe('getAll', () => {
     class TestComponentOne extends Component {}
     class TestComponentTwo extends Component {}
 
@@ -159,18 +159,18 @@ describe('Components', () => {
       world.registerComponent(TestComponentTwo)
     })
 
-    it('should return an array of all components in the entity', () => {
+    it('should return an array containing all components in the entity', () => {
       const entity = space.create.entity()
 
-      expect(entity.getComponents()).toEqual([])
+      expect(entity.getAll()).toEqual([])
 
       entity.add(TestComponentOne)
 
-      expect(entity.getComponents()).toEqual([expect.any(TestComponentOne)])
+      expect(entity.getAll()).toEqual([expect.any(TestComponentOne)])
 
       entity.remove(TestComponentOne)
 
-      expect(entity.getComponents()).toEqual([])
+      expect(entity.getAll()).toEqual([])
     })
   })
 

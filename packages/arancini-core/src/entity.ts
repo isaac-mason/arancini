@@ -133,6 +133,14 @@ export class Entity {
   }
 
   /**
+   * Returns all components for the entity
+   * @returns all components for the entity
+   */
+  getAll(): Component[] {
+    return Object.values(this._components)
+  }
+
+  /**
    * Retrieves a component on an entity by type, returns undefined if the component is not in the entity
    * @param value a constructor for the component type to retrieve
    * @returns the component if it is found, or undefined
@@ -174,14 +182,6 @@ export class Entity {
     this.world.queryManager.onEntityComponentChange(this)
 
     return this
-  }
-
-  /**
-   * Returns all the components on the entity
-   * @returns the components on the entity
-   */
-  getComponents(): Component[] {
-    return Object.values(this._components)
   }
 
   /**
