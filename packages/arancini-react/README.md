@@ -36,7 +36,12 @@ const ECS = createECS(world)
 const ECS = createECS()
 const world = ECS.world
 
-// use the world as normal
+/* use the world as normal */
+
+// register components
+world.registerComponent(MyComponent)
+
+// create entities
 const entity = world.create.entity()
 ```
 
