@@ -19,16 +19,6 @@ const boxBoxContactMaterial = new P2.ContactMaterial(
   { friction: 0.75 }
 )
 
-let ECS = createECS()
-
-const R3FStepper = () => {
-  useFrame((_, delta) => {
-    ECS.update(delta)
-  })
-
-  return null
-}
-
 class Object3DComponent extends A.Component {
   object3D!: THREE.Object3D
 
@@ -37,7 +27,7 @@ class Object3DComponent extends A.Component {
   }
 }
 
-class ColliderComponent extends A.Component {
+class RigidBodyComponent extends A.Component {
   body!: P2.Body
 
   construct(body: () => P2.Body) {
@@ -46,9 +36,10 @@ class ColliderComponent extends A.Component {
 }
 
 class PhysicsSystem extends A.System {
-  bodiesQuery = this.query([ColliderComponent])
+  bodiesQuery = this.query([RigidBodyComponent])
 
   physicsWorld = new P2.World({ gravity: [0, -9.81] })
+
   bodies = new Map<string, P2.Body>()
 
   onInit(): void {
@@ -56,7 +47,7 @@ class PhysicsSystem extends A.System {
     this.physicsWorld.addContactMaterial(boxBoxContactMaterial)
 
     this.bodiesQuery.onEntityAdded.add((added) => {
-      const body = added.get(ColliderComponent).body
+      const body = added.get(RigidBodyComponent).body
       this.bodies.set(added.id, body)
       this.physicsWorld.addBody(body)
     })
@@ -77,7 +68,7 @@ class PhysicsSystem extends A.System {
       const object3DComponent = entity.find(Object3DComponent)
       if (object3DComponent === undefined) continue
 
-      const { body } = entity.get(ColliderComponent)
+      const { body } = entity.get(RigidBodyComponent)
       object3DComponent.object3D.position.set(
         body.position[0],
         body.position[1],
@@ -88,10 +79,27 @@ class PhysicsSystem extends A.System {
   }
 }
 
+const ECS = createECS()
+
+ECS.world.registerComponent(Object3DComponent)
+ECS.world.registerComponent(RigidBodyComponent)
+
+const Queries = {
+  TO_RENDER: ECS.world.create.query([RigidBodyComponent]),
+}
+
+const R3FStepper = () => {
+  useFrame((_, delta) => {
+    ECS.update(delta)
+  })
+
+  return null
+}
+
 const Plane = () => (
   <ECS.Entity>
     <ECS.Component
-      type={ColliderComponent}
+      type={RigidBodyComponent}
       args={[
         () => {
           const plane = new P2.Plane({ material: groundMaterial })
@@ -105,21 +113,15 @@ const Plane = () => (
   </ECS.Entity>
 )
 
-const Box = ({ position }: { position: [number, number] }) => (
+const Box = ({ position, width, height }: { position: [number, number], width: number, height: number }) => (
   <ECS.Entity>
-    <ECS.Component type={Object3DComponent}>
-      <mesh>
-        <meshNormalMaterial />
-        <boxBufferGeometry args={[0.5, 0.5, 0.5]} />
-      </mesh>
-    </ECS.Component>
     <ECS.Component
-      type={ColliderComponent}
+      type={RigidBodyComponent}
       args={[
         () => {
           const box = new P2.Box({
-            width: 0.5,
-            height: 0.5,
+            width,
+            height,
             material: boxMaterial,
           })
           const body = new P2.Body({ mass: 1 })
@@ -146,12 +148,43 @@ const App = () => {
 
       {/* falling boxes */}
       <Repeat seconds={3}>
-        <Box position={[0, 0]} />
-        <Box position={[-0.2, 1]} />
-        <Box position={[0.2, 2]} />
-        <Box position={[-0.2, 3]} />
-        <Box position={[0.2, 4]} />
+        <Box width={0.5} height={0.5} position={[0, 0]} />
+        <Box width={2} height={0.5} position={[-0.2, 1]} />
+        <Box width={0.5} height={0.5} position={[0.2, 2]} />
+        <Box width={1} height={0.5} position={[-0.2, 3]} />
+        <Box width={0.5} height={0.5} position={[0.2, 4]} />
       </Repeat>
+
+      <ECS.QueryEntities query={Queries.TO_RENDER}>
+        {(entity) => {
+          const colliderComponent = entity.get(RigidBodyComponent)
+
+          const boxes = colliderComponent.body.shapes.filter((shape) => {
+            return shape instanceof P2.Box
+          })
+
+          if (boxes.length === 0) return null
+
+          return (
+            <ECS.Component type={Object3DComponent}>
+              <group>
+                {boxes.map((box, index) => (
+                  <mesh key={index}>
+                    <meshNormalMaterial />
+                    <boxBufferGeometry
+                      args={[
+                        (box as P2.Box).width,
+                        (box as P2.Box).height,
+                        0.5,
+                      ]}
+                    />
+                  </mesh>
+                ))}
+              </group>
+            </ECS.Component>
+          )
+        }}
+      </ECS.QueryEntities>
     </>
   )
 }

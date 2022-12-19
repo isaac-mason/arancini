@@ -25,6 +25,8 @@ describe('Components', () => {
         }
       }
 
+      world.registerComponent(TestComponent)
+
       const entity = space.create.entity()
       entity.add(TestComponent)
 
@@ -48,6 +50,8 @@ describe('Components', () => {
           componentDestroyJestFn()
         }
       }
+
+      world.registerComponent(TestComponentOne)
 
       const entity = space.create.entity()
       entity.add(TestComponentOne)
@@ -143,6 +147,30 @@ describe('Components', () => {
 
       expect(entity.has(TestComponentOne)).toBe(false)
       expect(entity.has(TestComponentTwo)).toBe(false)
+    })
+  })
+
+  describe('getComponents', () => {
+    class TestComponentOne extends Component {}
+    class TestComponentTwo extends Component {}
+
+    beforeEach(() => {
+      world.registerComponent(TestComponentOne)
+      world.registerComponent(TestComponentTwo)
+    })
+
+    it('should return an array of all components in the entity', () => {
+      const entity = space.create.entity()
+
+      expect(entity.getComponents()).toEqual([])
+
+      entity.add(TestComponentOne)
+
+      expect(entity.getComponents()).toEqual([expect.any(TestComponentOne)])
+
+      entity.remove(TestComponentOne)
+
+      expect(entity.getComponents()).toEqual([])
     })
   })
 

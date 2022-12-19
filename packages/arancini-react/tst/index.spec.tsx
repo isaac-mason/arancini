@@ -56,6 +56,8 @@ describe('<Entity>', () => {
 describe('<Entities>', () => {
   it('should add components to entities', () => {
     const ECS = createECS()
+    ECS.world.registerComponent(ExampleComponent)
+
     const entities = [
       ECS.world.create.entity(),
       ECS.world.create.entity(),
@@ -73,8 +75,11 @@ describe('<Entities>', () => {
 })
 
 describe('<QueryEntities>', () => {
-  it('should render entities that match the query', () => {
+  it('should render entities that match the query description', () => {
     const ECS = createECS()
+    ECS.world.registerComponent(ExampleComponent)
+    ECS.world.registerComponent(ExampleComponentWithArgs)
+
     const entities = [
       ECS.world.create.entity(),
       ECS.world.create.entity(),
@@ -86,6 +91,45 @@ describe('<QueryEntities>', () => {
 
     render(
       <ECS.QueryEntities query={[ExampleComponent]}>
+        <ECS.Component type={ExampleComponentWithArgs} />
+      </ECS.QueryEntities>
+    )
+
+    expect(entities[0].has(ExampleComponentWithArgs)).toBe(true)
+    expect(entities[1].has(ExampleComponentWithArgs)).toBe(true)
+    expect(entities[2].has(ExampleComponentWithArgs)).toBe(false)
+
+    act(() => {
+      entities[2].add(ExampleComponent)
+    })
+
+    expect(entities[2].has(ExampleComponentWithArgs)).toBe(true)
+
+    act(() => {
+      entities[2].remove(ExampleComponent)
+    })
+
+    expect(entities[2].has(ExampleComponentWithArgs)).toBe(false)
+  })
+
+  it('should render entities that match the query instance', () => {
+    const ECS = createECS()
+    ECS.world.registerComponent(ExampleComponent)
+    ECS.world.registerComponent(ExampleComponentWithArgs)
+
+    const entities = [
+      ECS.world.create.entity(),
+      ECS.world.create.entity(),
+      ECS.world.create.entity(),
+    ]
+
+    entities[0].add(ExampleComponent)
+    entities[1].add(ExampleComponent)
+
+    const query = ECS.world.create.query([ExampleComponent])
+
+    render(
+      <ECS.QueryEntities query={query}>
         <ECS.Component type={ExampleComponentWithArgs} />
       </ECS.QueryEntities>
     )
@@ -134,6 +178,8 @@ describe('<Space>', () => {
 describe('<Component>', () => {
   it('should add and remove the given component to an entity', () => {
     const ECS = createECS()
+    ECS.world.registerComponent(ExampleComponent)
+
     const entity = ECS.world.create.entity()
 
     const { unmount } = render(
@@ -153,6 +199,8 @@ describe('<Component>', () => {
 
   it('should call construct with the args prop', () => {
     const ECS = createECS()
+    ECS.world.registerComponent(ExampleComponentWithArgs)
+
     const entity = ECS.world.create.entity()
 
     render(
@@ -166,6 +214,8 @@ describe('<Component>', () => {
 
   it('should capture child ref and use it as a component arg', () => {
     const ECS = createECS()
+    ECS.world.registerComponent(ExampleComponentWithArgs)
+
     const entity = ECS.world.create.entity()
 
     const refValue = 'refValue'
@@ -206,8 +256,9 @@ describe('<System>', () => {
 })
 
 describe('useQuery', () => {
-  it('should return entities that match the query', () => {
+  it('should return a reactive query instance when given a query description', () => {
     const ECS = createECS()
+    ECS.world.registerComponent(ExampleComponent)
 
     const entities = [
       ECS.world.create.entity(),
@@ -220,6 +271,33 @@ describe('useQuery', () => {
     })
 
     const { result } = renderHook(() => ECS.useQuery([ExampleComponent]))
+
+    expect(result.current.entities).toEqual(entities)
+
+    act(() => {
+      entities[2].remove(ExampleComponent)
+    })
+
+    expect(result.current.entities).toEqual([entities[0], entities[1]])
+  })
+
+  it('should return a reactive query instance when given a query instance', () => {
+    const ECS = createECS()
+    ECS.world.registerComponent(ExampleComponent)
+
+    const entities = [
+      ECS.world.create.entity(),
+      ECS.world.create.entity(),
+      ECS.world.create.entity(),
+    ]
+
+    entities.forEach((e) => {
+      e.add(ExampleComponent)
+    })
+
+    const query = ECS.world.create.query([ExampleComponent])
+
+    const { result } = renderHook(() => ECS.useQuery(query))
 
     expect(result.current.entities).toEqual(entities)
 

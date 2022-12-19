@@ -15,18 +15,19 @@ describe('Entity', () => {
   describe('Entity', () => {
     it('should support creation with or without components', () => {
       class TestComponentOne extends Component {}
+      world.registerComponent(TestComponentOne)
 
       const entity = space.create.entity()
 
       expect(entity).toBeTruthy()
-      expect(entity.components.size).toBe(0)
+      expect(Object.values(entity._components).length).toBe(0)
 
       const otherEntity = world.create.entity([
         { type: TestComponentOne, args: [2] },
       ])
 
       expect(otherEntity).toBeTruthy()
-      expect(otherEntity.components.size).toBe(1)
+      expect(Object.values(otherEntity._components).length).toBe(1)
       expect(otherEntity.has(TestComponentOne)).toBe(true)
     })
 
@@ -47,10 +48,18 @@ describe('Entity', () => {
   describe('adding and removing components', () => {
     class TestComponentOne extends Component {}
     class TestComponentTwo extends Component {}
+    class TestComponentWithConstructParams extends Component {
+      position!: { x: number; y: number }
+
+      construct(x: number, y: number): void {
+        this.position = { x, y }
+      }
+    }
 
     beforeEach(() => {
       world.registerComponent(TestComponentOne)
       world.registerComponent(TestComponentTwo)
+      world.registerComponent(TestComponentWithConstructParams)
     })
 
     it('components can be added and removed from entities', () => {
@@ -95,14 +104,6 @@ describe('Entity', () => {
     })
 
     it('on re-adding a component to an entity, it will be newly constructed properly', () => {
-      class TestComponentWithConstructParams extends Component {
-        position!: { x: number; y: number }
-
-        construct(x: number, y: number): void {
-          this.position = { x, y }
-        }
-      }
-
       const entity = space.create.entity()
       entity.add(TestComponentWithConstructParams, 1, 2)
       expect(entity.has(TestComponentWithConstructParams)).toBe(true)

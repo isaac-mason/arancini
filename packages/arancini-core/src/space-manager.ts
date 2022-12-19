@@ -36,7 +36,7 @@ export class SpaceManager {
    */
   constructor(world: World) {
     this.world = world
-    this.componentPool = new ComponentPool(world)
+    this.componentPool = new ComponentPool()
     this.entityPool = new EntityPool()
   }
 
@@ -135,11 +135,11 @@ export class SpaceManager {
   initialiseEntity(entity: Entity): void {
     entity.initialised = true
 
-    entity.__internal.componentsBitSet.resize(
+    entity._componentsBitSet.resize(
       this.world.componentRegistry.currentComponentIndex
     )
 
-    for (const component of entity.components.values()) {
+    for (const component of Object.values(entity._components)) {
       this.initialiseComponent(component)
     }
   }
@@ -153,7 +153,7 @@ export class SpaceManager {
     entity.initialised = false
     space.entities.delete(entity.id)
 
-    for (const component of entity.components.values()) {
+    for (const component of Object.values(entity._components)) {
       this.removeComponentFromEntity(entity, component)
     }
 
@@ -162,7 +162,7 @@ export class SpaceManager {
     // reset and recycle the entity object
     entity.id = uniqueId()
     entity.events.reset()
-    entity.__internal.componentsBitSet.reset()
+    entity._componentsBitSet.reset()
 
     this.entityPool.release(entity)
   }
@@ -181,8 +181,8 @@ export class SpaceManager {
     component.entity = entity
     component.construct(...args)
 
-    entity.components.set(clazz, component)
-    entity.__internal.componentsBitSet.add(component.__internal.classIndex)
+    entity._components[clazz.componentIndex] = component
+    entity._componentsBitSet.add(component._class.componentIndex)
 
     if (entity.initialised) {
       this.initialiseComponent(component)
@@ -199,8 +199,8 @@ export class SpaceManager {
   removeComponentFromEntity(entity: Entity, component: Component): void {
     component.onDestroy()
 
-    entity.components.delete(component.__internal.class)
-    entity.__internal.componentsBitSet.remove(component.__internal.classIndex)
+    delete entity._components[component._class.componentIndex]
+    entity._componentsBitSet.remove(component._class.componentIndex)
 
     // reset and recycle the component object
     component.id = uniqueId()

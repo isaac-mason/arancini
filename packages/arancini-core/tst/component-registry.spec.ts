@@ -16,12 +16,14 @@ describe('ComponentRegistry', () => {
     for (let i = 0; i < 100; i++) {
       const ExampleComponent = class extends Component {}
       world.registerComponent(ExampleComponent)
-      expect(componentRegistry.getComponentIndex(ExampleComponent)).toBe(i)
+      expect(componentRegistry.components.get(ExampleComponent)).toBe(i)
+      expect(ExampleComponent.componentIndex).toBe(i)
     }
   })
 
   it('on reregistering a component, should return the existing component index', () => {
     const ExampleComponent = class extends Component {}
+    world.registerComponent(ExampleComponent)
 
     const index = world.componentRegistry.registerComponent(ExampleComponent)
 
@@ -30,14 +32,13 @@ describe('ComponentRegistry', () => {
     )
   })
 
-  it('should register unregistered components on requesting their component index', () => {
-    class ExampleComponent extends Component {}
+  it('should support registering a component after the world is initialised', () => {
+    const ExampleComponent = class extends Component {}
 
-    const space = world.create.space()
-    const entity = space.create.entity()
+    world.init()
 
-    entity.add(ExampleComponent)
+    world.componentRegistry.registerComponent(ExampleComponent)
 
-    expect(world.componentRegistry.getComponentIndex(ExampleComponent)).toBe(0)
+    expect(ExampleComponent.componentIndex).toBe(0)
   })
 })

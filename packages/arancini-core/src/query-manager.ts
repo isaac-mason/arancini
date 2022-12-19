@@ -189,21 +189,21 @@ export class QueryManager {
   ): boolean {
     if (
       queryBitSets.all &&
-      !entity.__internal.componentsBitSet.containsAll(queryBitSets.all)
+      !entity._componentsBitSet.containsAll(queryBitSets.all)
     ) {
       return false
     }
 
     if (
       queryBitSets.any &&
-      !entity.__internal.componentsBitSet.containsAny(queryBitSets.any)
+      !entity._componentsBitSet.containsAny(queryBitSets.any)
     ) {
       return false
     }
 
     if (
       queryBitSets.not &&
-      entity.__internal.componentsBitSet.containsAny(queryBitSets.not)
+      entity._componentsBitSet.containsAny(queryBitSets.not)
     ) {
       return false
     }
@@ -232,27 +232,15 @@ export class QueryManager {
     const queryBitSets: QueryBitSets = {}
 
     queryBitSets.all = all
-      ? new BitSet(
-          all.map((component) =>
-            this.world.componentRegistry.getComponentIndex(component)
-          )
-        )
+      ? new BitSet(all.map((component) => component.componentIndex))
       : undefined
 
     queryBitSets.any = any
-      ? new BitSet(
-          any.map((component) =>
-            this.world.componentRegistry.getComponentIndex(component)
-          )
-        )
+      ? new BitSet(any.map((component) => component.componentIndex))
       : undefined
 
     queryBitSets.not = not
-      ? new BitSet(
-          not.map((component) =>
-            this.world.componentRegistry.getComponentIndex(component)
-          )
-        )
+      ? new BitSet(not.map((component) => component.componentIndex))
       : undefined
 
     return queryBitSets

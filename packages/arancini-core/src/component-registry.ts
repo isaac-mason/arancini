@@ -27,21 +27,6 @@ export class ComponentRegistry {
   }
 
   /**
-   * Retrieves a component index for a given component
-   * @param component the component class
-   * @returns the component index
-   */
-  getComponentIndex(component: ComponentClass): number {
-    const index = this.components.get(component)
-
-    if (index === undefined) {
-      return this.registerComponent(component)
-    }
-
-    return index
-  }
-
-  /**
    * Registers a component
    * @param component the component class to register
    * @returns the component index
@@ -55,13 +40,14 @@ export class ComponentRegistry {
     this.currentComponentIndex++
     componentIndex = this.currentComponentIndex
 
+    component.componentIndex = componentIndex
     this.components.set(component, componentIndex)
 
     // if the world has already been initialised, resize all entity components bitsets
     if (this.world.initialised) {
       for (const space of this.world.spaceManager.spaces.values()) {
         for (const entity of space.entities.values()) {
-          entity.__internal.componentsBitSet.resize(this.currentComponentIndex)
+          entity._componentsBitSet.resize(this.currentComponentIndex)
         }
       }
     }

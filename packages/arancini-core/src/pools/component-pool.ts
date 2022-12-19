@@ -1,5 +1,4 @@
 import type { Component, ComponentClass } from '../component'
-import type { World } from '../world'
 import { ObjectPool } from './object-pool'
 
 /**
@@ -54,19 +53,6 @@ export class ComponentPool {
   private objectPools: Map<ComponentClass, ObjectPool<Component>> = new Map()
 
   /**
-   * The World the ComponentPool is in
-   */
-  private world: World
-
-  /**
-   * Constructor for a ComponentPool
-   * @param world the World the ComponentPool being created in
-   */
-  constructor(world: World) {
-    this.world = world
-  }
-
-  /**
    * Requests a component from the component pool
    */
   request<T extends Component>(Clazz: ComponentClass<T>): T {
@@ -76,10 +62,7 @@ export class ComponentPool {
       pool = new ObjectPool<T>(() => {
         const component = new Clazz()
 
-        component.__internal = {
-          class: Clazz,
-          classIndex: this.world.componentRegistry.getComponentIndex(Clazz),
-        }
+        component._class = Clazz
 
         return component
       })
@@ -95,7 +78,7 @@ export class ComponentPool {
    * @param component the component to release
    */
   release(component: Component): void {
-    const pool = this.objectPools.get(component.__internal.class)
+    const pool = this.objectPools.get(component._class)
 
     if (pool !== undefined) {
       pool.release(component)

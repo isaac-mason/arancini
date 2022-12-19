@@ -44,7 +44,7 @@ export type EntitiesProps = {
 }
 
 export type QueryEntitiesProps = {
-  query: A.QueryDescription
+  query: A.Query | A.QueryDescription
   children: ReactNode | ((entity: A.Entity) => ReactNode)
 }
 
@@ -60,7 +60,7 @@ export const createECS = (existing?: A.World) => {
 
   const world = existing ?? new A.World()
 
-  if (!existing) {
+  if (!world.initialised) {
     world.init()
   }
 
@@ -76,46 +76,44 @@ export const createECS = (existing?: A.World) => {
   }
 
   const Space = ({ id, children }: SpaceProps) => {
-    const [space, setSpace] = useState<A.Space>(null!)
+    const [context, setContext] = useState<SpaceProviderContext>(null!)
 
     useIsomorphicLayoutEffect(() => {
       const newSpace = world.create.space({ id })
-      setSpace(newSpace)
+      setContext({ space: newSpace })
 
       return () => {
-        setSpace(null!)
+        setContext(null!)
         newSpace.destroy()
       }
     }, [id])
 
     return (
-      <spaceContext.Provider value={{ space }}>
-        {children}
-      </spaceContext.Provider>
+      <spaceContext.Provider value={context}>{children}</spaceContext.Provider>
     )
   }
 
   const EntityImpl = ({ children, entity: existingEntity }: EntityProps) => {
     const space = useCurrentSpace()
-    const [entity, setEntity] = useState<A.Entity>(null!)
+    const [context, setContext] = useState<{ entity: A.Entity }>(null!)
 
     useIsomorphicLayoutEffect(() => {
-      if (existingEntity) {
-        setEntity(existingEntity)
-        return
-      }
-
       if (!space) {
         return
       }
 
+      if (existingEntity) {
+        setContext({ entity: existingEntity })
+        return
+      }
+
       const newEntity = space.create.entity()
-      setEntity(newEntity)
+      setContext({ entity: newEntity })
 
       const { id } = newEntity
 
       return () => {
-        setEntity(null!)
+        setContext(null!)
 
         // if the entity hasn't already been recycled
         if (id === newEntity.id) {
@@ -125,7 +123,7 @@ export const createECS = (existing?: A.World) => {
     }, [space])
 
     return (
-      <entityContext.Provider value={{ entity }}>
+      <entityContext.Provider value={context}>
         {children}
       </entityContext.Provider>
     )
@@ -143,10 +141,14 @@ export const createECS = (existing?: A.World) => {
     </>
   )
 
-  const useQuery = (queryDescription: A.QueryDescription) => {
+  const useQuery = (q: A.Query | A.QueryDescription) => {
     const query = useMemo(() => {
-      return world.create.query(queryDescription)
-    }, [queryDescription])
+      if (q instanceof A.Query) {
+        return q
+      }
+
+      return world.create.query(q)
+    }, [q])
 
     const rerender = useRerender()
 
@@ -165,13 +167,10 @@ export const createECS = (existing?: A.World) => {
     return query
   }
 
-  const QueryEntities = ({
-    query: queryDescription,
-    children,
-  }: QueryEntitiesProps) => {
-    const query = useQuery(queryDescription)
+  const QueryEntities = ({ query, children }: QueryEntitiesProps) => {
+    const { entities } = useQuery(query)
 
-    return <Entities entities={query.entities} children={children} />
+    return <Entities entities={entities} children={children} />
   }
 
   const Component = <T extends A.Component>({
@@ -181,12 +180,14 @@ export const createECS = (existing?: A.World) => {
   }: ComponentProps<T>) => {
     const ref = useRef<Parameters<T['construct']>>(null)
 
-    const { entity } = useContext(entityContext)
+    const entityCtx = useContext(entityContext)
 
     useIsomorphicLayoutEffect(() => {
-      if (!entity) {
+      if (!entityCtx || !entityCtx.entity.space) {
         return
       }
+
+      const { entity } = entityCtx
 
       let newComponent: A.Component
 
@@ -200,11 +201,11 @@ export const createECS = (existing?: A.World) => {
 
       return () => {
         // check if the entity has the component before removing it
-        if (entity.has(newComponent.__internal.class)) {
+        if (entity.find(newComponent._class) === newComponent) {
           entity.remove(newComponent)
         }
       }
-    }, [entity, args, children, type])
+    }, [entityCtx, args, children, type])
 
     // capture ref of child
     if (children) {

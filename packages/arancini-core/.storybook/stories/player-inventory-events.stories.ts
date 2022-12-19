@@ -51,6 +51,9 @@ class InventorySystem extends System {
 export const PlayerInventoryEvents = () => {
   useEffect(() => {
     const world = new World()
+
+    world.registerComponent(Inventory)
+
     world.registerSystem(InventorySystem)
 
     const space = world.create.space()

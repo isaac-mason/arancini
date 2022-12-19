@@ -134,6 +134,11 @@ export const RandomColorChangingWalkers = () => {
   useEffect(() => {
     const world = new World()
 
+    world.registerComponent(Position)
+    world.registerComponent(Red)
+    world.registerComponent(Blue)
+    world.registerComponent(CanvasContext)
+
     world.registerSystem(WalkSystem)
     world.registerSystem(DrawSystem)
     world.registerSystem(FlipSystem)

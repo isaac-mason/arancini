@@ -10,6 +10,7 @@ export type ComponentDetails = {
 
 export type ComponentClass<T extends Component | Component = Component> = {
   new (...args: never[]): T
+  componentIndex: number
 }
 
 /**
@@ -85,19 +86,12 @@ export abstract class Component {
   }
 
   /**
+   * The class the component was constructed from
    * @private used internally, do not use directly
    */
-  __internal!: {
-    /**
-     * The class the component was constructed from
-     */
-    class: ComponentClass
+  _class!: ComponentClass
 
-    /**
-     * The unique index for the component class
-     */
-    classIndex: number
-  }
+  static componentIndex: number
 
   /**
    * Method for "constructing" a component instance.

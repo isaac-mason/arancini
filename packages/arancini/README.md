@@ -100,7 +100,10 @@ entity.destroy()
 
 ### 📦 Component
 
-In arancini, components are classes that extend the `Component` class. You can define a `construct` method on your components, which will be called every time a component object is created or re-used.
+In arancini, components are classes that extend the `Component` class.
+Components must be registered with the world before they can be used.
+
+You can define a `construct` method on your components, which will be called every time a component object is created or re-used.
 
 Note the not null `!:` syntax! Use this in typescript to indicate that the property will be defined, even if it's not defined in the constructor.
 

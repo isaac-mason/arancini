@@ -18,7 +18,7 @@
     "preview": "vite preview",
     "storybook": "start-storybook -p 6008",
     "build-storybook": "build-storybook",
-    "test": "jest"
+    "test": "jest --coverage"
   },
   "dependencies": {
     "@arancini/core": "^0.1.1",

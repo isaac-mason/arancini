@@ -61,11 +61,6 @@ export class Entity {
   id = uniqueId()
 
   /**
-   * Map of component classes to components
-   */
-  components: Map<{ new (...args: never[]): Component }, Component> = new Map()
-
-  /**
    * The event system for the entity
    */
   events = new EventSystem()
@@ -83,9 +78,9 @@ export class Entity {
   /**
    * @private used internally, do not use directly
    */
-  __internal = {
-    componentsBitSet: new BitSet(),
-  }
+  _componentsBitSet = new BitSet()
+
+  _components: { [index: string]: Component } = {}
 
   /**
    * The World the entity is in
@@ -102,7 +97,7 @@ export class Entity {
     clazz: ComponentClass<T>,
     ...args: Parameters<T['construct']>
   ): T {
-    if (this.components.has(clazz)) {
+    if (this._components[clazz.componentIndex]) {
       throw new Error(
         `Cannot add component ${clazz.name}, entity with id ${this.id} already has this component`
       )
@@ -122,36 +117,13 @@ export class Entity {
   }
 
   /**
-   * Destroy the Entity's components and remove the Entity from the space
-   */
-  destroy(): void {
-    this.world.spaceManager.destroyEntity(this, this.space)
-  }
-
-  /**
-   * Broadcasts an event to the Entity EventSystem
-   * @param event the event to broadcast
-   */
-  emit<E extends Event | Event>(event: E): void {
-    this.events.emit(event)
-  }
-
-  /**
-   * Retrieves a component on an entity by type, returns undefined if the component is not in the entity
-   * @param value a constructor for the component type to retrieve
-   * @returns the component if it is found, or undefined
-   */
-  find<T extends Component>(value: ComponentClass<T>): T | undefined {
-    return this.components.get(value) as T | undefined
-  }
-
-  /**
    * Retrieves a component on an entity by type, throws an error if the component is not in the entity
    * @param value a constructor for the component type to retrieve
    * @returns the component
    */
   get<T extends Component>(value: ComponentClass<T>): T {
-    const component: Component | undefined = this.components.get(value)
+    const component: Component | undefined =
+      this._components[value.componentIndex]
 
     if (component !== undefined) {
       return component as T
@@ -161,12 +133,55 @@ export class Entity {
   }
 
   /**
+   * Retrieves a component on an entity by type, returns undefined if the component is not in the entity
+   * @param value a constructor for the component type to retrieve
+   * @returns the component if it is found, or undefined
+   */
+  find<T extends Component>(value: ComponentClass<T>): T | undefined {
+    return this._components[value.componentIndex] as T | undefined
+  }
+
+  /**
    * Returns whether the entity contains the given component
    * @param value the component constructor, a component instance, or the string name of the component
    * @returns whether the entity contains the given component
    */
   has(value: ComponentClass): boolean {
-    return this.components.has(value)
+    return this._components[value.componentIndex] !== undefined
+  }
+
+  /**
+   * Removes a component from the entity and destroys it
+   * The value can either be a Component constructor, or the component instance itself
+   * @param value the component to remove and destroy
+   */
+  remove(value: Component | ComponentClass): Entity {
+    let component: Component | undefined
+
+    if (value instanceof Component) {
+      if (!this._components[value._class.componentIndex]) {
+        throw new Error('Component instance does not exist in Entity')
+      }
+      component = value
+    } else {
+      component = this.find(value)
+      if (component === undefined) {
+        throw new Error('Component does not exist in Entity')
+      }
+    }
+
+    this.world.spaceManager.removeComponentFromEntity(this, component)
+    this.world.queryManager.onEntityComponentChange(this)
+
+    return this
+  }
+
+  /**
+   * Returns all the components on the entity
+   * @returns the components on the entity
+   */
+  getComponents(): Component[] {
+    return Object.values(this._components)
   }
 
   /**
@@ -183,28 +198,17 @@ export class Entity {
   }
 
   /**
-   * Removes a component from the entity and destroys it
-   * The value can either be a Component constructor, or the component instance itself
-   * @param value the component to remove and destroy
+   * Broadcasts an event to the Entity EventSystem
+   * @param event the event to broadcast
    */
-  remove(value: Component | ComponentClass): Entity {
-    let component: Component | undefined
+  emit<E extends Event | Event>(event: E): void {
+    this.events.emit(event)
+  }
 
-    if (value instanceof Component) {
-      if (!this.components.has(value.__internal.class)) {
-        throw new Error('Component instance does not exist in Entity')
-      }
-      component = value
-    } else {
-      component = this.find(value)
-      if (component === undefined) {
-        throw new Error('Component does not exist in Entity')
-      }
-    }
-
-    this.world.spaceManager.removeComponentFromEntity(this, component)
-    this.world.queryManager.onEntityComponentChange(this)
-
-    return this
+  /**
+   * Destroy the Entity's components and remove the Entity from the space
+   */
+  destroy(): void {
+    this.world.spaceManager.destroyEntity(this, this.space)
   }
 }

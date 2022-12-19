@@ -9,16 +9,6 @@ export default {
   title: 'Random Walkers',
 }
 
-const R = createECS()
-
-const R3FStepper = () => {
-  useFrame((_, delta) => {
-    R.update(delta)
-  })
-
-  return null
-}
-
 class WalkingComponent extends A.Component {}
 
 class Object3DComponent extends A.Component {
@@ -47,6 +37,19 @@ class WalkingSystem extends A.System {
   }
 }
 
+const ECS = createECS()
+
+ECS.world.registerComponent(Object3DComponent)
+ECS.world.registerComponent(WalkingComponent)
+
+const R3FStepper = () => {
+  useFrame((_, delta) => {
+    ECS.update(delta)
+  })
+
+  return null
+}
+
 const App = () => {
   return (
     <>
@@ -55,16 +58,16 @@ const App = () => {
 
       {/* create some walkers */}
       {Array.from({ length: 10 }).map((_, idx) => (
-        <R.Entity key={idx}>
+        <ECS.Entity key={idx}>
           {/* give the walkers the "walking" tag component */}
-          <R.Component type={WalkingComponent} />
-        </R.Entity>
+          <ECS.Component type={WalkingComponent} />
+        </ECS.Entity>
       ))}
 
       {/* render the walkers */}
-      <R.QueryEntities query={[WalkingComponent]}>
+      <ECS.QueryEntities query={[WalkingComponent]}>
         {() => (
-          <R.Component type={Object3DComponent}>
+          <ECS.Component type={Object3DComponent}>
             <mesh
               // random initial position
               position={[
@@ -76,12 +79,12 @@ const App = () => {
               <boxBufferGeometry args={[1, 1, 1]} />
               <meshNormalMaterial />
             </mesh>
-          </R.Component>
+          </ECS.Component>
         )}
-      </R.QueryEntities>
+      </ECS.QueryEntities>
 
       {/* class system to move the walkers */}
-      <R.System type={WalkingSystem} />
+      <ECS.System type={WalkingSystem} />
 
       <OrbitControls />
     </>

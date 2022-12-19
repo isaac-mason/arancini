@@ -9,16 +9,6 @@ export default {
   title: 'Spaces',
 }
 
-const ECS = createECS()
-
-const R3FStepper = () => {
-  useFrame((_, delta) => {
-    ECS.step(delta)
-  })
-
-  return null
-}
-
 class ExampleTagComponent extends A.Component {}
 
 class Object3DComponent extends A.Component {
@@ -29,8 +19,25 @@ class Object3DComponent extends A.Component {
   }
 }
 
+const ECS = createECS()
+
+ECS.world.registerComponent(ExampleTagComponent)
+ECS.world.registerComponent(Object3DComponent)
+
+const Queries = {
+  WITH_TAG_COMPONENT: ECS.world.create.query([ExampleTagComponent]),
+}
+
+const R3FStepper = () => {
+  useFrame((_, delta) => {
+    ECS.update(delta)
+  })
+
+  return null
+}
+
 const EntitiesAndTheirSpaces = () => (
-  <ECS.QueryEntities query={[ExampleTagComponent]}>
+  <ECS.QueryEntities query={Queries.WITH_TAG_COMPONENT}>
     {(entity) => (
       <ECS.Component type={Object3DComponent}>
         <Html center style={{ color: 'white', width: '200px' }}>

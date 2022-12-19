@@ -18,23 +18,6 @@ describe('ComponentPool', () => {
     pool = world.spaceManager.componentPool
   })
 
-  it('should retrieve component indexes on creating new components in the object pool', () => {
-    const exampleComponentOneIndex =
-      world.componentRegistry.getComponentIndex(ExampleComponentOne)
-    const exampleComponentTwoIndex =
-      world.componentRegistry.getComponentIndex(ExampleComponentTwo)
-
-    const exampleComponentOne = pool.request(ExampleComponentOne)
-    const exampleComponentTwo = pool.request(ExampleComponentTwo)
-
-    expect(exampleComponentOne.__internal.classIndex).toBe(
-      exampleComponentOneIndex
-    )
-    expect(exampleComponentTwo.__internal.classIndex).toBe(
-      exampleComponentTwoIndex
-    )
-  })
-
   it('should create a new pool on retrieving a component for the first time', () => {
     expect(pool.totalPools).toBe(0)
     expect(pool.size).toBe(0)
