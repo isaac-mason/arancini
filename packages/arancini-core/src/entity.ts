@@ -76,10 +76,15 @@ export class Entity {
   space!: Space
 
   /**
-   * @private used internally, do not use directly
+   * The BitSet for the entity
+   * @private
    */
   _componentsBitSet = new BitSet()
 
+  /**
+   * The components for the entity
+   * @private
+   */
   _components: { [index: string]: Component } = {}
 
   /**

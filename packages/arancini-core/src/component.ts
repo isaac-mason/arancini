@@ -87,7 +87,7 @@ export abstract class Component {
 
   /**
    * The class the component was constructed from
-   * @private used internally, do not use directly
+   * @private
    */
   _class!: ComponentClass
 

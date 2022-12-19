@@ -4,7 +4,7 @@ import type { World } from './world'
 /**
  * ComponentRegistry that manages Component registration
  *
- * @private used internally, do not use directly
+ * @private internal class, do not use directly
  */
 export class ComponentRegistry {
   /**
