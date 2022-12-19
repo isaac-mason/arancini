@@ -24,10 +24,6 @@ const ECS = createECS()
 ECS.world.registerComponent(ExampleTagComponent)
 ECS.world.registerComponent(Object3DComponent)
 
-const Queries = {
-  WITH_TAG_COMPONENT: ECS.world.create.query([ExampleTagComponent]),
-}
-
 const R3FStepper = () => {
   useFrame((_, delta) => {
     ECS.update(delta)
@@ -37,7 +33,7 @@ const R3FStepper = () => {
 }
 
 const EntitiesAndTheirSpaces = () => (
-  <ECS.QueryEntities query={Queries.WITH_TAG_COMPONENT}>
+  <ECS.QueryEntities query={[ExampleTagComponent]}>
     {(entity) => (
       <ECS.Component type={Object3DComponent}>
         <Html center style={{ color: 'white', width: '200px' }}>
