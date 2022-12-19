@@ -4,10 +4,13 @@
   "commit": false,
   "fixed": [],
   "linked": [
-    ["arancini", "@arancini/core"]
+    ["arancini", "@arancini/*"]
   ],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["benchmarks"]
+  "ignore": ["benchmarks"],
+  "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
+    "onlyUpdatePeerDependentsWhenOutOfRange": true
+  }
 }
