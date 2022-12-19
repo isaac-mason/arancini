@@ -45,8 +45,9 @@ export type ComponentClass<T extends Component | Component = Component> = {
  *   }
  * }
  *
- * // create a world
+ * // create a world and register the component
  * const world = new World()
+ * world.registerComponent(ExampleComponent)
  *
  * // create a space
  * const space = world.create.space()

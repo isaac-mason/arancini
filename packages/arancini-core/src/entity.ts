@@ -20,8 +20,11 @@ import type { World } from './world'
  * // example tag component without any data or behavior
  * class ExampleComponent extends Component {}
  *
- * // create a world, space, and an entity
+ * // create a world and register the component
  * const world = new World()
+ * world.registerComponent(ExampleComponent)
+ *
+ * // create a space and an entity
  * const space = world.create.space()
  * const entity = world.create.entity()
  *
