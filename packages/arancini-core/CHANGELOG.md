@@ -1,5 +1,20 @@
 # @arancini/core
 
+## 1.0.0
+
+### Minor Changes
+
+- 9a3d50a: Improve performance of `entity.get()`
+- b82c03f: Remove Entity 'alive' property
+- 0e2acf4: Query iterator iterates over matching entities in reverse order
+
+### Patch Changes
+
+- 8b7d9c6: refactor: rename SpaceManager 'remove' methods for entities and spaces to 'destroy'
+- b82c03f: Recycle entities and components immediately instead of on world step
+- 22faae1: Add "Getting Started" section to README.md
+- e7af3a8: Add description and keywords to package.json
+
 ## 0.1.1
 
 ### Patch Changes
