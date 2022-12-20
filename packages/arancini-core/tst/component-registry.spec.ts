@@ -35,6 +35,7 @@ describe('ComponentRegistry', () => {
   it('should support registering a component after the world is initialised', () => {
     const ExampleComponent = class extends Component {}
 
+    world.create.entity()
     world.init()
 
     world.componentRegistry.registerComponent(ExampleComponent)
