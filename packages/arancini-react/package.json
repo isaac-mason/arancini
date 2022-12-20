@@ -11,7 +11,7 @@
   "packageManager": "yarn@3.2.1",
   "author": "Isaac Mason <isaac@isaacmason.com>",
   "license": "MIT",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -21,12 +21,12 @@
     "test": "jest --coverage"
   },
   "dependencies": {
-    "@arancini/core": "^0.1.1",
+    "@arancini/core": "^1.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "peerDependencies": {
-    "@arancini/core": "^0.1.1",
+    "@arancini/core": "^1.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

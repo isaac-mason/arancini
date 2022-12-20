@@ -1,5 +1,24 @@
 # @arancini/react
 
+## 1.0.0
+
+### Minor Changes
+
+- 9a3d50a: Add support for passing a query instance to `useQuery` and `<QueryEntities />`
+- cf55aa6: Rename 'step' to 'update'
+
+### Patch Changes
+
+- e7af3a8: Add description and keywords to package.json
+- Updated dependencies [8b7d9c6]
+- Updated dependencies [9a3d50a]
+- Updated dependencies [b82c03f]
+- Updated dependencies [b82c03f]
+- Updated dependencies [0e2acf4]
+- Updated dependencies [22faae1]
+- Updated dependencies [e7af3a8]
+  - @arancini/core@1.0.0
+
 ## 0.1.1
 
 ### Patch Changes
