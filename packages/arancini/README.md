@@ -124,6 +124,23 @@ entity.add(Position, 10, 20)
 entity.remove(Position)
 ```
 
+**You can only register a component with one world.** If you want to use the same component in multiple worlds, you can create a base class and extend it for each world. For example:
+
+```ts
+/* lib.ts */
+import { Component } from 'arancini'
+
+export class MyComponent extends Component { /* ... */ }
+
+/* some-world.ts */
+import { World } from 'arancini'
+import { MyComponent as MyComponentImpl } from './lib'
+
+class MyComponent extends MyComponentImpl {}
+
+const world = new World()
+```
+
 ### 🔎 Query
 
 You can use queries to find entities that have certain components. Queries support `all`, `one`, and `none` filters. Queries with the same filters are deduplicated by arancini, so you can create multiple queries with the same filters without performance penalty.
