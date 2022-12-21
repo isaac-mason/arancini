@@ -70,35 +70,35 @@ export class EventSystem {
 
   /**
    * Adds a handler to the event system
-   * @param eventName the event name
+   * @param topic the event topic
    * @param handler the handler function
    * @returns the id of the new handler
    */
   on<E extends Event | Event>(
-    eventName: string,
+    topic: string,
     handler: EventHandler<E>
   ): EventSubscription {
-    let eventDispatcher = this.dispatchers.get(eventName)
+    let eventDispatcher = this.dispatchers.get(topic)
 
     if (eventDispatcher === undefined) {
       eventDispatcher = new EventDispatcher()
-      this.dispatchers.set(eventName, eventDispatcher)
+      this.dispatchers.set(topic, eventDispatcher)
     }
 
     eventDispatcher.add(handler)
 
     return {
-      unsubscribe: () => this.unsubscribe(eventName, handler),
+      unsubscribe: () => this.unsubscribe(topic, handler),
     }
   }
 
   /**
    * Removes an event handler by handler id
-   * @param eventName the name of the event
+   * @param topic the name of the event
    * @param handler the event handler
    */
-  unsubscribe(eventName: string, handler: EventHandler<never>): void {
-    const eventHandlers = this.dispatchers.get(eventName)
+  unsubscribe(topic: string, handler: EventHandler<never>): void {
+    const eventHandlers = this.dispatchers.get(topic)
     if (eventHandlers !== undefined) {
       eventHandlers.remove(handler)
     }

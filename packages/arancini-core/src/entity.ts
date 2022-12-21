@@ -194,15 +194,15 @@ export class Entity {
 
   /**
    * Adds a handler for entity events
-   * @param eventName the event name
+   * @param topic the event topic
    * @param handler the handler function
    * @returns the subscription
    */
   on<E extends Event | Event>(
-    eventName: string,
+    topic: E['topic'],
     handler: EventHandler<E>
   ): EventSubscription {
-    return this.events.on(eventName, handler)
+    return this.events.on(topic, handler)
   }
 
   /**

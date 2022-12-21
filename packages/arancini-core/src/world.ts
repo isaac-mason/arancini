@@ -178,15 +178,15 @@ export class World {
 
   /**
    * Adds a handler for World events
-   * @param eventName the event name
+   * @param topic the topic name
    * @param handler the handler function
    * @returns the id of the new handler
    */
   on<E extends Event | Event>(
-    eventName: string,
+    topic: E['topic'],
     handler: EventHandler<E>
   ): EventSubscription {
-    return this.events.on(eventName, handler)
+    return this.events.on(topic, handler)
   }
 
   /**
