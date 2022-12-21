@@ -213,6 +213,7 @@ export class QueryManager {
 
   private getQueryResults(queryBitSets: QueryBitSets): Entity[] {
     const matches: Entity[] = []
+
     for (const space of this.world.spaceManager.spaces.values()) {
       for (const entity of space.entities.values()) {
         if (this.matchesQueryConditions(queryBitSets, entity)) {
