@@ -320,7 +320,7 @@ describe('useCurrentEntity', () => {
       ),
     })
 
-    expect(result.current.entity).toBe(entity)
+    expect(result.current).toBe(entity)
   })
 })
 

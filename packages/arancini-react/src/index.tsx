@@ -68,7 +68,10 @@ export const createECS = (existing?: A.World) => {
     world.update(delta)
   }
 
-  const useCurrentEntity = () => useContext(entityContext)
+  const useCurrentEntity = (): A.Entity | undefined => {
+    const context = useContext(entityContext)
+    return context ? context.entity : undefined
+  }
 
   const useCurrentSpace = () => {
     const context = useContext(spaceContext)
