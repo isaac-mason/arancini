@@ -91,18 +91,16 @@ export class Space {
   /**
    * Retrieves space factories
    */
-  get create(): {
+  create: {
     /**
      * Creates a new entity in the space
      * @returns a new entity
      */
     entity: (components?: ComponentDetails[]) => Entity
-  } {
-    return {
-      entity: (components) => {
-        return this.world.spaceManager.createEntity(this, components)
-      },
-    }
+  } = {
+    entity: (components) => {
+      return this.world.spaceManager.createEntity(this, components)
+    },
   }
 
   /**

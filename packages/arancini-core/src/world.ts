@@ -109,7 +109,7 @@ export class World {
   /**
    * Retrieves World factories
    */
-  get create(): {
+  create: {
     /**
      * Creates a new Entity in the default World Space
      * @see defaultSpace
@@ -128,18 +128,16 @@ export class World {
      * @returns the Query
      */
     query: (queryDescription: QueryDescription) => Query
-  } {
-    return {
-      entity: (components) => {
-        return this.spaceManager.createEntity(this.defaultSpace, components)
-      },
-      space: (params) => {
-        return this.spaceManager.createSpace(params)
-      },
-      query: (queryDescription) => {
-        return this.queryManager.createQuery(queryDescription)
-      },
-    }
+  } = {
+    entity: (components) => {
+      return this.spaceManager.createEntity(this.defaultSpace, components)
+    },
+    space: (params) => {
+      return this.spaceManager.createSpace(params)
+    },
+    query: (queryDescription) => {
+      return this.queryManager.createQuery(queryDescription)
+    },
   }
 
   /**
