@@ -1,5 +1,12 @@
 # @arancini/core
 
+## 1.0.1
+
+### Patch Changes
+
+- 533082d: Use generic for topic name type when registering a handler with `.on(...)`
+- f447622: Change 'create' factories from getters to properties
+
 ## 1.0.0
 
 ### Minor Changes
