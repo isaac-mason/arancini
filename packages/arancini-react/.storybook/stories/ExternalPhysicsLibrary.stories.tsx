@@ -42,7 +42,7 @@ class PhysicsSystem extends A.System {
 
   bodies = new Map<string, P2.Body>()
 
-  onInit(): void {
+  onInit() {
     this.physicsWorld.addContactMaterial(boxGroundContactMaterial)
     this.physicsWorld.addContactMaterial(boxBoxContactMaterial)
 
@@ -88,14 +88,6 @@ const Queries = {
   TO_RENDER: ECS.world.create.query([RigidBodyComponent]),
 }
 
-const R3FStepper = () => {
-  useFrame((_, delta) => {
-    ECS.update(delta)
-  })
-
-  return null
-}
-
 const Plane = () => (
   <ECS.Entity>
     <ECS.Component
@@ -104,7 +96,7 @@ const Plane = () => (
         () => {
           const plane = new P2.Plane({ material: groundMaterial })
           const body = new P2.Body()
-          body.position = [0, -3]
+          body.position = [0, -2]
           body.addShape(plane)
           return body
         },
@@ -113,7 +105,13 @@ const Plane = () => (
   </ECS.Entity>
 )
 
-const Box = ({ position, width, height }: { position: [number, number], width: number, height: number }) => (
+type BoxProps = {
+  position: [number, number]
+  width: number
+  height: number
+}
+
+const Box = ({ position, width, height }: BoxProps) => (
   <ECS.Entity>
     <ECS.Component
       type={RigidBodyComponent}
@@ -135,11 +133,12 @@ const Box = ({ position, width, height }: { position: [number, number], width: n
 )
 
 const App = () => {
+  useFrame((_, delta) => {
+    ECS.update(delta)
+  })
+
   return (
     <>
-      {/* loop for r3f */}
-      <R3FStepper />
-
       {/* physics system */}
       <ECS.System type={PhysicsSystem} />
 
@@ -155,22 +154,29 @@ const App = () => {
         <Box width={0.5} height={0.5} position={[0.2, 4]} />
       </Repeat>
 
+      {/* render rigid bodies */}
       <ECS.QueryEntities query={Queries.TO_RENDER}>
         {(entity) => {
           const colliderComponent = entity.get(RigidBodyComponent)
 
-          const boxes = colliderComponent.body.shapes.filter((shape) => {
-            return shape instanceof P2.Box
-          })
+          const boxes: P2.Box[] = []
+          const planes: P2.Plane[] = []
 
-          if (boxes.length === 0) return null
+          for (const shape of colliderComponent.body.shapes) {
+            if (shape instanceof P2.Box) {
+              boxes.push(shape)
+            } else if (shape instanceof P2.Plane) {
+              planes.push(shape)
+            }
+          }
 
           return (
             <ECS.Component type={Object3DComponent}>
               <group>
+                {/* render box shapes */}
                 {boxes.map((box, index) => (
                   <mesh key={index}>
-                    <meshNormalMaterial />
+                    <meshStandardMaterial color="orange" />
                     <boxBufferGeometry
                       args={[
                         (box as P2.Box).width,
@@ -180,11 +186,23 @@ const App = () => {
                     />
                   </mesh>
                 ))}
+
+                {/* render plane shapes */}
+                {planes.map((plane, index) => (
+                  <mesh key={index} rotation={[-Math.PI / 2, 0, plane.angle]}>
+                    <meshStandardMaterial color="#333" />
+                    <planeBufferGeometry args={[100, 100]} />
+                  </mesh>
+                ))}
               </group>
             </ECS.Component>
           )
         }}
       </ECS.QueryEntities>
+
+      {/* lights */}
+      <ambientLight intensity={0.5} />
+      <pointLight position={[10, 10, -2]} />
     </>
   )
 }

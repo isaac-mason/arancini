@@ -1,6 +1,6 @@
 import * as A from '@arancini/core'
 import * as THREE from 'three'
-import { PerspectiveCamera } from '@react-three/drei'
+import { Bounds, Environment, PerspectiveCamera } from '@react-three/drei'
 import { useFrame, Vector3 } from '@react-three/fiber'
 import React, { useEffect, useState } from 'react'
 import { createECS } from '../../src'
@@ -115,6 +115,7 @@ const useIsSelected = (entity: A.Entity | undefined) => {
 const SelectableBox = (props: JSX.IntrinsicElements['mesh']) => {
   const entity = ECS.useCurrentEntity()
   const isSelected = useIsSelected(entity)
+  const [isHovered, setIsHovered] = useState(false)
 
   const toggleSelection = () => {
     if (!entity) return
@@ -126,22 +127,37 @@ const SelectableBox = (props: JSX.IntrinsicElements['mesh']) => {
     }
   }
 
+  let color: string
+  
+  if (isHovered) {
+    color = isSelected ? '#FFD580' : '#999'
+  } else {
+    color = isSelected ? 'orange' : '#555'
+  }
+
   return (
     <ECS.Component type={Object3DComponent}>
-      <mesh {...props} onClick={toggleSelection}>
+      <mesh
+        {...props}
+        onClick={toggleSelection}
+        onPointerOver={() => setIsHovered(true)}
+        onPointerOut={() => setIsHovered(false)}
+      >
         <boxBufferGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color={isSelected ? 0xff0000 : 0x0000ff} />
+        <meshStandardMaterial color={color} />
       </mesh>
     </ECS.Component>
   )
 }
 
-const boxPositions: Vector3[] = [
-  [-2, 0, 0],
-  [2, 0, 0],
-  [0, -2, 0],
-  [0, 2, 0],
-]
+const rows = 10
+const cols = 10
+
+const boxPositions = Array.from({ length: rows * cols }, (_, i) => {
+  const x = (i % cols) - (cols - 1) / 2
+  const y = Math.floor(i / cols) - (rows - 1) / 2
+  return [x * 1.5, y * 1.5, 0]
+}) as Vector3[]
 
 const SelectableBoxes = () => (
   <>
@@ -156,7 +172,7 @@ const SelectableBoxes = () => (
 const Camera = () => (
   <ECS.Entity>
     <ECS.Component type={CameraComponent}>
-      <PerspectiveCamera makeDefault position={[0, 0, 10]} />
+      <PerspectiveCamera makeDefault fov={30} position={[0, 0, 30]} />
     </ECS.Component>
   </ECS.Entity>
 )
@@ -168,8 +184,14 @@ const App = () => {
 
   return (
     <>
-      <SelectableBoxes />
+      <Bounds fit clip observe>
+        <SelectableBoxes />
+      </Bounds>
+      
       <Camera />
+      
+      <ambientLight intensity={0.5} />
+      <pointLight position={[5, 10, 5]} />
     </>
   )
 }
@@ -177,7 +199,7 @@ const App = () => {
 export const Example = () => {
   return (
     <>
-      <Setup controls={false}>
+      <Setup controls={false} lights={false}>
         <App />
       </Setup>
     </>
