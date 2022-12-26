@@ -1,5 +1,14 @@
 # @arancini/react
 
+## 1.0.1
+
+### Patch Changes
+
+- dd76cca: Change `useCurrentEntity` to return the current entity instead of the entity context value
+- Updated dependencies [533082d]
+- Updated dependencies [f447622]
+  - @arancini/core@1.0.1
+
 ## 1.0.0
 
 ### Minor Changes

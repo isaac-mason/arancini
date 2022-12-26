@@ -22,7 +22,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@arancini/core@1.0.0, @arancini/core@^1.0.0, @arancini/core@workspace:packages/arancini-core":
+"@arancini/core@1.0.1, @arancini/core@^1.0.1, @arancini/core@workspace:packages/arancini-core":
   version: 0.0.0-use.local
   resolution: "@arancini/core@workspace:packages/arancini-core"
   dependencies:
@@ -67,7 +67,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@arancini/react@workspace:packages/arancini-react"
   dependencies:
-    "@arancini/core": ^1.0.0
+    "@arancini/core": ^1.0.1
     "@babel/core": ^7.18.6
     "@mdx-js/react": ^1.6.22
     "@react-three/drei": ^9.16.0
@@ -5984,7 +5984,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "arancini@workspace:packages/arancini"
   dependencies:
-    "@arancini/core": 1.0.0
+    "@arancini/core": 1.0.1
     "@babel/core": ^7.18.6
     "@jest/globals": ^28.1.2
     "@mdx-js/react": ^1.6.22
