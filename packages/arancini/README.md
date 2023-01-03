@@ -38,7 +38,7 @@ Arancini is an object based Entity Component System. If you aren't familiar with
 
 TL;DR: ECS is a data-oriented architecture for structuring your application.
 
-In arancini, components are defined as classes and can contain data. You can then use queries to find entities that have certain components, and run logic on them. Arancini also has built-in support for Systems, but you can also use queries alone to roll your own "System" logic.
+In arancini, components are defined as classes and can contain data. You can then use queries to find entities that have certain components, and run logic on them. Arancini has built-in support for Systems, but you can also use queries alone to roll your own "System" logic.
 
 Object-pooling is a core feature of arancini. Arancini will pool and re-use entity and component objects for you! This helps avoid garbage collection and improves performance.
 
