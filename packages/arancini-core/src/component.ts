@@ -1,7 +1,5 @@
 import { Entity } from './entity'
-import { Space } from './space'
 import { uniqueId } from './utils'
-import { World } from './world'
 
 export type ComponentDetails = {
   type: ComponentClass
@@ -71,20 +69,6 @@ export abstract class Component {
    * The entity this component belongs to.
    */
   entity!: Entity
-
-  /**
-   * The Space the components entity is in
-   */
-  get space(): Space {
-    return this.entity.space
-  }
-
-  /**
-   * The World the components entity is in
-   */
-  get world(): World {
-    return this.entity.world
-  }
 
   /**
    * The class the component was constructed from

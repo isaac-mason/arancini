@@ -173,16 +173,4 @@ describe('Components', () => {
       expect(entity.getAll()).toEqual([])
     })
   })
-
-  it('components should have a getter for the space and world the component is in', () => {
-    class TestComponentOne extends Component {}
-    world.registerComponent(TestComponentOne)
-
-    const entity = space.create.entity()
-
-    const component = entity.add(TestComponentOne)
-
-    expect(component.space).toBe(space)
-    expect(component.world).toBe(world)
-  })
 })
