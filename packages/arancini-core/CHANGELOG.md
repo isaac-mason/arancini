@@ -1,5 +1,11 @@
 # @arancini/core
 
+## 1.1.0
+
+### Minor Changes
+
+- e41b313: feat(Component): remove 'world' and 'space' getters
+
 ## 1.0.1
 
 ### Patch Changes
