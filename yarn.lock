@@ -22,7 +22,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@arancini/core@1.0.1, @arancini/core@^1.0.1, @arancini/core@workspace:packages/arancini-core":
+"@arancini/core@1.1.0, @arancini/core@^1.0.1, @arancini/core@workspace:packages/arancini-core":
   version: 0.0.0-use.local
   resolution: "@arancini/core@workspace:packages/arancini-core"
   dependencies:
@@ -6309,7 +6309,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "arancini@workspace:packages/arancini"
   dependencies:
-    "@arancini/core": 1.0.1
+    "@arancini/core": 1.1.0
     "@typescript-eslint/eslint-plugin": ^5.7.0
     "@typescript-eslint/parser": ^5.7.0
     eslint: ^8.5.0

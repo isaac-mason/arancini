@@ -1,5 +1,12 @@
 # arancini
 
+## 1.1.0
+
+### Patch Changes
+
+- Updated dependencies [e41b313]
+  - @arancini/core@1.1.0
+
 ## 1.0.1
 
 ### Patch Changes
