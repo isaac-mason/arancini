@@ -33,13 +33,10 @@ describe('Entity', () => {
 
     it('can be destroyed or removed from a space', () => {
       const entity = space.create.entity()
-      const { id } = entity
 
       entity.destroy()
 
       // assert the entity has been reset
-      expect(entity.id).not.toBe(id)
-      expect(entity.initialised).toBe(false)
       expect(entity.space).toBeFalsy()
       expect(space.entities.has(entity.id)).toBe(false)
     })
