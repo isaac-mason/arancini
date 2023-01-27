@@ -1,4 +1,4 @@
-import { EventDispatcher } from './event-dispatcher'
+import { EventDispatcher, Unsubscribe } from './event-dispatcher'
 
 /**
  * An event that can be broadcast and consumed by entities and components
@@ -11,11 +11,6 @@ export interface Event {
  * An event handler that takes an event or a type that extends the event type
  */
 export type EventHandler<E extends Event = Event> = (event: E) => void
-
-/**
- * A subscription to an event
- */
-export type Unsubscribe = () => void
 
 /**
  * Params for creating an EventSystem
@@ -83,9 +78,7 @@ export class EventSystem {
       this.dispatchers.set(topic, eventDispatcher)
     }
 
-    eventDispatcher.add(handler)
-
-    return () => this.unsubscribe(topic, handler)
+    return eventDispatcher.add(handler)
   }
 
   /**

@@ -1,3 +1,8 @@
+/**
+ * Function to unsubscribe from an event
+ */
+export type Unsubscribe = () => void
+
 export class EventDispatcher<E> {
   listeners: Set<(event: E) => void> = new Set()
 
@@ -6,20 +11,18 @@ export class EventDispatcher<E> {
    * @param handler the handler for the event
    * @returns a function to unsubscribe from the event
    */
-  add(handler: (event: E) => void): this {
+  add(handler: (event: E) => void): Unsubscribe {
     this.listeners.add(handler)
 
-    return this
+    return () => this.remove(handler)
   }
 
   /**
    * Unsubscribe to events
    * @param handler the handler to unsubscribe
    */
-  remove(handler: (event: E) => void): this {
+  remove(handler: (event: E) => void): void {
     this.listeners.delete(handler)
-
-    return this
   }
 
   /**
