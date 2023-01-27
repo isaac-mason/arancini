@@ -127,7 +127,7 @@ describe('EventSystem', () => {
         data: 'data',
       }
 
-      const subscription = eventSystem.on(eventName, handler)
+      const unsubscribe = eventSystem.on(eventName, handler)
 
       eventSystem.emit(event)
 
@@ -136,7 +136,7 @@ describe('EventSystem', () => {
       expect(handler).toBeCalledTimes(1)
       expect(handler).toBeCalledWith(event)
 
-      subscription.unsubscribe()
+      unsubscribe()
 
       eventSystem.emit(event)
 

@@ -17,7 +17,7 @@ describe('Space', () => {
 
     const mockFn = jest.fn()
 
-    const subscription = space.on('event-name', () => mockFn())
+    const unsubscribe = space.on('event-name', () => mockFn())
 
     expect(mockFn).toBeCalledTimes(0)
 
@@ -27,7 +27,7 @@ describe('Space', () => {
 
     expect(mockFn).toBeCalledTimes(1)
 
-    subscription.unsubscribe()
+    unsubscribe()
 
     space.emit({
       topic: 'event-name',

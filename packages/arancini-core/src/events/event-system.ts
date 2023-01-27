@@ -15,9 +15,7 @@ export type EventHandler<E extends Event = Event> = (event: E) => void
 /**
  * A subscription to an event
  */
-export type EventSubscription = {
-  unsubscribe: () => void
-}
+export type Unsubscribe = () => void
 
 /**
  * Params for creating an EventSystem
@@ -77,7 +75,7 @@ export class EventSystem {
   on<E extends Event | Event>(
     topic: string,
     handler: EventHandler<E>
-  ): EventSubscription {
+  ): Unsubscribe {
     let eventDispatcher = this.dispatchers.get(topic)
 
     if (eventDispatcher === undefined) {
@@ -87,9 +85,7 @@ export class EventSystem {
 
     eventDispatcher.add(handler)
 
-    return {
-      unsubscribe: () => this.unsubscribe(topic, handler),
-    }
+    return () => this.unsubscribe(topic, handler)
   }
 
   /**

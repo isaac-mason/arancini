@@ -1,6 +1,6 @@
 import type { ComponentDetails } from './component'
 import type { Entity } from './entity'
-import type { Event, EventHandler, EventSubscription } from './events'
+import type { Event, EventHandler } from './events'
 import { EventSystem } from './events'
 import { uniqueId } from './utils'
 import type { World } from './world'
@@ -117,10 +117,7 @@ export class Space {
    * @param handler the handler function
    * @returns the id of the new handler
    */
-  on<E extends Event | Event>(
-    topic: E['topic'],
-    handler: EventHandler<E>
-  ): EventSubscription {
+  on<E extends Event | Event>(topic: E['topic'], handler: EventHandler<E>) {
     return this.events.on(topic, handler)
   }
 

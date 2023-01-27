@@ -137,7 +137,7 @@ describe('Entity', () => {
 
       // register an event handler
       const mockFn = jest.fn()
-      const subscription = entity.on('event-name', () => mockFn())
+      const unsubscribe = entity.on('event-name', () => mockFn())
       expect(mockFn).toBeCalledTimes(0)
 
       // event should be handled
@@ -147,7 +147,7 @@ describe('Entity', () => {
       expect(mockFn).toBeCalledTimes(1)
 
       // event should not be handled
-      subscription.unsubscribe()
+      unsubscribe()
       entity.emit({
         topic: 'event-name',
       })
@@ -157,7 +157,7 @@ describe('Entity', () => {
     it('spaces should be able to register event handlers and emit events', () => {
       // register an event handler
       const mockFn = jest.fn()
-      const subscription = space.on('event-name', () => mockFn())
+      const unsubscribe = space.on('event-name', () => mockFn())
       expect(mockFn).toBeCalledTimes(0)
 
       // event should be handled
@@ -167,7 +167,7 @@ describe('Entity', () => {
       expect(mockFn).toBeCalledTimes(1)
 
       // event should not be handled
-      subscription.unsubscribe()
+      unsubscribe()
       space.emit({
         topic: 'event-name',
       })

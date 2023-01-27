@@ -1,7 +1,7 @@
 import type { ComponentClass, ComponentDetails } from './component'
 import { ComponentRegistry } from './component-registry'
 import type { Entity } from './entity'
-import type { Event, EventHandler, EventSubscription } from './events'
+import type { Event, EventHandler } from './events'
 import { EventSystem } from './events'
 import type { Query, QueryDescription } from './query'
 import { QueryManager } from './query-manager'
@@ -180,10 +180,7 @@ export class World {
    * @param handler the handler function
    * @returns the id of the new handler
    */
-  on<E extends Event | Event>(
-    topic: E['topic'],
-    handler: EventHandler<E>
-  ): EventSubscription {
+  on<E extends Event | Event>(topic: E['topic'], handler: EventHandler<E>) {
     return this.events.on(topic, handler)
   }
 

@@ -53,7 +53,7 @@ describe('World', () => {
 
     world.init()
 
-    const subscription = world.on('event-name', () => mockFn())
+    const unsubscribe = world.on('event-name', () => mockFn())
 
     expect(mockFn).toBeCalledTimes(0)
 
@@ -63,7 +63,7 @@ describe('World', () => {
 
     expect(mockFn).toBeCalledTimes(1)
 
-    subscription.unsubscribe()
+    unsubscribe()
 
     world.emit({
       topic: 'event-name',
