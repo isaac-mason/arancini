@@ -165,7 +165,7 @@ describe('<Space>', () => {
 
     expect(ECS.world.defaultSpace.entities.size).toBe(0)
     expect(ECS.world.spaceManager.spaces.size).toBe(2)
-    expect(ECS.world.getSpace('testSpaceName')!.entities.size).toBe(1)
+    expect(ECS.world.getSpace(testSpaceName)!.entities.size).toBe(1)
 
     act(() => {
       unmount()
