@@ -37,7 +37,7 @@ export class SpaceManager {
   constructor(world: World) {
     this.world = world
     this.componentPool = new ComponentPool()
-    this.entityPool = new EntityPool()
+    this.entityPool = new EntityPool(this.world)
   }
 
   /**

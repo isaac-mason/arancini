@@ -79,6 +79,11 @@ export class Entity {
   space!: Space
 
   /**
+   * The World the entity is in
+   */
+  world!: World
+
+  /**
    * The BitSet for the entity
    * @private
    */
@@ -89,13 +94,6 @@ export class Entity {
    * @private
    */
   _components: { [index: string]: Component } = {}
-
-  /**
-   * The World the entity is in
-   */
-  get world(): World {
-    return this.space.world
-  }
 
   /**
    * Adds a component to the entity
@@ -217,6 +215,8 @@ export class Entity {
    * Destroy the Entity's components and remove the Entity from the space
    */
   destroy(): void {
-    this.world.spaceManager.destroyEntity(this, this.space)
+    if (!this.space || !this.world) return
+
+    this.space.world.spaceManager.destroyEntity(this, this.space)
   }
 }

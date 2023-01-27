@@ -128,6 +128,8 @@ export class Space {
    * Destroys the space and removes it from the World
    */
   destroy(): void {
+    if (!this.world) return
+
     this.world.spaceManager.destroySpace(this)
   }
 }

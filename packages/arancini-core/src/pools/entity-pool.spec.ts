@@ -1,12 +1,15 @@
 import { describe, it, expect } from '@jest/globals'
 import { Entity } from '../entity'
+import { World } from '../world'
 import { EntityPool } from './entity-pool'
 
 describe('EntityPool', () => {
+  let world = new World()
   let pool: EntityPool
 
   beforeEach(() => {
-    pool = new EntityPool()
+    world = new World()
+    pool = world.spaceManager.entityPool
   })
 
   it('should return an entity on request', () => {

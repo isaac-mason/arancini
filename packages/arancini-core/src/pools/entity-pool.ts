@@ -1,4 +1,5 @@
 import { Entity } from '../entity'
+import { World } from '../world'
 import { ObjectPool } from './object-pool'
 
 /**
@@ -10,7 +11,11 @@ export class EntityPool {
   /**
    * The object pool for the entity pool
    */
-  private objectPool = new ObjectPool<Entity>(() => new Entity())
+  private objectPool = new ObjectPool<Entity>(() => {
+    const entity = new Entity()
+    entity.world = this.world
+    return entity
+  })
 
   /**
    * The size of the entity pool
@@ -31,6 +36,15 @@ export class EntityPool {
    */
   get used(): number {
     return this.objectPool.used
+  }
+
+  /**
+   * The world the entity pool is part of
+   */
+  private world: World
+
+  constructor(world: World) {
+    this.world = world
   }
 
   /**
