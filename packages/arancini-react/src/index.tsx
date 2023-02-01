@@ -2,6 +2,7 @@ import * as A from '@arancini/core'
 import React, {
   createContext,
   memo,
+  ReactElement,
   ReactNode,
   useContext,
   useMemo,
@@ -212,11 +213,10 @@ export const createECS = (existing?: A.World) => {
 
     // capture ref of child
     if (children) {
-      const child = React.Children.only(children) as React.ReactElement
+      const child = React.Children.only(children) as ReactElement
 
       return React.cloneElement(child, {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ref: mergeRefs([(child as any).ref, ref]),
+        ref: mergeRefs([(child as unknown as { ref: never }).ref, ref]),
       })
     }
 
