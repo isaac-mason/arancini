@@ -1,5 +1,20 @@
 # @arancini/core
 
+## 2.0.0
+
+### Major Changes
+
+- 39d3641: remove events from World, Space, Entity
+
+### Minor Changes
+
+- 52bb1e5: feat: reset entities on request, not on destroy
+- 4169199: feat: change query onEntityAdded and onEntityRemoved '.add()' to return unsubscribe function
+
+### Patch Changes
+
+- 807443d: fix: noop when destroying a non-active space or entity
+
 ## 1.1.0
 
 ### Minor Changes

@@ -1,5 +1,15 @@
 # arancini
 
+## 2.0.0
+
+### Patch Changes
+
+- Updated dependencies [52bb1e5]
+- Updated dependencies [4169199]
+- Updated dependencies [807443d]
+- Updated dependencies [39d3641]
+  - @arancini/core@2.0.0
+
 ## 1.1.0
 
 ### Patch Changes
