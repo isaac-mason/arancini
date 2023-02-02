@@ -28,11 +28,6 @@ export type SpaceProps = {
   children?: React.ReactNode
 }
 
-export type SystemProps<T extends A.System> = {
-  type: A.SystemClass<T>
-  priority?: number
-}
-
 export type EntityProps = {
   name?: string
   entity?: A.Entity
@@ -223,25 +218,12 @@ export const createECS = (existing?: A.World) => {
     return null
   }
 
-  const System = <T extends A.System>({ type, priority }: SystemProps<T>) => {
-    useIsomorphicLayoutEffect(() => {
-      world.registerSystem(type, { priority })
-
-      return () => {
-        world.unregisterSystem(type)
-      }
-    }, [type, priority])
-
-    return null
-  }
-
   return {
     Space,
     Entity,
     Entities,
     QueryEntities,
     Component,
-    System,
     useQuery,
     useCurrentEntity,
     useCurrentSpace,

@@ -14,8 +14,6 @@ class ExampleComponentWithArgs extends A.Component {
   }
 }
 
-class ExampleSystem extends A.System {}
-
 describe('createECS', () => {
   it('should create an ECS instance', () => {
     const ECS = createECS()
@@ -234,24 +232,6 @@ describe('<Component>', () => {
     )
 
     expect(entity.get(ExampleComponentWithArgs).exampleProperty).toBe(refValue)
-  })
-})
-
-describe('<System>', () => {
-  it('should register and unregister the given system', () => {
-    const ECS = createECS()
-
-    const { unmount } = render(<ECS.System type={ExampleSystem} />)
-
-    expect(ECS.world.systemManager.systems.size).toBe(1)
-    expect(ECS.world.systemManager.systems.has(ExampleSystem)).toBe(true)
-
-    act(() => {
-      unmount()
-    })
-
-    expect(ECS.world.systemManager.systems.size).toBe(0)
-    expect(ECS.world.systemManager.systems.has(ExampleSystem)).toBe(false)
   })
 })
 
