@@ -15,29 +15,28 @@ class ExampleComponentWithArgs extends A.Component {
 }
 
 describe('createECS', () => {
-  let world: A.World
-  let ECS: ReturnType<typeof createECS>
-
-  beforeEach(() => {
-    world = new A.World()
-    world.init()
-
-    ECS = createECS(world)
-  })
-
   it('should be truthy', () => {
+    const world = new A.World()
+    const ECS = createECS(world)
+
     expect(ECS).toBeTruthy()
     expect(ECS.world).toBeTruthy()
   })
 
   describe('<Entity>', () => {
     it('should create an entity', () => {
+      const world = new A.World()
+      const ECS = createECS(world)
+
       render(<ECS.Entity />)
 
       expect(world.defaultSpace.entities.size).toBe(1)
     })
 
     it('should support taking an existing entity via props', () => {
+      const world = new A.World()
+      const ECS = createECS(world)
+
       const entity = world.create.entity()
 
       render(<ECS.Entity entity={entity} />)
@@ -45,10 +44,26 @@ describe('createECS', () => {
       expect(world.defaultSpace.entities.size).toBe(1)
       expect(world.defaultSpace.entities.has(entity.id)).toBe(true)
     })
+
+    it('supports refs', () => {
+      const world = new A.World()
+      const ECS = createECS(world)
+
+      const ref = React.createRef<A.Entity>()
+      const entity = world.create.entity()
+
+      render(<ECS.Entity ref={ref} entity={entity} />)
+
+      expect(ref.current).not.toBeNull()
+      expect(ref.current).toBe(entity)
+    })
   })
 
   describe('<Entities>', () => {
     it('should add components to entities', () => {
+      const world = new A.World()
+      const ECS = createECS(world)
+
       world.registerComponent(ExampleComponent)
 
       const entities = [
@@ -71,6 +86,9 @@ describe('createECS', () => {
 
   describe('<QueryEntities>', () => {
     it('should render entities that match the query description', () => {
+      const world = new A.World()
+      const ECS = createECS(world)
+
       world.registerComponent(ExampleComponent)
       world.registerComponent(ExampleComponentWithArgs)
 
@@ -107,6 +125,9 @@ describe('createECS', () => {
     })
 
     it('should render entities that match the query instance', () => {
+      const world = new A.World()
+      const ECS = createECS(world)
+
       world.registerComponent(ExampleComponent)
       world.registerComponent(ExampleComponentWithArgs)
 
@@ -147,6 +168,9 @@ describe('createECS', () => {
 
   describe('<Space>', () => {
     it('should support creation of entities within the space', () => {
+      const world = new A.World()
+      const ECS = createECS(world)
+
       const testSpaceName = 'testSpaceName'
       const { unmount } = render(
         <ECS.Space id={testSpaceName}>
@@ -168,6 +192,9 @@ describe('createECS', () => {
 
   describe('<Component>', () => {
     it('should add and remove the given component to an entity', () => {
+      const world = new A.World()
+      const ECS = createECS(world)
+
       world.registerComponent(ExampleComponent)
 
       const entity = world.create.entity()
@@ -188,6 +215,9 @@ describe('createECS', () => {
     })
 
     it('should call construct with the args prop', () => {
+      const world = new A.World()
+      const ECS = createECS(world)
+
       world.registerComponent(ExampleComponentWithArgs)
 
       const entity = world.create.entity()
@@ -202,6 +232,9 @@ describe('createECS', () => {
     })
 
     it('should capture child ref and use it as a component arg', () => {
+      const world = new A.World()
+      const ECS = createECS(world)
+
       world.registerComponent(ExampleComponentWithArgs)
 
       const entity = world.create.entity()
@@ -229,6 +262,9 @@ describe('createECS', () => {
 
   describe('useQuery', () => {
     it('should return a reactive query instance when given a query description', () => {
+      const world = new A.World()
+      const ECS = createECS(world)
+
       world.registerComponent(ExampleComponent)
 
       const entities = [
@@ -253,6 +289,9 @@ describe('createECS', () => {
     })
 
     it('should return a reactive query instance when given a query instance', () => {
+      const world = new A.World()
+      const ECS = createECS(world)
+
       world.registerComponent(ExampleComponent)
 
       const entities = [
@@ -281,6 +320,9 @@ describe('createECS', () => {
 
   describe('useCurrentEntity', () => {
     it('should return the current entity', () => {
+      const world = new A.World()
+      const ECS = createECS(world)
+
       const entity = world.create.entity()
 
       const { result } = renderHook(() => ECS.useCurrentEntity(), {
@@ -295,12 +337,18 @@ describe('createECS', () => {
 
   describe('useCurrentSpace', () => {
     it('should return the default space when not wrapped in a space', () => {
+      const world = new A.World()
+      const ECS = createECS(world)
+
       const { result } = renderHook(() => ECS.useCurrentSpace())
 
       expect(result.current).toBe(world.defaultSpace)
     })
 
     it('should return the default space when not wrapped in a space', () => {
+      const world = new A.World()
+      const ECS = createECS(world)
+
       const testSpaceId = 'testSpaceId'
       const { result } = renderHook(() => ECS.useCurrentSpace(), {
         wrapper: ({ children }) => (
@@ -314,6 +362,9 @@ describe('createECS', () => {
 
   describe('step', () => {
     it('should step the world', () => {
+      const world = new A.World()
+      const ECS = createECS(world)
+
       const onUpdate = jest.fn()
 
       world.systemManager.registerSystem(

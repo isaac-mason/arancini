@@ -1,10 +1,12 @@
 import * as A from '@arancini/core'
 import React, {
   createContext,
+  forwardRef,
   memo,
   ReactElement,
   ReactNode,
   useContext,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -90,43 +92,43 @@ export const createECS = (world: A.World) => {
     )
   }
 
-  const EntityImpl = ({ children, entity: existingEntity }: EntityProps) => {
-    const space = useCurrentSpace()
-    const [context, setContext] = useState<{ entity: A.Entity }>(null!)
+  const Entity = memo(
+    forwardRef<A.Entity, EntityProps>(
+      ({ children, entity: existingEntity }, ref) => {
+        const space = useCurrentSpace()
+        const [context, setContext] = useState<{ entity: A.Entity }>(null!)
 
-    useIsomorphicLayoutEffect(() => {
-      if (!space) {
-        return
+        useImperativeHandle(ref, () => context?.entity, [context])
+
+        useIsomorphicLayoutEffect(() => {
+          if (existingEntity) {
+            setContext({ entity: existingEntity })
+            return
+          }
+
+          const newEntity = space.create.entity()
+          setContext({ entity: newEntity })
+
+          const { id } = newEntity
+
+          return () => {
+            setContext(null!)
+
+            // if the entity hasn't already been recycled
+            if (id === newEntity.id) {
+              newEntity.destroy()
+            }
+          }
+        }, [space])
+
+        return (
+          <entityContext.Provider value={context}>
+            {children}
+          </entityContext.Provider>
+        )
       }
-
-      if (existingEntity) {
-        setContext({ entity: existingEntity })
-        return
-      }
-
-      const newEntity = space.create.entity()
-      setContext({ entity: newEntity })
-
-      const { id } = newEntity
-
-      return () => {
-        setContext(null!)
-
-        // if the entity hasn't already been recycled
-        if (id === newEntity.id) {
-          newEntity.destroy()
-        }
-      }
-    }, [space])
-
-    return (
-      <entityContext.Provider value={context}>
-        {children}
-      </entityContext.Provider>
     )
-  }
-
-  const Entity = memo(EntityImpl) as typeof EntityImpl
+  )
 
   const Entities = ({ entities, children }: EntitiesProps) => (
     <>
