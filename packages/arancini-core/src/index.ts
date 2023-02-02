@@ -1,5 +1,6 @@
 export * from './component'
 export * from './entity'
+export * from './events'
 export * from './query'
 export * from './space'
 export * from './system'

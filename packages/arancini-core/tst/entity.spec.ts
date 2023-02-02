@@ -129,49 +129,4 @@ describe('Entity', () => {
       expect(() => entity.remove(component)).toThrowError()
     })
   })
-
-  describe('events', () => {
-    it('entities should be able to register event handlers and emit events', () => {
-      // create an entity
-      const entity = space.create.entity()
-
-      // register an event handler
-      const mockFn = jest.fn()
-      const unsubscribe = entity.on('event-name', () => mockFn())
-      expect(mockFn).toBeCalledTimes(0)
-
-      // event should be handled
-      entity.emit({
-        topic: 'event-name',
-      })
-      expect(mockFn).toBeCalledTimes(1)
-
-      // event should not be handled
-      unsubscribe()
-      entity.emit({
-        topic: 'event-name',
-      })
-      expect(mockFn).toBeCalledTimes(1)
-    })
-
-    it('spaces should be able to register event handlers and emit events', () => {
-      // register an event handler
-      const mockFn = jest.fn()
-      const unsubscribe = space.on('event-name', () => mockFn())
-      expect(mockFn).toBeCalledTimes(0)
-
-      // event should be handled
-      space.emit({
-        topic: 'event-name',
-      })
-      expect(mockFn).toBeCalledTimes(1)
-
-      // event should not be handled
-      unsubscribe()
-      space.emit({
-        topic: 'event-name',
-      })
-      expect(mockFn).toBeCalledTimes(1)
-    })
-  })
 })

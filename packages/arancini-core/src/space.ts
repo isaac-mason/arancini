@@ -1,7 +1,5 @@
 import type { ComponentDetails } from './component'
 import type { Entity } from './entity'
-import type { Event, EventHandler } from './events'
-import { EventSystem } from './events'
 import { uniqueId } from './utils'
 import type { World } from './world'
 
@@ -37,17 +35,6 @@ export type SpaceParams = {
  * // create an entity in the space
  * const entity = space.create.entity()
  *
- * // subscribe to a space event
- * space.on('event-name', (event) => {
- *   console.log(event);
- * })
- *
- * // emit a space event
- * space.emit({
- *   topic: 'event-name',
- *   data: { x: 0, y: 0 },
- * })
- *
  * // destroy the space and all entities in it
  * space.destroy()
  * ```
@@ -62,11 +49,6 @@ export class Space {
    * Entities in the space
    */
   entities: Map<string, Entity> = new Map()
-
-  /**
-   * The spaces event system
-   */
-  events = new EventSystem()
 
   /**
    * Whether the space has been initialised
@@ -101,24 +83,6 @@ export class Space {
     entity: (components) => {
       return this.world.spaceManager.createEntity(this, components)
     },
-  }
-
-  /**
-   * Broadcasts an event to the Space
-   * @param event the event to broadcast in the Space
-   */
-  emit<E extends Event | Event>(event: E): void {
-    this.events.emit(event)
-  }
-
-  /**
-   * Adds a handler for Space events
-   * @param topic the topic name
-   * @param handler the handler function
-   * @returns the id of the new handler
-   */
-  on<E extends Event | Event>(topic: E['topic'], handler: EventHandler<E>) {
-    return this.events.on(topic, handler)
   }
 
   /**

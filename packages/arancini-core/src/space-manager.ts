@@ -157,13 +157,12 @@ export class SpaceManager {
     space.entities.delete(entity.id)
 
     for (const component of Object.values(entity._components)) {
-      this.removeComponentFromEntity(entity, component)
+      this.removeComponentFromEntity(entity, component, false)
     }
 
     this.world.queryManager.onEntityRemoved(entity)
 
-    // reset entity events and component bitset
-    entity.events.reset()
+    // reset entity component bitset
     entity._componentsBitSet.reset()
 
     this.entityPool.release(entity)
@@ -198,11 +197,18 @@ export class SpaceManager {
    * @param entity the entity to remove from
    * @param component the component to remove
    */
-  removeComponentFromEntity(entity: Entity, component: Component): void {
+  removeComponentFromEntity(
+    entity: Entity,
+    component: Component,
+    updateBitSet: boolean
+  ): void {
     component.onDestroy()
 
     delete entity._components[component._class.componentIndex]
-    entity._componentsBitSet.remove(component._class.componentIndex)
+
+    if (updateBitSet) {
+      entity._componentsBitSet.remove(component._class.componentIndex)
+    }
 
     // reset and recycle the component object
     component.id = uniqueId()

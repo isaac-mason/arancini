@@ -1,49 +1,43 @@
 import { Component, System, World } from '@arancini/core'
 import { useEffect } from '@storybook/client-api'
-
-type InventoryEvent = {
-  topic: 'inventory-event'
-  type: 'add' | 'remove'
-  entity: string
-  item: string
-  count: number
-}
+import { Topic } from '../../src'
 
 class Inventory extends Component {
-  /**
-   * A map of item ids to counts
-   */
-  items: Map<string, number> = new Map()
+  items!: Map<string, number>
+
+  construct() {
+    this.items = new Map()
+  }
 }
 
-const Queries = {
-  Inventories: [Inventory],
+type InventoryChangeEvent = [op: 'add' | 'remove', item: string, count: number]
+
+class InventoryEvents extends Component {
+  change = new Topic<InventoryChangeEvent>()
+
+  onDestroy(): void {
+    this.change.clear()
+  }
 }
 
 class InventorySystem extends System {
-  inventories = this.query(Queries.Inventories)
+  inventories = this.query([Inventory, InventoryEvents])
 
   onInit(): void {
-    this.world.on<InventoryEvent>('inventory-event', (e) => {
-      const entity = this.inventories.entities.find(
-        (entity) => entity.id === e.entity
-      )
+    this.inventories.onEntityAdded.add((entity) => {
+      const { change } = entity.get(InventoryEvents)
+      const { items } = entity.get(Inventory)
 
-      if (!entity) {
-        return
-      }
+      change.add((op, item, count) => {
+        let itemCount = items.get(item) ?? 0
+        itemCount = itemCount + (op === 'add' ? count : -count)
 
-      const inventory = entity.get(Inventory)
-
-      let itemCount = inventory.items.get(e.item) ?? 0
-
-      itemCount = itemCount + (e.type === 'add' ? e.count : -e.count)
-
-      if (itemCount <= 0) {
-        inventory.items.delete(e.item)
-      } else {
-        inventory.items.set(e.item, itemCount)
-      }
+        if (itemCount <= 0) {
+          items.delete(item)
+        } else {
+          items.set(item, itemCount)
+        }
+      })
     })
   }
 }
@@ -53,53 +47,30 @@ export const PlayerInventoryEvents = () => {
     const world = new World()
 
     world.registerComponent(Inventory)
-
+    world.registerComponent(InventoryEvents)
     world.registerSystem(InventorySystem)
-
-    const space = world.create.space()
-    const player = space.create.entity()
-    player.add(Inventory)
-
     world.init()
 
+    const player = world.create.entity()
+    
+    player.add(Inventory)
+
+    const inventoryEvents = player.add(InventoryEvents)
+
     document.querySelector('#add-apple')!.addEventListener('click', () => {
-      world.emit<InventoryEvent>({
-        topic: 'inventory-event',
-        entity: player.id,
-        type: 'add',
-        item: 'apple',
-        count: 1,
-      })
+      inventoryEvents.change.emit('add', 'apple', 1)
     })
 
     document.querySelector('#remove-apple')!.addEventListener('click', () => {
-      world.emit<InventoryEvent>({
-        topic: 'inventory-event',
-        entity: player.id,
-        type: 'remove',
-        item: 'apple',
-        count: 1,
-      })
+      inventoryEvents.change.emit('remove', 'apple', 1)
     })
 
     document.querySelector('#add-bomb')!.addEventListener('click', () => {
-      world.emit<InventoryEvent>({
-        topic: 'inventory-event',
-        entity: player.id,
-        type: 'add',
-        item: 'bomb',
-        count: 1,
-      })
+      inventoryEvents.change.emit('add', 'bomb', 1)
     })
 
     document.querySelector('#remove-bomb')!.addEventListener('click', () => {
-      world.emit<InventoryEvent>({
-        topic: 'inventory-event',
-        entity: player.id,
-        type: 'remove',
-        item: 'bomb',
-        count: 1,
-      })
+      inventoryEvents.change.emit('remove', 'bomb', 1)
     })
 
     const now = () => performance.now() / 1000

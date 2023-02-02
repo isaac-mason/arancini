@@ -1,8 +1,6 @@
 import type { ComponentClass, ComponentDetails } from './component'
 import { ComponentRegistry } from './component-registry'
 import type { Entity } from './entity'
-import type { Event, EventHandler } from './events'
-import { EventSystem } from './events'
 import type { Query, QueryDescription } from './query'
 import { QueryManager } from './query-manager'
 import type { Space, SpaceParams } from './space'
@@ -32,17 +30,6 @@ export const WORLD_DEFAULT_SPACE_ID = '__arancini_default_world_space'
  * // update the world with a specified time elapsed
  * // (Systems will be called with a delta of 0.1)
  * world.update(0.1)
- *
- * // subscribe to a world event
- * world.on('message', (e) => {
- *   // ...
- * })
- *
- * // emit a world event
- * world.emit({
- *  topic: 'message',
- * })
- * ```
  */
 export class World {
   /**
@@ -64,11 +51,6 @@ export class World {
    * The default Space for the World
    */
   defaultSpace: Space
-
-  /**
-   * The World EventSystem
-   */
-  events: EventSystem
 
   /**
    * The SpaceManager for the World
@@ -98,7 +80,6 @@ export class World {
    * Constructor for a World
    */
   constructor() {
-    this.events = new EventSystem()
     this.componentRegistry = new ComponentRegistry(this)
     this.spaceManager = new SpaceManager(this)
     this.queryManager = new QueryManager(this)
@@ -164,24 +145,6 @@ export class World {
   destroy(): void {
     this.systemManager.destroy()
     this.spaceManager.destroy()
-  }
-
-  /**
-   * Broadcasts an event to the World
-   * @param event the event to broadcast in the World
-   */
-  emit<E extends Event | Event>(event: E): void {
-    this.events.emit(event)
-  }
-
-  /**
-   * Adds a handler for World events
-   * @param topic the topic name
-   * @param handler the handler function
-   * @returns the id of the new handler
-   */
-  on<E extends Event | Event>(topic: E['topic'], handler: EventHandler<E>) {
-    return this.events.on(topic, handler)
   }
 
   /**

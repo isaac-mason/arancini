@@ -79,10 +79,13 @@ class PhysicsSystem extends A.System {
   }
 }
 
-const ECS = createECS()
+const world = new A.World()
+world.registerComponent(RigidBodyComponent)
+world.registerComponent(Object3DComponent)
+world.registerSystem(PhysicsSystem)
+world.init()
 
-ECS.world.registerComponent(Object3DComponent)
-ECS.world.registerComponent(RigidBodyComponent)
+const ECS = createECS(world)
 
 const Queries = {
   TO_RENDER: ECS.world.create.query([RigidBodyComponent]),
@@ -139,9 +142,6 @@ const App = () => {
 
   return (
     <>
-      {/* physics system */}
-      <ECS.System type={PhysicsSystem} />
-
       {/* create the ground */}
       <Plane />
 

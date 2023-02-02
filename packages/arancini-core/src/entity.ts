@@ -1,7 +1,5 @@
 import type { ComponentClass } from './component'
 import { Component } from './component'
-import type { Event, EventHandler } from './events'
-import { EventSystem } from './events'
 import type { Space } from './space'
 import { uniqueId } from './utils'
 import { BitSet } from './utils/bit-set'
@@ -39,17 +37,6 @@ import type { World } from './world'
  * entity.get(ExampleComponent) // returns `exampleComponent`
  * entity.get(ExampleComponent) // returns `exampleComponent`
  *
- * // subscribe to an entity event
- * space.on('event-name', (event) => {
- *   console.log(event)
- * });
- *
- * // emit an entity event
- * space.emit({
- *   topic: 'event-name',
- *   data: { x: 0, y: 0 },
- * });
- *
  * // remove the component
  * entity.remove(ExampleComponent);
  *
@@ -62,11 +49,6 @@ export class Entity {
    * The unique ID of the entity
    */
   id = uniqueId()
-
-  /**
-   * The event system for the entity
-   */
-  events = new EventSystem()
 
   /**
    * Whether the entity has been initialised
@@ -184,28 +166,10 @@ export class Entity {
       }
     }
 
-    this.world.spaceManager.removeComponentFromEntity(this, component)
+    this.world.spaceManager.removeComponentFromEntity(this, component, true)
     this.world.queryManager.onEntityComponentChange(this)
 
     return this
-  }
-
-  /**
-   * Adds a handler for entity events
-   * @param topic the event topic
-   * @param handler the handler function
-   * @returns the subscription
-   */
-  on<E extends Event | Event>(topic: E['topic'], handler: EventHandler<E>) {
-    return this.events.on(topic, handler)
-  }
-
-  /**
-   * Broadcasts an event to the Entity EventSystem
-   * @param event the event to broadcast
-   */
-  emit<E extends Event | Event>(event: E): void {
-    this.events.emit(event)
   }
 
   /**

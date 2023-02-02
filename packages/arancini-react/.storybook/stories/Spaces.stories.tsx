@@ -19,10 +19,13 @@ class Object3DComponent extends A.Component {
   }
 }
 
-const ECS = createECS()
+const world = new A.World()
+world.registerComponent(ExampleTagComponent)
+world.registerComponent(Object3DComponent)
+world.init()
 
-ECS.world.registerComponent(ExampleTagComponent)
-ECS.world.registerComponent(Object3DComponent)
+const ECS = createECS(world)
+
 
 const R3FStepper = () => {
   useFrame((_, delta) => {

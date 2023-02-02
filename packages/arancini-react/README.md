@@ -14,35 +14,15 @@ To get started, use `createECS` to get glue components and hooks scoped to a giv
 
 ```ts
 import { createECS } from '@arancini/react'
-
-const ECS = createECS()
-```
-
-You can also pass in an existing world.
-
-```ts
-import { createECS } from '@arancini/react'
 import { World } from 'arancini'
 
 const world = new World()
-const ECS = createECS(world)
-```
 
-### Imperative API
-
-`createECS` returns a reference to the arancini world, so if you didn't pass `createECS` in an existing world, you can still use the regular imperative API.
-
-```ts
-const ECS = createECS()
-const world = ECS.world
-
-/* use the world as normal */
-
-// register components
 world.registerComponent(MyComponent)
+world.registerSystem(MySystem)
+world.init()
 
-// create entities
-const entity = world.create.entity()
+const ECS = createECS(world)
 ```
 
 ### Stepping the World
@@ -64,7 +44,8 @@ const Stepper = () => {
 If arancini needs to be integrated into an existing game loop, instead of calling `step`, you can decide when to update parts of the world.
 
 ```tsx
-const ECS = createECS()
+const world = new World()
+const ECS = createECS(world)
 
 const Example = () => {
   useFrame(({ clock: { elapsedTime }, delta) => {
@@ -85,7 +66,7 @@ const Example = () => {
 `<Component />` will automatically register the component with the world if it hasn't been registered yet.
 
 ```tsx
-class Position extends A.Component {
+class Position extends Component {
   x!: number
   y!: number
 
@@ -160,7 +141,8 @@ const Example = () => {
 `QueryEntities` can be used to render entities, as well as enhance existing ones. It will re-render whenever the query results change. It also supports [render props](https://reactjs.org/docs/render-props.html).
 
 ```tsx
-const ECS = createECS()
+const world = new World()
+const ECS = createECS(world)
 
 const SimpleExample = () => (
   <ECS.QueryEntities query={[ExampleTagComponent]}>
@@ -217,10 +199,8 @@ const EnhanceExistingEntities = () => (
 If a child is passed to `Component`, it will be captured and passed to the component's `construct` method. This is useful for keeping ECS code decoupled from React code.
 
 ```tsx
-import * as A from 'arancini'
-import { createECS } from '@arancini/react'
-
-const ECS = createECS()
+const world = new A.World()
+const ECS = createECS(world)
 
 class CanvasElementComponent extends A.Component {
   canvasElement!: HTMLCanvasElement
@@ -239,38 +219,6 @@ const Example = () => (
 )
 ```
 
-### Systems
-
-`@arancini/react` provides a `<System />` helper component that can be used to register a system. It will automatically unregister the system when the component unmounts.
-
-```tsx
-import * as A from 'arancini'
-
-class ExampleSystem extends A.System {
-  update(delta: number) {
-    // ...
-  }
-}
-
-const Example = () => (
-  <ECS.System type={ExampleSystem} priority={10} />
-)
-```
-
-You can also opt to register systems using the imperative API.
-
-```tsx
-const Example = () => {
-  useEffect(() => {
-    ECS.world.registerSystem(ExampleSystem, { priority: 10 })
-
-    return () => {
-      ECS.world.unregisterSystem(ExampleSystem)
-    }
-  }, [])
-}
-```
-
 ## Advanced Usage
 
 ### Entity and Space contexts
@@ -278,12 +226,12 @@ const Example = () => {
 You can use the hooks `useCurrentEntitiy` and `useCurrentSpace` to access the current entity and space in a React component.
 
 ```tsx
-import * as A from 'arancini'
 import { createECS } from '@arancini/react'
+import { Component } from 'arancini'
 
 const ECS = createECS()
 
-class Position extends A.Component {
+class Position extends Component {
   x!: number
   y!: number
 
@@ -309,4 +257,4 @@ const App = () => (
 )
 ```
 
-For truly advanced usage, `createECS` also returns the react contexts, `entityContext` and `spaceContext`.
+For extra advanced usage, `createECS` also returns the react contexts, `entityContext` and `spaceContext`.

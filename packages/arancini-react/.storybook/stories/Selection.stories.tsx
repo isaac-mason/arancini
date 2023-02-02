@@ -1,22 +1,13 @@
 import * as A from '@arancini/core'
-import * as THREE from 'three'
-import { Bounds, Environment, PerspectiveCamera } from '@react-three/drei'
+import { Bounds, PerspectiveCamera } from '@react-three/drei'
 import { useFrame, Vector3 } from '@react-three/fiber'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
+import * as THREE from 'three'
 import { createECS } from '../../src'
 import { Setup } from '../Setup'
 
 export default {
   title: 'Selection',
-}
-
-const ECS = createECS()
-
-/* events */
-
-type SelectedEvent = {
-  topic: 'selected'
-  selected: boolean
 }
 
 /* components */
@@ -39,24 +30,7 @@ class Object3DComponent extends A.Component {
   }
 }
 
-ECS.world.registerComponent(Object3DComponent)
-ECS.world.registerComponent(SelectedComponent)
-ECS.world.registerComponent(CameraComponent)
-
 /* systems */
-
-class SelectedEventSystem extends A.System {
-  selectedQuery = this.query([SelectedComponent])
-
-  onInit(): void {
-    this.selectedQuery.onEntityAdded.add((entity) => {
-      entity.emit<SelectedEvent>({ topic: 'selected', selected: true })
-    })
-    this.selectedQuery.onEntityRemoved.add((entity) => {
-      entity.emit<SelectedEvent>({ topic: 'selected', selected: false })
-    })
-  }
-}
 
 class CameraSystem extends A.System {
   selectedQuery = this.query([SelectedComponent, Object3DComponent])
@@ -91,48 +65,38 @@ class CameraSystem extends A.System {
   }
 }
 
-ECS.world.registerSystem(CameraSystem)
-ECS.world.registerSystem(SelectedEventSystem)
+const world = new A.World()
+world.registerComponent(Object3DComponent)
+world.registerComponent(SelectedComponent)
+world.registerComponent(CameraComponent)
+world.registerSystem(CameraSystem)
+world.init()
 
-const useIsSelected = (entity: A.Entity | undefined) => {
-  const [selected, setSelected] = useState(false)
-
-  useEffect(() => {
-    if (!entity) return
-
-    const unsubscribe = entity.on<SelectedEvent>('selected', (e) => {
-      setSelected(e.selected)
-    })
-
-    return () => {
-      unsubscribe()
-    }
-  }, [entity])
-
-  return selected
-}
+const ECS = createECS(world)
 
 const SelectableBox = (props: JSX.IntrinsicElements['mesh']) => {
   const entity = ECS.useCurrentEntity()
-  const isSelected = useIsSelected(entity)
-  const [isHovered, setIsHovered] = useState(false)
+  const [selected, setSelected] = useState(false)
+  const [hovered, setHovered] = useState(false)
 
   const toggleSelection = () => {
     if (!entity) return
 
     if (entity.has(SelectedComponent)) {
       entity.remove(SelectedComponent)
+      setSelected(false)
     } else {
       entity.add(SelectedComponent)
+      setSelected(true)
     }
   }
 
   let color: string
   
-  if (isHovered) {
-    color = isSelected ? '#FFD580' : '#999'
+  if (hovered) {
+    color = selected ? '#FFD580' : '#999'
   } else {
-    color = isSelected ? 'orange' : '#555'
+    color = selected ? 'orange' : '#555'
   }
 
   return (
@@ -140,8 +104,8 @@ const SelectableBox = (props: JSX.IntrinsicElements['mesh']) => {
       <mesh
         {...props}
         onClick={toggleSelection}
-        onPointerOver={() => setIsHovered(true)}
-        onPointerOut={() => setIsHovered(false)}
+        onPointerOver={() => setHovered(true)}
+        onPointerOut={() => setHovered(false)}
       >
         <boxBufferGeometry args={[1, 1, 1]} />
         <meshStandardMaterial color={color} />

@@ -1,6 +1,6 @@
 import type { ComponentClass } from './component'
 import type { Entity } from './entity'
-import { EventDispatcher } from './events/event-dispatcher'
+import { Topic } from './events'
 import type { BitSet } from './utils/bit-set'
 import type { World } from './world'
 
@@ -106,12 +106,12 @@ export class Query {
   /**
    * Event dispatcher for when an Entity is added to the query
    */
-  onEntityAdded = new EventDispatcher<Entity>()
+  onEntityAdded = new Topic<[Entity]>()
 
   /**
    * Event dispatcher for when an Entity is removed from the query
    */
-  onEntityRemoved = new EventDispatcher<Entity>();
+  onEntityRemoved = new Topic<[Entity]>();
 
   /**
    * Iterator for entities matched by the query. Iterates over matching entities in reverse order.

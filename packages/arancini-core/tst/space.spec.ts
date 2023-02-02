@@ -8,32 +8,7 @@ describe('Space', () => {
 
   beforeEach(() => {
     world = new World()
-  })
-
-  it('should be able to register event handlers and emit events', () => {
-    const space = world.create.space()
-
     world.init()
-
-    const mockFn = jest.fn()
-
-    const unsubscribe = space.on('event-name', () => mockFn())
-
-    expect(mockFn).toBeCalledTimes(0)
-
-    space.emit({
-      topic: 'event-name',
-    })
-
-    expect(mockFn).toBeCalledTimes(1)
-
-    unsubscribe()
-
-    space.emit({
-      topic: 'event-name',
-    })
-
-    expect(mockFn).toBeCalledTimes(1)
   })
 
   it('should destroy contained entities when destroying the space', () => {

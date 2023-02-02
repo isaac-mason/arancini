@@ -1,6 +1,7 @@
 import * as A from '@arancini/core'
 import { OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
+import { World } from 'p2-es'
 import React from 'react'
 import { createECS } from '../../src'
 import { Setup } from '../Setup'
@@ -37,10 +38,13 @@ class WalkingSystem extends A.System {
   }
 }
 
-const ECS = createECS()
+const world = new A.World()
+world.registerComponent(WalkingComponent)
+world.registerComponent(Object3DComponent)
+world.registerSystem(WalkingSystem)
+world.init()
 
-ECS.world.registerComponent(Object3DComponent)
-ECS.world.registerComponent(WalkingComponent)
+const ECS = createECS(world)
 
 const R3FStepper = () => {
   useFrame((_, delta) => {
@@ -82,9 +86,6 @@ const App = () => {
           </ECS.Component>
         )}
       </ECS.QueryEntities>
-
-      {/* class system to move the walkers */}
-      <ECS.System type={WalkingSystem} />
 
       <OrbitControls />
     </>

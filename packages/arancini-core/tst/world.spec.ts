@@ -7,6 +7,7 @@ describe('World', () => {
 
   beforeEach(() => {
     world = new World()
+    world.init()
   })
 
   it('should have a default space that entities can be created in', () => {
@@ -46,30 +47,6 @@ describe('World', () => {
     const space = world.create.space({ id: 'SpaceName' })
 
     expect(world.getSpace('SpaceName')).toBe(space)
-  })
-
-  it('should be able to register event handlers and emit events', () => {
-    const mockFn = jest.fn()
-
-    world.init()
-
-    const unsubscribe = world.on('event-name', () => mockFn())
-
-    expect(mockFn).toBeCalledTimes(0)
-
-    world.emit({
-      topic: 'event-name',
-    })
-
-    expect(mockFn).toBeCalledTimes(1)
-
-    unsubscribe()
-
-    world.emit({
-      topic: 'event-name',
-    })
-
-    expect(mockFn).toBeCalledTimes(1)
   })
 
   it('removes all Systems and Spaces on destroying a World', () => {

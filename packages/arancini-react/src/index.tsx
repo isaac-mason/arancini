@@ -50,11 +50,9 @@ export type ComponentProps<T extends A.Component> = {
   children?: ReactNode
 }
 
-export const createECS = (existing?: A.World) => {
+export const createECS = (world: A.World) => {
   const spaceContext = createContext(null! as SpaceProviderContext)
   const entityContext = createContext(null! as EntityProviderContext)
-
-  const world = existing ?? new A.World()
 
   if (!world.initialised) {
     world.init()

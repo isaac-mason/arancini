@@ -1,6 +1,5 @@
 import * as A from '@arancini/core'
 import { Html } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
 import React from 'react'
 import { createECS } from '../../src'
 import { Setup } from '../Setup'
@@ -18,9 +17,11 @@ class ExampleComponent extends A.Component {
   }
 }
 
-const ECS = createECS()
+const world = new A.World()
+world.registerComponent(ExampleComponent)
+world.init()
 
-ECS.world.registerComponent(ExampleComponent)
+const ECS = createECS(world)
 
 export const Components = () => {
   const { arg } = useControls({ arg: 1 })
@@ -42,11 +43,11 @@ export const Components = () => {
                   fontFamily: 'monospace',
                   fontSize: '1em',
                   width: '300px',
+                  textAlign: 'center'
                 }}
               >
                 <>
                   <h1>{entity.get(ExampleComponent).arg}</h1>
-                  <p>{ExampleComponent.toString()}</p>
                 </>
               </Html>
             )}
