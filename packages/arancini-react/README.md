@@ -53,7 +53,7 @@ const Example = () => {
     this.systemManager.update(delta, elapsedTime)
 
     // or update a particular system
-    const exampleSystem = ECS.world.getSystem(ExampleSystem)
+    const exampleSystem = world.getSystem(ExampleSystem)
     exampleSystem.update(delta, elapsedTime)
   })
 }
@@ -88,7 +88,7 @@ const Example = () => (
 You can also pass an existing entity to `<Entity />`.
 
 ```tsx
-const entity = ECS.world.create.entity()
+const entity = world.create.entity()
 
 const Example = () => (
   <ECS.Entity entity={entity}>
