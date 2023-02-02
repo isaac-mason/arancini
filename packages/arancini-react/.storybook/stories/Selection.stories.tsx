@@ -100,12 +100,12 @@ const useIsSelected = (entity: A.Entity | undefined) => {
   useEffect(() => {
     if (!entity) return
 
-    const subscription = entity.on<SelectedEvent>('selected', (e) => {
+    const unsubscribe = entity.on<SelectedEvent>('selected', (e) => {
       setSelected(e.selected)
     })
 
     return () => {
-      subscription.unsubscribe()
+      unsubscribe()
     }
   }, [entity])
 
