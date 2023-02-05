@@ -1,5 +1,23 @@
 # @arancini/react
 
+## 2.0.0
+
+### Minor Changes
+
+- e44f646: remove 'System' component
+- 39d3641: remove support for createECS without providing a World
+- ee2b197: add ref support to '<Entity />'
+- 39d3641: remove <System /> component
+
+### Patch Changes
+
+- 40e324f: refactor: replace 'as any' with 'as unknown as <type>'
+- Updated dependencies [52bb1e5]
+- Updated dependencies [4169199]
+- Updated dependencies [807443d]
+- Updated dependencies [39d3641]
+  - @arancini/core@2.0.0
+
 ## 1.0.1
 
 ### Patch Changes
