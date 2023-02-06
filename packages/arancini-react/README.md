@@ -63,8 +63,6 @@ const Example = () => {
 
 `<Space />` can be used to declaratively create spaces, `<Entity />` can be used to declaratively create entities, and `<Component />` can be used to add components to an entity.
 
-`<Component />` will automatically register the component with the world if it hasn't been registered yet.
-
 ```tsx
 class Position extends Component {
   x!: number
