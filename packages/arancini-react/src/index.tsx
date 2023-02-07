@@ -8,10 +8,9 @@ import React, {
   useContext,
   useImperativeHandle,
   useMemo,
-  useRef,
   useState,
 } from 'react'
-import { mergeRefs, useIsomorphicLayoutEffect, useRerender } from './hooks'
+import { useIsomorphicLayoutEffect, useRerender } from './hooks'
 
 type SpaceProviderContext = {
   space: A.Space
@@ -173,11 +172,11 @@ export const createECS = (world: A.World) => {
   }
 
   const Component = <T extends A.Component>({
-    args,
+    args: argsProp,
     children,
     type,
   }: ComponentProps<T>) => {
-    const ref = useRef<Parameters<T['construct']>>(null)
+    const [childRef, setChildRef] = useState<never>(null!)
 
     const entityCtx = useContext(entityContext)
 
@@ -186,17 +185,22 @@ export const createECS = (world: A.World) => {
         return
       }
 
+      if (children && !childRef) {
+        return
+      }
+
       const { entity } = entityCtx
 
-      let newComponent: A.Component
-
+      let args: Parameters<T['construct']>
       if (children) {
-        // if a child is passed in, use them as the component's args
-        newComponent = entity.add(type, ...([ref.current] as never))
+        // if children are passed in, use them as the component's args
+        args = [childRef] as never
       } else {
         // otherwise, use the args prop
-        newComponent = entity.add(type, ...(args ?? ([] as never)))
+        args = argsProp ?? ([] as never)
       }
+
+      const newComponent = entity.add(type, ...args)
 
       return () => {
         // check if the entity has the component before removing it
@@ -204,14 +208,14 @@ export const createECS = (world: A.World) => {
           entity.remove(newComponent)
         }
       }
-    }, [entityCtx, args, children, type])
+    }, [entityCtx, childRef, type, ...(argsProp ?? [])])
 
     // capture ref of child
     if (children) {
       const child = React.Children.only(children) as ReactElement
 
       return React.cloneElement(child, {
-        ref: mergeRefs([(child as unknown as { ref: never }).ref, ref]),
+        ref: setChildRef,
       })
     }
 
