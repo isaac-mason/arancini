@@ -3,15 +3,11 @@
   "private": true,
   "packageManager": "yarn@3.4.1",
   "workspaces": [
-    "packages/arancini-core",
-    "packages/arancini",
-    "packages/arancini-react",
-    "packages/benchmarks"
+    "packages/*"
   ],
   "scripts": {
-    "build": "yarn workspaces foreach run build",
-    "test": "yarn workspaces foreach run test",
-    "bench": "yarn workspace benchmarks run bench",
+    "build": "(cd packages/arancini-core && yarn build) && (cd packages/arancini-react && yarn build) && (cd packages/arancini && yarn build)",
+    "test": "(cd packages/arancini-core && yarn test) && (cd packages/arancini-react && yarn test)",
     "change": "yarn changeset",
     "version": "yarn changeset version && yarn install --mode update-lockfile",
     "release": "yarn build && yarn test && yarn build-storybook && changeset publish",
