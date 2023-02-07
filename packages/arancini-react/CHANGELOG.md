@@ -1,5 +1,13 @@
 # @arancini/react
 
+## 2.0.1
+
+### Patch Changes
+
+- a9ede4a: feat: recreate components on ref updates
+- a9ede4a: fix: only recreate components when one of the args values or references have changed
+- 330bc6a: fix: remove incorrect information regarding auto-registering components from README.md
+
 ## 2.0.0
 
 ### Minor Changes
