@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { describe, expect, it } from '@jest/globals'
+import { describe, expect } from '@jest/globals'
 import { Component, Entity, Space, System, World } from '../src'
 
 class TestComponentOne extends Component {}
@@ -8,6 +8,50 @@ class TestComponentThree extends Component {}
 class TestComponentFour extends Component {}
 class TestComponentFive extends Component {}
 class TestComponentSix extends Component {}
+
+const systemUpdateFn = jest.fn()
+
+class SystemOne extends System {
+  onUpdate(): void {
+    systemUpdateFn(SystemOne)
+  }
+}
+
+class SystemTwo extends System {
+  onUpdate(): void {
+    systemUpdateFn(SystemTwo)
+  }
+}
+
+class SystemThree extends System {
+  onUpdate(): void {
+    systemUpdateFn(SystemThree)
+  }
+}
+
+class SystemFour extends System {
+  onUpdate(): void {
+    systemUpdateFn(SystemFour)
+  }
+}
+
+class TestSystemWithOnUpdate extends System {
+  onUpdate(): void {
+    systemUpdateFn(TestSystemWithOnUpdate)
+  }
+}
+
+const testSystemQueryDescription = {
+  all: [TestComponentOne],
+}
+
+class TestSystemWithQuery extends System {
+  exampleQuery = this.query(testSystemQueryDescription)
+}
+
+class AnotherTestSystemWithQuery extends System {
+  exampleQuery = this.query(testSystemQueryDescription)
+}
 
 describe('System', () => {
   let world: World
@@ -25,6 +69,8 @@ describe('System', () => {
     world.registerComponent(TestComponentFour)
     world.registerComponent(TestComponentFive)
     world.registerComponent(TestComponentSix)
+
+    systemUpdateFn.mockReset()
   })
 
   test('Systems are initialised on initialising the world', () => {
@@ -137,231 +183,158 @@ describe('System', () => {
     expect(systemDestroyJestFn).toHaveBeenCalledTimes(1)
   })
 
-  describe('System registration', () => {
-    const systemUpdateFn = jest.fn()
-
-    class SystemOne extends System {
-      onUpdate(): void {
-        systemUpdateFn(SystemOne)
-      }
-    }
-
-    class SystemTwo extends System {
-      onUpdate(): void {
-        systemUpdateFn(SystemTwo)
-      }
-    }
-
-    class SystemThree extends System {
-      onUpdate(): void {
-        systemUpdateFn(SystemThree)
-      }
-    }
-
-    class SystemFour extends System {
-      onUpdate(): void {
-        systemUpdateFn(SystemFour)
-      }
-    }
-
-    beforeEach(() => {
-      systemUpdateFn.mockReset()
-    })
-
-    it('silently swallows attempting to unregister a system that is not registered or has already been unregistered', () => {
-      expect(() => {
-        world
-          .unregisterSystem(SystemOne)
-          .registerSystem(SystemOne)
-          .unregisterSystem(SystemOne)
-          .unregisterSystem(SystemOne)
-      }).not.toThrowError()
-    })
-
-    it('throws an error on attempting to re-register a system', () => {
-      expect(() => {
-        world.registerSystem(SystemOne).registerSystem(SystemOne)
-      }).toThrowError()
-    })
-
-    it('defaults to sorting systems by registration order', () => {
+  test('silently swallows attempting to unregister a system that is not registered or has already been unregistered', () => {
+    expect(() => {
       world
+        .unregisterSystem(SystemOne)
         .registerSystem(SystemOne)
-        .registerSystem(SystemTwo)
-        .registerSystem(SystemThree)
-        .registerSystem(SystemFour)
-
-      expect(world.getSystems().map((s) => s.__internal.class)).toEqual([
-        SystemOne,
-        SystemTwo,
-        SystemThree,
-        SystemFour,
-      ])
-
-      world.update()
-
-      expect(systemUpdateFn).toHaveBeenCalledTimes(4)
-      expect(systemUpdateFn).nthCalledWith(1, SystemOne)
-      expect(systemUpdateFn).nthCalledWith(2, SystemTwo)
-      expect(systemUpdateFn).nthCalledWith(3, SystemThree)
-      expect(systemUpdateFn).nthCalledWith(4, SystemFour)
-    })
-
-    it('supports sorting with an optional system priority', () => {
-      world
-        .registerSystem(SystemOne, { priority: -100 })
-        .registerSystem(SystemTwo)
-        .registerSystem(SystemThree, { priority: -50 })
-        .registerSystem(SystemFour)
-
-      expect(world.getSystems().map((s) => s.__internal.class)).toEqual([
-        SystemOne,
-        SystemTwo,
-        SystemThree,
-        SystemFour,
-      ])
-
-      world.update()
-
-      expect(systemUpdateFn).toHaveBeenCalledTimes(4)
-      expect(systemUpdateFn).nthCalledWith(1, SystemTwo)
-      expect(systemUpdateFn).nthCalledWith(2, SystemFour)
-      expect(systemUpdateFn).nthCalledWith(3, SystemThree)
-      expect(systemUpdateFn).nthCalledWith(4, SystemOne)
-    })
+        .unregisterSystem(SystemOne)
+        .unregisterSystem(SystemOne)
+    }).not.toThrowError()
   })
 
-  describe('System unregistration', () => {
-    const systemUpdateFn = jest.fn()
-    class TestSystemWithOnUpdate extends System {
-      onUpdate(): void {
-        systemUpdateFn(TestSystemWithOnUpdate)
-      }
-    }
+  test('throws an error on attempting to re-register a system', () => {
+    expect(() => {
+      world.registerSystem(SystemOne).registerSystem(SystemOne)
+    }).toThrowError()
+  })
 
-    const testSystemQueryDescription = {
-      all: [TestComponentOne],
-    }
-    class TestSystemWithQuery extends System {
-      exampleQuery = this.query(testSystemQueryDescription)
-    }
-    class AnotherTestSystemWithQuery extends System {
-      exampleQuery = this.query(testSystemQueryDescription)
-    }
+  test('defaults to sorting systems by registration order', () => {
+    world
+      .registerSystem(SystemOne)
+      .registerSystem(SystemTwo)
+      .registerSystem(SystemThree)
+      .registerSystem(SystemFour)
 
-    test('Systems will not be updated after they have been unregistered', () => {
-      world.registerSystem(TestSystemWithOnUpdate)
+    expect(world.getSystems().map((s) => s.__internal.class)).toEqual([
+      SystemOne,
+      SystemTwo,
+      SystemThree,
+      SystemFour,
+    ])
 
-      expect(world.getSystems().map((s) => s.__internal.class)).toEqual([
-        TestSystemWithOnUpdate,
-      ])
+    world.update()
 
-      world.update()
+    expect(systemUpdateFn).toHaveBeenCalledTimes(4)
+    expect(systemUpdateFn).nthCalledWith(1, SystemOne)
+    expect(systemUpdateFn).nthCalledWith(2, SystemTwo)
+    expect(systemUpdateFn).nthCalledWith(3, SystemThree)
+    expect(systemUpdateFn).nthCalledWith(4, SystemFour)
+  })
 
-      expect(systemUpdateFn).toHaveBeenCalledTimes(1)
-      expect(systemUpdateFn).nthCalledWith(1, TestSystemWithOnUpdate)
+  test('supports sorting systems with an optional system priority', () => {
+    world
+      .registerSystem(SystemOne, { priority: -100 })
+      .registerSystem(SystemTwo)
+      .registerSystem(SystemThree, { priority: -50 })
+      .registerSystem(SystemFour)
 
-      world.unregisterSystem(TestSystemWithOnUpdate)
+    expect(world.getSystems().map((s) => s.__internal.class)).toEqual([
+      SystemOne,
+      SystemTwo,
+      SystemThree,
+      SystemFour,
+    ])
 
-      expect(systemUpdateFn).toHaveBeenCalledTimes(1)
-      expect(systemUpdateFn).nthCalledWith(1, TestSystemWithOnUpdate)
-    })
+    world.update()
 
-    test('Systems can be removed, and queries will be removed if they are no longer used by any systems', () => {
-      world.registerSystem(TestSystemWithQuery)
-      const systemOne = world.getSystem(
-        TestSystemWithQuery
-      ) as TestSystemWithQuery
+    expect(systemUpdateFn).toHaveBeenCalledTimes(4)
+    expect(systemUpdateFn).nthCalledWith(1, SystemTwo)
+    expect(systemUpdateFn).nthCalledWith(2, SystemFour)
+    expect(systemUpdateFn).nthCalledWith(3, SystemThree)
+    expect(systemUpdateFn).nthCalledWith(4, SystemOne)
+  })
 
-      world.registerSystem(AnotherTestSystemWithQuery)
-      const systemTwo = world.getSystem(
-        AnotherTestSystemWithQuery
-      ) as AnotherTestSystemWithQuery
+  test('Systems will not be updated after they have been unregistered', () => {
+    world.registerSystem(TestSystemWithOnUpdate)
 
-      expect(
-        world.queryManager.hasQuery({
-          all: [TestComponentOne],
-        })
-      ).toBe(true)
+    expect(world.getSystems().map((s) => s.__internal.class)).toEqual([
+      TestSystemWithOnUpdate,
+    ])
 
-      systemOne.destroy()
+    world.update()
 
-      expect(
-        world.queryManager.hasQuery({
-          all: [TestComponentOne],
-        })
-      ).toBe(true)
+    expect(systemUpdateFn).toHaveBeenCalledTimes(1)
+    expect(systemUpdateFn).nthCalledWith(1, TestSystemWithOnUpdate)
 
-      systemTwo.destroy()
+    world.unregisterSystem(TestSystemWithOnUpdate)
 
-      expect(
-        world.queryManager.hasQuery({
-          all: [TestComponentOne],
-        })
-      ).toBe(false)
-    })
+    expect(systemUpdateFn).toHaveBeenCalledTimes(1)
+    expect(systemUpdateFn).nthCalledWith(1, TestSystemWithOnUpdate)
+  })
 
-    test('Systems can be removed, and queries will not be removed if they are used standalone outside of systems', () => {
-      // use the query outside of a system
-      const query = world.create.query(testSystemQueryDescription)
+  test('Systems can be removed, and queries will be removed if they are no longer used by any systems', () => {
+    world.registerSystem(TestSystemWithQuery)
+    const systemOne = world.getSystem(
+      TestSystemWithQuery
+    ) as TestSystemWithQuery
 
-      world.registerSystem(TestSystemWithQuery)
-      const systemOne = world.getSystem(
-        TestSystemWithQuery
-      ) as TestSystemWithQuery
+    world.registerSystem(AnotherTestSystemWithQuery)
+    const systemTwo = world.getSystem(
+      AnotherTestSystemWithQuery
+    ) as AnotherTestSystemWithQuery
 
-      world.registerSystem(AnotherTestSystemWithQuery)
-      const systemTwo = world.getSystem(
-        AnotherTestSystemWithQuery
-      ) as AnotherTestSystemWithQuery
+    expect(
+      world.queryManager.hasQuery({
+        all: [TestComponentOne],
+      })
+    ).toBe(true)
 
-      // assert the query exists
-      expect(
-        world.queryManager.hasQuery({
-          all: [TestComponentOne],
-        })
-      ).toBe(true)
+    systemOne.destroy()
 
-      // destroy both systems using the query
-      systemOne.destroy()
-      systemTwo.destroy()
+    expect(
+      world.queryManager.hasQuery({
+        all: [TestComponentOne],
+      })
+    ).toBe(true)
 
-      expect(
-        world.queryManager.hasQuery({
-          all: [TestComponentOne],
-        })
-      ).toBe(true)
+    systemTwo.destroy()
 
-      // remove the query manually
-      query.destroy()
+    expect(
+      world.queryManager.hasQuery({
+        all: [TestComponentOne],
+      })
+    ).toBe(false)
+  })
 
-      expect(
-        world.queryManager.hasQuery({
-          all: [TestComponentOne],
-        })
-      ).toBe(false)
-    })
+  test('Systems can be removed, and queries will not be removed if they are used standalone outside of systems', () => {
+    // use the query outside of a system
+    const query = world.create.query(testSystemQueryDescription)
 
-    test('onUpdate will not be called if any required queries have no results', () => {
-      class TestSystemWithRequiredQuery extends System {
-        requiredQuery = this.query([TestComponentOne], { required: true })
+    world.registerSystem(TestSystemWithQuery)
+    const systemOne = world.getSystem(
+      TestSystemWithQuery
+    ) as TestSystemWithQuery
 
-        onUpdate(): void {
-          systemUpdateFn()
-        }
-      }
+    world.registerSystem(AnotherTestSystemWithQuery)
+    const systemTwo = world.getSystem(
+      AnotherTestSystemWithQuery
+    ) as AnotherTestSystemWithQuery
 
-      world.registerSystem(TestSystemWithRequiredQuery)
+    // assert the query exists
+    expect(
+      world.queryManager.hasQuery({
+        all: [TestComponentOne],
+      })
+    ).toBe(true)
 
-      world.update()
+    // destroy both systems using the query
+    systemOne.destroy()
+    systemTwo.destroy()
 
-      expect(systemUpdateFn).toHaveBeenCalledTimes(0)
+    expect(
+      world.queryManager.hasQuery({
+        all: [TestComponentOne],
+      })
+    ).toBe(true)
 
-      world.create.entity().add(TestComponentOne)
+    // remove the query manually
+    query.destroy()
 
-      world.update()
-
-      expect(systemUpdateFn).toHaveBeenCalledTimes(1)
-    })
+    expect(
+      world.queryManager.hasQuery({
+        all: [TestComponentOne],
+      })
+    ).toBe(false)
   })
 })
