@@ -1,5 +1,11 @@
 # @arancini/core
 
+## 2.1.0
+
+### Minor Changes
+
+- e427b6d: feat(System): required queries that must have results for the system to update
+
 ## 2.0.0
 
 ### Major Changes
