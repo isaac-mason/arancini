@@ -13,8 +13,8 @@ React glue for the [arancini](https://github.com/isaac-mason/arancini/tree/main/
 To get started, use `createECS` to get glue components and hooks scoped to a given arancini world. Because the react glue is scoped, libraries can use @arancini/react without worrying about context conflicts.
 
 ```ts
+import { World } from '@arancini/core'
 import { createECS } from '@arancini/react'
-import { World } from 'arancini'
 
 const world = new World()
 
@@ -224,8 +224,8 @@ const Example = () => (
 You can use the hooks `useCurrentEntitiy` and `useCurrentSpace` to access the current entity and space in a React component.
 
 ```tsx
+import { Component } from '@arancini/core'
 import { createECS } from '@arancini/react'
-import { Component } from 'arancini'
 
 const ECS = createECS()
 

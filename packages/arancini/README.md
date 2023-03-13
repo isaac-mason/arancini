@@ -8,7 +8,7 @@ Arancini is an object based Entity Component System. You can use arancini to str
 - 🔍 ‎ Reactive queries that update on entity composition changes
 - 🗑️ ‎ Built-in object pooling to help avoid garbage collection
 - 🍃 ‎ Less than 4kB minified + gzipped
-- 🖇 ‎ Easy integration with React via [`@arancini/react`](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-react)
+- 🖇 ‎ [Easy integration with React](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-react)
 
 ## Packages
 
@@ -16,17 +16,27 @@ Arancini is an object based Entity Component System. You can use arancini to str
 
 [![Version](https://img.shields.io/npm/v/arancini)](https://www.npmjs.com/package/arancini)
 
-The core library!
+The umbrella package for `arancini`. Includes `@arancini/core`, and `@arancini/react` under the `arancini/react` entrypoint.
 
 ```bash
 > yarn add arancini
+```
+
+### [**`@arancini/core`**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-core)
+
+[![Version](https://img.shields.io/npm/v/arancini)](https://www.npmjs.com/package/@arancini/core)
+
+The core library!
+
+```bash
+> yarn add @arancini/core
 ```
 
 ### [**`@arancini/react`**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-react)
 
 [![Version](https://img.shields.io/npm/v/@arancini/react)](https://www.npmjs.com/package/@arancini/react)
 
-React glue for arancini
+React glue for arancini.
 
 ```bash
 > yarn add @arancini/react
