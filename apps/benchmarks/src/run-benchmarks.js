@@ -34,10 +34,12 @@ export const runBenchmarks = (now) => {
     console.log(`${nameTxt} ${averageText} ${sumText} ${updateText}`)
   }
 
-  console.log('\nrunning benchmarks...\n')
+  console.log('running benchmarks...\n')
 
   setTimeout(() => {
-    ;[addRemove, addition, destroy, velocity].forEach((suite) => {
+    const suites = [addRemove, addition, destroy, velocity]
+
+    suites.forEach((suite) => {
       bench(suite)
     })
   })

@@ -3,19 +3,29 @@
   "private": true,
   "packageManager": "yarn@3.4.1",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
-    "build": "(cd packages/arancini-core && yarn build) && (cd packages/arancini-react && yarn build) && (cd packages/arancini && yarn build)",
+    "dev": "preconstruct dev",
+    "build": "preconstruct build",
     "test": "(cd packages/arancini-core && yarn test) && (cd packages/arancini-react && yarn test)",
     "change": "yarn changeset",
     "version": "yarn changeset version && yarn install --mode update-lockfile",
-    "release": "yarn build && yarn test && yarn build-storybook && changeset publish",
+    "release": "preconstruct validate && yarn build && yarn test && yarn build-storybook && changeset publish",
     "build-storybook": "concurrently \"cd ./packages/arancini-core && yarn build-storybook\" \"cd ./packages/arancini-react && yarn build-storybook\"",
     "storybook": "concurrently \"cd ./packages/arancini-core && yarn storybook\" \"cd ./packages/arancini-react && yarn storybook\""
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.0",
+    "@preconstruct/cli": "^2.3.0",
     "concurrently": "^7.4.0"
+  },
+  "preconstruct": {
+    "packages": [
+      "packages/arancini-core",
+      "packages/arancini-react",
+      "packages/arancini"
+    ]
   }
 }

@@ -18,19 +18,20 @@
   "scripts": {
     "test": " NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
+    "build": "preconstruct build",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
   "dependencies": {
-    "@arancini/core": "2.1.0"
+    "@arancini/core": "2.1.0",
+    "@arancini/react": "2.0.1"
   },
   "peerDependencies": {
-    "@arancini/core": "^2.0.0"
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
   },
   "devDependencies": {
+    "@preconstruct/cli": "^2.3.0",
     "@typescript-eslint/eslint-plugin": "^5.7.0",
     "@typescript-eslint/parser": "^5.7.0",
     "eslint": "^8.5.0",
@@ -46,19 +47,28 @@
     "eslint-plugin-typescript-enum": "^2.1.0",
     "prettier": "^2.3.2",
     "typescript": "^4.5.4",
-    "vite": "^2.9.9",
-    "vite-plugin-dts": "^1.2.0"
+    "vite": "^4.1.4",
+    "vite-plugin-dts": "^2.1.0"
   },
   "files": [
-    "dist"
+    "dist/**",
+    "react/**",
+    "LICENSE",
+    "README.md"
   ],
-  "main": "./dist/index.umd.js",
-  "module": "./dist/index.es.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.es.js",
-      "require": "./dist/index.umd.js"
-    }
+  "main": "dist/arancini.cjs.js",
+  "module": "dist/arancini.esm.js",
+  "preconstruct": {
+    "entrypoints": [
+      "index.ts",
+      "react.ts"
+    ]
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-react",
+      "@babel/preset-typescript"
+    ]
   }
 }
