@@ -209,6 +209,18 @@ class MovementSystem extends System {
 }
 ```
 
+System queries can be marked as 'required', meaning that the system will only be updated if the query has at least one result.
+
+```ts
+class ExampleSystem extends System {
+  requiredQuery = this.query([ExampleComponent], { required: true })
+
+  onUpdate() {
+    const { data } = this.requiredQuery.first!.get(ExampleComponent)
+  }
+}
+```
+
 Systems can be registered with a priority. The order systems run in is first determined by priority, then by the order systems were registered.
 
 ```ts

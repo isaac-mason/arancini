@@ -71,9 +71,18 @@ export class SystemManager {
    */
   update(delta: number, time: number): void {
     for (const system of this.sortedSystems.values()) {
-      if (system.enabled) {
-        system.onUpdate(delta, time)
+      if (!system.enabled) {
+        continue
       }
+
+      if (
+        system.__internal.requiredQueries.length > 0 &&
+        system.__internal.requiredQueries.some((q) => q.entities.length === 0)
+      ) {
+        continue
+      }
+
+      system.onUpdate(delta, time)
     }
   }
 

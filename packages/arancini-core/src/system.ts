@@ -75,12 +75,18 @@ export abstract class System {
      * The order the system was inserted in
      */
     order: number
+
+    /**
+     * Queries that must have at least one result for onUpdate to be called
+     */
+    requiredQueries: Query[]
   } = {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    class: null!,
     queries: new Set(),
     priority: 0,
     order: 0,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    class: null!,
+    requiredQueries: [],
   }
 
   constructor(world: World) {
@@ -114,11 +120,21 @@ export abstract class System {
   /**
    * Creates and returns a query that gets updated every update.
    * @param queryDescription the query description
+   * @param options optional options for the system query
    * @returns the query
    */
-  protected query(queryDescription: QueryDescription): Query {
+  protected query(
+    queryDescription: QueryDescription,
+    options?: {
+      required: boolean
+    }
+  ): Query {
     const query = this.world.queryManager.createQuery(queryDescription)
     this.__internal.queries.add(query)
+
+    if (options?.required) {
+      this.__internal.requiredQueries.push(query)
+    }
 
     return query
   }

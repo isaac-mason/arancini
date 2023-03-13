@@ -59,6 +59,7 @@ module.exports = {
       'WithStatement',
     ],
     '@typescript-eslint/no-empty-function': 'off',
+    'no-continue': 'off',
   },
   settings: {
     'import/resolver': {

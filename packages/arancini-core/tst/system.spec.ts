@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
-import { describe, it, expect } from '@jest/globals'
-import { Component, World, System, Space, Entity } from '../src'
+import { describe, expect, it } from '@jest/globals'
+import { Component, Entity, Space, System, World } from '../src'
 
 class TestComponentOne extends Component {}
 class TestComponentTwo extends Component {}
@@ -340,6 +340,28 @@ describe('System', () => {
           all: [TestComponentOne],
         })
       ).toBe(false)
+    })
+
+    test('onUpdate will not be called if any required queries have no results', () => {
+      class TestSystemWithRequiredQuery extends System {
+        requiredQuery = this.query([TestComponentOne], { required: true })
+
+        onUpdate(): void {
+          systemUpdateFn()
+        }
+      }
+
+      world.registerSystem(TestSystemWithRequiredQuery)
+
+      world.update()
+
+      expect(systemUpdateFn).toHaveBeenCalledTimes(0)
+
+      world.create.entity().add(TestComponentOne)
+
+      world.update()
+
+      expect(systemUpdateFn).toHaveBeenCalledTimes(1)
     })
   })
 })
