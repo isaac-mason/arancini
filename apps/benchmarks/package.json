@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "bench": "node src/index.js",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
@@ -14,6 +13,6 @@
   },
   "devDependencies": {
     "prettier": "^2.7.1",
-    "vite": "^3.0.0"
+    "vite": "^4.1.4"
   }
 }

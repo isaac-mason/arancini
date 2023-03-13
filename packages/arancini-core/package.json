@@ -18,9 +18,7 @@
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
+    "build": "preconstruct build",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
@@ -28,6 +26,7 @@
     "@babel/core": "^7.18.6",
     "@jest/globals": "^28.1.2",
     "@mdx-js/react": "^1.6.22",
+    "@preconstruct/cli": "^2.3.0",
     "@storybook/addon-actions": "^6.5.9",
     "@storybook/addon-docs": "^6.5.9",
     "@storybook/addon-essentials": "^6.5.9",
@@ -56,20 +55,11 @@
     "jest": "^28.1.2",
     "prettier": "^2.3.2",
     "ts-jest": "^28.0.5",
-    "typescript": "^4.5.4",
-    "vite": "^2.9.9",
-    "vite-plugin-dts": "^1.2.0"
+    "typescript": "^4.5.4"
   },
   "files": [
     "dist"
   ],
-  "main": "./dist/index.umd.js",
-  "module": "./dist/index.es.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.es.js",
-      "require": "./dist/index.umd.js"
-    }
-  }
+  "main": "dist/arancini-core.cjs.js",
+  "module": "dist/arancini-core.esm.js"
 }

@@ -1,0 +1,4 @@
+{
+  "main": "dist/arancini-react.cjs.js",
+  "module": "dist/arancini-react.esm.js"
+}
