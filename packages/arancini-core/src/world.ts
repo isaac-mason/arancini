@@ -30,6 +30,7 @@ export const WORLD_DEFAULT_SPACE_ID = '__arancini_default_world_space'
  * // update the world with a specified time elapsed
  * // (Systems will be called with a delta of 0.1)
  * world.update(0.1)
+ * ```
  */
 export class World {
   /**
