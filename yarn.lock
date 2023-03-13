@@ -97,7 +97,6 @@ __metadata:
     timeline-composer: ^0.1.5
     typescript: ^4.5.4
   peerDependencies:
-    "@arancini/core": 2.1.0
     react: ^18.0.0
     react-dom: ^18.0.0
   languageName: unknown

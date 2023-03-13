@@ -1,6 +1,4 @@
 ---
-"@arancini/react": minor
-"@arancini/core": minor
 "arancini": minor
 ---
 

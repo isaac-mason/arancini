@@ -22,7 +22,6 @@
     "@arancini/core": "2.1.0"
   },
   "peerDependencies": {
-    "@arancini/core": "2.1.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
