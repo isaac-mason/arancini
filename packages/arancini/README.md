@@ -155,8 +155,6 @@ const world = new World()
 
 You can use queries to find entities that have certain components. Queries support `all`, `one`, and `none` filters. Queries with the same filters are deduplicated by arancini, so you can create multiple queries with the same filters without performance penalty.
 
-The `Query` class has a `Symbol.iterator` method which can be used to iterate over all entities that match the query in reverse order.
-
 ```ts
 const basicQuery = world.create.query([Position])
 
@@ -165,18 +163,34 @@ const advancedQuery = world.create.query({
   one: [EitherThisComponent, OrThisComponent],
   none: [NotThisComponent],
 })
+```
 
-for (const entity of basicQuery) {
-  // ...
+#### Iterating over query results
+
+The `Query` class has a `Symbol.iterator` method which can be used to iterate over all entities that match the query in reverse order. When removing entities from within the loop, entities must be iterated over in reverse order.
+
+Alternatively, you can simply iterate over entities in `query.entities`.
+
+```ts
+const query = world.create.query([Position])
+
+for (const entity of query) {
+  // iterates over entities in reverse order
+}
+
+for (const entity of query.entities) {
+  // regular forward iteration
 }
 ```
+
+#### Reactive queries
 
 Queries are reactive and can emit events when entities are added or removed from the query.
 
 ```ts
 const query = world.create.query([Position])
 
-const handler = (entity) => {
+const handler = (entity: Entity) => {
   // ...
 }
 
@@ -231,8 +245,6 @@ class MovementSystem extends System {
   }
 }
 ```
-
-#### Required queries
 
 System queries can be marked as 'required', meaning that the system will only be updated if the query has at least one result.
 
