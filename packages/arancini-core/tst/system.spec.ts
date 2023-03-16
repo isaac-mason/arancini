@@ -382,11 +382,32 @@ describe('System', () => {
     expect(systemUpdateFn).toHaveBeenCalledTimes(0)
 
     // singletonComponent should be defined after an entity with the component is created
-    const testComponentOne = world.create.entity().add(TestComponentOne)
+    const testEntity = world.create.entity()
+    const testComponentOne = testEntity.add(TestComponentOne)
+
     expect(system.singletonComponent).toBe(testComponentOne)
+    expect(system.singletonComponent?.entity).toBe(testEntity)
 
     // system should update as the singleton is now defined
     world.update()
     expect(systemUpdateFn).toHaveBeenCalledTimes(1)
+
+    // singletonComponent should be undefined after the component is destroyed
+    testEntity.destroy()
+    expect(system.singletonComponent).toBe(undefined)
+
+    // ensure the old entity and component is not re-used
+    world.spaceManager.entityPool.free(1)
+    world.spaceManager.componentPool.free(TestComponentOne, 1)
+
+    // singletonComponent should be set after a new entity with the component is created
+    const newTestEntity = world.create.entity()
+    const newTestComponentOne = newTestEntity.add(TestComponentOne)
+
+    expect(system.singletonComponent).toBe(newTestComponentOne)
+    expect(system.singletonComponent?.entity).toBe(newTestEntity)
+
+    expect(system.singletonComponent).not.toBe(testComponentOne)
+    expect(system.singletonComponent).not.toBe(testEntity)
   })
 })

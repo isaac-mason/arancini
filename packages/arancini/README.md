@@ -191,17 +191,34 @@ query.onEntityRemoved.remove(handler)
 
 Arancini has built-in support for systems, but you can also use queries alone to create your own "System" logic if you prefer. Systems are just a convenient way to organise your logic.
 
-Systems have lifecycle methods that are called when the system is added and removed from the world, and when the world is updated.
+#### System lifecycle methods
+
+Systems have lifecycle methods that are called on world initialisation and teardown, and when the world is updated.
+
+```ts
+class ExampleSystem extends System {
+  onInit() {
+    // called when the world is initialised,
+    // or when the system is registered in an initialised world
+  }
+
+  onDestroy() {
+    // called when the world is destroyed or the system is unregistered
+  }
+
+  onUpdate(delta: number, time: number) {
+    // called when updating the world
+  }
+}
+```
+
+#### Creating system queries
 
 You can use `this.query` to create a query linked to the system. These queries will automatically be destroyed when the system is destroyed.
 
 ```ts
 class MovementSystem extends System {
   moving = this.query([Position, Velocity])
-
-  onInit() {
-    // ...
-  }
 
   onUpdate() {
     for (const entity of this.moving) {
@@ -212,12 +229,10 @@ class MovementSystem extends System {
       position.y += velocity.y
     }
   }
-
-  onDestroy() {
-    // ...
-  }
 }
 ```
+
+#### Required queries
 
 System queries can be marked as 'required', meaning that the system will only be updated if the query has at least one result.
 
@@ -230,6 +245,24 @@ class ExampleSystem extends System {
   }
 }
 ```
+
+#### Singleton components
+
+Singleton components queries can be defined for cases where systems need to access shared data, like a camera or player component.
+
+The `singleton` method creates a query for a single component, and sets the property on the system to the given component from the first matching entity.
+
+```ts
+class ExampleSystem extends System {
+  player = this.singleton(PlayerComponent, { required: true })
+
+  onUpdate() {
+    player.ENERGY -= 1
+  }
+}
+```
+
+#### Execution Order
 
 Systems can be registered with a priority. The order systems run in is first determined by priority, then by the order systems were registered.
 

@@ -21,23 +21,23 @@ class InventoryEvents extends Component {
 }
 
 class InventorySystem extends System {
-  inventories = this.query([Inventory, InventoryEvents])
+  inventory = this.singleton(Inventory)!
+
+  inventoryEvents = this.singleton(InventoryEvents)!
 
   onInit(): void {
-    this.inventories.onEntityAdded.add((entity) => {
-      const { change } = entity.get(InventoryEvents)
-      const { items } = entity.get(Inventory)
+    const { change } = this.inventoryEvents
+    const { items } = this.inventory
 
-      change.add((op, item, count) => {
-        let itemCount = items.get(item) ?? 0
-        itemCount = itemCount + (op === 'add' ? count : -count)
+    change.add((op, item, count) => {
+      let itemCount = items.get(item) ?? 0
+      itemCount = itemCount + (op === 'add' ? count : -count)
 
-        if (itemCount <= 0) {
-          items.delete(item)
-        } else {
-          items.set(item, itemCount)
-        }
-      })
+      if (itemCount <= 0) {
+        items.delete(item)
+      } else {
+        items.set(item, itemCount)
+      }
     })
   }
 }
@@ -49,10 +49,9 @@ export const PlayerInventoryEvents = () => {
     world.registerComponent(Inventory)
     world.registerComponent(InventoryEvents)
     world.registerSystem(InventorySystem)
-    world.init()
 
     const player = world.create.entity()
-    
+
     player.add(Inventory)
 
     const inventoryEvents = player.add(InventoryEvents)
@@ -72,6 +71,8 @@ export const PlayerInventoryEvents = () => {
     document.querySelector('#remove-bomb')!.addEventListener('click', () => {
       inventoryEvents.change.emit('remove', 'bomb', 1)
     })
+
+    world.init()
 
     const now = () => performance.now() / 1000
 

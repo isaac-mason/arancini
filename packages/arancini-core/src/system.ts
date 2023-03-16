@@ -147,7 +147,7 @@ export abstract class System {
   protected singleton<T extends ComponentClass>(
     clazz: T,
     options?: SystemQueryOptions
-  ): T | undefined {
+  ): InstanceType<T> | undefined {
     const placeholder: SystemSingletonPlaceholder = {
       __internal: {
         placeholder: true,

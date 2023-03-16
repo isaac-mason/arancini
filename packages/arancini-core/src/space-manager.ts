@@ -165,7 +165,7 @@ export class SpaceManager {
     // reset entity component bitset
     entity._componentsBitSet.reset()
 
-    this.entityPool.release(entity)
+    this.entityPool.recycle(entity)
   }
 
   /**
@@ -213,7 +213,7 @@ export class SpaceManager {
     // reset and recycle the component object
     component.id = uniqueId()
     ;(component.entity as unknown) = undefined
-    this.componentPool.release(component)
+    this.componentPool.recycle(component)
   }
 
   /**
