@@ -262,6 +262,8 @@ class ExampleSystem extends System {
 }
 ```
 
+> **Note:** Singleton components must be defined on a top-level property of the system. The property must not be a ES2022 private field (prefixed with `#`).
+
 #### Execution Order
 
 Systems can be registered with a priority. The order systems run in is first determined by priority, then by the order systems were registered.
