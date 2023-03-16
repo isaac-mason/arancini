@@ -25,9 +25,9 @@ world.init()
 const ECS = createECS(world)
 ```
 
-### Stepping the World
+### Updating Systems
 
-`@arancini/react` does not automatically step the world for you. If you are using arancini with `@react-three/fiber`, you can use the `useFrame` hook to step the World.
+`@arancini/react` does not automatically update systems for you. If you are using arancini with `@react-three/fiber`, you can use the `useFrame` hook to update systems in the world.
 
 ```tsx
 import { useFrame } from '@react-three/fiber'
@@ -41,7 +41,7 @@ const Stepper = () => {
 }
 ```
 
-If arancini needs to be integrated into an existing game loop, instead of calling `step`, you can decide when to update parts of the world.
+If arancini needs to be integrated into an existing game loop, instead of calling `update`, you can decide when to update particular systems.
 
 ```tsx
 const world = new World()

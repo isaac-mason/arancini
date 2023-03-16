@@ -360,8 +360,8 @@ describe('createECS', () => {
     })
   })
 
-  describe('step', () => {
-    it('should step the world', () => {
+  describe('update', () => {
+    it('should update the world', () => {
       const world = new A.World()
       const ECS = createECS(world)
 
