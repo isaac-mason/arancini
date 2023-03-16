@@ -11,7 +11,7 @@
   "packageManager": "yarn@3.2.1",
   "author": "Isaac Mason <isaac@isaacmason.com>",
   "license": "MIT",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "scripts": {
     "build": "preconstruct build",
     "storybook": "start-storybook -p 6008",
@@ -19,7 +19,7 @@
     "test": "jest --coverage"
   },
   "dependencies": {
-    "@arancini/core": "2.2.0"
+    "@arancini/core": "2.2.1"
   },
   "peerDependencies": {
     "react": "^18.0.0",
