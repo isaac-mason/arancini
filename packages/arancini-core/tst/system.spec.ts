@@ -73,7 +73,7 @@ describe('System', () => {
     systemUpdateFn.mockReset()
   })
 
-  test('Systems are initialised on initialising the world', () => {
+  test('systems are initialised on initialising the world', () => {
     world = new World()
     space = world.create.space()
 
@@ -94,7 +94,7 @@ describe('System', () => {
     expect(systemInitFn).toHaveBeenCalled()
   })
 
-  test('Systems can create Queries for Entities based on Components', () => {
+  test('systems can have queries', () => {
     // system with query for both TestComponentOne and TestComponentTwo
     const onAddedFn = jest.fn()
     const onRemovedFn = jest.fn()
@@ -140,7 +140,7 @@ describe('System', () => {
     expect(onRemovedFn.mock.calls.length).toBe(1)
   })
 
-  test('Systems will have onInit, onUpdate, and onDestroy lifecycle methods called', () => {
+  test('onInit, onUpdate, and onDestroy lifecycle methods are called', () => {
     const systemInitJestFn = jest.fn()
     const systemUpdateJestFn = jest.fn()
     const systemDestroyJestFn = jest.fn()
@@ -199,7 +199,7 @@ describe('System', () => {
     }).toThrowError()
   })
 
-  test('defaults to sorting systems by registration order', () => {
+  test('system execution order defaults to order of registration', () => {
     world
       .registerSystem(SystemOne)
       .registerSystem(SystemTwo)
@@ -222,7 +222,7 @@ describe('System', () => {
     expect(systemUpdateFn).nthCalledWith(4, SystemFour)
   })
 
-  test('supports sorting systems with an optional system priority', () => {
+  test('system execution order should be in order of registration, with an optional system priority', () => {
     world
       .registerSystem(SystemOne, { priority: -100 })
       .registerSystem(SystemTwo)
@@ -245,7 +245,7 @@ describe('System', () => {
     expect(systemUpdateFn).nthCalledWith(4, SystemOne)
   })
 
-  test('Systems will not be updated after they have been unregistered', () => {
+  test('systems will not be updated after they have been unregistered', () => {
     world.registerSystem(TestSystemWithOnUpdate)
 
     expect(world.getSystems().map((s) => s.__internal.class)).toEqual([
@@ -263,7 +263,7 @@ describe('System', () => {
     expect(systemUpdateFn).nthCalledWith(1, TestSystemWithOnUpdate)
   })
 
-  test('Systems can be removed, and queries will be removed if they are no longer used by any systems', () => {
+  test('systems can be removed, and queries will be removed if they are no longer used by any systems', () => {
     world.registerSystem(TestSystemWithQuery)
     const systemOne = world.getSystem(
       TestSystemWithQuery
@@ -297,7 +297,7 @@ describe('System', () => {
     ).toBe(false)
   })
 
-  test('Systems can be removed, and queries will not be removed if they are used standalone outside of systems', () => {
+  test('systems can be removed, and queries will not be removed if they are used standalone outside of systems', () => {
     // use the query outside of a system
     const query = world.create.query(testSystemQueryDescription)
 
@@ -336,5 +336,57 @@ describe('System', () => {
         all: [TestComponentOne],
       })
     ).toBe(false)
+  })
+
+  test('onUpdate will not be called if any required queries have no results', () => {
+    class TestSystemWithRequiredQuery extends System {
+      requiredQuery = this.query([TestComponentOne], { required: true })
+
+      onUpdate(): void {
+        systemUpdateFn()
+      }
+    }
+
+    world.registerSystem(TestSystemWithRequiredQuery)
+
+    world.update()
+
+    expect(systemUpdateFn).toHaveBeenCalledTimes(0)
+
+    world.create.entity().add(TestComponentOne)
+
+    world.update()
+
+    expect(systemUpdateFn).toHaveBeenCalledTimes(1)
+  })
+
+  test('systems can have singleton components defined', () => {
+    class TestSystemWithSingleton extends System {
+      singletonComponent = this.singleton(TestComponentOne, { required: true })
+
+      onUpdate(): void {
+        systemUpdateFn()
+      }
+    }
+
+    world.registerSystem(TestSystemWithSingleton)
+    const system = world.getSystem(
+      TestSystemWithSingleton
+    ) as TestSystemWithSingleton
+
+    // singletonComponent should be undefined before any entities are created
+    expect(system.singletonComponent).toBe(undefined)
+
+    // system should not update as the singleton is required
+    world.update()
+    expect(systemUpdateFn).toHaveBeenCalledTimes(0)
+
+    // singletonComponent should be defined after an entity with the component is created
+    const testComponentOne = world.create.entity().add(TestComponentOne)
+    expect(system.singletonComponent).toBe(testComponentOne)
+
+    // system should update as the singleton is now defined
+    world.update()
+    expect(systemUpdateFn).toHaveBeenCalledTimes(1)
   })
 })

@@ -1,10 +1,19 @@
-import type { Query } from './query'
-import type { System, SystemClass } from './system'
+import { ComponentClass } from './component'
+import type { Query, QueryDescription } from './query'
+import type { System, SystemClass, SystemQueryOptions } from './system'
 import { isSubclassMethodOverridden } from './utils'
 import type { World } from './world'
 
 export type SystemAttributes = {
   priority?: number
+}
+
+export type SystemSingletonPlaceholder = {
+  __internal: {
+    placeholder: true
+    componentClass: ComponentClass
+    options?: SystemQueryOptions
+  }
 }
 
 /**
@@ -105,17 +114,45 @@ export class SystemManager {
       throw new Error(`System "${Clazz.name}" has already been registered`)
     }
 
+    /* instantiate the system */
     this.systemCounter++
-
     const system = new Clazz(this.world)
+    this.systems.set(Clazz, system)
+
+    /* set internal properties */
     system.__internal.class = Clazz
     system.__internal.priority = attributes?.priority ?? 0
     system.__internal.order = this.systemCounter
 
-    this.systems.set(Clazz, system)
+    /* replace singleton placeholders */
+    // eslint-disable-next-line guard-for-in
+    for (const fieldName in system) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const _system = system as any
 
+      const field = _system[fieldName]
+
+      if (field?.__internal?.placeholder) {
+        const {
+          __internal: { componentClass, options },
+        } = field as SystemSingletonPlaceholder
+
+        const query = this.createSystemQuery(system, [componentClass], options)
+
+        const onQueryChange = () => {
+          _system[fieldName] = query.first?.get(componentClass)
+        }
+
+        query.onEntityAdded.add(onQueryChange)
+        query.onEntityRemoved.add(onQueryChange)
+        onQueryChange()
+      }
+    }
+
+    // if the system has an onUpdate method, add it to the sorted systems.
+    // systems are sorted immediately if the system manager is initialised, otherwise
+    // they are sorted on initialisation.
     const hasOnUpdate = isSubclassMethodOverridden(Clazz, 'onUpdate')
-
     if (hasOnUpdate) {
       this.sortedSystems.push(system)
     }
@@ -124,7 +161,6 @@ export class SystemManager {
       system.onInit()
 
       if (hasOnUpdate) {
-        // if the system manager is not initialised, systems will be sorted on initialisation
         this.sortSystems()
       }
     }
@@ -150,6 +186,28 @@ export class SystemManager {
     })
 
     system.onDestroy()
+  }
+
+  /**
+   * Creates a query for a system
+   * @param system the system to create the query for
+   * @param queryDescription the query description
+   * @param options the options for the query
+   */
+  createSystemQuery(
+    system: System,
+    queryDescription: QueryDescription,
+    options?: SystemQueryOptions
+  ): Query {
+    const query = this.world.queryManager.createQuery(queryDescription)
+
+    system.__internal.queries.add(query)
+
+    if (options?.required) {
+      system.__internal.requiredQueries.push(query)
+    }
+
+    return query
   }
 
   private sortSystems(): void {

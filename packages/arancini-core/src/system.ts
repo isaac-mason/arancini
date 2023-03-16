@@ -1,6 +1,12 @@
+import { ComponentClass } from './component'
 import type { QueryDescription } from './query'
 import { Query } from './query'
+import type { SystemSingletonPlaceholder } from './system-manager'
 import type { World } from './world'
+
+export type SystemQueryOptions = {
+  required?: boolean
+}
 
 export type SystemClass<T extends System = System> = {
   new (world: World): T
@@ -125,17 +131,31 @@ export abstract class System {
    */
   protected query(
     queryDescription: QueryDescription,
-    options?: {
-      required: boolean
-    }
+    options?: SystemQueryOptions
   ): Query {
-    const query = this.world.queryManager.createQuery(queryDescription)
-    this.__internal.queries.add(query)
+    return this.world.systemManager.createSystemQuery(
+      this,
+      queryDescription,
+      options
+    )
+  }
 
-    if (options?.required) {
-      this.__internal.requiredQueries.push(query)
+  /**
+   * Shortcut for creating a query for a singleton component.
+   * @param clazz the singleton component class
+   */
+  protected singleton<T extends ComponentClass>(
+    clazz: T,
+    options?: SystemQueryOptions
+  ): T | undefined {
+    const placeholder: SystemSingletonPlaceholder = {
+      __internal: {
+        placeholder: true,
+        componentClass: clazz,
+        options,
+      },
     }
 
-    return query
+    return placeholder as InstanceType<T> | undefined
   }
 }
