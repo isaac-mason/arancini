@@ -1,5 +1,24 @@
 # @arancini/core
 
+## 2.2.1
+
+### Patch Changes
+
+- a2d975e: fix(World): jsdoc code example
+- e884984: feat(System): add support for retrieving singleton components
+
+  Adds a protected method `singleton` to the System class, which creates a query for a single component, and sets the property on the system to the given component from the first matching entity.
+
+  ```ts
+  class ExampleSystem extends System {
+    settings = this.singleton(SettingsComponent);
+
+    // ...
+  }
+  ```
+
+- 04234c0: feat: add support for manually growing and shrinking object pools
+
 ## 2.2.0
 
 ## 2.1.0

@@ -10,7 +10,7 @@
   "packageManager": "yarn@3.2.1",
   "author": "Isaac Mason <isaac@isaacmason.com>",
   "license": "MIT",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "homepage": "https://github.com/isaac-mason/arancini",
   "bugs": {
     "url": "https://github.com/isaac-mason/arancini/issues"

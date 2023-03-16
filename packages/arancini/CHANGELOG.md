@@ -1,5 +1,15 @@
 # arancini
 
+## 2.2.1
+
+### Patch Changes
+
+- Updated dependencies [a2d975e]
+- Updated dependencies [e884984]
+- Updated dependencies [04234c0]
+  - @arancini/core@2.2.1
+  - @arancini/react@2.2.1
+
 ## 2.2.0
 
 ### Minor Changes
