@@ -85,7 +85,7 @@ export class ComponentPool {
   /**
    * Frees a given number of currently available components
    * @param componentClass the component class to free the components for
-   * @param count the number of available objects to free
+   * @param count the number of available components to free
    */
   free(componentClass: ComponentClass, count: number): void {
     this.getPool(componentClass).free(count)
