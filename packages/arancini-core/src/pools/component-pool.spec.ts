@@ -21,14 +21,14 @@ describe('ComponentPool', () => {
   it('should create a new pool on retrieving a component for the first time', () => {
     expect(pool.totalPools).toBe(0)
     expect(pool.size).toBe(0)
-    expect(pool.free).toBe(0)
+    expect(pool.available).toBe(0)
     expect(pool.used).toBe(0)
 
     const componentOne = pool.request(ExampleComponentOne)
 
     expect(pool.totalPools).toBe(1)
     expect(pool.size).toBe(1)
-    expect(pool.free).toBe(0)
+    expect(pool.available).toBe(0)
     expect(pool.used).toBe(1)
     expect(componentOne).toBeTruthy()
     expect(componentOne instanceof ExampleComponentOne).toBeTruthy()
@@ -36,7 +36,7 @@ describe('ComponentPool', () => {
     const componentTwo = pool.request(ExampleComponentOne)
     expect(pool.totalPools).toBe(1)
     expect(pool.size).toBe(2)
-    expect(pool.free).toBe(0)
+    expect(pool.available).toBe(0)
     expect(pool.used).toBe(2)
 
     expect(componentTwo).toBeTruthy()
@@ -47,31 +47,60 @@ describe('ComponentPool', () => {
     expect(componentThree instanceof ExampleComponentTwo).toBeTruthy()
     expect(pool.totalPools).toBe(2)
     expect(pool.size).toBe(3)
-    expect(pool.free).toBe(0)
+    expect(pool.available).toBe(0)
     expect(pool.used).toBe(3)
   })
 
-  it('should release components', () => {
+  it('should recycle components', () => {
     expect(pool.totalPools).toBe(0)
     expect(pool.size).toBe(0)
-    expect(pool.free).toBe(0)
+    expect(pool.available).toBe(0)
     expect(pool.used).toBe(0)
 
     const component = pool.request(ExampleComponentOne)
 
     expect(pool.totalPools).toBe(1)
     expect(pool.size).toBe(1)
-    expect(pool.free).toBe(0)
+    expect(pool.available).toBe(0)
     expect(pool.used).toBe(1)
 
     expect(component).toBeTruthy()
     expect(component instanceof ExampleComponentOne).toBeTruthy()
 
-    pool.release(component)
+    pool.recycle(component)
 
     expect(pool.totalPools).toBe(1)
     expect(pool.size).toBe(1)
-    expect(pool.free).toBe(1)
+    expect(pool.available).toBe(1)
     expect(pool.used).toBe(0)
+  })
+
+  it('should support manually growing and shrinking', () => {
+    expect(pool.totalPools).toBe(0)
+    expect(pool.size).toBe(0)
+    expect(pool.available).toBe(0)
+    expect(pool.used).toBe(0)
+
+    pool.grow(ExampleComponentOne, 10)
+
+    expect(pool.totalPools).toBe(1)
+
+    expect(pool.size).toBe(10)
+    expect(pool.available).toBe(10)
+    expect(pool.used).toBe(0)
+
+    pool.request(ExampleComponentOne)
+
+    pool.free(ExampleComponentOne, 5)
+
+    expect(pool.size).toBe(5)
+    expect(pool.available).toBe(4)
+    expect(pool.used).toBe(1)
+
+    pool.free(ExampleComponentOne, 5)
+
+    expect(pool.size).toBe(1)
+    expect(pool.available).toBe(0)
+    expect(pool.used).toBe(1)
   })
 })

@@ -34,7 +34,7 @@ export class ObjectPool<T> {
   /**
    * Returns the number of available objects in the object pool
    */
-  get free(): number {
+  get available(): number {
     return this.availableObjects.length
   }
 
@@ -57,19 +57,35 @@ export class ObjectPool<T> {
   constructor(factory: () => T, size?: number) {
     this.factory = factory
     if (size !== undefined) {
-      this.expand(size)
+      this.grow(size)
     }
   }
 
   /**
-   * Expands the object pool by a given amount
+   * Grows the object pool by a given amount
    * @param count the count of objects to expand the object pool by
    */
-  expand(count: number): void {
+  grow(count: number): void {
     for (let i = 0; i < count; i++) {
       this.availableObjects.push(this.factory())
     }
     this.size += count
+  }
+
+  /**
+   * Frees a given number of currently available objects
+   * @param count the number of available objects to free
+   */
+  free(count: number): void {
+    for (let i = 0; i < count; i++) {
+      const object = this.availableObjects.pop()
+
+      if (object) {
+        this.size--
+      } else {
+        break
+      }
+    }
   }
 
   /**
@@ -79,18 +95,17 @@ export class ObjectPool<T> {
   request(): T {
     // grow the list by ~20% if there are no more available objects
     if (this.availableObjects.length <= 0) {
-      this.expand(Math.round(this.size * 0.2) + 1)
+      this.grow(Math.round(this.size * 0.2) + 1)
     }
 
     return this.availableObjects.pop() as T
   }
 
   /**
-   * Releases an object into the object pool
-   * @param object the object to release into the object pool
+   * Recycles an object into the object pool
+   * @param object the object to recycle
    */
-  release(object: T): void {
-    // push the object back into the pool as-is
+  recycle(object: T): void {
     this.availableObjects.push(object)
   }
 }

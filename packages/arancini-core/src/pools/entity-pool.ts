@@ -27,8 +27,8 @@ export class EntityPool {
   /**
    * The number of available objects in the entity pool
    */
-  get free(): number {
-    return this.objectPool.free
+  get available(): number {
+    return this.objectPool.available
   }
 
   /**
@@ -48,17 +48,33 @@ export class EntityPool {
   }
 
   /**
-   * Requests an entity from the entity pool
+   * Requests an entity from the pool
    */
   request(): Entity {
     return this.objectPool.request()
   }
 
   /**
-   * Releases an entity from the entity pool
-   * @param e the entity to release
+   * Recycles an entity into the pool
+   * @param e the entity to recycle
    */
-  release(e: Entity): void {
-    this.objectPool.release(e)
+  recycle(e: Entity): void {
+    this.objectPool.recycle(e)
+  }
+
+  /**
+   * Grows the entity pool by the specified amount
+   * @param count the count of entities to expand the pool by
+   */
+  grow(count: number): void {
+    this.objectPool.grow(count)
+  }
+
+  /**
+   * Frees a given number of currently available entities
+   * @param count the number of available entities to free
+   */
+  free(count: number): void {
+    this.objectPool.free(count)
   }
 }

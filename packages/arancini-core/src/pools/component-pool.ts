@@ -28,10 +28,10 @@ export class ComponentPool {
   /**
    * The number of available objects in the component object pools
    */
-  get free(): number {
+  get available(): number {
     let total = 0
     for (const pool of this.objectPools.values()) {
-      total += pool.free
+      total += pool.available
     }
     return total
   }
@@ -53,13 +53,49 @@ export class ComponentPool {
   private objectPools: Map<ComponentClass, ObjectPool<Component>> = new Map()
 
   /**
-   * Requests a component from the component pool
+   * Requests a component from the pool
    */
-  request<T extends Component>(Clazz: ComponentClass<T>): T {
+  request<T extends Component>(componentClass: ComponentClass<T>): T {
+    const pool = this.getPool(componentClass)
+
+    return pool.request() as T
+  }
+
+  /**
+   * Recycles a component into the pool
+   * @param component the component to release
+   */
+  recycle(component: Component): void {
+    const pool = this.objectPools.get(component._class)
+
+    if (pool !== undefined) {
+      pool.recycle(component)
+    }
+  }
+
+  /**
+   * Grows the component pool by the specified amount
+   * @param componentClass the component class to grow the pool for
+   * @param count the count of components to expand the pool by
+   */
+  grow(componentClass: ComponentClass, count: number): void {
+    this.getPool(componentClass).grow(count)
+  }
+
+  /**
+   * Frees a given number of currently available components
+   * @param componentClass the component class to free the components for
+   * @param count the number of available objects to free
+   */
+  free(componentClass: ComponentClass, count: number): void {
+    this.getPool(componentClass).free(count)
+  }
+
+  private getPool(Clazz: ComponentClass): ObjectPool<Component> {
     let pool = this.objectPools.get(Clazz)
 
     if (pool === undefined) {
-      pool = new ObjectPool<T>(() => {
+      pool = new ObjectPool<Component>(() => {
         const component = new Clazz()
 
         component._class = Clazz
@@ -70,18 +106,6 @@ export class ComponentPool {
       this.objectPools.set(Clazz, pool)
     }
 
-    return pool.request() as T
-  }
-
-  /**
-   * Releases a component from the component pool
-   * @param component the component to release
-   */
-  release(component: Component): void {
-    const pool = this.objectPools.get(component._class)
-
-    if (pool !== undefined) {
-      pool.release(component)
-    }
+    return pool
   }
 }
