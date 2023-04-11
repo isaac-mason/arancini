@@ -46,7 +46,7 @@
     "eslint-plugin-storybook": "^0.5.1",
     "eslint-plugin-typescript-enum": "^2.1.0",
     "prettier": "^2.3.2",
-    "typescript": "^4.5.4",
+    "typescript": "^5.0.4",
     "vite": "^4.2.1",
     "vite-plugin-dts": "^2.1.0"
   },
