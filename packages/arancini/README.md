@@ -201,7 +201,7 @@ query.onEntityAdded.remove(handler)
 query.onEntityRemoved.remove(handler)
 ```
 
-### 🧠 Systems
+### 🧠 System
 
 Arancini has built-in support for systems, but you can also use queries alone to create your own "System" logic if you prefer. Systems are just a convenient way to organise your logic.
 
