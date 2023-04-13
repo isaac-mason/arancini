@@ -1,5 +1,11 @@
 # @arancini/core
 
+## 2.2.2
+
+### Patch Changes
+
+- 8224bf2: fix: remove `"type": "module"` from package.json
+
 ## 2.2.1
 
 ### Patch Changes

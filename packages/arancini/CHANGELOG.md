@@ -1,5 +1,14 @@
 # arancini
 
+## 2.2.2
+
+### Patch Changes
+
+- 8224bf2: fix: remove `"type": "module"` from package.json
+- Updated dependencies [8224bf2]
+  - @arancini/react@2.2.2
+  - @arancini/core@2.2.2
+
 ## 2.2.1
 
 ### Patch Changes
