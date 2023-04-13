@@ -1,5 +1,5 @@
 import { World } from '@arancini/core'
-import { useEffect } from '@storybook/client-api'
+import React, { useEffect } from 'react'
 import { CanvasContext, Circle, Intersecting, Movement } from './components'
 import { IntersectionSystem, MovementSystem, Renderer } from './systems'
 import { random } from './utils'
@@ -80,9 +80,7 @@ export const OverlappingCircles = () => {
     }
   })
 
-  return `
-    <canvas id="example-canvas" />
-  `
+  return <canvas id="example-canvas" />
 }
 
 export default {

@@ -1,5 +1,7 @@
 import { Component, Entity, System, World } from '@arancini/core'
-import { useEffect } from '@storybook/client-api'
+import React, { useEffect } from 'react'
+
+import './find-the-bomb.css'
 
 class GameState extends Component {
   clicks!: number
@@ -286,43 +288,19 @@ export const FindTheBomb = () => {
     }
   })
 
-  return `
-    <style>
-      #emoji-sweeper {
-        color: white;
-        text-align: center;
-      }
-      #score {
-        margin-bottom: 1.5em;
-      }
-      #emojis {
-        width: 100%;
-        height: 500px;
-        margin-top: 180px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-      }
-      #emojis .emoji {
-        position: absolute;
-        font-size: 26px;
-        color: white;
-        transition: transform 0.1s ease-in-out;
-      }
-      #emojis .emoji:not(.revealed):hover {
-        cursor: pointer;
-        transform: scale(1.2);
-      }
-    </style>
-    <div id="emoji-sweeper">
-      <p>Click the emojis to reveal them. Try to find the bomb in as few clicks as possible!</p>
-      <div id="score"></div>
-      <button id="reset">Reset</button>
-      <div id="emojis"></div>
-    </div>
-  `
+  return (
+    <>
+      <div id="emoji-sweeper">
+        <p>
+          Click the emojis to reveal them. Try to find the bomb in as few clicks
+          as possible!
+        </p>
+        <div id="score"></div>
+        <button id="reset">Reset</button>
+        <div id="emojis"></div>
+      </div>
+    </>
+  )
 }
 
 export default {

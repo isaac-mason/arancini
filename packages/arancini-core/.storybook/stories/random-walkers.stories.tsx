@@ -1,5 +1,5 @@
 import { Component, System, World } from '@arancini/core'
-import { useEffect } from '@storybook/client-api'
+import React, { useEffect } from 'react'
 
 class Position extends Component {
   // * note the not null `!:` syntax! *
@@ -206,9 +206,7 @@ export const RandomColorChangingWalkers = () => {
     }
   })
 
-  return `
-    <canvas id="example-canvas" />
-  `
+  return <canvas id="example-canvas" />
 }
 
 export default {

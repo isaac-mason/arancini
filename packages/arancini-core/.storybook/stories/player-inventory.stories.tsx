@@ -1,5 +1,5 @@
 import { Component, System, World } from '@arancini/core'
-import { useEffect } from '@storybook/client-api'
+import React, { useEffect } from 'react'
 import { Topic } from '../../src'
 
 class Inventory extends Component {
@@ -104,9 +104,9 @@ export const PlayerInventoryEvents = () => {
     }
   })
 
-  return `
-    <div style="padding: 1em;">
-      <div id="inventory" style="color: white; margin-bottom: 1em;"></div>
+  return (
+    <div style={{ padding: '1em' }}>
+      <div id="inventory" style={{ color: 'white', marginBottom: '1em' }}></div>
       <div>
         <button id="add-apple">add apple</button>
         <button id="remove-apple">remove apple</button>
@@ -114,7 +114,7 @@ export const PlayerInventoryEvents = () => {
         <button id="remove-bomb">remove bomb</button>
       </div>
     </div>
-  `
+  )
 }
 
 export default {
