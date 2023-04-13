@@ -5,7 +5,7 @@ React glue for the [arancini](https://github.com/isaac-mason/arancini/tree/main/
 ## Installation
 
 ```sh
-> yarn add @arancini/react
+> npm install @arancini/react
 ```
 
 ## Usage
