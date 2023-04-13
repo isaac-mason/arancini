@@ -210,7 +210,7 @@ class CanvasElementComponent extends A.Component {
 
 const Example = () => (
   <ECS.Entity>
-    <ECS.Component type={Canvas}>
+    <ECS.Component type={CanvasElementComponent}>
       <canvas />
     </ECS.Component>
   </ECS.Entity>
