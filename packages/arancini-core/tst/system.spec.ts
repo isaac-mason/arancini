@@ -1,5 +1,4 @@
-/* eslint-disable max-classes-per-file */
-import { describe, expect } from '@jest/globals'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { Component, Entity, Space, System, World } from '../src'
 
 class TestComponentOne extends Component {}
@@ -9,7 +8,7 @@ class TestComponentFour extends Component {}
 class TestComponentFive extends Component {}
 class TestComponentSix extends Component {}
 
-const systemUpdateFn = jest.fn()
+const systemUpdateFn = vi.fn()
 
 class SystemOne extends System {
   onUpdate(): void {
@@ -77,7 +76,7 @@ describe('System', () => {
     world = new World()
     space = world.create.space()
 
-    const systemInitFn = jest.fn()
+    const systemInitFn = vi.fn()
 
     class TestSystem extends System {
       onInit(): void {
@@ -96,8 +95,8 @@ describe('System', () => {
 
   test('systems can have queries', () => {
     // system with query for both TestComponentOne and TestComponentTwo
-    const onAddedFn = jest.fn()
-    const onRemovedFn = jest.fn()
+    const onAddedFn = vi.fn()
+    const onRemovedFn = vi.fn()
     class TestSystem extends System {
       testQuery = this.query({
         all: [TestComponentOne, TestComponentTwo],
@@ -141,9 +140,9 @@ describe('System', () => {
   })
 
   test('onInit, onUpdate, and onDestroy lifecycle methods are called', () => {
-    const systemInitJestFn = jest.fn()
-    const systemUpdateJestFn = jest.fn()
-    const systemDestroyJestFn = jest.fn()
+    const systemInitJestFn = vi.fn()
+    const systemUpdateJestFn = vi.fn()
+    const systemDestroyJestFn = vi.fn()
     class TestSystem extends System {
       onDestroy(): void {
         systemDestroyJestFn()

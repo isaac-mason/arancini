@@ -1,8 +1,10 @@
 import * as A from '@arancini/core'
-import '@testing-library/jest-dom'
 import { act, render, renderHook } from '@testing-library/react'
 import React, { forwardRef, useImperativeHandle } from 'react'
+import { describe, expect, it, vi } from 'vitest'
 import { createECS } from '../src'
+
+import '@testing-library/jest-dom'
 
 class ExampleComponent extends A.Component {}
 
@@ -365,7 +367,7 @@ describe('createECS', () => {
       const world = new A.World()
       const ECS = createECS(world)
 
-      const onUpdate = jest.fn()
+      const onUpdate = vi.fn()
 
       world.systemManager.registerSystem(
         class extends A.System {

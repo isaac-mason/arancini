@@ -1,5 +1,4 @@
-/* eslint-disable max-classes-per-file */
-import { describe, it, expect } from '@jest/globals'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { System, World } from '../src'
 
 describe('World', () => {

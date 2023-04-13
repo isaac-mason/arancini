@@ -1,5 +1,4 @@
-/* eslint-disable max-classes-per-file */
-import { describe, expect, it } from '@jest/globals'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Entity, QueryDescription, Space } from '../src'
 import { Component, Query, System, World } from '../src'
 
@@ -176,11 +175,11 @@ describe('Query', () => {
 
   describe('query evaluation', () => {
     it('should emit events when entities are added and removed from a query', () => {
-      const onAddedHandlerOne = jest.fn()
-      const onAddedHandlerTwo = jest.fn()
+      const onAddedHandlerOne = vi.fn()
+      const onAddedHandlerTwo = vi.fn()
 
-      const onRemovedHandlerOne = jest.fn()
-      const onRemovedHandlerTwo = jest.fn()
+      const onRemovedHandlerOne = vi.fn()
+      const onRemovedHandlerTwo = vi.fn()
 
       const query = world.create.query([TestComponentOne])
 
@@ -222,8 +221,8 @@ describe('Query', () => {
     })
 
     it('updates system query results if an entity matches a query with the ANY condition', () => {
-      const onAddedFn = jest.fn()
-      const onRemovedFn = jest.fn()
+      const onAddedFn = vi.fn()
+      const onRemovedFn = vi.fn()
       class TestSystem extends System {
         testQuery = this.query({ any: [TestComponentOne, TestComponentTwo] })
 
@@ -271,8 +270,8 @@ describe('Query', () => {
     })
 
     it('updates system query results if an entity matches a query with the NOT condition', () => {
-      const onAddedFn = jest.fn()
-      const onRemovedFn = jest.fn()
+      const onAddedFn = vi.fn()
+      const onRemovedFn = vi.fn()
       class TestSystem extends System {
         testQuery = this.query({ not: [TestComponentOne] })
 
@@ -314,8 +313,8 @@ describe('Query', () => {
     })
 
     it('updates system query results if an entity matches a query with the ALL condition', () => {
-      const onAddedFn = jest.fn()
-      const onRemovedFn = jest.fn()
+      const onAddedFn = vi.fn()
+      const onRemovedFn = vi.fn()
       class TestSystem extends System {
         testQuery = this.query([
           TestComponentOne,
@@ -363,8 +362,8 @@ describe('Query', () => {
     })
 
     it('updates system query results if an entity matches a query with multiple conditions', () => {
-      const onAddedFn = jest.fn()
-      const onRemovedFn = jest.fn()
+      const onAddedFn = vi.fn()
+      const onRemovedFn = vi.fn()
       class TestSystem extends System {
         testQuery = this.query({
           all: [TestComponentOne, TestComponentTwo],

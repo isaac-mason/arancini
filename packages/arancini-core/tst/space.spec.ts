@@ -1,7 +1,5 @@
-/* eslint-disable max-classes-per-file */
-import { describe, it, expect } from '@jest/globals'
-import { WORLD_DEFAULT_SPACE_ID } from '../src/world'
-import { World } from '../src'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { World, WORLD_DEFAULT_SPACE_ID } from '../src'
 
 describe('Space', () => {
   let world: World

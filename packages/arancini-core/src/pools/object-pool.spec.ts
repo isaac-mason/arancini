@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { describe, it, expect } from '@jest/globals'
+import { describe, expect, it } from 'vitest'
 import { ObjectPool } from './object-pool'
 
 describe('ObjectPool', () => {

@@ -1,5 +1,4 @@
-/* eslint-disable max-classes-per-file */
-import { describe, it, expect } from '@jest/globals'
+import { vi, beforeEach, describe, expect, it } from 'vitest'
 import { Component, Space, World } from '../src'
 
 describe('Components', () => {
@@ -18,7 +17,7 @@ describe('Components', () => {
       world = new World()
       space = world.create.space()
 
-      const onInit = jest.fn()
+      const onInit = vi.fn()
       class TestComponent extends Component {
         onInit() {
           onInit()
@@ -38,8 +37,8 @@ describe('Components', () => {
     })
 
     it('will call component onInit and onDestroy methods', () => {
-      const componentInitJestFn = jest.fn()
-      const componentDestroyJestFn = jest.fn()
+      const componentInitJestFn = vi.fn()
+      const componentDestroyJestFn = vi.fn()
 
       class TestComponentOne extends Component {
         onInit(): void {

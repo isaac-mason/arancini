@@ -1,5 +1,5 @@
-/* eslint-disable max-classes-per-file */
-import { World, Space, Component } from '../src'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { Component, Space, World } from '../src'
 
 describe('Entity', () => {
   let world: World

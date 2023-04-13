@@ -1,5 +1,4 @@
-/* eslint-disable max-classes-per-file */
-
+import { beforeEach, describe, expect, it } from 'vitest'
 import { Component, World } from '../src'
 import { ComponentRegistry } from '../src/component-registry'
 

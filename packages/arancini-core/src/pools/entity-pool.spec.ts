@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { Entity } from '../entity'
 import { World } from '../world'
 import { EntityPool } from './entity-pool'
