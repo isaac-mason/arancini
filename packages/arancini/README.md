@@ -19,7 +19,7 @@ Arancini is an object based Entity Component System. You can use arancini to str
 The umbrella package for `arancini`. Includes `@arancini/core`, and `@arancini/react` under the `arancini/react` entrypoint.
 
 ```bash
-> yarn add arancini
+> npm install arancini
 ```
 
 ### [**`@arancini/core`**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-core)
@@ -29,7 +29,7 @@ The umbrella package for `arancini`. Includes `@arancini/core`, and `@arancini/r
 The core library!
 
 ```bash
-> yarn add @arancini/core
+> npm install @arancini/core
 ```
 
 ### [**`@arancini/react`**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-react)
@@ -39,7 +39,7 @@ The core library!
 React glue for arancini.
 
 ```bash
-> yarn add @arancini/react
+> npm install @arancini/react
 ```
 
 ## Overview
