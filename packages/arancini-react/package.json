@@ -10,7 +10,7 @@
   "packageManager": "yarn@3.2.1",
   "author": "Isaac Mason <isaac@isaacmason.com>",
   "license": "MIT",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
@@ -19,7 +19,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@arancini/core": "2.2.1"
+    "@arancini/core": "2.2.2"
   },
   "peerDependencies": {
     "react": "^18.0.0",
