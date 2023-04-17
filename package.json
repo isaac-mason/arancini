@@ -17,7 +17,7 @@
     "storybook": "concurrently \"cd ./packages/arancini-core && yarn storybook\" \"cd ./packages/arancini-react && yarn storybook\""
   },
   "devDependencies": {
-    "@changesets/cli": "^2.26.0",
+    "@changesets/cli": "^2.26.1",
     "@preconstruct/cli": "^2.5.0",
     "concurrently": "^7.4.0"
   },
