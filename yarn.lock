@@ -30,7 +30,7 @@ __metadata:
     "@babel/preset-env": ^7.21.4
     "@babel/preset-typescript": ^7.21.4
     "@mdx-js/react": ^1.6.22
-    "@preconstruct/cli": ^2.3.0
+    "@preconstruct/cli": ^2.5.0
     "@storybook/addon-essentials": ^7.0.4
     "@storybook/addon-interactions": ^7.0.4
     "@storybook/addon-links": ^7.0.4
@@ -71,7 +71,7 @@ __metadata:
     "@babel/preset-react": ^7.18.6
     "@babel/preset-typescript": ^7.21.4
     "@mdx-js/react": ^1.6.22
-    "@preconstruct/cli": ^2.3.0
+    "@preconstruct/cli": ^2.5.0
     "@react-three/drei": ^9.16.0
     "@react-three/fiber": ^8.0.27
     "@storybook/addon-essentials": ^7.0.4
@@ -2800,9 +2800,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@preconstruct/cli@npm:^2.3.0":
-  version: 2.3.0
-  resolution: "@preconstruct/cli@npm:2.3.0"
+"@preconstruct/cli@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "@preconstruct/cli@npm:2.5.0"
   dependencies:
     "@babel/code-frame": ^7.5.5
     "@babel/core": ^7.7.7
@@ -2826,7 +2826,7 @@ __metadata:
     is-ci: ^2.0.0
     is-reference: ^1.2.1
     jest-worker: ^26.3.0
-    magic-string: ^0.25.7
+    magic-string: ^0.30.0
     meow: ^7.1.0
     ms: ^2.1.2
     normalize-path: ^3.0.0
@@ -2837,13 +2837,13 @@ __metadata:
     quick-lru: ^5.1.1
     resolve: ^1.17.0
     resolve-from: ^5.0.0
-    rollup: ^2.32.0
+    rollup: ^2.79.1
     semver: ^7.3.4
-    terser: ^5.2.1
+    terser: ^5.16.8
     v8-compile-cache: ^2.1.1
   bin:
     preconstruct: bin.js
-  checksum: 68a4cbfbda724c8aaee1220ac2dd9df8fbecca285ee21051298d189f7e17a05b8ed6611e515219395a09a41bceb63323af2bbe0bcca2b9f18bfd9a146a5faa2f
+  checksum: 794d06482c2031844e6670ce9b99c3f07d7bea7b5889786923a90ce0ac81615f17337996addb7df4184990fce85979a44a84737fa53486ffeb5ce8c47cc9f748
   languageName: node
   linkType: hard
 
@@ -5767,7 +5767,7 @@ __metadata:
     "@babel/preset-env": ^7.21.4
     "@babel/preset-react": ^7.18.6
     "@babel/preset-typescript": ^7.21.4
-    "@preconstruct/cli": ^2.3.0
+    "@preconstruct/cli": ^2.5.0
     "@typescript-eslint/eslint-plugin": ^5.7.0
     "@typescript-eslint/parser": ^5.7.0
     eslint: ^8.5.0
@@ -12635,7 +12635,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup@npm:^2.32.0":
+"rollup@npm:^2.79.1":
   version: 2.79.1
   resolution: "rollup@npm:2.79.1"
   dependencies:
@@ -12654,7 +12654,7 @@ __metadata:
   resolution: "root@workspace:."
   dependencies:
     "@changesets/cli": ^2.26.0
-    "@preconstruct/cli": ^2.3.0
+    "@preconstruct/cli": ^2.5.0
     concurrently: ^7.4.0
   languageName: unknown
   linkType: soft
@@ -13478,9 +13478,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"terser@npm:^5.2.1":
-  version: 5.16.6
-  resolution: "terser@npm:5.16.6"
+"terser@npm:^5.16.8":
+  version: 5.16.9
+  resolution: "terser@npm:5.16.9"
   dependencies:
     "@jridgewell/source-map": ^0.3.2
     acorn: ^8.5.0
@@ -13488,7 +13488,7 @@ __metadata:
     source-map-support: ~0.5.20
   bin:
     terser: bin/terser
-  checksum: f763a7bcc7b98cb2bfc41434f7b92bfe8a701a12c92ea6049377736c8e6de328240d654a20dfe15ce170fd783491b9873fad9f4cd8fee4f6c6fb8ca407859dee
+  checksum: b373693ee01ce08cc9b9595d57df889acbbc899d929a7fe53662330ce954d53145582f6715c9cc4839d555f5769a28fbeb203155b54e3a9c6c646db292002edd
   languageName: node
   linkType: hard
 
