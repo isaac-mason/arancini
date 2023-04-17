@@ -26,7 +26,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@arancini/core@workspace:packages/arancini-core"
   dependencies:
-    "@babel/core": ^7.18.6
+    "@babel/core": ^7.21.4
     "@babel/preset-env": ^7.21.4
     "@babel/preset-typescript": ^7.21.4
     "@mdx-js/react": ^1.6.22
@@ -66,7 +66,7 @@ __metadata:
   resolution: "@arancini/react@workspace:packages/arancini-react"
   dependencies:
     "@arancini/core": 2.2.2
-    "@babel/core": ^7.18.6
+    "@babel/core": ^7.21.4
     "@babel/preset-env": ^7.21.4
     "@babel/preset-react": ^7.18.6
     "@babel/preset-typescript": ^7.21.4
@@ -154,7 +154,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/core@npm:^7.11.6, @babel/core@npm:^7.12.10, @babel/core@npm:^7.12.3, @babel/core@npm:^7.18.6, @babel/core@npm:^7.7.5":
+"@babel/core@npm:^7.11.6, @babel/core@npm:^7.12.10, @babel/core@npm:^7.12.3, @babel/core@npm:^7.7.5":
   version: 7.18.6
   resolution: "@babel/core@npm:7.18.6"
   dependencies:
@@ -177,7 +177,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/core@npm:^7.13.16, @babel/core@npm:^7.20.2, @babel/core@npm:~7.21.0":
+"@babel/core@npm:^7.13.16, @babel/core@npm:^7.20.2, @babel/core@npm:^7.21.4, @babel/core@npm:~7.21.0":
   version: 7.21.4
   resolution: "@babel/core@npm:7.21.4"
   dependencies:
