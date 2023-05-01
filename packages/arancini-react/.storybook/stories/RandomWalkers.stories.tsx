@@ -1,7 +1,7 @@
 import * as A from '@arancini/core'
 import { OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { World } from 'p2-es'
+
 import React from 'react'
 import { createECS } from '../../src'
 import { Setup } from '../Setup'
@@ -80,7 +80,7 @@ const App = () => {
                 (Math.random() - 0.5) * 4,
               ]}
             >
-              <boxBufferGeometry args={[1, 1, 1]} />
+              <boxGeometry args={[1, 1, 1]} />
               <meshNormalMaterial />
             </mesh>
           </ECS.Component>

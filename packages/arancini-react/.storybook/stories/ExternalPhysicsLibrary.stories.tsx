@@ -177,7 +177,7 @@ const App = () => {
                 {boxes.map((box, index) => (
                   <mesh key={index}>
                     <meshStandardMaterial color="orange" />
-                    <boxBufferGeometry
+                    <boxGeometry
                       args={[
                         (box as P2.Box).width,
                         (box as P2.Box).height,
@@ -191,7 +191,7 @@ const App = () => {
                 {planes.map((plane, index) => (
                   <mesh key={index} rotation={[-Math.PI / 2, 0, plane.angle]}>
                     <meshStandardMaterial color="#333" />
-                    <planeBufferGeometry args={[100, 100]} />
+                    <planeGeometry args={[100, 100]} />
                   </mesh>
                 ))}
               </group>

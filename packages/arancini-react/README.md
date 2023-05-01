@@ -145,7 +145,7 @@ const ECS = createECS(world)
 const SimpleExample = () => (
   <ECS.QueryEntities query={[ExampleTagComponent]}>
     <mesh>
-      <boxBufferGeometry args={[1, 1, 1]} />
+      <boxGeometry args={[1, 1, 1]} />
       <meshNormalMaterial />
     </mesh>
   </ECS.QueryEntities>
@@ -156,7 +156,7 @@ const RenderProps = () => (
     {(entity) => {
       return (
         <mesh>
-          <boxBufferGeometry
+          <boxGeometry
             position={[
               (Math.random() - 0.5) * 2,
               (Math.random() - 0.5) * 2,
@@ -176,7 +176,7 @@ const EnhanceExistingEntities = () => (
       return (
         <ECS.Component type={Object3D}>
           <mesh>
-            <boxBufferGeometry
+            <boxGeometry
               position={[
                 (Math.random() - 0.5) * 2,
                 (Math.random() - 0.5) * 2,

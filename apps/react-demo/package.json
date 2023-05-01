@@ -15,7 +15,7 @@
     "arancini": "^2.2.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "three": "^0.150.1"
+    "three": "^0.152.2"
   },
   "devDependencies": {
     "@types/react": "^18.0.27",
