@@ -89,7 +89,7 @@ __metadata:
     babel-loader: ^8.2.5
     jsdom: ^21.1.1
     leva: ^0.9.34
-    p2-es: ^1.1.6
+    p2-es: ^1.1.8
     prop-types: ^15.8.1
     react: ^18.2.0
     react-dom: ^18.2.0
@@ -11447,12 +11447,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"p2-es@npm:^1.1.6":
-  version: 1.1.6
-  resolution: "p2-es@npm:1.1.6"
+"p2-es@npm:^1.1.8":
+  version: 1.1.8
+  resolution: "p2-es@npm:1.1.8"
   dependencies:
     poly-decomp-es: 0.4.1
-  checksum: 650a28e23dca9108d2416872370d0602579d9676f272ae27c9e7dc5a9dc508ada6086ac5a658df0c20d59e275a48a09b3f4b524152dfde92e5678f46b0d86426
+  checksum: a8ef25a117575df2ee9c2c687ae9ef36b39113bd0a71869d41b68a9c5fac881d00248706b6763d796d9be36e0976be0eaf55bec5cb6493fccb5b8eee09ade998
   languageName: node
   linkType: hard
 
