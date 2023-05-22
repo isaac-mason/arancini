@@ -29,7 +29,7 @@
     "@preconstruct/cli": "^2.5.0",
     "@storybook/addon-essentials": "^7.0.4",
     "@storybook/addon-interactions": "^7.0.4",
-    "@storybook/addon-links": "^7.0.4",
+    "@storybook/addon-links": "^7.0.12",
     "@storybook/blocks": "^7.0.4",
     "@storybook/react": "^7.0.4",
     "@storybook/react-vite": "^7.0.4",
