@@ -48,7 +48,7 @@ export const ExistingWorld = () => {
 
   return (
     <>
-      <Setup cameraPosition={[0, 0, 2]}>
+      <Setup cameraPosition={[0, 0, 20]}>
         <R3FStepper />
 
         <ECS.Entity />

@@ -107,7 +107,7 @@ const SelectableBox = (props: JSX.IntrinsicElements['mesh']) => {
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
       >
-        <boxBufferGeometry args={[1, 1, 1]} />
+        <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial color={color} />
       </mesh>
     </ECS.Component>
