@@ -30,7 +30,7 @@
     "@babel/preset-env": "^7.21.4",
     "@babel/preset-react": "^7.18.6",
     "@babel/preset-typescript": "^7.21.4",
-    "@mdx-js/react": "^1.6.22",
+    "@mdx-js/react": "^2.3.0",
     "@preconstruct/cli": "^2.5.0",
     "@react-three/drei": "^9.68.6",
     "@react-three/fiber": "^8.13.0",
