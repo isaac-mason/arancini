@@ -11,6 +11,7 @@ module.exports = {
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:storybook/recommended',
+    'plugin:storybook/recommended',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -24,7 +25,9 @@ module.exports = {
   rules: {
     'import/no-extraneous-dependencies': [
       'off',
-      { devDependencies: ['**/*.spec.ts', '**/*.js', '**/*.config.js'] },
+      {
+        devDependencies: ['**/*.spec.ts', '**/*.js', '**/*.config.js'],
+      },
     ],
     '@typescript-eslint/no-non-null-assertion': 'off',
     'import/prefer-default-export': 'off',
