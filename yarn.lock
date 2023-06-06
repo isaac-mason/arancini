@@ -5561,7 +5561,7 @@ __metadata:
     eslint-plugin-import: ^2.24.2
     eslint-plugin-prettier: ^4.0.0
     eslint-plugin-simple-import-sort: ^7.0.0
-    eslint-plugin-storybook: ^0.5.1
+    eslint-plugin-storybook: ^0.6.12
     eslint-plugin-typescript-enum: ^2.1.0
     prettier: ^2.3.2
     typescript: ^5.0.4
@@ -7698,19 +7698,6 @@ __metadata:
   peerDependencies:
     eslint: ">=5.0.0"
   checksum: 6aacb7179c213cd2081950630368d1f3b1dcb4f5674d8b989fe7839e7b317ee521d74761676e8b1a7cab49f20405dbcc9aac05358ae804e6bcba6cbf1daccb3d
-  languageName: node
-  linkType: hard
-
-"eslint-plugin-storybook@npm:^0.5.1":
-  version: 0.5.13
-  resolution: "eslint-plugin-storybook@npm:0.5.13"
-  dependencies:
-    "@storybook/csf": ^0.0.1
-    "@typescript-eslint/experimental-utils": ^5.3.0
-    requireindex: ^1.1.0
-  peerDependencies:
-    eslint: ">=6"
-  checksum: 78a74daff68394e080aeff52250c5a6a3a6779f2867366c7db93ce36afd6e3113c3190b4a1d68c6a220b2511b3a3747aeab3d43bdce87fc6a63464847b9576fa
   languageName: node
   linkType: hard
 
