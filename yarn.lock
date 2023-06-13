@@ -39,7 +39,7 @@ __metadata:
     "@storybook/react-vite": ^7.0.18
     "@storybook/testing-library": ^0.1.0
     "@typescript-eslint/eslint-plugin": ^5.59.9
-    "@typescript-eslint/parser": ^5.7.0
+    "@typescript-eslint/parser": ^5.59.9
     eslint: ^8.5.0
     eslint-config-airbnb: ^19.0.4
     eslint-config-airbnb-base: ^15.0.0
@@ -5119,20 +5119,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/parser@npm:^5.7.0":
-  version: 5.59.8
-  resolution: "@typescript-eslint/parser@npm:5.59.8"
+"@typescript-eslint/parser@npm:^5.59.9":
+  version: 5.59.9
+  resolution: "@typescript-eslint/parser@npm:5.59.9"
   dependencies:
-    "@typescript-eslint/scope-manager": 5.59.8
-    "@typescript-eslint/types": 5.59.8
-    "@typescript-eslint/typescript-estree": 5.59.8
+    "@typescript-eslint/scope-manager": 5.59.9
+    "@typescript-eslint/types": 5.59.9
+    "@typescript-eslint/typescript-estree": 5.59.9
     debug: ^4.3.4
   peerDependencies:
     eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: bac9f09d8552086ceb882a7b87ce4d98dfaa41579249216c75d97e3fc07af33cddc4cbbd07a127a5823c826a258882643aaf658bec19cb2a434002b55c5f0d12
+  checksum: 69b07d0a5bc6e1d24d23916c057ea9f2f53a0e7fb6dabadff92987c299640edee2c013fb93269322c7124e87b5c515529001397eae33006dfb40e1dcdf1902d7
   languageName: node
   linkType: hard
 
@@ -5614,7 +5614,7 @@ __metadata:
     "@babel/preset-typescript": ^7.21.4
     "@preconstruct/cli": ^2.5.0
     "@typescript-eslint/eslint-plugin": ^5.59.9
-    "@typescript-eslint/parser": ^5.7.0
+    "@typescript-eslint/parser": ^5.59.9
     eslint: ^8.5.0
     eslint-config-airbnb: ^19.0.4
     eslint-config-airbnb-base: ^15.0.0
