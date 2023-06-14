@@ -1,5 +1,19 @@
 # arancini
 
+## 2.3.0
+
+### Minor Changes
+
+- 2051329: feat: retain registered systems on destroying a world
+
+### Patch Changes
+
+- 2051329: fix: don't remove the default space from the world when destroying it
+- Updated dependencies [2051329]
+- Updated dependencies [2051329]
+  - @arancini/core@2.3.0
+  - @arancini/react@2.3.0
+
 ## 2.2.2
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @arancini/react
 
+## 2.3.0
+
+### Patch Changes
+
+- Updated dependencies [2051329]
+- Updated dependencies [2051329]
+  - @arancini/core@2.3.0
+
 ## 2.2.2
 
 ### Patch Changes
