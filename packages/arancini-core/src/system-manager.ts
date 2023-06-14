@@ -101,7 +101,6 @@ export class SystemManager {
   destroy(): void {
     for (const system of this.systems.values()) {
       system.onDestroy()
-      this.systems.delete(system.__internal.class)
     }
   }
 

@@ -85,6 +85,7 @@ export class World {
     this.spaceManager = new SpaceManager(this)
     this.queryManager = new QueryManager(this)
     this.systemManager = new SystemManager(this)
+
     this.defaultSpace = this.create.space({ id: WORLD_DEFAULT_SPACE_ID })
   }
 

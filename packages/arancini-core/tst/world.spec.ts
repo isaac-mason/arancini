@@ -48,18 +48,11 @@ describe('World', () => {
     expect(world.getSpace('SpaceName')).toBe(space)
   })
 
-  it('removes all Systems and Spaces on destroying a World', () => {
+  it('removes all spaces on destroying a world', () => {
     world.create.space()
-
-    class TestSystem extends System {}
-    world.registerSystem(TestSystem)
-
     expect(world.spaceManager.spaces.size).toBe(2)
-    expect(world.systemManager.systems.size).toBe(1)
 
     world.destroy()
-
-    expect(world.spaceManager.spaces.size).toBe(0)
-    expect(world.systemManager.systems.size).toBe(0)
+    expect(world.spaceManager.spaces.size).toBe(1)
   })
 })

@@ -90,11 +90,15 @@ export class SpaceManager {
   }
 
   /**
-   * Destroys a space
+   * Destroys a space.
+   * Destroys all entities in the space, and if the space is not the worlds default space it will be removed from the space manager.
    * @param space the space to destroy
    */
   destroySpace(space: Space): void {
-    this.spaces.delete(space.id)
+    if (space !== this.world.defaultSpace) {
+      this.spaces.delete(space.id)
+    }
+
     for (const entity of space.entities.values()) {
       this.destroyEntity(entity, space)
     }
