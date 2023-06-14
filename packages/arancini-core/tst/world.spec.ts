@@ -48,7 +48,7 @@ describe('World', () => {
     expect(world.getSpace('SpaceName')).toBe(space)
   })
 
-  it('removes all Spaces on destroying a World', () => {
+  it('removes all spaces on destroying a world', () => {
     world.create.space()
     expect(world.spaceManager.spaces.size).toBe(2)
 
