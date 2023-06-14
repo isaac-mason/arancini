@@ -1,5 +1,15 @@
 # @arancini/core
 
+## 2.3.0
+
+### Minor Changes
+
+- 2051329: feat: retain registered systems on destroying a world
+
+### Patch Changes
+
+- 2051329: fix: don't remove the default space from the world when destroying it
+
 ## 2.2.2
 
 ### Patch Changes

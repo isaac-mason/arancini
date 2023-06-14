@@ -9,7 +9,7 @@
   "packageManager": "yarn@3.2.1",
   "author": "Isaac Mason <isaac@isaacmason.com>",
   "license": "MIT",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "homepage": "https://github.com/isaac-mason/arancini",
   "bugs": {
     "url": "https://github.com/isaac-mason/arancini/issues"
@@ -22,8 +22,8 @@
     "build-storybook": "build-storybook"
   },
   "dependencies": {
-    "@arancini/core": "2.2.2",
-    "@arancini/react": "2.2.2"
+    "@arancini/core": "2.3.0",
+    "@arancini/react": "2.3.0"
   },
   "peerDependencies": {
     "react": "^18.0.0",
