@@ -45,7 +45,7 @@
     "@testing-library/react": "^14.0.0",
     "@types/react": "^18.0.14",
     "@types/react-dom": "^18.0.5",
-    "@types/three": "^0.152.0",
+    "@types/three": "^0.152.1",
     "babel-loader": "^8.2.5",
     "eslint-plugin-storybook": "^0.6.12",
     "jsdom": "^21.1.1",
