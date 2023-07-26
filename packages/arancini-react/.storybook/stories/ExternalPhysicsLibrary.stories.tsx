@@ -2,7 +2,7 @@ import * as A from '@arancini/core'
 import { createECS } from '@arancini/react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as P2 from 'p2-es'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Repeat } from 'timeline-composer'
 
 const boxMaterial = new P2.Material()
@@ -30,8 +30,8 @@ class Object3DComponent extends A.Component {
 class RigidBodyComponent extends A.Component {
   body!: P2.Body
 
-  construct(body: () => P2.Body) {
-    this.body = body()
+  construct(body: P2.Body) {
+    this.body = body
   }
 }
 
@@ -88,25 +88,26 @@ world.init()
 const ECS = createECS(world)
 
 const Queries = {
-  TO_RENDER: ECS.world.create.query([RigidBodyComponent]),
+  TO_RENDER: ECS.world.query([RigidBodyComponent]),
 }
 
-const Plane = () => (
-  <ECS.Entity>
-    <ECS.Component
-      type={RigidBodyComponent}
-      args={[
-        () => {
-          const plane = new P2.Plane({ material: groundMaterial })
-          const body = new P2.Body()
-          body.position = [0, -2]
-          body.addShape(plane)
-          return body
-        },
-      ]}
-    />
-  </ECS.Entity>
-)
+const Plane = () => {
+  const planeBody = useMemo(() => {
+    const body = new P2.Body({
+      position: [0, -2],
+    })
+
+    body.addShape(new P2.Plane({ material: groundMaterial }))
+
+    return body
+  }, [])
+
+  return (
+    <ECS.Entity>
+      <ECS.Component type={RigidBodyComponent} args={[planeBody]} />
+    </ECS.Entity>
+  )
+}
 
 type BoxProps = {
   position: [number, number]
@@ -114,26 +115,27 @@ type BoxProps = {
   height: number
 }
 
-const Box = ({ position, width, height }: BoxProps) => (
-  <ECS.Entity>
-    <ECS.Component
-      type={RigidBodyComponent}
-      args={[
-        () => {
-          const box = new P2.Box({
-            width,
-            height,
-            material: boxMaterial,
-          })
-          const body = new P2.Body({ mass: 1 })
-          body.position = [...position]
-          body.addShape(box)
-          return body
-        },
-      ]}
-    />
-  </ECS.Entity>
-)
+const Box = ({ position, width, height }: BoxProps) => {
+  const boxBody = useMemo(() => {
+    const body = new P2.Body({ mass: 1, position: [...position] })
+
+    body.addShape(
+      new P2.Box({
+        width,
+        height,
+        material: boxMaterial,
+      })
+    )
+
+    return body
+  }, [])
+
+  return (
+    <ECS.Entity>
+      <ECS.Component type={RigidBodyComponent} args={[boxBody]} />
+    </ECS.Entity>
+  )
+}
 
 const App = () => {
   useFrame((_, delta) => {

@@ -3,51 +3,19 @@ import React, { useEffect } from 'react'
 
 import './find-the-bomb.css'
 
-class GameState extends Component {
-  clicks!: number
-  foundBomb!: boolean
+const GameState = Component.data<{ clicks: number; foundBomb: boolean }>('GameState')
 
-  construct() {
-    this.clicks = 0
-    this.foundBomb = false
-  }
-}
+const Emoji = Component.data<{
+  revealed: boolean
+  dirty: boolean
+  domElement: HTMLElement
+}>('Emoji')
 
-class Emoji extends Component {
-  domElement!: HTMLElement
-  revealed!: boolean
-  dirty!: boolean
+const Position = Component.data<{ x: number; y: number }>('Position')
 
-  construct() {
-    this.domElement = document.createElement('div')
-    this.revealed = false
-    this.dirty = false
-  }
+const DistanceToTarget = Component.data<{ distance: number }>('DistanceToTarget')
 
-  onDestroy(): void {
-    this.domElement.remove()
-  }
-}
-
-class Position extends Component {
-  x!: number
-  y!: number
-
-  construct(x: number, y: number) {
-    this.x = x
-    this.y = y
-  }
-}
-
-class DistanceToTarget extends Component {
-  value!: number
-
-  construct(value: number) {
-    this.value = value
-  }
-}
-
-class Target extends Component {}
+const Target = Component.tag('Target')
 
 class EmojiRendererSystem extends System {
   queries = {
@@ -64,13 +32,23 @@ class EmojiRendererSystem extends System {
     })
   }
 
+  onDestroy(): void {
+    for (const entity of this.queries.toRender) {
+      const emoji = entity.get(Emoji)
+      emoji.domElement.remove()
+    }
+  }
+
   onUpdate() {
     for (const entity of this.queries.toRender) {
       const emoji = entity.get(Emoji)
       if (!emoji.dirty) continue
 
       const pos = entity.get(Position)
-      const { value: distance } = entity.get(DistanceToTarget)
+      const distanceToTarget = entity.find(DistanceToTarget)
+      if (!distanceToTarget) continue
+
+      const { distance } = distanceToTarget
 
       if (emoji.revealed) {
         if (distance > 8) {
@@ -128,7 +106,7 @@ class DistanceSystem extends System {
         Math.pow(targetPosition.x - x, 2) + Math.pow(targetPosition.y - y, 2)
       )
 
-      entity.add(DistanceToTarget, distance)
+      entity.add(DistanceToTarget, { distance })
     })
   }
 }
@@ -137,32 +115,26 @@ class InteractionSystem extends System {
   queries = {
     emojis: this.query([Emoji]),
     target: this.query([Target, Position]),
-    gameState: this.query([GameState]),
   }
 
-  get gameState(): Entity | undefined {
-    return this.queries.gameState.first
-  }
+  gameState = this.singleton(GameState, { required: true })
 
   nRevealedDomElement = document.createElement('p')
 
   onInit(): void {
     document.querySelector('#score')!.appendChild(this.nRevealedDomElement)
 
-    this.queries.gameState.onEntityAdded.add(() => {
-      this.nRevealedDomElement.innerText = 'Click on an emoji to start'
-    })
+    this.nRevealedDomElement.innerText = 'Click on an emoji to start'
 
     this.queries.emojis.onEntityAdded.add((entity) => {
       const emoji = entity.get(Emoji)
 
       emoji.domElement.addEventListener('click', () => {
-        const gameState = this.gameState?.get(GameState)
-        if (!gameState || gameState.foundBomb) return
+        if (!this.gameState || this.gameState.foundBomb) return
 
         if (!emoji.revealed) {
           emoji.revealed = true
-          gameState.clicks += 1
+          this.gameState.clicks += 1
 
           const target = this.queries.target.first!
           const targetPosition = target.get(Position)
@@ -173,14 +145,14 @@ class InteractionSystem extends System {
             targetPosition.x === clickedPosition.x &&
             targetPosition.y === clickedPosition.y
           ) {
-            gameState.foundBomb = true
+            this.gameState.foundBomb = true
             this.nRevealedDomElement.innerText =
               'You found the bomb in ' +
-              gameState.clicks.toString() +
+              this.gameState.clicks.toString() +
               ' clicks!'
           } else {
             this.nRevealedDomElement.innerText = InteractionSystem.scoreText(
-              gameState.clicks
+              this.gameState.clicks
             )
           }
 
@@ -215,10 +187,7 @@ export const FindTheBomb = () => {
       Math.floor(Math.random() * (max - min + 1) + min)
 
     const setupGame = () => {
-      const space = world.create.space()
-
-      const gameState = space.create.entity()
-      gameState.add(GameState)
+      world.create((e) => e.add(GameState, { clicks: 0, foundBomb: false }))
 
       const rows = 11
       const rowsLower = -Math.floor(rows / 2)
@@ -228,37 +197,41 @@ export const FindTheBomb = () => {
       const colsLower = -Math.floor(cols / 2)
       const colsUpper = Math.ceil(cols / 2)
 
-      const target = space.create.entity()
-      const randomTargetPosition = (): [number, number] => [
-        randomBetween(rowsLower + 2, rowsUpper - 2),
-        randomBetween(colsLower + 2, colsUpper - 2),
-      ]
-      const targetPosition = randomTargetPosition()
-      target.add(Position, ...targetPosition)
-      target.add(Target)
+      world.create((e) => {
+        e.add(Position, {
+          x: randomBetween(rowsLower + 2, rowsUpper - 2),
+          y: randomBetween(colsLower + 2, colsUpper - 2),
+        })
+        e.add(Target)
+      })
 
       for (let i = rowsLower; i < rowsUpper; i++) {
         for (let j = colsLower; j < colsUpper; j++) {
-          const entity = space.create.entity()
-          entity.add(Position, j, i)
-          entity.add(Emoji)
+          world.create((e) => {
+            e.add(Position, { x: j, y: i })
+            e.add(Emoji, {
+              revealed: false,
+              dirty: false,
+              domElement: document.createElement('div'),
+            })
+          })
         }
       }
 
       return () => {
-        space.destroy()
+        world.destroy()
       }
     }
 
-    let tearDownGame = setupGame()
+    let destroyGame = setupGame()
 
     document.querySelector('#reset')!.addEventListener('click', () => {
-      tearDownGame()
-      tearDownGame = setupGame()
+      destroyGame()
+      destroyGame = setupGame()
     })
 
     window.addEventListener('resize', () => {
-      world.query([Emoji]).forEach((entity) => {
+      world.find([Emoji]).forEach((entity) => {
         entity.get(Emoji).dirty = true
       })
     })

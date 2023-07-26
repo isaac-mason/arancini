@@ -1,6 +1,5 @@
 import type { ComponentClass } from './component'
 import { Component } from './component'
-import type { Space } from './space'
 import { uniqueId } from './utils'
 import { BitSet } from './utils/bit-set'
 import type { World } from './world'
@@ -22,9 +21,8 @@ import type { World } from './world'
  * const world = new World()
  * world.registerComponent(ExampleComponent)
  *
- * // create a space and an entity
- * const space = world.create.space()
- * const entity = world.create.entity()
+ * // create an entitty
+ * const entity = world.create()
  *
  * // try retrieving a component that isn't in the entity
  * entity.find(ExampleComponent) // returns `undefined`
@@ -56,11 +54,6 @@ export class Entity {
   initialised = false
 
   /**
-   * The space the entity is in
-   */
-  space!: Space
-
-  /**
    * The World the entity is in
    */
   world!: World
@@ -78,30 +71,75 @@ export class Entity {
   _components: { [index: string]: Component } = {}
 
   /**
+   * Whether to update queries when components are added or removed
+   * Used by the `bulk` method to control when queries are updated
+   * @private
+   */
+  _updateQueries = true
+
+  /**
    * Adds a component to the entity
    * @param clazz the component to add
    */
-  add<T extends Component>(
-    clazz: ComponentClass<T>,
-    ...args: Parameters<T['construct']>
-  ): T {
-    if (this._components[clazz.componentIndex]) {
-      throw new Error(
-        `Cannot add component ${clazz.name}, entity with id ${this.id} already has this component`
-      )
-    }
-
+  add<C extends Component>(
+    clazz: ComponentClass<C>,
+    ...args: Parameters<C['construct']>
+  ): C {
     // add the component to this entity
-    const component = this.world.spaceManager.addComponentToEntity(
+    const component = this.world.entityManager.addComponentToEntity(
       this,
       clazz,
       args
     )
 
-    // inform the query manager that the component has been initialised
-    this.world.queryManager.onEntityComponentChange(this)
+    if (this._updateQueries) {
+      this.world.queryManager.onEntityComponentChange(this)
+    }
 
     return component
+  }
+
+  /**
+   * Removes a component from the entity and destroys it
+   * The value can either be a Component constructor, or the component instance itself
+   * @param value the component to remove and destroy
+   */
+  remove(component: Component | ComponentClass): Entity {
+    this.world.entityManager.removeComponentFromEntity(this, component, true)
+
+    if (this._updateQueries) {
+      this.world.queryManager.onEntityComponentChange(this)
+    }
+
+    return this
+  }
+
+  /**
+   * Utility method for adding and removing components in bulk.
+   *
+   * Wrap multiple `add` and `remove` calls in `entity.bulk(() => { ... })` to prevent queries from updating until all components have been added or removed.
+   *
+   * @param updateFn callback to update the Entity
+   *
+   * @example
+   * ```ts
+   * world.create().bulk((entity) => {
+   *   entity.add(TestComponentOne)
+   *   entity.add(TestComponentTwo)
+   *   entity.remove(TestComponentThree)
+   * })
+   * ```
+   */
+  bulk(updateFn: (entity: Entity) => void): this {
+    this._updateQueries = false
+
+    updateFn(this)
+
+    this._updateQueries = true
+
+    this.world.queryManager.onEntityComponentChange(this)
+
+    return this
   }
 
   /**
@@ -113,11 +151,15 @@ export class Entity {
     const component: Component | undefined =
       this._components[value.componentIndex]
 
-    if (component !== undefined) {
+    if (component) {
       return component as T
     }
 
-    throw new Error(`Component ${value}} not in entity ${this.id}`)
+    throw new Error(
+      `Component ${value}} with componentIndex ${
+        value.componentIndex
+      } not in entity ${this.id} - ${Object.keys(this._components)}`
+    )
   }
 
   /**
@@ -143,41 +185,15 @@ export class Entity {
    * @returns whether the entity contains the given component
    */
   has(value: ComponentClass): boolean {
-    return this._components[value.componentIndex] !== undefined
+    return !!this._components[value.componentIndex]
   }
 
   /**
-   * Removes a component from the entity and destroys it
-   * The value can either be a Component constructor, or the component instance itself
-   * @param value the component to remove and destroy
-   */
-  remove(value: Component | ComponentClass): Entity {
-    let component: Component | undefined
-
-    if (value instanceof Component) {
-      if (!this._components[value._class.componentIndex]) {
-        throw new Error('Component instance does not exist in Entity')
-      }
-      component = value
-    } else {
-      component = this.find(value)
-      if (component === undefined) {
-        throw new Error('Component does not exist in Entity')
-      }
-    }
-
-    this.world.spaceManager.removeComponentFromEntity(this, component, true)
-    this.world.queryManager.onEntityComponentChange(this)
-
-    return this
-  }
-
-  /**
-   * Destroy the Entity's components and remove the Entity from the space
+   * Destroy the Entity's components and remove the Entity from the world
    */
   destroy(): void {
-    if (!this.space || !this.world) return
+    if (!this.world) return
 
-    this.space.world.spaceManager.destroyEntity(this, this.space)
+    this.world.entityManager.destroyEntity(this)
   }
 }

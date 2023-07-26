@@ -72,7 +72,7 @@ export class QueryManager {
 
       const matches = this.getQueryResults(dedupedQuery.bitSets)
 
-      for (const entity of matches.values()) {
+      for (const entity of matches) {
         dedupedQuery.entities.push(entity)
         dedupedQuery.entitySet.add(entity)
       }
@@ -152,7 +152,7 @@ export class QueryManager {
    * If `options.useExisting` is true, results are taken from an existing query if present.
    * @param queryDescription the query description
    */
-  query(queryDescription: QueryDescription): Entity[] {
+  find(queryDescription: QueryDescription): Entity[] {
     const key = Query.getDescriptionDedupeString(queryDescription)
 
     const query = this.dedupedQueries.get(key)
@@ -214,11 +214,9 @@ export class QueryManager {
   private getQueryResults(queryBitSets: QueryBitSets): Entity[] {
     const matches: Entity[] = []
 
-    for (const space of this.world.spaceManager.spaces.values()) {
-      for (const entity of space.entities.values()) {
-        if (this.matchesQueryConditions(queryBitSets, entity)) {
-          matches.push(entity)
-        }
+    for (const entity of this.world.entities.values()) {
+      if (this.matchesQueryConditions(queryBitSets, entity)) {
+        matches.push(entity)
       }
     }
 

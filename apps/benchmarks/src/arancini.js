@@ -45,12 +45,11 @@ export const arancini = {
 
     this.world.registerSystem(MovementSystem)
 
-    this.space = this.world.create.space()
     this.world.init()
     updateCount = 0
   },
   createEntity() {
-    return this.space.create.entity()
+    return this.world.create()
   },
   addPositionComponent(entity) {
     entity.add(Position)

@@ -20,7 +20,12 @@ module.exports = {
     sourceType: 'module',
   },
   plugins: ['@typescript-eslint'],
-  rules: {},
+  rules: {
+    'import/no-extraneous-dependencies': [
+      'off',
+      { devDependencies: ['**/*.spec.ts', '**/*.js', '**/*.config.js'] },
+    ],
+  },
   settings: {
     'import/resolver': {
       typescript: {},

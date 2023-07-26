@@ -1,21 +1,25 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "ES2022",
     "useDefineForClassFields": true,
-    "module": "ESNext",
-    "lib": ["ESNext", "DOM"],
+    "module": "ES2022",
+    "lib": ["ES2022", "DOM"],
     "moduleResolution": "Node",
     "strict": true,
     "sourceMap": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
-    "noEmit": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "skipLibCheck": true,
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "rootDir": "./src",
+    "allowSyntheticDefaultImports": true,
+    "noEmit": false,
+    "declaration": true,
+    "outDir": "./dist"
   },
-  "include": ["src"]
+  "files": ["./src/index.ts"]
 }

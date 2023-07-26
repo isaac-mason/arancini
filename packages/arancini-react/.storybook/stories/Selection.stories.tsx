@@ -12,7 +12,7 @@ export default {
 
 /* components */
 
-class SelectedComponent extends A.Component {}
+const SelectedComponent = A.Component.tag('Selected')
 
 class CameraComponent extends A.Component {
   camera!: THREE.PerspectiveCamera
@@ -35,17 +35,12 @@ class Object3DComponent extends A.Component {
 class CameraSystem extends A.System {
   selectedQuery = this.query([SelectedComponent, Object3DComponent])
 
-  cameraQuery = this.query([CameraComponent])
-
-  get camera(): THREE.PerspectiveCamera | undefined {
-    return this.cameraQuery.first?.get(CameraComponent).camera
-  }
+  cameraComponent = this.singleton(CameraComponent, { required: true })!
 
   private lerpedLookAt = new THREE.Vector3(0, 0, 0)
 
   onUpdate(delta: number) {
-    const camera = this.camera
-    if (!camera) return
+    const { camera } = this.cameraComponent
 
     const selected = this.selectedQuery.entities.map(
       (entity) => entity.get(Object3DComponent).object3D
@@ -92,7 +87,7 @@ const SelectableBox = (props: JSX.IntrinsicElements['mesh']) => {
   }
 
   let color: string
-  
+
   if (hovered) {
     color = selected ? '#FFD580' : '#999'
   } else {
@@ -151,9 +146,9 @@ const App = () => {
       <Bounds fit clip observe>
         <SelectableBoxes />
       </Bounds>
-      
+
       <Camera />
-      
+
       <ambientLight intensity={0.5} />
       <pointLight position={[5, 10, 5]} />
     </>

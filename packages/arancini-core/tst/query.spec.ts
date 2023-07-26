@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { Entity, QueryDescription, Space } from '../src'
+import type { Entity, QueryDescription } from '../src'
 import { Component, Query, System, World } from '../src'
 
 class TestComponentOne extends Component {}
@@ -11,13 +11,10 @@ class TestComponentSix extends Component {}
 
 describe('Query', () => {
   let world: World
-  let space: Space
 
   beforeEach(() => {
     world = new World()
     world.init()
-
-    space = world.create.space()
 
     world.registerComponent(TestComponentOne)
     world.registerComponent(TestComponentTwo)
@@ -29,7 +26,7 @@ describe('Query', () => {
 
   it('should throw an error when attempting to create a query with no conditions', () => {
     expect(() => {
-      world.create.query({})
+      world.query({})
     }).toThrow()
   })
 
@@ -40,11 +37,11 @@ describe('Query', () => {
     }
 
     // create entity matching query
-    const entity = space.create.entity()
+    const entity = world.create()
     entity.add(TestComponentOne)
 
     // create query
-    const query = world.create.query(description)
+    const query = world.query(description)
 
     // query is populated with existing entity
     expect(query).toBeTruthy()
@@ -59,8 +56,8 @@ describe('Query', () => {
 
     const descriptionTwo: QueryDescription = [TestComponentOne]
 
-    const queryOne = world.create.query(descriptionOne)
-    const queryTwo = world.create.query(descriptionTwo)
+    const queryOne = world.query(descriptionOne)
+    const queryTwo = world.query(descriptionTwo)
 
     expect(queryOne).toBeTruthy()
     expect(queryTwo).toBeTruthy()
@@ -73,10 +70,10 @@ describe('Query', () => {
     const description: QueryDescription = {
       all: [TestComponentOne],
     }
-    const query = world.create.query(description)
+    const query = world.query(description)
 
     // create entity matching the query
-    const entityOne = space.create.entity()
+    const entityOne = world.create()
     entityOne.add(TestComponentOne)
 
     // entity should be updated
@@ -88,7 +85,7 @@ describe('Query', () => {
     query.destroy()
 
     // creating an entity matching the removed query should not update the query
-    const entityTwo = space.create.entity()
+    const entityTwo = world.create()
     entityTwo.add(TestComponentOne)
     expect(query).toBeTruthy()
     expect(query.entities.length).toBe(1)
@@ -110,13 +107,13 @@ describe('Query', () => {
         all: [TestComponentOne],
       }
 
-      const entityOne = space.create.entity()
+      const entityOne = world.create()
       entityOne.add(TestComponentOne)
 
-      const entityTwo = space.create.entity()
+      const entityTwo = world.create()
       entityTwo.add(TestComponentOne)
 
-      const query = world.create.query(description)
+      const query = world.query(description)
 
       expect(query.first).toBe(entityOne)
 
@@ -134,15 +131,15 @@ describe('Query', () => {
       }
 
       // create an entity matching the query
-      const entityOne = space.create.entity()
+      const entityOne = world.create()
       entityOne.add(TestComponentOne)
 
       // create another entity that matches the query
-      const entityTwo = space.create.entity()
+      const entityTwo = world.create()
       entityTwo.add(TestComponentOne)
 
       // get query results
-      const queryResults = world.query(description)
+      const queryResults = world.find(description)
       expect(queryResults).toBeTruthy()
       expect(queryResults.length).toBe(2)
       expect(queryResults.includes(entityOne)).toBeTruthy()
@@ -154,17 +151,17 @@ describe('Query', () => {
         all: [TestComponentOne],
       }
 
-      const entityOne = space.create.entity()
+      const entityOne = world.create()
       entityOne.add(TestComponentOne)
 
-      const activeQuery = world.create.query(description)
+      const activeQuery = world.query(description)
 
       world.update()
 
-      const entityTwo = space.create.entity()
+      const entityTwo = world.create()
       entityTwo.add(TestComponentOne)
 
-      const onceOffQueryResults = world.query(description)
+      const onceOffQueryResults = world.find(description)
 
       // once-off query results should be the same as the active query results
       expect(onceOffQueryResults).toBeTruthy()
@@ -181,14 +178,14 @@ describe('Query', () => {
       const onRemovedHandlerOne = vi.fn()
       const onRemovedHandlerTwo = vi.fn()
 
-      const query = world.create.query([TestComponentOne])
+      const query = world.query([TestComponentOne])
 
       query.onEntityAdded.add(onAddedHandlerOne)
       query.onEntityRemoved.add(onRemovedHandlerOne)
       query.onEntityAdded.add(onAddedHandlerTwo)
       query.onEntityRemoved.add(onRemovedHandlerTwo)
 
-      const entityOne = world.create.entity()
+      const entityOne = world.create()
       entityOne.add(TestComponentOne)
 
       expect(onAddedHandlerOne.mock.calls.length).toBe(1)
@@ -206,7 +203,7 @@ describe('Query', () => {
       query.onEntityAdded.remove(onAddedHandlerTwo)
       query.onEntityRemoved.remove(onRemovedHandlerTwo)
 
-      const entityTwo = world.create.entity()
+      const entityTwo = world.create()
       entityTwo.add(TestComponentOne)
 
       expect(onAddedHandlerOne.mock.calls.length).toBe(2)
@@ -243,7 +240,7 @@ describe('Query', () => {
       world.registerSystem(TestSystem)
       const system = world.getSystem(TestSystem) as TestSystem
 
-      const entity = space.create.entity()
+      const entity = world.create()
       entity.add(TestComponentOne)
 
       expect(system.testQuery.entities.length).toBe(1)
@@ -292,7 +289,7 @@ describe('Query', () => {
       world.registerSystem(TestSystem)
       const system = world.getSystem(TestSystem) as TestSystem
 
-      const entity = space.create.entity()
+      const entity = world.create()
       entity.add(TestComponentTwo)
 
       expect(system.testQuery.entities.length).toBe(1)
@@ -339,7 +336,7 @@ describe('Query', () => {
       world.registerSystem(TestSystem)
       const system = world.getSystem(TestSystem) as TestSystem
 
-      const entity = space.create.entity()
+      const entity = world.create()
       entity.add(TestComponentOne)
       entity.add(TestComponentTwo)
       entity.add(TestComponentThree)
@@ -388,7 +385,7 @@ describe('Query', () => {
       world.registerSystem(TestSystem)
       const system = world.getSystem(TestSystem) as TestSystem
 
-      const entity = space.create.entity()
+      const entity = world.create()
       entity.add(TestComponentOne)
       entity.add(TestComponentTwo)
       entity.add(TestComponentFour)
@@ -406,16 +403,16 @@ describe('Query', () => {
       const description: QueryDescription = {
         all: [TestComponentOne],
       }
-      const query = world.create.query(description)
+      const query = world.query(description)
 
       expect(query.entities.length).toBe(0)
 
       // create entity that matches query
-      const entityOne = space.create.entity()
+      const entityOne = world.create()
       entityOne.add(TestComponentOne)
 
       // create another entity that matches query
-      const entityTwo = space.create.entity()
+      const entityTwo = world.create()
       entityTwo.add(TestComponentOne)
       entityTwo.add(TestComponentTwo)
 

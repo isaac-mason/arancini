@@ -1,21 +1,32 @@
-import { vi, beforeEach, describe, expect, it } from 'vitest'
-import { Component, Space, World } from '../src'
+import { beforeEach, describe, expect, it, test, vi } from 'vitest'
+import { Component, World } from '../src'
 
 describe('Components', () => {
   let world: World
-  let space: Space
 
   beforeEach(() => {
     world = new World()
-    space = world.create.space()
 
     world.init()
+  })
+
+  describe('object', () => {
+    test('should define a component with the provided type', () => {
+      const TestComponent = Component.data<{ x: number; y: number }>()
+
+      world.registerComponent(TestComponent)
+
+      const entity = world.create()
+      const testComponent = entity.add(TestComponent, { x: 1, y: 2 })
+
+      expect(testComponent.x).toBe(1)
+      expect(testComponent.y).toBe(2)
+    })
   })
 
   describe('lifecycle methods', () => {
     it('will initialise entity components on initialising an entity', () => {
       world = new World()
-      space = world.create.space()
 
       const onInit = vi.fn()
       class TestComponent extends Component {
@@ -26,7 +37,7 @@ describe('Components', () => {
 
       world.registerComponent(TestComponent)
 
-      const entity = space.create.entity()
+      const entity = world.create()
       entity.add(TestComponent)
 
       expect(onInit).toBeCalledTimes(0)
@@ -52,7 +63,7 @@ describe('Components', () => {
 
       world.registerComponent(TestComponentOne)
 
-      const entity = space.create.entity()
+      const entity = world.create()
       entity.add(TestComponentOne)
       expect(world.initialised).toBe(true)
       expect(componentInitJestFn).toHaveBeenCalledTimes(1)
@@ -71,13 +82,13 @@ describe('Components', () => {
     })
 
     it('should throw an error if the component is not in the entity', () => {
-      const entity = space.create.entity()
+      const entity = world.create()
 
       expect(() => entity.get(TestComponentOne)).toThrow()
     })
 
     it('should return the component instance if the component is in the entity', () => {
-      const entity = space.create.entity()
+      const entity = world.create()
 
       entity.add(TestComponentOne)
 
@@ -93,13 +104,13 @@ describe('Components', () => {
     })
 
     it('should return undefined if the component is not in the entity', () => {
-      const entity = space.create.entity()
+      const entity = world.create()
 
       expect(entity.find(TestComponentOne)).toBeUndefined()
     })
 
     it('should return the component instance if the component is in the entity', () => {
-      const entity = space.create.entity()
+      const entity = world.create()
 
       entity.add(TestComponentOne)
 
@@ -117,7 +128,7 @@ describe('Components', () => {
     })
 
     it('should return true if the entity has the given component', () => {
-      const entity = space.create.entity()
+      const entity = world.create()
 
       entity.add(TestComponentOne)
 
@@ -125,7 +136,7 @@ describe('Components', () => {
     })
 
     it('should return false if the entity does not have the given component', () => {
-      const entity = space.create.entity()
+      const entity = world.create()
 
       entity.add(TestComponentOne)
 
@@ -159,7 +170,7 @@ describe('Components', () => {
     })
 
     it('should return an array containing all components in the entity', () => {
-      const entity = space.create.entity()
+      const entity = world.create()
 
       expect(entity.getAll()).toEqual([])
 

@@ -1,4 +1,5 @@
 import { Entity } from '../entity'
+import { uniqueId } from '../utils'
 import { World } from '../world'
 import { ObjectPool } from './object-pool'
 
@@ -59,6 +60,10 @@ export class EntityPool {
    * @param e the entity to recycle
    */
   recycle(e: Entity): void {
+    e.id = uniqueId()
+    e.initialised = false
+    e._componentsBitSet.reset()
+
     this.objectPool.recycle(e)
   }
 

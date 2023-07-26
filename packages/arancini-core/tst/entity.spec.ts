@@ -1,45 +1,52 @@
-import { beforeEach, describe, expect, it } from 'vitest'
-import { Component, Space, World } from '../src'
+import { beforeEach, describe, expect, test } from 'vitest'
+import { Component, World } from '../src'
 
 describe('Entity', () => {
   let world: World
-  let space: Space
 
   beforeEach(() => {
     world = new World()
-    space = world.create.space()
 
     world.init()
   })
 
-  describe('Entity', () => {
-    it('should support creation with or without components', () => {
-      class TestComponentOne extends Component {}
-      world.registerComponent(TestComponentOne)
+  test('creating and destroying', () => {
+    const entity = world.create()
+    const { id } = entity
 
-      const entity = space.create.entity()
+    entity.destroy()
 
-      expect(entity).toBeTruthy()
-      expect(Object.values(entity._components).length).toBe(0)
+    // assert the entity has been reset
+    expect(entity.id).not.toEqual(id)
+    expect(world.entities.has(entity.id)).toBe(false)
+  })
 
-      const otherEntity = world.create.entity([
-        { type: TestComponentOne, args: [2] },
-      ])
+  test('creating with initial components', () => {
+    class TestComponent extends Component {}
 
-      expect(otherEntity).toBeTruthy()
-      expect(Object.values(otherEntity._components).length).toBe(1)
-      expect(otherEntity.has(TestComponentOne)).toBe(true)
+    world.registerComponent(TestComponent)
+
+    const query = world.query([TestComponent])
+
+    let added = 0
+    let removed = 0
+
+    query.onEntityAdded.add(() => {
+      added++
     })
 
-    it('can be destroyed or removed from a space', () => {
-      const entity = space.create.entity()
-
-      entity.destroy()
-
-      // assert the entity has been reset
-      expect(entity.space).toBeFalsy()
-      expect(space.entities.has(entity.id)).toBe(false)
+    query.onEntityRemoved.add(() => {
+      removed++
     })
+
+    world.create((e) => {
+      e.add(TestComponent)
+      e.remove(TestComponent)
+      e.add(TestComponent)
+    })
+
+    expect(added).toBe(1)
+    expect(removed).toBe(0)
   })
 
   describe('adding and removing components', () => {
@@ -59,10 +66,10 @@ describe('Entity', () => {
       world.registerComponent(TestComponentWithConstructParams)
     })
 
-    it('components can be added and removed from entities', () => {
+    test('components can be added and removed from entities', () => {
       // create two entities
-      const entityOne = space.create.entity()
-      const entityTwo = space.create.entity()
+      const entityOne = world.create()
+      const entityTwo = world.create()
 
       // add TestComponentOne to entities
       const testComponentOne = entityOne.add(TestComponentOne)
@@ -91,8 +98,33 @@ describe('Entity', () => {
       expect(entityTwo.has(TestComponentTwo)).toBeFalsy()
     })
 
-    it('should throw if adding a component to an entity that already has the component', () => {
-      const entity = space.create.entity()
+    test('components can be added and removed in bulk', () => {
+      const entity = world.create()
+
+      entity.add(TestComponentOne)
+
+      expect(entity.has(TestComponentOne)).toBeTruthy()
+
+      entity.bulk(() => {
+        entity.remove(TestComponentOne)
+        entity.add(TestComponentTwo)
+        entity.add(TestComponentWithConstructParams, 1, 2)
+      })
+
+      expect(entity.has(TestComponentOne)).toBeFalsy()
+
+      expect(entity.has(TestComponentTwo)).toBeTruthy()
+
+      const testComponentWithConstructParams = entity.get(
+        TestComponentWithConstructParams
+      )
+      expect(testComponentWithConstructParams).toBeTruthy()
+      expect(testComponentWithConstructParams.position.x).toBe(1)
+      expect(testComponentWithConstructParams.position.y).toBe(2)
+    })
+
+    test('should throw if adding a component to an entity that already has the component', () => {
+      const entity = world.create()
       entity.add(TestComponentOne)
 
       expect(() => {
@@ -100,8 +132,8 @@ describe('Entity', () => {
       }).toThrowError()
     })
 
-    it('on re-adding a component to an entity, it will be newly constructed properly', () => {
-      const entity = space.create.entity()
+    test('on re-adding a component to an entity, it will be newly constructed properly', () => {
+      const entity = world.create()
       entity.add(TestComponentWithConstructParams, 1, 2)
       expect(entity.has(TestComponentWithConstructParams)).toBe(true)
 
@@ -118,12 +150,12 @@ describe('Entity', () => {
       expect(componentTwo.position.y).toBe(4)
     })
 
-    it('should throw an error if the component does not exist in the entity', () => {
-      const entity = space.create.entity()
+    test('should throw an error if the component does not exist in the entity', () => {
+      const entity = world.create()
 
       expect(() => entity.remove(TestComponentOne)).toThrowError()
 
-      const otherEntity = space.create.entity()
+      const otherEntity = world.create()
       const component = otherEntity.add(TestComponentOne)
 
       expect(() => entity.remove(component)).toThrowError()

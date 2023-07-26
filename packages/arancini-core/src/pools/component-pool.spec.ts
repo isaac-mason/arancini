@@ -14,7 +14,7 @@ describe('ComponentPool', () => {
     world = new World()
     world.registerComponent(ExampleComponentOne)
     world.registerComponent(ExampleComponentTwo)
-    pool = world.spaceManager.componentPool
+    pool = world.entityManager.componentPool
   })
 
   it('should create a new pool on retrieving a component for the first time', () => {

@@ -1,26 +1,12 @@
 import { Component, System, World } from '@arancini/core'
 import React, { useEffect } from 'react'
 
-class Position extends Component {
-  // * note the not null `!:` syntax! *
-  // It is recommended that components use this to indicate those properties
-  // will be be initialised late, but at time of construction will be defined.
-  x!: number
-  y!: number
+const Position = Component.data<{ x: number; y: number }>('Position')
 
-  // * component objects will be reused! *
-  // Here we add a method `construct`, which behaves just like a `constructor`.
-  // This method will be called every time a new component is being created or re-used
-  construct(x: number, y: number) {
-    this.x = x
-    this.y = y
-  }
-}
+const Red = Component.tag('Red')
+const Blue = Component.tag('Blue')
 
-class Red extends Component {}
-class Blue extends Component {}
-
-export class CanvasContext extends Component {
+class CanvasContext extends Component {
   ctx!: CanvasRenderingContext2D
   width!: number
   height!: number
@@ -146,19 +132,18 @@ export const RandomColorChangingWalkers = () => {
     // how many entities to create
     const n = 100
 
-    // create entities in the World's default space
+    // create entities in the World's default
     for (let i = 0; i < n; i++) {
-      const entity = world.create.entity()
-      entity.add(
-        Position,
-        (Math.random() - 0.5) * 300,
-        (Math.random() - 0.5) * 300
-      )
+      const entity = world.create()
+      entity.add(Position, {
+        x: (Math.random() - 0.5) * 300,
+        y: (Math.random() - 0.5) * 300,
+      })
       entity.add(i % 2 === 0 ? Red : Blue)
     }
 
     // create an entity with a component containing the canvas context
-    const context = world.create.entity()
+    const context = world.create()
 
     const canvas = document.querySelector(
       '#example-canvas'

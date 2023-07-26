@@ -25,9 +25,7 @@ module.exports = {
   rules: {
     'import/no-extraneous-dependencies': [
       'off',
-      {
-        devDependencies: ['**/*.spec.ts', '**/*.js', '**/*.config.js'],
-      },
+      { devDependencies: ['**/*.spec.ts', '**/*.js', '**/*.config.js'] },
     ],
     '@typescript-eslint/no-non-null-assertion': 'off',
     'import/prefer-default-export': 'off',

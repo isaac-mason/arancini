@@ -1,5 +1,5 @@
 import * as A from '@arancini/core'
-import { Text } from '@react-three/drei'
+import { Html, Text } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import React, { useEffect, useState } from 'react'
 import { Lifetime, Repeat } from 'timeline-composer'
@@ -27,18 +27,9 @@ export const ExistingWorld = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const nSpaces = world.spaceManager.spaces.size
+      const n = world.entities.size
 
-      let nEntities = 0
-      for (const [_, space] of world.spaceManager.spaces) {
-        nEntities += space.entities.size
-      }
-
-      setWorldStats(
-        `world with id ${world.id} has ${nSpaces} space${
-          nSpaces !== 1 ? 's' : ''
-        } and ${nEntities} ${nEntities === 1 ? 'entity' : 'entities'}`
-      )
+      setWorldStats(`${n} ${n === 1 ? 'entity' : 'entities'}`)
     }, 1 / 10)
 
     return () => {
@@ -55,13 +46,13 @@ export const ExistingWorld = () => {
 
         <Repeat seconds={4}>
           <Lifetime seconds={2}>
-            <ECS.Space>
-              <ECS.Entity />
-            </ECS.Space>
+            <ECS.Entity />
           </Lifetime>
         </Repeat>
 
-        <Text color="white">{worldStats}</Text>
+        <Html style={{ color: 'white' }} transform scale={3}>
+          {worldStats}
+        </Html>
       </Setup>
     </>
   )

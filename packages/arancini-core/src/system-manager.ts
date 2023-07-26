@@ -43,11 +43,6 @@ export class SystemManager {
   private systemCounter = 0
 
   /**
-   * Whether the system manager has been initialised
-   */
-  private initialised = false
-
-  /**
    * The World the system manager belongs in
    */
   private world: World
@@ -64,8 +59,6 @@ export class SystemManager {
    * Initialises the system manager
    */
   init(): void {
-    this.initialised = true
-
     for (const system of this.systems.values()) {
       system.onInit()
     }
@@ -79,7 +72,7 @@ export class SystemManager {
    * @param time the current time in seconds
    */
   update(delta: number, time: number): void {
-    for (const system of this.sortedSystems.values()) {
+    for (const system of this.sortedSystems) {
       if (!system.enabled) {
         continue
       }
@@ -156,7 +149,7 @@ export class SystemManager {
       this.sortedSystems.push(system)
     }
 
-    if (this.initialised) {
+    if (this.world.initialised) {
       system.onInit()
 
       if (hasOnUpdate) {
@@ -183,6 +176,7 @@ export class SystemManager {
     system.__internal.queries.forEach((query: Query) => {
       this.world.queryManager.removeQuery(query)
     })
+    system.__internal.requiredQueries = []
 
     system.onDestroy()
   }

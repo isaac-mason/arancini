@@ -9,7 +9,7 @@ describe('EntityPool', () => {
 
   beforeEach(() => {
     world = new World()
-    pool = world.spaceManager.entityPool
+    pool = world.entityManager.entityPool
   })
 
   it('should return an entity on request', () => {

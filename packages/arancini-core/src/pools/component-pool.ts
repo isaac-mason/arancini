@@ -68,7 +68,7 @@ export class ComponentPool {
   recycle(component: Component): void {
     const pool = this.objectPools.get(component._class)
 
-    if (pool !== undefined) {
+    if (pool) {
       pool.recycle(component)
     }
   }

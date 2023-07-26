@@ -10,7 +10,7 @@ export default {
   title: 'Random Walkers',
 }
 
-class WalkingComponent extends A.Component {}
+const WalkingComponent = A.Component.tag('Walking')
 
 class Object3DComponent extends A.Component {
   object3D!: THREE.Object3D

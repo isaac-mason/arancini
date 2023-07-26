@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { Component, Entity, Space, System, World } from '../src'
+import { Component, Entity, System, World } from '../src'
 
 class TestComponentOne extends Component {}
 class TestComponentTwo extends Component {}
@@ -54,13 +54,10 @@ class AnotherTestSystemWithQuery extends System {
 
 describe('System', () => {
   let world: World
-  let space: Space
 
   beforeEach(() => {
     world = new World()
     world.init()
-
-    space = world.create.space()
 
     world.registerComponent(TestComponentOne)
     world.registerComponent(TestComponentTwo)
@@ -74,7 +71,6 @@ describe('System', () => {
 
   test('systems are initialised on initialising the world', () => {
     world = new World()
-    space = world.create.space()
 
     const systemInitFn = vi.fn()
 
@@ -120,7 +116,7 @@ describe('System', () => {
     const system = world.getSystem(TestSystem) as TestSystem
 
     // create entity that matches query
-    const entity = space.create.entity()
+    const entity = world.create()
     entity.add(TestComponentOne)
     entity.add(TestComponentTwo)
 
@@ -298,7 +294,7 @@ describe('System', () => {
 
   test('systems can be removed, and queries will not be removed if they are used standalone outside of systems', () => {
     // use the query outside of a system
-    const query = world.create.query(testSystemQueryDescription)
+    const query = world.query(testSystemQueryDescription)
 
     world.registerSystem(TestSystemWithQuery)
     const systemOne = world.getSystem(
@@ -352,7 +348,7 @@ describe('System', () => {
 
     expect(systemUpdateFn).toHaveBeenCalledTimes(0)
 
-    world.create.entity().add(TestComponentOne)
+    world.create().add(TestComponentOne)
 
     world.update()
 
@@ -381,11 +377,11 @@ describe('System', () => {
     expect(systemUpdateFn).toHaveBeenCalledTimes(0)
 
     // singletonComponent should be defined after an entity with the component is created
-    const testEntity = world.create.entity()
+    const testEntity = world.create()
     const testComponentOne = testEntity.add(TestComponentOne)
 
     expect(system.singletonComponent).toBe(testComponentOne)
-    expect(system.singletonComponent?.entity).toBe(testEntity)
+    expect(system.singletonComponent?._entity).toBe(testEntity)
 
     // system should update as the singleton is now defined
     world.update()
@@ -396,15 +392,15 @@ describe('System', () => {
     expect(system.singletonComponent).toBe(undefined)
 
     // ensure the old entity and component is not re-used
-    world.spaceManager.entityPool.free(1)
-    world.spaceManager.componentPool.free(TestComponentOne, 1)
+    world.entityManager.entityPool.free(1)
+    world.entityManager.componentPool.free(TestComponentOne, 1)
 
     // singletonComponent should be set after a new entity with the component is created
-    const newTestEntity = world.create.entity()
+    const newTestEntity = world.create()
     const newTestComponentOne = newTestEntity.add(TestComponentOne)
 
     expect(system.singletonComponent).toBe(newTestComponentOne)
-    expect(system.singletonComponent?.entity).toBe(newTestEntity)
+    expect(system.singletonComponent?._entity).toBe(newTestEntity)
 
     expect(system.singletonComponent).not.toBe(testComponentOne)
     expect(system.singletonComponent).not.toBe(testEntity)

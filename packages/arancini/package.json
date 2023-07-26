@@ -15,9 +15,7 @@
     "url": "https://github.com/isaac-mason/arancini/issues"
   },
   "scripts": {
-    "test": " NODE_OPTIONS=--experimental-vm-modules jest --coverage",
-    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
-    "build": "preconstruct build",
+    "build": "rollup --config rollup.config.js --bundleConfigAsCjs",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
@@ -33,7 +31,10 @@
     "@babel/preset-env": "^7.22.7",
     "@babel/preset-react": "^7.18.6",
     "@babel/preset-typescript": "^7.21.4",
-    "@preconstruct/cli": "^2.5.0",
+    "@rollup/plugin-commonjs": "^24.0.1",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-terser": "^0.4.3",
+    "@rollup/plugin-typescript": "^11.1.1",
     "@typescript-eslint/eslint-plugin": "^5.60.0",
     "@typescript-eslint/parser": "^5.59.9",
     "eslint": "^8.5.0",
@@ -48,29 +49,30 @@
     "eslint-plugin-storybook": "^0.6.12",
     "eslint-plugin-typescript-enum": "^2.1.0",
     "prettier": "^2.3.2",
+    "rollup": "^3.26.3",
+    "rollup-plugin-copy": "^3.4.0",
+    "rollup-plugin-filesize": "^10.0.0",
     "typescript": "^5.1.3",
     "vite": "^4.2.1",
     "vite-plugin-dts": "^2.1.0"
   },
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./index.js"
+    },
+    "./react": {
+      "import": "./react.js"
+    }
+  },
   "files": [
-    "dist/**",
-    "react/**",
+    "index.js",
+    "index.d.ts",
+    "react.js",
+    "react.d.ts",
     "LICENSE",
     "README.md"
-  ],
-  "main": "dist/arancini.cjs.js",
-  "module": "dist/arancini.esm.js",
-  "preconstruct": {
-    "entrypoints": [
-      "index.ts",
-      "react.ts"
-    ]
-  },
-  "babel": {
-    "presets": [
-      "@babel/preset-env",
-      "@babel/preset-react",
-      "@babel/preset-typescript"
-    ]
-  }
+  ]
 }

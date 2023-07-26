@@ -7,25 +7,16 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "preconstruct dev",
-    "build": "preconstruct build",
+    "build": "yarn workspaces foreach -t run build",
     "test": "(cd packages/arancini-core && yarn test) && (cd packages/arancini-react && yarn test)",
     "change": "yarn changeset",
     "version": "yarn changeset version && yarn install --mode update-lockfile",
-    "release": "preconstruct validate && yarn build && yarn test && yarn build-storybook && changeset publish",
+    "release": "yarn build && yarn test && yarn build-storybook && changeset publish",
     "build-storybook": "concurrently \"cd ./packages/arancini-core && yarn build-storybook\" \"cd ./packages/arancini-react && yarn build-storybook\"",
     "storybook": "concurrently \"cd ./packages/arancini-core && yarn storybook\" \"cd ./packages/arancini-react && yarn storybook\""
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.1",
-    "@preconstruct/cli": "^2.5.0",
     "concurrently": "^8.2.0"
-  },
-  "preconstruct": {
-    "packages": [
-      "packages/arancini-core",
-      "packages/arancini-react",
-      "packages/arancini"
-    ]
   }
 }

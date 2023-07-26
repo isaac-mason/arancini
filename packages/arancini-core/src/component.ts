@@ -7,7 +7,7 @@ export type ComponentDetails = {
 }
 
 export type ComponentClass<T extends Component | Component = Component> = {
-  new (...args: never[]): T
+  new (...args: unknown[]): T
   componentIndex: number
 }
 
@@ -16,6 +16,21 @@ export type ComponentClass<T extends Component | Component = Component> = {
  *
  * Component objects are reused. See the documentation for the `construct` method for initializing properties.
  *
+ * @example creating a basic data component
+ * ```ts
+ * import { Component } from '@arancini/core'
+ *
+ * const PositionComponent = Component.data<{ x: number, y: number }>('Position')
+ * ```
+ *
+ * @example creating a tag component
+ * ```ts
+ * import { Component } from '@arancini/core'
+ *
+ * const PoweredUpComponent = Component.tag('PoweredUp')
+ * ```
+ *
+ * @example creating a component by extending the `Component` class
  * ```ts
  * import { Component, World } from '@arancini/core'
  *
@@ -47,11 +62,8 @@ export type ComponentClass<T extends Component | Component = Component> = {
  * const world = new World()
  * world.registerComponent(ExampleComponent)
  *
- * // create a space
- * const space = world.create.space()
- *
- * // create an entity in the space
- * const entity = space.create.entity()
+ * // create an entity
+ * const entity = world.create()
  *
  * // add the example component to the entity
  * const x = 1
@@ -62,43 +74,40 @@ export type ComponentClass<T extends Component | Component = Component> = {
 export abstract class Component {
   /**
    * This component instances unique id
+   * @private internal
    */
-  id: string = uniqueId()
+  _id: string = uniqueId()
 
   /**
    * The entity this component belongs to.
+   * @private internal
    */
-  entity!: Entity
+  _entity!: Entity
 
   /**
    * The class the component was constructed from
-   * @private
+   * @private internal
    */
   _class!: ComponentClass
 
   static componentIndex: number
 
   /**
-   * Method for "constructing" a component instance.
+   * Properties can be be initialised with arguments with the `construct` method.
    *
-   * If a component has properties, this method should be implemented to set initial values for all of them.
+   * Component instances are object pooled. To prevent unexpected behavior properties should be initialised or reset in the `construct` method.
    *
-   * If a component is a tag with no properties, this method does not need to be implemented.
-   *
-   * Non-static component properties should not have values defined in the constructor, but should be initialised in this `construct` method.
-   * The reason for this is component object instances will be reused, so in order to prevent unexpected behavior, they should be initialised in the `construct` method,
-   * which will be executed as part of component reuse to return it to the starting state.
-   *
-   * The recommended way to handle this in TypeScript is to use the not-null operator for added properties, acting as a 'late-init' syntax for properties.
-   * This is safe as the `construct` method will always be run before `onInit` and `onDestroy`, and the component will not be accessible by system queries until `construct` has run.
-   * For example:
-   *
+   * @example
    * ```ts
    * class MyComponent extends Component {
-   *   exampleProperty!: number;
+   *   exampleNumber!: number;
+   *
+   *   exampleMap = new Map();
    *
    *   construct(): void {
-   *     this.exampleProperty = 1; // here we initialise the value of exampleProperty
+   *     this.exampleNumber = 0;
+   *
+   *     this.exampleMap.clear();
    *   }
    *
    *   onInit(): void {
@@ -108,7 +117,7 @@ export abstract class Component {
    * }
    * ```
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-function, class-methods-use-this
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   construct(..._args: any[] | []) {}
 
   /**
@@ -120,4 +129,64 @@ export abstract class Component {
    * Initialisation logic
    */
   onInit(): void {}
+
+  /**
+   * Creates a simple data component with the given type.
+   *
+   * The following object keys are reserved:
+   * - `_id`
+   * - `_entity`
+   * - `_class`
+   * - `construct`
+   *
+   * @param name an optional name for the component
+   * @return data component
+   *
+   * @example
+   * ```ts
+   * import { Component } from '@arancini/core'
+   *
+   * const PositionComponent = Component.data<{ x: number, y: number }>('Position')
+   * ```
+   */
+  static data<T extends Record<string, unknown>>(name?: string) {
+    const DataComponent = class extends Component {
+      construct(value: unknown): void {
+        Object.assign(this, value)
+      }
+    }
+
+    if (name) {
+      Object.defineProperty(DataComponent, 'name', { value: name })
+    }
+
+    return DataComponent as typeof DataComponent & {
+      new (...args: unknown[]): InstanceType<typeof DataComponent> &
+        T & {
+          construct(value: T): void
+        }
+    }
+  }
+
+  /**
+   * Creates a tag component
+   * @param name an optional name for the component
+   * @returns tag component
+   *
+   * @example
+   * ```ts
+   * import { Component } from '@arancini/core'
+   *
+   * const PoweredUpComponent = Component.tag('PoweredUp')
+   * ```
+   */
+  static tag(name?: string) {
+    const TagComponent = class extends Component {}
+
+    if (name) {
+      Object.defineProperty(TagComponent, 'name', { value: name })
+    }
+
+    return TagComponent
+  }
 }

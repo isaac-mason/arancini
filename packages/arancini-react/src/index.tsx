@@ -12,20 +12,11 @@ import React, {
 } from 'react'
 import { useIsomorphicLayoutEffect, useRerender } from './hooks'
 
-type SpaceProviderContext = {
-  space: A.Space
-}
-
 type EntityProviderContext = {
   entity: A.Entity
 }
 
 export type WorldProps = {
-  children?: React.ReactNode
-}
-
-export type SpaceProps = {
-  id?: string
   children?: React.ReactNode
 }
 
@@ -52,7 +43,6 @@ export type ComponentProps<T extends A.Component> = {
 }
 
 export const createECS = (world: A.World) => {
-  const spaceContext = createContext(null! as SpaceProviderContext)
   const entityContext = createContext(null! as EntityProviderContext)
 
   if (!world.initialised) {
@@ -68,33 +58,9 @@ export const createECS = (world: A.World) => {
     return context ? context.entity : undefined
   }
 
-  const useCurrentSpace = () => {
-    const context = useContext(spaceContext)
-    return !context ? world.defaultSpace : context.space
-  }
-
-  const Space = ({ id, children }: SpaceProps) => {
-    const [context, setContext] = useState<SpaceProviderContext>(null!)
-
-    useIsomorphicLayoutEffect(() => {
-      const newSpace = world.create.space({ id })
-      setContext({ space: newSpace })
-
-      return () => {
-        setContext(null!)
-        newSpace.destroy()
-      }
-    }, [id])
-
-    return (
-      <spaceContext.Provider value={context}>{children}</spaceContext.Provider>
-    )
-  }
-
   const Entity = memo(
     forwardRef<A.Entity, EntityProps>(
       ({ children, entity: existingEntity }, ref) => {
-        const space = useCurrentSpace()
         const [context, setContext] = useState<{ entity: A.Entity }>(null!)
 
         useImperativeHandle(ref, () => context?.entity, [context])
@@ -105,7 +71,7 @@ export const createECS = (world: A.World) => {
             return
           }
 
-          const newEntity = space.create.entity()
+          const newEntity = world.create()
           setContext({ entity: newEntity })
 
           const { id } = newEntity
@@ -118,7 +84,7 @@ export const createECS = (world: A.World) => {
               newEntity.destroy()
             }
           }
-        }, [space])
+        }, [])
 
         return (
           <entityContext.Provider value={context}>
@@ -145,7 +111,7 @@ export const createECS = (world: A.World) => {
         return q
       }
 
-      return world.create.query(q)
+      return world.query(q)
     }, [q])
 
     const rerender = useRerender()
@@ -181,7 +147,7 @@ export const createECS = (world: A.World) => {
     const entityCtx = useContext(entityContext)
 
     useIsomorphicLayoutEffect(() => {
-      if (!entityCtx || !entityCtx.entity.space) {
+      if (!entityCtx || !entityCtx.entity) {
         return
       }
 
@@ -223,17 +189,14 @@ export const createECS = (world: A.World) => {
   }
 
   return {
-    Space,
     Entity,
     Entities,
     QueryEntities,
     Component,
     useQuery,
     useCurrentEntity,
-    useCurrentSpace,
     update,
     world,
-    spaceContext,
     entityContext,
   }
 }

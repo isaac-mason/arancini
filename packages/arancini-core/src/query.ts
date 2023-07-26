@@ -67,7 +67,7 @@ export type QueryBitSets = {
  * world.query(simpleQueryDescription)
  *
  * // get a query that will update every world update
- * const query = world.create.query({
+ * const query = world.query({
  *   all: [ExampleComponentOne]
  * })
  *

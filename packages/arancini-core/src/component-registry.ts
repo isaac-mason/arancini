@@ -45,10 +45,8 @@ export class ComponentRegistry {
 
     // if the world has already been initialised, resize all entity components bitsets
     if (this.world.initialised) {
-      for (const space of this.world.spaceManager.spaces.values()) {
-        for (const entity of space.entities.values()) {
-          entity._componentsBitSet.resize(this.currentComponentIndex)
-        }
+      for (const entity of this.world.entities.values()) {
+        entity._componentsBitSet.resize(this.currentComponentIndex)
       }
     }
 

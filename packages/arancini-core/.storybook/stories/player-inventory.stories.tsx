@@ -3,10 +3,10 @@ import React, { useEffect } from 'react'
 import { Topic } from '../../src'
 
 class Inventory extends Component {
-  items!: Map<string, number>
+  items = new Map<string, number>
 
   construct() {
-    this.items = new Map()
+    this.items.clear()
   }
 }
 
@@ -50,7 +50,7 @@ export const PlayerInventoryEvents = () => {
     world.registerComponent(InventoryEvents)
     world.registerSystem(InventorySystem)
 
-    const player = world.create.entity()
+    const player = world.create()
 
     player.add(Inventory)
 

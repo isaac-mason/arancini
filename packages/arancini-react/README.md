@@ -59,12 +59,12 @@ const Example = () => {
 }
 ```
 
-### Spaces, Entities, Components
+### Entities and Components
 
-`<Space />` can be used to declaratively create spaces, `<Entity />` can be used to declaratively create entities, and `<Component />` can be used to add components to an entity.
+`<Entity />` can be used to declaratively create entities, and `<Component />` can be used to add components to an entity.
 
 ```tsx
-class Position extends Component {
+class PositionComponent extends Component {
   x!: number
   y!: number
 
@@ -75,11 +75,9 @@ class Position extends Component {
 }
 
 const Example = () => (
-  <ECS.Space>
-    <ECS.Entity>
-      <ECS.Component type={Position} args={[0, 0]} />
-    </ECS.Entity>
-  </ECS.Space>
+  <ECS.Entity>
+    <ECS.Component type={PositionComponent} args={[0, 0]} />
+  </ECS.Entity>
 )
 ```
 
@@ -91,7 +89,7 @@ const entity = world.create.entity()
 const Example = () => (
   <ECS.Entity entity={entity}>
     {/* this will add the Position component to the existing entity */}
-    <ECS.Component type={Position} args={[0, 0]} />
+    <ECS.Component type={PositionComponent} args={[0, 0]} />
   </ECS.Entity>
 )
 ```
@@ -107,7 +105,7 @@ const SimpleExample = () => (
 
 const AddComponentToEntities = () => (
   <ECS.Entities entities={[entity1, entity2]}>
-    <ECS.Component type={Position} args={[0, 0]} />
+    <ECS.Component type={PositionComponent} args={[0, 0]} />
   </ECS.Entities>
 )
 
@@ -128,7 +126,7 @@ The `useQuery` hook queries the world for entities with given components and wil
 
 ```tsx
 const Example = () => {
-  const entities = ECS.useQuery([Position])
+  const entities = ECS.useQuery([PositionComponent])
 
   // ...
 }
@@ -174,7 +172,7 @@ const EnhanceExistingEntities = () => (
   <ECS.QueryEntities query={[ExampleTagComponent]}>
     {(entity) => {
       return (
-        <ECS.Component type={Object3D}>
+        <ECS.Component type={Object3DComponent}>
           <mesh>
             <boxGeometry
               position={[
@@ -219,9 +217,9 @@ const Example = () => (
 
 ## Advanced Usage
 
-### Entity and Space contexts
+### Entity context
 
-You can use the hooks `useCurrentEntitiy` and `useCurrentSpace` to access the current entity and space in a React component.
+You can use the `useCurrentEntitiy` hook to access the current entity in a React component.
 
 ```tsx
 import { Component } from '@arancini/core'
@@ -241,18 +239,15 @@ class Position extends Component {
 
 const Example = () => {
   const entity = useCurrentEntity()
-  const space = useCurrentSpace()
 
   // ...
 }
 
 const App = () => (
-  <ECS.Space>
-    <ECS.Entity>
-      <Example />
-    </ECS.Entity>
-  </ECS.Space>
+  <ECS.Entity>
+    <Example />
+  </ECS.Entity>
 )
 ```
 
-For extra advanced usage, `createECS` also returns the react contexts, `entityContext` and `spaceContext`.
+For extra advanced usage, `createECS` also returns the entity react context `entityContext`.

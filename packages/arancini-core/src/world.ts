@@ -1,19 +1,15 @@
-import type { ComponentClass, ComponentDetails } from './component'
+import type { ComponentClass } from './component'
 import { ComponentRegistry } from './component-registry'
 import type { Entity } from './entity'
+import { EntityManager } from './entity-manager'
 import type { Query, QueryDescription } from './query'
 import { QueryManager } from './query-manager'
-import type { Space, SpaceParams } from './space'
-import { SpaceManager } from './space-manager'
 import type { System, SystemClass } from './system'
 import type { SystemAttributes } from './system-manager'
 import { SystemManager } from './system-manager'
-import { uniqueId } from './utils'
-
-export const WORLD_DEFAULT_SPACE_ID = '__arancini_default_world_space'
 
 /**
- * A World that can contain Spaces with Entities, Systems, and Queries.
+ * A World that can contain Entities, Systems, and Queries.
  *
  * ```ts
  * import { World } from '@arancini/core'
@@ -30,14 +26,12 @@ export const WORLD_DEFAULT_SPACE_ID = '__arancini_default_world_space'
  * // update the world with a specified time elapsed
  * // (Systems will be called with a delta of 0.1)
  * world.update(0.1)
+ *
+ * // destroy the world, removing all entities
+ * world.destroy()
  * ```
  */
 export class World {
-  /**
-   * A unique id for the World
-   */
-  id = uniqueId()
-
   /**
    * Whether the World has been initialised
    */
@@ -49,15 +43,10 @@ export class World {
   time = 0
 
   /**
-   * The default Space for the World
+   * The EntityManager for the World
+   * Manages Entities and Components
    */
-  defaultSpace: Space
-
-  /**
-   * The SpaceManager for the World
-   * Manages Spaces, Entities and Components
-   */
-  spaceManager: SpaceManager
+  entityManager: EntityManager
 
   /**
    * The QueryManager for the World
@@ -78,49 +67,18 @@ export class World {
   componentRegistry: ComponentRegistry
 
   /**
+   * Entities in the World
+   */
+  entities: Map<string, Entity> = new Map()
+
+  /**
    * Constructor for a World
    */
   constructor() {
     this.componentRegistry = new ComponentRegistry(this)
-    this.spaceManager = new SpaceManager(this)
+    this.entityManager = new EntityManager(this)
     this.queryManager = new QueryManager(this)
     this.systemManager = new SystemManager(this)
-
-    this.defaultSpace = this.create.space({ id: WORLD_DEFAULT_SPACE_ID })
-  }
-
-  /**
-   * Retrieves World factories
-   */
-  create: {
-    /**
-     * Creates a new Entity in the default World Space
-     * @see defaultSpace
-     * @returns a new Entity
-     */
-    entity: (components?: ComponentDetails[]) => Entity
-    /**
-     * Creates a Space in the Qorld
-     * @param params the params for the space
-     * @returns the new Space
-     */
-    space: (params?: SpaceParams) => Space
-    /**
-     * Creates a Query from a given query description
-     * @param queryDescription the query description
-     * @returns the Query
-     */
-    query: (queryDescription: QueryDescription) => Query
-  } = {
-    entity: (components) => {
-      return this.spaceManager.createEntity(this.defaultSpace, components)
-    },
-    space: (params) => {
-      return this.spaceManager.createSpace(params)
-    },
-    query: (queryDescription) => {
-      return this.queryManager.createQuery(queryDescription)
-    },
   }
 
   /**
@@ -128,7 +86,7 @@ export class World {
    */
   init(): void {
     this.initialised = true
-    this.spaceManager.init()
+    this.entityManager.init()
     this.systemManager.init()
   }
 
@@ -145,17 +103,59 @@ export class World {
    * Destroys the World
    */
   destroy(): void {
+    this.time = 0
+    this.initialised = false
     this.systemManager.destroy()
-    this.spaceManager.destroy()
+    this.entityManager.destroy()
   }
 
   /**
-   * Retrieves entities that match a given query description.
-   * @param queryDescription the query description
-   * @returns an array of matching entities
+   * Creates an Entity
+   * @param initFn an optional function to bulk add components to the new Entity
+   * @returns the new Entity
+   *
+   * @example
+   * ```ts
+   * import { World } from '@arancini/core'
+   *
+   * const world = new World()
+   *
+   * // create an entity
+   * const entity = world.create()
+   *
+   * // create an entity with components
+   * const entityWithComponents = world.create((entity) => {
+   *   entity.add(ExampleComponentOne)
+   *   entity.add(ExampleComponentTwo)
+   * })
+   * ```
    */
-  query(queryDescription: QueryDescription): Entity[] {
-    return this.queryManager.query(queryDescription)
+  create(initFn?: (entity: Entity) => void): Entity {
+    const entity = this.entityManager.createEntity()
+
+    if (initFn) {
+      entity.bulk(initFn)
+    }
+
+    return entity
+  }
+
+  /**
+   * Creates a Query
+   * @param queryDescription the query description
+   * @returns the Query
+   */
+  query(queryDescription: QueryDescription): Query {
+    return this.queryManager.createQuery(queryDescription)
+  }
+
+  /**
+   * Finds entities that match a given query description.
+   * @param queryDescription the query description
+   * @returns entities matching the query description
+   */
+  find(queryDescription: QueryDescription): Entity[] {
+    return this.queryManager.find(queryDescription)
   }
 
   /**
@@ -183,8 +183,8 @@ export class World {
   }
 
   /**
-   * Adds a System to the World
-   * @param system the System to add to the World
+   * Removes a System from the World
+   * @param system the System to remove from the World
    * @returns the World
    */
   unregisterSystem<T extends System>(system: SystemClass<T>): World {
@@ -207,14 +207,5 @@ export class World {
    */
   getSystems(): System[] {
     return Array.from(this.systemManager.systems.values())
-  }
-
-  /**
-   * Retrives a Space by id
-   * @param id the Space id
-   * @returns the Space, or undefined if a Space with the given id is not in the World
-   */
-  getSpace(id: string): Space | undefined {
-    return this.spaceManager.spaces.get(id)
   }
 }

@@ -16,7 +16,7 @@ export class Topic<T extends unknown[]> {
   }
 
   emit(...data: T): void {
-    for (const handler of this.listeners.values()) {
+    for (const handler of this.listeners) {
       handler(...data)
     }
   }

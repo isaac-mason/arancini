@@ -32,19 +32,19 @@ describe('createECS', () => {
 
       render(<ECS.Entity />)
 
-      expect(world.defaultSpace.entities.size).toBe(1)
+      expect(world.entities.size).toBe(1)
     })
 
     it('should support taking an existing entity via props', () => {
       const world = new A.World()
       const ECS = createECS(world)
 
-      const entity = world.create.entity()
+      const entity = world.create()
 
       render(<ECS.Entity entity={entity} />)
 
-      expect(world.defaultSpace.entities.size).toBe(1)
-      expect(world.defaultSpace.entities.has(entity.id)).toBe(true)
+      expect(world.entities.size).toBe(1)
+      expect(world.entities.has(entity.id)).toBe(true)
     })
 
     it('supports refs', () => {
@@ -52,7 +52,7 @@ describe('createECS', () => {
       const ECS = createECS(world)
 
       const ref = React.createRef<A.Entity>()
-      const entity = world.create.entity()
+      const entity = world.create()
 
       render(<ECS.Entity ref={ref} entity={entity} />)
 
@@ -68,11 +68,7 @@ describe('createECS', () => {
 
       world.registerComponent(ExampleComponent)
 
-      const entities = [
-        world.create.entity(),
-        world.create.entity(),
-        world.create.entity(),
-      ]
+      const entities = [world.create(), world.create(), world.create()]
 
       render(
         <ECS.Entities entities={entities}>
@@ -94,11 +90,7 @@ describe('createECS', () => {
       world.registerComponent(ExampleComponent)
       world.registerComponent(ExampleComponentWithArgs)
 
-      const entities = [
-        world.create.entity(),
-        world.create.entity(),
-        world.create.entity(),
-      ]
+      const entities = [world.create(), world.create(), world.create()]
 
       entities[0].add(ExampleComponent)
       entities[1].add(ExampleComponent)
@@ -133,16 +125,12 @@ describe('createECS', () => {
       world.registerComponent(ExampleComponent)
       world.registerComponent(ExampleComponentWithArgs)
 
-      const entities = [
-        world.create.entity(),
-        world.create.entity(),
-        world.create.entity(),
-      ]
+      const entities = [world.create(), world.create(), world.create()]
 
       entities[0].add(ExampleComponent)
       entities[1].add(ExampleComponent)
 
-      const query = world.create.query([ExampleComponent])
+      const query = world.query([ExampleComponent])
 
       render(
         <ECS.QueryEntities query={query}>
@@ -168,30 +156,6 @@ describe('createECS', () => {
     })
   })
 
-  describe('<Space>', () => {
-    it('should support creation of entities within the space', () => {
-      const world = new A.World()
-      const ECS = createECS(world)
-
-      const testSpaceName = 'testSpaceName'
-      const { unmount } = render(
-        <ECS.Space id={testSpaceName}>
-          <ECS.Entity />
-        </ECS.Space>
-      )
-
-      expect(world.defaultSpace.entities.size).toBe(0)
-      expect(world.spaceManager.spaces.size).toBe(2)
-      expect(world.getSpace(testSpaceName)!.entities.size).toBe(1)
-
-      act(() => {
-        unmount()
-      })
-
-      expect(world.spaceManager.spaces.size).toBe(1)
-    })
-  })
-
   describe('<Component>', () => {
     it('should add and remove the given component to an entity', () => {
       const world = new A.World()
@@ -199,7 +163,7 @@ describe('createECS', () => {
 
       world.registerComponent(ExampleComponent)
 
-      const entity = world.create.entity()
+      const entity = world.create()
 
       const { unmount } = render(
         <ECS.Entity entity={entity}>
@@ -222,7 +186,7 @@ describe('createECS', () => {
 
       world.registerComponent(ExampleComponentWithArgs)
 
-      const entity = world.create.entity()
+      const entity = world.create()
 
       render(
         <ECS.Entity entity={entity}>
@@ -239,7 +203,7 @@ describe('createECS', () => {
 
       world.registerComponent(ExampleComponentWithArgs)
 
-      const entity = world.create.entity()
+      const entity = world.create()
 
       const refValue = 'refValue'
 
@@ -269,11 +233,7 @@ describe('createECS', () => {
 
       world.registerComponent(ExampleComponent)
 
-      const entities = [
-        world.create.entity(),
-        world.create.entity(),
-        world.create.entity(),
-      ]
+      const entities = [world.create(), world.create(), world.create()]
 
       entities.forEach((e) => {
         e.add(ExampleComponent)
@@ -296,17 +256,13 @@ describe('createECS', () => {
 
       world.registerComponent(ExampleComponent)
 
-      const entities = [
-        world.create.entity(),
-        world.create.entity(),
-        world.create.entity(),
-      ]
+      const entities = [world.create(), world.create(), world.create()]
 
       entities.forEach((e) => {
         e.add(ExampleComponent)
       })
 
-      const query = world.create.query([ExampleComponent])
+      const query = world.query([ExampleComponent])
 
       const { result } = renderHook(() => ECS.useQuery(query))
 
@@ -325,7 +281,7 @@ describe('createECS', () => {
       const world = new A.World()
       const ECS = createECS(world)
 
-      const entity = world.create.entity()
+      const entity = world.create()
 
       const { result } = renderHook(() => ECS.useCurrentEntity(), {
         wrapper: ({ children }) => (
@@ -334,31 +290,6 @@ describe('createECS', () => {
       })
 
       expect(result.current).toBe(entity)
-    })
-  })
-
-  describe('useCurrentSpace', () => {
-    it('should return the default space when not wrapped in a space', () => {
-      const world = new A.World()
-      const ECS = createECS(world)
-
-      const { result } = renderHook(() => ECS.useCurrentSpace())
-
-      expect(result.current).toBe(world.defaultSpace)
-    })
-
-    it('should return the default space when not wrapped in a space', () => {
-      const world = new A.World()
-      const ECS = createECS(world)
-
-      const testSpaceId = 'testSpaceId'
-      const { result } = renderHook(() => ECS.useCurrentSpace(), {
-        wrapper: ({ children }) => (
-          <ECS.Space id={testSpaceId}>{children}</ECS.Space>
-        ),
-      })
-
-      expect(result.current).toBe(world.getSpace(testSpaceId))
     })
   })
 
