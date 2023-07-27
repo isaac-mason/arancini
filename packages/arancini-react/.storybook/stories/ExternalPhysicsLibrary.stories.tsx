@@ -1,4 +1,4 @@
-import * as A from '@arancini/core'
+import { Component, System, World } from '@arancini/core'
 import { createECS } from '@arancini/react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as P2 from 'p2-es'
@@ -19,15 +19,9 @@ const boxBoxContactMaterial = new P2.ContactMaterial(
   { friction: 0.75 }
 )
 
-class Object3DComponent extends A.Component {
-  object3D!: THREE.Object3D
+const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
 
-  construct(object3D: THREE.Object3D) {
-    this.object3D = object3D
-  }
-}
-
-class RigidBodyComponent extends A.Component {
+class RigidBodyComponent extends Component {
   body!: P2.Body
 
   construct(body: P2.Body) {
@@ -35,7 +29,7 @@ class RigidBodyComponent extends A.Component {
   }
 }
 
-class PhysicsSystem extends A.System {
+class PhysicsSystem extends System {
   bodiesQuery = this.query([RigidBodyComponent])
 
   physicsWorld = new P2.World({ gravity: [0, -9.81] })
@@ -65,21 +59,17 @@ class PhysicsSystem extends A.System {
     this.physicsWorld.step(stepSize, delta, maxSubSteps)
 
     for (const entity of this.bodiesQuery) {
-      const object3DComponent = entity.find(Object3DComponent)
-      if (object3DComponent === undefined) continue
+      const object3D = entity.find(Object3DComponent)
+      if (object3D === undefined) continue
 
       const { body } = entity.get(RigidBodyComponent)
-      object3DComponent.object3D.position.set(
-        body.position[0],
-        body.position[1],
-        0
-      )
-      object3DComponent.object3D.rotation.set(0, 0, body.angle)
+      object3D.position.set(body.position[0], body.position[1], 0)
+      object3D.rotation.set(0, 0, body.angle)
     }
   }
 }
 
-const world = new A.World()
+const world = new World()
 world.registerComponent(RigidBodyComponent)
 world.registerComponent(Object3DComponent)
 world.registerSystem(PhysicsSystem)

@@ -1,4 +1,4 @@
-import type { ComponentClass } from './component'
+import type { ComponentDefinition } from './component'
 import type { World } from './world'
 
 /**
@@ -8,9 +8,9 @@ import type { World } from './world'
  */
 export class ComponentRegistry {
   /**
-   * Component classes to component ids
+   * Component definition to component id
    */
-  components: Map<ComponentClass, number> = new Map()
+  components: Map<ComponentDefinition<unknown>, number> = new Map()
 
   /**
    * The current component index. Increments when a new component is registered.
@@ -28,11 +28,11 @@ export class ComponentRegistry {
 
   /**
    * Registers a component
-   * @param component the component class to register
+   * @param componentDefinition the component definition to register
    * @returns the component index
    */
-  registerComponent(component: ComponentClass): number {
-    let componentIndex = this.components.get(component)
+  registerComponent(componentDefinition: ComponentDefinition<unknown>): number {
+    let componentIndex = this.components.get(componentDefinition)
     if (componentIndex !== undefined) {
       return componentIndex
     }
@@ -40,8 +40,8 @@ export class ComponentRegistry {
     this.currentComponentIndex++
     componentIndex = this.currentComponentIndex
 
-    component.componentIndex = componentIndex
-    this.components.set(component, componentIndex)
+    componentDefinition.componentIndex = componentIndex
+    this.components.set(componentDefinition, componentIndex)
 
     // if the world has already been initialised, resize all entity components bitsets
     if (this.world.initialised) {

@@ -2,6 +2,7 @@ import * as A from '@arancini/core'
 import { OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 
+import { Component, System, World } from '@arancini/core'
 import React from 'react'
 import { createECS } from '../../src'
 import { Setup } from '../Setup'
@@ -10,22 +11,16 @@ export default {
   title: 'Random Walkers',
 }
 
-const WalkingComponent = A.Component.tag('Walking')
+const WalkingComponent = Component.tag('Walking')
 
-class Object3DComponent extends A.Component {
-  object3D!: THREE.Object3D
+const Object3DComponent = A.Component.object<THREE.Object3D>('Object3D')
 
-  construct(object3D: THREE.Object3D): void {
-    this.object3D = object3D
-  }
-}
-
-class WalkingSystem extends A.System {
+class WalkingSystem extends System {
   walking = this.query([Object3DComponent, WalkingComponent])
 
   onUpdate(delta: number) {
     for (const walker of this.walking) {
-      const { object3D } = walker.get(Object3DComponent)
+      const object3D = walker.get(Object3DComponent)
 
       object3D.position.x += (Math.random() - 0.5) * 2 * delta
       object3D.position.y += (Math.random() - 0.5) * 2 * delta
@@ -38,7 +33,7 @@ class WalkingSystem extends A.System {
   }
 }
 
-const world = new A.World()
+const world = new World()
 world.registerComponent(WalkingComponent)
 world.registerComponent(Object3DComponent)
 world.registerSystem(WalkingSystem)

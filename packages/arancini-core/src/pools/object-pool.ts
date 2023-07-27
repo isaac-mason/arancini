@@ -1,5 +1,5 @@
 /**
- * ObjectPool manages a pool of objects of a given type
+ * Pools of objects of a given type
  *
  * @param T the type of object to pool
  *
@@ -17,8 +17,6 @@
  * // release the object back into the pool
  * pool.release(object)
  * ```
- *
- * @private internal class, do not use directly
  */
 export class ObjectPool<T> {
   /**

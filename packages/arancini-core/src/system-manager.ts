@@ -1,4 +1,4 @@
-import { ComponentClass } from './component'
+import { ComponentDefinition } from './component'
 import type { Query, QueryDescription } from './query'
 import type { System, SystemClass, SystemQueryOptions } from './system'
 import { isSubclassMethodOverridden } from './utils'
@@ -11,7 +11,7 @@ export type SystemAttributes = {
 export type SystemSingletonPlaceholder = {
   __internal: {
     placeholder: true
-    componentClass: ComponentClass
+    componentDefinition: ComponentDefinition<unknown>
     options?: SystemQueryOptions
   }
 }
@@ -126,13 +126,17 @@ export class SystemManager {
 
       if (field?.__internal?.placeholder) {
         const {
-          __internal: { componentClass, options },
+          __internal: { componentDefinition, options },
         } = field as SystemSingletonPlaceholder
 
-        const query = this.createSystemQuery(system, [componentClass], options)
+        const query = this.createSystemQuery(
+          system,
+          [componentDefinition],
+          options
+        )
 
         const onQueryChange = () => {
-          _system[fieldName] = query.first?.get(componentClass)
+          _system[fieldName] = query.first?.get(componentDefinition)
         }
 
         query.onEntityAdded.add(onQueryChange)

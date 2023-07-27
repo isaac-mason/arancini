@@ -462,9 +462,7 @@ describe('Query', () => {
         all: [TestComponentOne, TestComponentTwo],
       }
 
-      expect(Query.getDescriptionDedupeString(queryOne)).toEqual(
-        'TestComponentOne&TestComponentTwo'
-      )
+      expect(Query.getDescriptionDedupeString(queryOne)).toEqual('0&1')
     })
 
     it('should return the same key for two matching query descriptions', () => {

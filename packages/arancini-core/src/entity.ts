@@ -1,5 +1,8 @@
-import type { ComponentClass } from './component'
-import { Component } from './component'
+import type {
+  ComponentDefinition,
+  ComponentDefinitionArgs,
+  ComponentDefinitionInstance,
+} from './component'
 import { uniqueId } from './utils'
 import { BitSet } from './utils/bit-set'
 import type { World } from './world'
@@ -60,15 +63,15 @@ export class Entity {
 
   /**
    * The BitSet for the entity
-   * @private
+   * @private internal
    */
   _componentsBitSet = new BitSet()
 
   /**
    * The components for the entity
-   * @private
+   * @private internal
    */
-  _components: { [index: string]: Component } = {}
+  _components: { [index: string]: unknown } = {}
 
   /**
    * Whether to update queries when components are added or removed
@@ -79,16 +82,16 @@ export class Entity {
 
   /**
    * Adds a component to the entity
-   * @param clazz the component to add
+   * @param componentDefinition the component to add
    */
-  add<C extends Component>(
-    clazz: ComponentClass<C>,
-    ...args: Parameters<C['construct']>
-  ): C {
+  add<C extends ComponentDefinition<unknown>>(
+    componentDefinition: C,
+    ...args: ComponentDefinitionArgs<C>
+  ): ComponentDefinitionInstance<C> {
     // add the component to this entity
     const component = this.world.entityManager.addComponentToEntity(
       this,
-      clazz,
+      componentDefinition,
       args
     )
 
@@ -104,7 +107,7 @@ export class Entity {
    * The value can either be a Component constructor, or the component instance itself
    * @param value the component to remove and destroy
    */
-  remove(component: Component | ComponentClass): Entity {
+  remove(component: ComponentDefinition<unknown>): Entity {
     this.world.entityManager.removeComponentFromEntity(this, component, true)
 
     if (this._updateQueries) {
@@ -147,12 +150,13 @@ export class Entity {
    * @param value a constructor for the component type to retrieve
    * @returns the component
    */
-  get<T extends Component>(value: ComponentClass<T>): T {
-    const component: Component | undefined =
-      this._components[value.componentIndex]
+  get<T extends ComponentDefinition<unknown>>(
+    value: T
+  ): ComponentDefinitionInstance<T> {
+    const component = this._components[value.componentIndex]
 
     if (component) {
-      return component as T
+      return component as ComponentDefinitionInstance<T>
     }
 
     throw new Error(
@@ -166,7 +170,7 @@ export class Entity {
    * Returns all components for the entity
    * @returns all components for the entity
    */
-  getAll(): Component[] {
+  getAll(): unknown[] {
     return Object.values(this._components)
   }
 
@@ -175,8 +179,12 @@ export class Entity {
    * @param value a constructor for the component type to retrieve
    * @returns the component if it is found, or undefined
    */
-  find<T extends Component>(value: ComponentClass<T>): T | undefined {
-    return this._components[value.componentIndex] as T | undefined
+  find<T extends ComponentDefinition<unknown>>(
+    value: T
+  ): ComponentDefinitionInstance<T> | undefined {
+    return this._components[value.componentIndex] as
+      | ComponentDefinitionInstance<T>
+      | undefined
   }
 
   /**
@@ -184,7 +192,7 @@ export class Entity {
    * @param value the component constructor, a component instance, or the string name of the component
    * @returns whether the entity contains the given component
    */
-  has(value: ComponentClass): boolean {
+  has<T extends ComponentDefinition<unknown>>(value: T): boolean {
     return !!this._components[value.componentIndex]
   }
 

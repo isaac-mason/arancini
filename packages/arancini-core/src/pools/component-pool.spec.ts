@@ -56,7 +56,7 @@ describe('ComponentPool', () => {
     expect(pool.available).toBe(0)
     expect(pool.used).toBe(0)
 
-    const component = pool.request(ExampleComponentOne)
+    const component = world.create().add(ExampleComponentOne)
 
     expect(pool.totalPools).toBe(1)
     expect(pool.size).toBe(1)

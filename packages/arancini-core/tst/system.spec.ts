@@ -381,7 +381,7 @@ describe('System', () => {
     const testComponentOne = testEntity.add(TestComponentOne)
 
     expect(system.singletonComponent).toBe(testComponentOne)
-    expect(system.singletonComponent?._entity).toBe(testEntity)
+    expect(system.singletonComponent?._arancini_entity).toBe(testEntity)
 
     // system should update as the singleton is now defined
     world.update()
@@ -400,7 +400,7 @@ describe('System', () => {
     const newTestComponentOne = newTestEntity.add(TestComponentOne)
 
     expect(system.singletonComponent).toBe(newTestComponentOne)
-    expect(system.singletonComponent?._entity).toBe(newTestEntity)
+    expect(system.singletonComponent?._arancini_entity).toBe(newTestEntity)
 
     expect(system.singletonComponent).not.toBe(testComponentOne)
     expect(system.singletonComponent).not.toBe(testEntity)

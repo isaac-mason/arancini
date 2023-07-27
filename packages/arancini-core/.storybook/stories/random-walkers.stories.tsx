@@ -1,7 +1,7 @@
 import { Component, System, World } from '@arancini/core'
 import React, { useEffect } from 'react'
 
-const Position = Component.data<{ x: number; y: number }>('Position')
+const Position = Component.object<{ x: number; y: number }>('Position')
 
 const Red = Component.tag('Red')
 const Blue = Component.tag('Blue')

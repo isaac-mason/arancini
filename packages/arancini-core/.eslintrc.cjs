@@ -61,6 +61,10 @@ module.exports = {
     '@typescript-eslint/no-empty-function': 'off',
     'no-continue': 'off',
     'max-classes-per-file': 'off',
+    'prefer-destructuring': 'off',
+    'no-extra-semi': 'off',
+    '@typescript-eslint/no-extra-semi': 'off',
+    '@typescript-eslint/no-non-null-assertion': 'off',
   },
   settings: {
     'import/resolver': {

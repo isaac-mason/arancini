@@ -1,4 +1,4 @@
-import type { ComponentClass } from './component'
+import type { ComponentDefinition } from './component'
 import { ComponentRegistry } from './component-registry'
 import type { Entity } from './entity'
 import { EntityManager } from './entity-manager'
@@ -159,13 +159,13 @@ export class World {
   }
 
   /**
-   * Registers a Component class.
+   * Registers a Component.
    * For best performance, register all Component classes before initialising the World.
-   * @param component the Component class to register
+   * @param componentDefinition the Component definition to register
    * @returns the World
    */
-  registerComponent(component: ComponentClass): World {
-    this.componentRegistry.registerComponent(component)
+  registerComponent(componentDefinition: ComponentDefinition<unknown>): World {
+    this.componentRegistry.registerComponent(componentDefinition)
     return this
   }
 

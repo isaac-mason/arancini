@@ -41,4 +41,18 @@ describe('ComponentRegistry', () => {
 
     expect(ExampleComponent.componentIndex).toBe(0)
   })
+
+  it('should support registering tag components', () => {
+    const TagComponent = Component.tag()
+    world.registerComponent(TagComponent)
+
+    expect(TagComponent.componentIndex).toBe(0)
+  })
+
+  it('should support registering object components', () => {
+    const ObjectComponent = Component.object<{ x: number; y: number }>()
+    world.registerComponent(ObjectComponent)
+
+    expect(ObjectComponent.componentIndex).toBe(0)
+  })
 })

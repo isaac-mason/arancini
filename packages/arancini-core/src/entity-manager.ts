@@ -1,4 +1,12 @@
-import { Component, ComponentClass } from './component'
+import {
+  Component,
+  ComponentClass,
+  ComponentDefinition,
+  ComponentDefinitionArgs,
+  ComponentDefinitionInstance,
+  ComponentDefinitionType,
+  InternalComponentInstanceProperties,
+} from './component'
 import type { Entity } from './entity'
 import { ComponentPool, EntityPool } from './pools'
 import { uniqueId } from './utils'
@@ -68,7 +76,12 @@ export class EntityManager {
     this.world.entities.delete(entity.id)
 
     for (const component of Object.values(entity._components)) {
-      this.removeComponentFromEntity(entity, component, false)
+      const internal = component as InternalComponentInstanceProperties
+      this.removeComponentFromEntity(
+        entity,
+        internal._arancini_component_definition!,
+        false
+      )
     }
 
     this.world.queryManager.onEntityRemoved(entity)
@@ -79,68 +92,87 @@ export class EntityManager {
   /**
    * Adds a component to an entity
    * @param entity the entity to add to
-   * @param clazz the component to add
+   * @param componentDefinition the component to add
    */
-  addComponentToEntity<T extends Component>(
+  addComponentToEntity<T extends ComponentDefinition<unknown>>(
     entity: Entity,
-    clazz: ComponentClass<T>,
-    args?: Parameters<T['construct']>
-  ): T {
-    if (entity._components[clazz.componentIndex]) {
+    componentDefinition: T,
+    args: ComponentDefinitionArgs<T>
+  ): ComponentDefinitionInstance<T> {
+    if (entity._components[componentDefinition.componentIndex]) {
       throw new Error(
-        `Cannot add component ${clazz.name}, entity with id ${entity.id} already has this component`
+        `Cannot add component ${componentDefinition.name}, entity with id ${entity.id} already has this component`
       )
     }
 
-    const component = this.componentPool.request(clazz)
-    component._entity = entity
-    component.construct(...(args ?? []))
+    let component: ComponentDefinitionInstance<T>
 
-    entity._components[clazz.componentIndex] = component
-    entity._componentsBitSet.add(component._class.componentIndex)
-
-    if (entity.initialised) {
-      this.initialiseComponent(component)
+    if (componentDefinition.type === ComponentDefinitionType.CLASS) {
+      const classComponent = this.componentPool.request(
+        componentDefinition as ComponentClass
+      )
+      classComponent.construct(...(args ?? []))
+      component = classComponent as ComponentDefinitionInstance<T>
+    } else if (componentDefinition.type === ComponentDefinitionType.OBJECT) {
+      component = args[0] as ComponentDefinitionInstance<T>
+    } else {
+      component = {} as ComponentDefinitionInstance<T>
     }
 
-    return component as T
+    const internal = component as InternalComponentInstanceProperties
+    internal._arancini_entity = entity
+    internal._arancini_id = uniqueId()
+    internal._arancini_component_definition = componentDefinition
+
+    entity._components[componentDefinition.componentIndex] = component
+    entity._componentsBitSet.add(componentDefinition.componentIndex)
+
+    if (entity.initialised && component instanceof Component) {
+      component.onInit()
+    }
+
+    return component as ComponentDefinitionInstance<T>
   }
 
   /**
    * Removes a component from an entity
    * @param entity the entity to remove from
-   * @param value the component or component class to remove
+   * @param componentDefinition the component to remove
    */
-  removeComponentFromEntity(
+  removeComponentFromEntity<T extends ComponentDefinition<unknown>>(
     entity: Entity,
-    value: Component | ComponentClass,
+    componentDefinition: T,
     updateBitSet: boolean
   ): void {
-    let component: Component | undefined
-    if (value instanceof Component) {
-      if (!entity._components[value._class.componentIndex]) {
-        throw new Error('Component instance does not exist in Entity')
-      }
-      component = value
-    } else {
-      component = entity.find(value)
-      if (component === undefined) {
-        throw new Error('Component does not exist in Entity')
-      }
+    const component = entity.find(componentDefinition)
+    if (component === undefined) {
+      throw new Error('Component does not exist in Entity')
     }
 
-    component.onDestroy()
+    const internal = component as InternalComponentInstanceProperties
+    const { componentIndex } = internal._arancini_component_definition!
 
-    delete entity._components[component._class.componentIndex]
+    const isClass =
+      internal._arancini_component_definition!.type ===
+      ComponentDefinitionType.CLASS
+
+    delete entity._components[componentIndex]
 
     if (updateBitSet) {
-      entity._componentsBitSet.remove(component._class.componentIndex)
+      entity._componentsBitSet.remove(componentIndex)
     }
 
-    // reset and recycle the component object
-    component._id = uniqueId()
-    ;(component._entity as unknown) = undefined
-    this.componentPool.recycle(component)
+    if (isClass) {
+      ;(component as Component)?.onDestroy()
+
+      internal._arancini_id = uniqueId()
+      internal._arancini_entity = undefined
+      this.componentPool.recycle(component as Component)
+    } else {
+      delete internal._arancini_entity
+      delete internal._arancini_component_definition
+      delete internal._arancini_id
+    }
   }
 
   /**
@@ -155,15 +187,9 @@ export class EntityManager {
     )
 
     for (const component of Object.values(entity._components)) {
-      this.initialiseComponent(component)
+      if (component instanceof Component) {
+        component.onInit()
+      }
     }
-  }
-
-  /**
-   * Initialises a component
-   * @param component the component to initialise
-   */
-  private initialiseComponent(component: Component): void {
-    component.onInit()
   }
 }

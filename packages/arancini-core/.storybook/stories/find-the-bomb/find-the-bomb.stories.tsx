@@ -3,17 +3,17 @@ import React, { useEffect } from 'react'
 
 import './find-the-bomb.css'
 
-const GameState = Component.data<{ clicks: number; foundBomb: boolean }>('GameState')
+const GameState = Component.object<{ clicks: number; foundBomb: boolean }>('GameState')
 
-const Emoji = Component.data<{
+const Emoji = Component.object<{
   revealed: boolean
   dirty: boolean
   domElement: HTMLElement
 }>('Emoji')
 
-const Position = Component.data<{ x: number; y: number }>('Position')
+const Position = Component.object<{ x: number; y: number }>('Position')
 
-const DistanceToTarget = Component.data<{ distance: number }>('DistanceToTarget')
+const DistanceToTarget = Component.object<{ distance: number }>('DistanceToTarget')
 
 const Target = Component.tag('Target')
 

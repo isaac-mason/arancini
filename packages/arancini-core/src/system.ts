@@ -1,4 +1,4 @@
-import { ComponentClass } from './component'
+import { ComponentDefinition, ComponentDefinitionInstance } from './component'
 import type { QueryDescription } from './query'
 import { Query } from './query'
 import type { SystemSingletonPlaceholder } from './system-manager'
@@ -144,18 +144,18 @@ export abstract class System {
    * Shortcut for creating a query for a singleton component.
    * @param clazz the singleton component class
    */
-  protected singleton<T extends ComponentClass>(
-    clazz: T,
+  protected singleton<T extends ComponentDefinition<unknown>>(
+    componentDefinition: T,
     options?: SystemQueryOptions
-  ): InstanceType<T> | undefined {
+  ): ComponentDefinitionInstance<T> | undefined {
     const placeholder: SystemSingletonPlaceholder = {
       __internal: {
         placeholder: true,
-        componentClass: clazz,
+        componentDefinition,
         options,
       },
     }
 
-    return placeholder as InstanceType<T> | undefined
+    return placeholder as ComponentDefinitionInstance<T> | undefined
   }
 }

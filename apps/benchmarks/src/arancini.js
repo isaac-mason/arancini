@@ -9,8 +9,8 @@ class Position extends Component {
 
 class Velocity extends Component {
   construct() {
-    this.dx = Math.random - 0.5
-    this.dy = Math.random - 0.5
+    this.dx = Math.random() - 0.5
+    this.dy = Math.random() - 0.5
   }
 }
 

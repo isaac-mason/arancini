@@ -14,9 +14,7 @@ If you aren't familiar with Entity Component Systems, this is a good read: https
 
 TL;DR: ECS is a data-oriented architecture for structuring your application.
 
-In arancini, components are defined as classes and can contain data. You can then use queries to find entities that have certain components, and run logic on them. Arancini has built-in support for Systems, but you can also use queries alone to roll your own "System" logic.
-
-Object-pooling is a core feature of arancini. Arancini will pool and re-use entity and component objects for you! This helps avoid garbage collection and improves performance.
+Object-pooling is a core feature of arancini. Arancini will help you structure your application in a way that avoids garbage collection.
 
 ## Packages
 
@@ -86,34 +84,15 @@ const entity = world.create();
 entity.destroy();
 ```
 
-> **Note:** You should avoid storing references to entities and components - arancini pools/recycles entity and component objects. Use queries to find entities that have certain components, run logic on them, and then discard the references.
+> **Note:** You should avoid storing references to entities and components. Use queries to find entities that have certain components, run logic on them, and then discard the references.
 
 ### 📦 Component
 
-Components are containers for data. There are multiple ways to define components.
+Components are containers for data. There are multiple ways to define components:
 
-#### Basic Data Component
+#### Class Components
 
-You can use the `Component.data` utility to define a basic data component.
-
-```ts
-import { Component } from "arancini";
-
-const PositionComponent = Component.data<{ x: number; y: number }>();
-
-world.registerComponent(PositionComponent);
-
-const entity = world.create();
-const position = entity.add(PositionComponent, { x: 1, y: 2 });
-
-console.log(position.x, position.y); // 1, 2
-```
-
-> **Note:** If you want some properties to be optional, you should include them as `undefined`. Otherwise, the previous value from a recycled component may be present. It may be more straightforward to define a component with the below method.
-
-#### Custom Component
-
-The basic method is succinct, but it doesn't exploit all of arancini's features. To get the most out of arancini, you can define your components as classes that extend the `Component` class.
+To get the most out of arancini, you should define your components as classes that extend the `Component` class. Components defined this way will be object pooled by arancini.
 
 You can define a `construct` method on your components, which will be called every time a component object is created or re-used. You can also define `onInit` and `onDestroy` methods, which will be called when the component is added or removed from an entity.
 
@@ -128,15 +107,65 @@ class PositionComponent extends Component {
   }
 }
 
+class InventoryComponent extends Component {
+  inventory = new Map<string, number>();
+
+  construct() {
+    this.inventory.clear();
+  }
+}
+
 world.registerComponent(PositionComponent);
+world.registerComponent(InventoryComponent);
 
 entity.add(Position, 10, 20);
+entity.add(Inventory);
+
 entity.remove(Position);
+entity.remove(Inventory);
 ```
 
-> **Note:** In typescript you need to use the not null `!:` syntax to indicate that the properties should be defined, as they will be set in the `construct` method.
+> **Note:** In typescript you can use the not null `!:` syntax to indicate that the properties should be defined if they are set in the `construct` method.
 
-> **Note:** Components must be registered with the world before they can be used. You can register components after the world is initialised, but doing so will cause a small performance hit as internal data structures need to be updated.
+#### Object Components
+
+You can use `Component.object()` to create a object component definition. Object components are not pooled by arancini. They are ideal for objects from external libraries that don't benefit from object pooling.
+
+```ts
+import { Component } from "arancini";
+import { Object3D } from "three"; 
+
+const Object3DComponent = Component.object<Object3D>();
+
+world.registerComponent(Object3DComponent);
+
+const entity = world.create();
+
+const object3D = entity.add(Object3DComponent, new Object3D());
+```
+
+#### Tag Components
+
+You can use the `Component.tag` utility to define a tag component. Tag components are useful for marking entities without storing any data.
+
+```ts
+import { Component } from "arancini";
+
+const PlayerComponent = Component.tag();
+
+world.registerComponent(PlayerComponent);
+
+const entity = world.create();
+entity.add(PlayerComponent);
+
+console.log(entity.has(PlayerComponent)); // true
+```
+
+#### Registering components
+
+Components must be registered with the world before they can be used. You can register components after the world is initialised, but doing so will cause a small performance hit as internal data structures need to be updated.
+
+#### Bulk updates
 
 Adding or removing a component from an entity will cause queries to be updated. To avoid unnecessary updates, you can use `entity.bulk` to add or remove multiple components in a single operation.
 
@@ -147,6 +176,8 @@ entity.bulk(() => {
   entity.remove(Health);
 });
 ```
+
+#### Using components in multiple worlds
 
 **You can only register a component with one world.** If you want to use the same component in multiple worlds, you can create a base class and extend it for each world. For example:
 

@@ -1,4 +1,4 @@
-import type { ComponentClass } from './component'
+import type { ComponentDefinition } from './component'
 import type { Entity } from './entity'
 import { Topic } from './events'
 import type { BitSet } from './utils/bit-set'
@@ -17,11 +17,11 @@ export const QueryConditionType = {
  * Type for query conditions
  */
 export type QueryDescription =
-  | ComponentClass[]
+  | ComponentDefinition<unknown>[]
   | {
-      [QueryConditionType.ALL]?: ComponentClass[]
-      [QueryConditionType.NOT]?: ComponentClass[]
-      [QueryConditionType.ANY]?: ComponentClass[]
+      [QueryConditionType.ALL]?: ComponentDefinition<unknown>[]
+      [QueryConditionType.NOT]?: ComponentDefinition<unknown>[]
+      [QueryConditionType.ANY]?: ComponentDefinition<unknown>[]
     }
 
 export type QueryBitSets = {
@@ -169,16 +169,16 @@ export class Query {
     queryDescription: QueryDescription
   ): string {
     if (Array.isArray(queryDescription)) {
-      return queryDescription.map((c) => `${c.name}`).join('&')
+      return queryDescription.map((c) => `${c.componentIndex}`).join('&')
     }
 
     return Object.entries(queryDescription)
       .flatMap(([type, components]) => {
         if (type === QueryConditionType.ALL) {
-          return components.map((c) => `${c.name}`).sort()
+          return components.map((c) => `${c.componentIndex}`).sort()
         }
 
-        return [`${type}:${components.sort().map((c) => c.name)}`]
+        return [`${type}:${components.sort().map((c) => c.componentIndex)}`]
       })
       .sort()
       .join('&')

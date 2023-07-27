@@ -14,36 +14,22 @@ export default {
 
 const SelectedComponent = A.Component.tag('Selected')
 
-class CameraComponent extends A.Component {
-  camera!: THREE.PerspectiveCamera
+const CameraComponent = A.Component.object<THREE.PerspectiveCamera>('Camera')
 
-  construct(camera: THREE.PerspectiveCamera): void {
-    this.camera = camera
-  }
-}
-
-class Object3DComponent extends A.Component {
-  object3D!: THREE.Object3D
-
-  construct(object3D: THREE.Object3D): void {
-    this.object3D = object3D
-  }
-}
+const Object3DComponent = A.Component.object<THREE.Object3D>('Object3D')
 
 /* systems */
 
 class CameraSystem extends A.System {
   selectedQuery = this.query([SelectedComponent, Object3DComponent])
 
-  cameraComponent = this.singleton(CameraComponent, { required: true })!
+  camera = this.singleton(CameraComponent, { required: true })!
 
   private lerpedLookAt = new THREE.Vector3(0, 0, 0)
 
   onUpdate(delta: number) {
-    const { camera } = this.cameraComponent
-
-    const selected = this.selectedQuery.entities.map(
-      (entity) => entity.get(Object3DComponent).object3D
+    const selected = this.selectedQuery.entities.map((entity) =>
+      entity.get(Object3DComponent)
     )
 
     const lookAt = new THREE.Vector3(0, 0, 0)
@@ -56,7 +42,7 @@ class CameraSystem extends A.System {
     }
 
     this.lerpedLookAt = this.lerpedLookAt.lerp(lookAt, 10 * delta)
-    camera.lookAt(this.lerpedLookAt)
+    this.camera.lookAt(this.lerpedLookAt)
   }
 }
 

@@ -36,9 +36,9 @@ export type QueryEntitiesProps = {
   children: ReactNode | ((entity: A.Entity) => ReactNode)
 }
 
-export type ComponentProps<T extends A.Component> = {
-  type: A.ComponentClass<T>
-  args?: Parameters<T['construct']>
+export type ComponentProps<T extends A.ComponentDefinition<unknown>> = {
+  type: T
+  args?: A.ComponentDefinitionArgs<T>
   children?: ReactNode
 }
 
@@ -137,7 +137,7 @@ export const createECS = (world: A.World) => {
     return <Entities entities={entities} children={children} />
   }
 
-  const Component = <T extends A.Component>({
+  const Component = <T extends A.ComponentDefinition<unknown>>({
     args: argsProp,
     children,
     type,
@@ -157,7 +157,7 @@ export const createECS = (world: A.World) => {
 
       const { entity } = entityCtx
 
-      let args: Parameters<T['construct']>
+      let args: A.ComponentDefinitionArgs<T>
       if (children) {
         // if children are passed in, use them as the component's args
         args = [childRef] as never
@@ -170,8 +170,12 @@ export const createECS = (world: A.World) => {
 
       return () => {
         // check if the entity has the component before removing it
-        if (entity.find(newComponent._class) === newComponent) {
-          entity.remove(newComponent)
+        const internal = newComponent as A.InternalComponentInstanceProperties
+        if (
+          internal?._arancini_component_definition &&
+          entity.has(internal._arancini_component_definition!)
+        ) {
+          entity.remove(internal._arancini_component_definition!)
         }
       }
     }, [entityCtx, childRef, type, ...(argsProp ?? [])])
