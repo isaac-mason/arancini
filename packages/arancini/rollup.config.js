@@ -7,7 +7,7 @@ import filesize from 'rollup-plugin-filesize'
 
 const commonOutput = {
   format: 'es',
-  sourcemap: 'inline',
+  sourcemap: true,
   exports: 'named',
 }
 
@@ -24,7 +24,7 @@ const plugins = [
 export default [
   {
     input: `./src/index.ts`,
-    external: ['@recast-navigation/core'],
+    external: ['@arancini/core'],
     output: [
       {
         file: `./index.js`,

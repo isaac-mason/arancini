@@ -12,13 +12,11 @@ If you aren't familiar with Entity Component Systems, this is a good read: https
 
 TL;DR: ECS is a data-oriented architecture for structuring your application.
 
-Object-pooling is one of the differentiating features of arancini. Arancini will help you structure your application in a way that avoids garbage collection.
-
 ## Packages
 
 You can install all of arancini with the umbrella `arancini` package, or you can install particular packages.
 
-> **Note:** arancini ships as ESM only
+> **Note:** arancini ships as ECMAScript modules.
 
 ### [**`arancini`**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini)
 

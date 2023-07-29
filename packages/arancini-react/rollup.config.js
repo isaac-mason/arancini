@@ -13,7 +13,7 @@ export default [
       {
         file: `dist/index.es.js`,
         format: 'es',
-        sourcemap: 'inline',
+        sourcemap: true,
         exports: 'named',
       },
     ],
