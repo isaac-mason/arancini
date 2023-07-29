@@ -12,7 +12,7 @@ export default [
       {
         file: `dist/index.es.js`,
         format: 'es',
-        sourcemap: true,
+        sourcemap: 'inline',
         exports: 'named',
       },
     ],
@@ -23,7 +23,7 @@ export default [
       typescript({
         tsconfig: path.resolve(__dirname, `tsconfig.json`),
         sourceMap: true,
-        inlineSources: true,
+        inlineSourceMap: false,
       }),
       filesize(),
     ],

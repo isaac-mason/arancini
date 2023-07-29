@@ -6,7 +6,6 @@
     "lib": ["ES2022", "DOM"],
     "moduleResolution": "Node",
     "strict": true,
-    "sourceMap": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
@@ -20,7 +19,9 @@
     "rootDir": "./src",
     "allowSyntheticDefaultImports": true,
     "jsx": "react-jsx",
-    "outDir": ".",
+    "outDir": "."
   },
-  "files": ["./src/index.ts", "./src/react.ts"]
+  "include": ["./src"],
+  "files": ["./src/index.ts", "./src/react.ts"],
+  "exclude": ["./index.d.ts", "./react.d.ts"]
 }

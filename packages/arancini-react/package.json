@@ -14,7 +14,8 @@
   "scripts": {
     "test": "vitest run --coverage",
     "test:watch": "vitest",
-    "build": "rollup --config rollup.config.js --bundleConfigAsCjs",
+    "build": "yarn build:before && rollup --config rollup.config.js --bundleConfigAsCjs",
+    "build:before": "rm -rf dist",
     "storybook": "storybook dev -p 6008",
     "build-storybook": "storybook build"
   },

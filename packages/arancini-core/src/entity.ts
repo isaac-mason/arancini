@@ -104,7 +104,6 @@ export class Entity {
 
   /**
    * Removes a component from the entity and destroys it
-   * The value can either be a Component constructor, or the component instance itself
    * @param value the component to remove and destroy
    */
   remove(component: ComponentDefinition<unknown>): Entity {
