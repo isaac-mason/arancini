@@ -7,7 +7,7 @@ import filesize from 'rollup-plugin-filesize'
 
 const commonOutput = {
   format: 'es',
-  sourcemap: true,
+  sourcemap: 'inline',
   exports: 'named',
 }
 
@@ -17,8 +17,6 @@ const plugins = [
   commonjs(),
   typescript({
     tsconfig: path.resolve(__dirname, `tsconfig.json`),
-    sourceMap: true,
-    inlineSources: true,
   }),
   filesize(),
 ]

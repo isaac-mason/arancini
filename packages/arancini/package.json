@@ -15,7 +15,8 @@
     "url": "https://github.com/isaac-mason/arancini/issues"
   },
   "scripts": {
-    "build": "rollup --config rollup.config.js --bundleConfigAsCjs",
+    "build": "yarn build:before && rollup --config rollup.config.js --bundleConfigAsCjs",
+    "build:before": "(rm index.js index.d.ts react.js react.d.ts || true)",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
