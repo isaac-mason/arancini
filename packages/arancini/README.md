@@ -3,18 +3,16 @@
 Arancini is an object based Entity Component System. You can use arancini to structure demanding applications such as games and simulations.
 
 - 💪 ‎ Flexible and extensible
-- 🔍 ‎ Reactive queries
+- 🔍 ‎ Fast reactive queries powered by bitsets
 - 🗑️ ‎ Built-in object pooling to help avoid garbage collection
 - 🍃 ‎ Less than 4kB minified + gzipped
 - 🖇 ‎ [Easy integration with React](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-react)
-
-## Overview
 
 If you aren't familiar with Entity Component Systems, this is a good read: https://github.com/SanderMertens/ecs-faq
 
 TL;DR: ECS is a data-oriented architecture for structuring your application.
 
-Object-pooling is a core feature of arancini. Arancini will help you structure your application in a way that avoids garbage collection.
+Object-pooling is one of the differentiating features of arancini. Arancini will help you structure your application in a way that avoids garbage collection.
 
 ## Packages
 
