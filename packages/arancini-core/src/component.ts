@@ -236,7 +236,7 @@ export abstract class Component {
   /**
    * Creates an object component definition with the given type.
    *
-   * @param name an optional name for the component definition
+   * @param name an optional name for the component, useful for debugging
    * @return object component definition
    *
    * @example
@@ -258,9 +258,9 @@ export abstract class Component {
   }
 
   /**
-   * Creates a tag component
-   * @param name an optional name for the component
-   * @returns tag component
+   * Creates a tag component definition.
+   * @param name an optional name for the component, useful for debugging
+   * @returns tag component definition
    *
    * @example
    * ```ts
