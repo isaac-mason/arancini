@@ -1,5 +1,15 @@
 # @arancini/react
 
+## 3.1.0
+
+### Minor Changes
+
+- e19b6a3: fix: don't init the World in createECS
+
+### Patch Changes
+
+- @arancini/core@3.1.0
+
 ## 3.0.0
 
 ### Major Changes
