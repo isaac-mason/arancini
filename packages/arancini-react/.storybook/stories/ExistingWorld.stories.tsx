@@ -11,6 +11,7 @@ export default {
 }
 
 const world = new A.World()
+world.init()
 
 const ECS = createECS(world)
 

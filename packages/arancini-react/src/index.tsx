@@ -45,10 +45,6 @@ export type ComponentProps<T extends A.ComponentDefinition<unknown>> = {
 export const createECS = (world: A.World) => {
   const entityContext = createContext(null! as EntityProviderContext)
 
-  if (!world.initialised) {
-    world.init()
-  }
-
   const update = (delta: number) => {
     world.update(delta)
   }

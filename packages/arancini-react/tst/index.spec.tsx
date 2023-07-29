@@ -19,6 +19,8 @@ class ExampleComponentWithArgs extends A.Component {
 describe('createECS', () => {
   it('should be truthy', () => {
     const world = new A.World()
+    world.init()
+
     const ECS = createECS(world)
 
     expect(ECS).toBeTruthy()
@@ -28,6 +30,8 @@ describe('createECS', () => {
   describe('<Entity>', () => {
     it('should create an entity', () => {
       const world = new A.World()
+      world.init()
+
       const ECS = createECS(world)
 
       render(<ECS.Entity />)
@@ -37,6 +41,8 @@ describe('createECS', () => {
 
     it('should support taking an existing entity via props', () => {
       const world = new A.World()
+      world.init()
+
       const ECS = createECS(world)
 
       const entity = world.create()
@@ -49,6 +55,8 @@ describe('createECS', () => {
 
     it('supports refs', () => {
       const world = new A.World()
+      world.init()
+
       const ECS = createECS(world)
 
       const ref = React.createRef<A.Entity>()
@@ -64,6 +72,8 @@ describe('createECS', () => {
   describe('<Entities>', () => {
     it('should add components to entities', () => {
       const world = new A.World()
+      world.init()
+
       const ECS = createECS(world)
 
       world.registerComponent(ExampleComponent)
@@ -85,6 +95,8 @@ describe('createECS', () => {
   describe('<QueryEntities>', () => {
     it('should render entities that match the query description', () => {
       const world = new A.World()
+      world.init()
+
       const ECS = createECS(world)
 
       world.registerComponent(ExampleComponent)
@@ -120,6 +132,8 @@ describe('createECS', () => {
 
     it('should render entities that match the query instance', () => {
       const world = new A.World()
+      world.init()
+
       const ECS = createECS(world)
 
       world.registerComponent(ExampleComponent)
@@ -159,6 +173,8 @@ describe('createECS', () => {
   describe('<Component>', () => {
     it('should add and remove the given component to an entity', () => {
       const world = new A.World()
+      world.init()
+
       const ECS = createECS(world)
 
       world.registerComponent(ExampleComponent)
@@ -182,6 +198,8 @@ describe('createECS', () => {
 
     it('should call construct with the args prop', () => {
       const world = new A.World()
+      world.init()
+
       const ECS = createECS(world)
 
       world.registerComponent(ExampleComponentWithArgs)
@@ -199,6 +217,8 @@ describe('createECS', () => {
 
     it('should capture child ref and use it as a component arg', () => {
       const world = new A.World()
+      world.init()
+
       const ECS = createECS(world)
 
       world.registerComponent(ExampleComponentWithArgs)
@@ -229,6 +249,8 @@ describe('createECS', () => {
   describe('useQuery', () => {
     it('should return a reactive query instance when given a query description', () => {
       const world = new A.World()
+      world.init()
+
       const ECS = createECS(world)
 
       world.registerComponent(ExampleComponent)
@@ -252,6 +274,8 @@ describe('createECS', () => {
 
     it('should return a reactive query instance when given a query instance', () => {
       const world = new A.World()
+      world.init()
+
       const ECS = createECS(world)
 
       world.registerComponent(ExampleComponent)
@@ -279,6 +303,8 @@ describe('createECS', () => {
   describe('useCurrentEntity', () => {
     it('should return the current entity', () => {
       const world = new A.World()
+      world.init()
+
       const ECS = createECS(world)
 
       const entity = world.create()
@@ -296,6 +322,8 @@ describe('createECS', () => {
   describe('update', () => {
     it('should update the world', () => {
       const world = new A.World()
+      world.init()
+
       const ECS = createECS(world)
 
       const onUpdate = vi.fn()

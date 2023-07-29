@@ -38,8 +38,8 @@ const world = new World()
 
 world.registerComponent(ThreeComponent)
 world.registerComponent(AngularVelocity)
-
 world.registerSystem(LinearVelocitySystem)
+world.init()
 
 const ECS = createECS(world)
 
