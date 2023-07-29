@@ -1,5 +1,22 @@
 # @arancini/core
 
+## 3.0.0
+
+### Major Changes
+
+- 4b4891b: feat: remove Spaces
+
+  Spaces were not useful in practise, removing to simplify the API.
+
+- 4b4891b: feat: change `world.create.entity()` to `world.create()`
+- 4b4891b: drop support for cjs, output esm only
+- 4b4891b: feat: change `world.query()` to `world.find()` for getting once-off results, change `world.create.query()` to `world.query()`
+- 3a33332: feat: add new component types, object components and tag components
+
+### Minor Changes
+
+- 4b4891b: feat: add `entity.bulk()` api for adding and removing components in a single operation
+
 ## 2.3.0
 
 ### Minor Changes
