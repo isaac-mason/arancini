@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { Entity } from '../entity'
-import { World } from '../world'
-import { EntityPool } from './entity-pool'
+import { Entity } from '../../src/entity'
+import { EntityPool } from '../../src/pools/entity-pool'
+import { World } from '../../src/world'
 
 describe('EntityPool', () => {
   let world = new World()

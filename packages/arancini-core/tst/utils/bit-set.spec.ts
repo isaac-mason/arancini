@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { BitSet } from './bit-set'
+import { BitSet } from '../../src/utils/bit-set'
 
 describe('BitSet', () => {
   describe('add, remove, has', () => {

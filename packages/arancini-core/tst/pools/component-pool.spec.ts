@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { Component } from '../component'
-import { World } from '../world'
-import { ComponentPool } from './component-pool'
+import { Component } from '../../src/component'
+import { ComponentPool } from '../../src/pools/component-pool'
+import { World } from '../../src/world'
 
 describe('ComponentPool', () => {
   class ExampleComponentOne extends Component {}
