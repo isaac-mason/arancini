@@ -100,12 +100,12 @@ export abstract class System {
   }
 
   /**
-   * Logic for destruction of the system. Called on removing a System from the World.
+   * Logic for destruction of the system. Called on destroying the World, or removing the System from the World.
    */
   onDestroy(): void {}
 
   /**
-   * Logic for initialisation of the system. Called during System construction.
+   * Logic for initialising of the system. Called when initialising the World, or on adding the System to an initialised World.
    */
   onInit(): void {}
 
