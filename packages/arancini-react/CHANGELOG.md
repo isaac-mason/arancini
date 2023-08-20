@@ -1,5 +1,12 @@
 # @arancini/react
 
+## 3.1.1
+
+### Patch Changes
+
+- Updated dependencies [3c18e5e]
+  - @arancini/core@3.1.1
+
 ## 3.1.0
 
 ### Minor Changes
