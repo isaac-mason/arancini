@@ -193,8 +193,8 @@ const App = () => {
       </ECS.QueryEntities>
 
       {/* lights */}
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, -2]} />
+      <ambientLight intensity={1.5} />
+      <directionalLight intensity={3} position={[10, 10, -2]} />
     </>
   )
 }

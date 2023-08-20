@@ -135,8 +135,8 @@ const App = () => {
 
       <Camera />
 
-      <ambientLight intensity={0.5} />
-      <pointLight position={[5, 10, 5]} />
+      <ambientLight intensity={1.5} />
+      <directionalLight intensity={3} position={[5, 10, 5]} />
     </>
   )
 }
