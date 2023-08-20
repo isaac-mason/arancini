@@ -1,5 +1,11 @@
 # @arancini/core
 
+## 3.1.1
+
+### Patch Changes
+
+- 3c18e5e: feat(System): jsdoc improvement
+
 ## 3.1.0
 
 ## 3.0.0
