@@ -23,7 +23,7 @@
     "build-storybook": "storybook build"
   },
   "devDependencies": {
-    "@babel/core": "^7.21.4",
+    "@babel/core": "^7.22.10",
     "@babel/preset-env": "^7.22.7",
     "@babel/preset-typescript": "^7.21.4",
     "@mdx-js/react": "^2.3.0",
