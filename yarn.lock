@@ -85,7 +85,7 @@ __metadata:
     "@babel/preset-react": ^7.18.6
     "@babel/preset-typescript": ^7.21.4
     "@mdx-js/react": ^2.3.0
-    "@react-three/drei": ^9.78.2
+    "@react-three/drei": ^9.80.4
     "@react-three/fiber": ^8.13.4
     "@rollup/plugin-commonjs": ^25.0.4
     "@rollup/plugin-node-resolve": ^15.0.1
@@ -3330,9 +3330,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/drei@npm:^9.78.2":
-  version: 9.79.4
-  resolution: "@react-three/drei@npm:9.79.4"
+"@react-three/drei@npm:^9.80.4":
+  version: 9.80.4
+  resolution: "@react-three/drei@npm:9.80.4"
   dependencies:
     "@babel/runtime": ^7.11.2
     "@mediapipe/tasks-vision": 0.10.2
@@ -3364,7 +3364,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: eb62f53c4287d40bb86a845d3879bafb67a560a439435d4b14d899313467f12d843a8512701ab11a29afe6f8c79c2fa7afb6119ad0d3f514a2aa017440ce04fd
+  checksum: 131370a06ba57fac6ab827c5f4918eef96c3e843180335bf0ea8c031cf47d9ea9944404573a525ec285b47b4710a45e88e8b0aa7f35d867538f4bea9d49c0793
   languageName: node
   linkType: hard
 
@@ -12282,7 +12282,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "react-demo@workspace:apps/react-demo"
   dependencies:
-    "@react-three/drei": ^9.78.2
+    "@react-three/drei": ^9.80.4
     "@react-three/fiber": ^8.13.4
     "@types/react": ^18.0.27
     "@types/react-dom": ^18.0.10
