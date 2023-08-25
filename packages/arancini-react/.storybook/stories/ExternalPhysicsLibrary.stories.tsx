@@ -21,13 +21,7 @@ const boxBoxContactMaterial = new P2.ContactMaterial(
 
 const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
 
-class RigidBodyComponent extends Component {
-  body!: P2.Body
-
-  construct(body: P2.Body) {
-    this.body = body
-  }
-}
+const RigidBodyComponent = Component.object<P2.Body>('RigidBody')
 
 class PhysicsSystem extends System {
   bodiesQuery = this.query([RigidBodyComponent])
@@ -41,7 +35,7 @@ class PhysicsSystem extends System {
     this.physicsWorld.addContactMaterial(boxBoxContactMaterial)
 
     this.bodiesQuery.onEntityAdded.add((added) => {
-      const body = added.get(RigidBodyComponent).body
+      const body = added.get(RigidBodyComponent)
       this.bodies.set(added.id, body)
       this.physicsWorld.addBody(body)
     })
@@ -62,7 +56,7 @@ class PhysicsSystem extends System {
       const object3D = entity.find(Object3DComponent)
       if (object3D === undefined) continue
 
-      const { body } = entity.get(RigidBodyComponent)
+      const body = entity.get(RigidBodyComponent)
       object3D.position.set(body.position[0], body.position[1], 0)
       object3D.rotation.set(0, 0, body.angle)
     }
@@ -76,10 +70,6 @@ world.registerSystem(PhysicsSystem)
 world.init()
 
 const ECS = createECS(world)
-
-const Queries = {
-  TO_RENDER: ECS.world.query([RigidBodyComponent]),
-}
 
 const Plane = () => {
   const planeBody = useMemo(() => {
@@ -147,18 +137,18 @@ const App = () => {
       </Repeat>
 
       {/* render rigid bodies */}
-      <ECS.QueryEntities query={Queries.TO_RENDER}>
+      <ECS.QueryEntities query={[RigidBodyComponent]}>
         {(entity) => {
-          const colliderComponent = entity.get(RigidBodyComponent)
+          const body = entity.get(RigidBodyComponent)
 
           const boxes: P2.Box[] = []
           const planes: P2.Plane[] = []
 
-          for (const shape of colliderComponent.body.shapes) {
-            if (shape instanceof P2.Box) {
-              boxes.push(shape)
-            } else if (shape instanceof P2.Plane) {
-              planes.push(shape)
+          for (const shape of body.shapes) {
+            if (shape.type === P2.Shape.BOX) {
+              boxes.push(shape as P2.Box)
+            } else if (shape.type === P2.Shape.PLANE) {
+              planes.push(shape as P2.Plane)
             }
           }
 

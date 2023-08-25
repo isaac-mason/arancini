@@ -187,7 +187,7 @@ export const RandomColorChangingWalkers = () => {
 
     return () => {
       running = false
-      world.destroy()
+      world.reset()
     }
   })
 

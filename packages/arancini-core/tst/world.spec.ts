@@ -28,15 +28,15 @@ describe('World', () => {
     expect(systems[0].__internal.class).toBe(TestSystem)
   })
 
-  test('destroy', () => {
+  test('reset', () => {
     world.create()
 
     expect(world.initialised).toBe(true)
-    expect(world.entities.size).toBe(1)
+    expect(world.entities.length).toBe(1)
 
-    world.destroy()
+    world.reset()
 
     expect(world.initialised).toBe(false)
-    expect(world.entities.size).toBe(0)
+    expect(world.entities.length).toBe(0)
   })
 })

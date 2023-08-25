@@ -1,15 +1,9 @@
 import { Entity } from './entity'
 
-export type ComponentClass<T extends Component | Component = Component> = {
-  new (...args: unknown[]): T
-  componentIndex: number
-  type: typeof ComponentDefinitionType.CLASS
-}
-
 export const ComponentDefinitionType = {
-  CLASS: 0,
-  OBJECT: 1,
-  TAG: 2,
+  CLASS: 1,
+  OBJECT: 2,
+  TAG: 3,
 } as const
 
 /**
@@ -18,22 +12,17 @@ export const ComponentDefinitionType = {
 export type InternalComponentInstanceProperties = {
   _arancini_component_definition?: ComponentDefinition<unknown>
   _arancini_id?: string
-  _arancini_entity?: Entity
 }
 
-export type ComponentValue = Component | unknown
-
-export type ClassComponentDefinition<T extends ComponentValue = unknown> = {
-  type: typeof ComponentDefinitionType.CLASS
-
+export type ClassComponentDefinition<T = unknown> = {
   name?: string
   componentIndex: number
-  new (...args: unknown[]): T
+  objectPooled: boolean
 
   T?: T
-}
+} & { type: typeof ComponentDefinitionType.CLASS; new (): T }
 
-export type ObjectComponentDefinition<T extends ComponentValue = unknown> = {
+export type ObjectComponentDefinition<T = unknown> = {
   type: typeof ComponentDefinitionType.OBJECT
 
   name?: string
@@ -51,18 +40,16 @@ export type TagComponentDefinition = {
   T: undefined
 }
 
-export type ComponentDefinition<T extends ComponentValue = unknown> =
+export type ComponentDefinition<T = unknown> =
   | ClassComponentDefinition<T>
   | ObjectComponentDefinition<T>
   | TagComponentDefinition
 
-export type ComponentDefinitionInstance<
-  T extends ComponentDefinition<unknown>
-> =
+export type ComponentInstance<T extends ComponentDefinition<unknown>> =
   // class
   T['type'] extends typeof ComponentDefinitionType.CLASS
     ? T extends {
-        new (...args: unknown[]): infer U
+        new (...args: any[]): infer U
       }
       ? U
       : never
@@ -78,7 +65,7 @@ export type ComponentDefinitionArgs<T extends ComponentDefinition<unknown>> =
   // class
   T['type'] extends typeof ComponentDefinitionType.CLASS
     ? T extends {
-        new (...args: unknown[]): infer U
+        new (args: any[]): infer U
       }
       ? U extends { construct(...args: infer Args): void }
         ? Args
@@ -93,48 +80,38 @@ export type ComponentDefinitionArgs<T extends ComponentDefinition<unknown>> =
     : never
 
 /**
- * There are multiple ways to define a component in Arancini.
+ * Decorator for opting ia class component into being object objectPooled.
  *
- * You can define:
- * - an object component with the `Component.object` method
- * - a tag component with the `Component.tag` method
- * - a class component by extending the `Component` class
- *
- * To get the most out of arancini, you should use class components where possible.
- * Class components let you utilise arancini's object pooling and lifecycle features.
- *
- * @example defining an object component
+ * @example defining an object pooled component using the @objectPool decorator
  * ```ts
- * import { Component, World } from '@arancini/core'
+ * import { Component, objectPooled, World } from '@arancini/core'
  *
- * const PositionComponent = Component.object<{ x: number, y: number }>('Position')
- *
- * const world = new World()
- * world.registerComponent(PositionComponent)
- *
- * const entity = world.create()
- *
- * entity.add(PositionComponent, { x: 1, y: 2 })
+ * @objectPooled()
+ * class ExampleComponent extends Component {}
  * ```
  *
- * @example defining a tag component
- * ```ts
- * import { Component, World } from '@arancini/core'
+ * This can also be achieved by setting the `objectPooled` property on a component class
+ * @example vanilla js
+ * ```js
+ * import { Component } from '@arancini/core'
  *
- * const PoweredUpComponent = Component.tag('PoweredUp')
- *
- * const world = new World()
- * world.registerComponent(PoweredUpComponent)
- *
- * const entity = world.create()
- *
- * entity.add(PoweredUpComponent)
+ * class ExampleComponent extends Component {}
+ * ExampleComponent.objectPooled = true
  * ```
+ */
+export const objectPooled =
+  () => (target: { new (): Component; objectPooled: boolean }, _v?: any) => {
+    target.objectPooled = true
+  }
+
+/**
+ * The base class for class components.
  *
- * @example defining and creating a class component that extends the `Component` class
+ *  * @example defining and creating a class component that extends the `Component` class and uses the `@objectPooled` decorator
  * ```ts
- * import { Component, World } from '@arancini/core'
+ * import { Component, objectPooled, World } from '@arancini/core'
  *
+ * @objectPooled()
  * class ExampleComponent extends Component {
  *   // When using typescript, the `!:` not null assertion can be used as a "late-init" syntax.
  *   // You must take care to set all class properties in the `construct` method.
@@ -172,82 +149,49 @@ export type ComponentDefinitionArgs<T extends ComponentDefinition<unknown>> =
  * entity.add(ExampleComponent, x, y)
  * ```
  */
-export abstract class Component {
+export class Component {
+  construct(..._args: any[]): void {}
+  onInit() {}
+  onDestroy() {}
+
+  static componentIndex: number
+  static type = ComponentDefinitionType.CLASS
+  static objectPooled: boolean = false
+
+  entity!: Entity
+
   /**
-   * This component instances unique id
-   * @private internal
+   * @ignore
    */
   _arancini_id!: string
 
   /**
-   * The entity this component belongs to.
-   * @private internal
-   */
-  _arancini_entity!: Entity
-
-  /**
-   * The class the component was constructed from
-   * @private internal
+   * @ignore
    */
   _arancini_component_definition!: ComponentDefinition<unknown>
-
-  static componentIndex: number
-
-  static type = ComponentDefinitionType.CLASS
-
-  /**
-   * Properties can be be initialised with arguments with the `construct` method.
-   *
-   * Component instances are object pooled. To prevent unexpected behavior properties should be initialised or reset in the `construct` method.
-   *
-   * @example
-   * ```ts
-   * class MyComponent extends Component {
-   *   exampleNumber!: number;
-   *
-   *   exampleMap = new Map();
-   *
-   *   construct(): void {
-   *     this.exampleNumber = 0;
-   *
-   *     this.exampleMap.clear();
-   *   }
-   *
-   *   onInit(): void {
-   *     // because we used the not-null operator `!:` the type of `this.exampleProperty` here will be `number`, as opposed to `number | undefined`
-   *     this.exampleProperty += 1;
-   *   }
-   * }
-   * ```
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  construct(..._args: any[] | []) {}
-
-  /**
-   * Destruction logic
-   */
-  onDestroy(): void {}
-
-  /**
-   * Initialisation logic
-   */
-  onInit(): void {}
 
   /**
    * Creates an object component definition with the given type.
    *
-   * @param name an optional name for the component, useful for debugging
+   * @param name a name for the component
    * @return object component definition
    *
-   * @example
+   *  * @example defining an object component
    * ```ts
-   * import { object } from '@arancini/core'
+   * import { Component, World } from '@arancini/core'
    *
-   * const PositionComponent = object<{ x: number, y: number }>('Position')
+   * const PositionComponent = Component.object<{ x: number, y: number }>('Position')
+   *
+   * const world = new World()
+   * world.registerComponent(PositionComponent)
+   *
+   * const entity = world.create()
+   *
+   * entity.add(PositionComponent, { x: 1, y: 2 })
    * ```
    */
-  static object<T extends object>(name?: string) {
-    const componentDefinition: ComponentDefinition<T> = {
+  static object<T>(name: string) {
+    const componentDefinition: ObjectComponentDefinition<T> = {
       name,
       type: ComponentDefinitionType.OBJECT,
       componentIndex: -1,
@@ -259,18 +203,25 @@ export abstract class Component {
 
   /**
    * Creates a tag component definition.
-   * @param name an optional name for the component, useful for debugging
+   * @param name an name for the component
    * @returns tag component definition
    *
-   * @example
+   * @example defining a tag component
    * ```ts
-   * import { tag } from '@arancini/core'
+   * import { Component, World } from '@arancini/core'
    *
-   * const PoweredUpComponent = tag('PoweredUp')
+   * const PoweredUpComponent = Component.tag('PoweredUp')
+   *
+   * const world = new World()
+   * world.registerComponent(PoweredUpComponent)
+   *
+   * const entity = world.create()
+   *
+   * entity.add(PoweredUpComponent)
    * ```
    */
-  static tag(name?: string) {
-    const componentDefinition: ComponentDefinition<unknown> = {
+  static tag(name: string) {
+    const componentDefinition: TagComponentDefinition = {
       name,
       type: ComponentDefinitionType.TAG,
       componentIndex: -1,
@@ -279,4 +230,20 @@ export abstract class Component {
 
     return componentDefinition
   }
+}
+
+export const cloneComponentDefinition = <
+  T extends ComponentDefinition<unknown>,
+>(
+  componentDefinition: T
+): T => {
+  if (componentDefinition.type === ComponentDefinitionType.CLASS) {
+    const clone = class extends (componentDefinition as any) {} as T
+    clone.componentIndex = -1
+    return clone
+  }
+
+  const clone = { ...componentDefinition }
+  clone.componentIndex = -1
+  return clone
 }

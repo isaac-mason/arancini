@@ -1,10 +1,9 @@
 import * as A from '@arancini/core'
+import '@testing-library/jest-dom'
 import { act, render, renderHook } from '@testing-library/react'
 import React, { forwardRef, useImperativeHandle } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { createECS } from '../src'
-
-import '@testing-library/jest-dom'
 
 class ExampleComponent extends A.Component {}
 
@@ -36,7 +35,7 @@ describe('createECS', () => {
 
       render(<ECS.Entity />)
 
-      expect(world.entities.size).toBe(1)
+      expect(world.entities.length).toBe(1)
     })
 
     it('should support taking an existing entity via props', () => {
@@ -49,8 +48,8 @@ describe('createECS', () => {
 
       render(<ECS.Entity entity={entity} />)
 
-      expect(world.entities.size).toBe(1)
-      expect(world.entities.has(entity.id)).toBe(true)
+      expect(world.entities.length).toBe(1)
+      expect(world.has(entity)).toBe(true)
     })
 
     it('supports refs', () => {

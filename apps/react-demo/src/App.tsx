@@ -1,15 +1,9 @@
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Component, System, World } from 'arancini'
 import { createECS } from 'arancini/react'
-import { Object3D, Vector3, Vector3Tuple } from 'three'
+import { Vector3, Vector3Tuple } from 'three'
 
-class ThreeComponent extends Component {
-  object!: Object3D
-
-  construct(object: Object3D) {
-    this.object = object
-  }
-}
+const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
 
 class AngularVelocity extends Component {
   linvel!: Vector3
@@ -20,11 +14,11 @@ class AngularVelocity extends Component {
 }
 
 class LinearVelocitySystem extends System {
-  linvel = this.query([AngularVelocity, ThreeComponent])
+  linvel = this.query([AngularVelocity, Object3DComponent])
 
   onUpdate(delta: number): void {
     for (const entity of this.linvel) {
-      const { object } = entity.get(ThreeComponent)
+      const object = entity.get(Object3DComponent)
       const { linvel } = entity.get(AngularVelocity)
 
       object.rotation.x += linvel.x * delta
@@ -36,7 +30,7 @@ class LinearVelocitySystem extends System {
 
 const world = new World()
 
-world.registerComponent(ThreeComponent)
+world.registerComponent(Object3DComponent)
 world.registerComponent(AngularVelocity)
 world.registerSystem(LinearVelocitySystem)
 world.init()
@@ -51,7 +45,7 @@ const App = () => {
   return (
     <>
       <ECS.Entity>
-        <ECS.Component type={ThreeComponent}>
+        <ECS.Component type={Object3DComponent}>
           <mesh>
             <boxGeometry />
             <meshStandardMaterial color="orange" />

@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, test, vi } from 'vitest'
-import { Component, World } from '../src'
+import {
+  Component,
+  World,
+  cloneComponentDefinition,
+} from '../src'
 import { InternalComponentInstanceProperties } from '../dist'
 
 describe('Entities and Components', () => {
@@ -19,10 +23,10 @@ describe('Entities and Components', () => {
 
     // assert the entity has been reset
     expect(entity.id).not.toEqual(id)
-    expect(world.entities.has(entity.id)).toBe(false)
+    expect(world.has(entity)).toBe(false)
   })
 
-  describe('class component', () => {
+  describe('pooled class component', () => {
     test('with no construct args', () => {
       class TestComponent extends Component {}
 
@@ -58,7 +62,9 @@ describe('Entities and Components', () => {
   })
 
   test('object component', () => {
-    const TestComponent = Component.object<{ x: number; y: number }>()
+    const TestComponent = Component.object<{ x: number; y: number }>(
+      'TestComponent'
+    )
 
     world.registerComponent(TestComponent)
 
@@ -75,19 +81,17 @@ describe('Entities and Components', () => {
     const internal =
       testComponent as unknown as InternalComponentInstanceProperties
 
-    expect(internal._arancini_entity).toBe(entity)
     expect(internal._arancini_id).toBeTruthy()
     expect(internal._arancini_component_definition).toBe(TestComponent)
 
     entity.remove(TestComponent)
 
-    expect(internal._arancini_entity).toBeUndefined()
     expect(internal._arancini_id).toBeUndefined()
     expect(internal._arancini_component_definition).toBeUndefined()
   })
 
   test('tag component', () => {
-    const TagComponent = Component.tag()
+    const TagComponent = Component.tag('TagComponent')
 
     world.registerComponent(TagComponent)
 
@@ -97,6 +101,27 @@ describe('Entities and Components', () => {
     expect(entity.has(TagComponent)).toBe(true)
 
     entity.remove(TagComponent)
+  })
+
+  test('cloneComponentDefinition', () => {
+    const TestComponent = Component.object<{ x: number; y: number }>(
+      'TestComponent'
+    )
+    const Clone = cloneComponentDefinition(TestComponent)
+
+
+    world.registerComponent(TestComponent)
+    world.registerComponent(Clone)
+
+    expect(world.componentRegistry.components.size).toBe(2)
+
+    class TestClassComponent extends Component {}
+    const ClassClone = cloneComponentDefinition(TestClassComponent)
+
+    world.registerComponent(TestClassComponent)
+    world.registerComponent(ClassClone)
+
+    expect(world.componentRegistry.components.size).toBe(4)
   })
 
   test('creating an entity with initial components', () => {
@@ -283,7 +308,9 @@ describe('Entities and Components', () => {
     })
 
     describe('find', () => {
-      class TestComponentOne extends Component {}
+      class TestComponentOne extends Component {
+        value = 0
+      }
 
       beforeEach(() => {
         world.registerComponent(TestComponentOne)
@@ -292,7 +319,9 @@ describe('Entities and Components', () => {
       it('should return undefined if the component is not in the entity', () => {
         const entity = world.create()
 
-        expect(entity.find(TestComponentOne)).toBeUndefined()
+        const result = entity.find(TestComponentOne)
+
+        expect(result).toBeUndefined()
       })
 
       it('should return the component instance if the component is in the entity', () => {
@@ -300,7 +329,10 @@ describe('Entities and Components', () => {
 
         entity.add(TestComponentOne)
 
-        expect(entity.find(TestComponentOne)).toBeInstanceOf(TestComponentOne)
+        const result = entity.find(TestComponentOne)
+
+        expect(result!.value).toBe(0)
+        expect(result).toBeInstanceOf(TestComponentOne)
       })
     })
   })
@@ -362,9 +394,9 @@ describe('Entities and Components', () => {
 
         expect(entity.getAll()).toEqual([])
 
-        entity.add(TestComponentOne)
+        const testComponentOne = entity.add(TestComponentOne)
 
-        expect(entity.getAll()).toEqual([expect.any(TestComponentOne)])
+        expect(entity.getAll()).toEqual([testComponentOne])
 
         entity.remove(TestComponentOne)
 

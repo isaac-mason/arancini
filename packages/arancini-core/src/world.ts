@@ -1,12 +1,17 @@
-import type { ComponentDefinition } from './component'
+import {
+  InternalComponentInstanceProperties,
+  type ComponentDefinition,
+  ComponentDefinitionType,
+  Component,
+} from './component'
 import { ComponentRegistry } from './component-registry'
 import type { Entity } from './entity'
-import { EntityManager } from './entity-manager'
+import { EntityContainer } from './entity-container'
+import { ComponentPool, EntityPool } from './pools'
 import type { Query, QueryDescription } from './query'
-import { QueryManager } from './query-manager'
-import type { System, SystemClass } from './system'
-import type { SystemAttributes } from './system-manager'
-import { SystemManager } from './system-manager'
+import { QueryManager } from './query'
+import type { System, SystemAttributes, SystemClass } from './system'
+import { SystemManager } from './system'
 
 /**
  * A World that can contain Entities, Systems, and Queries.
@@ -27,11 +32,11 @@ import { SystemManager } from './system-manager'
  * // (Systems will be called with a delta of 0.1)
  * world.update(0.1)
  *
- * // destroy the world, removing all entities
- * world.destroy()
+ * // reset the world, removing all entities
+ * world.reset()
  * ```
  */
-export class World {
+export class World extends EntityContainer {
   /**
    * Whether the World has been initialised
    */
@@ -41,12 +46,6 @@ export class World {
    * The current World time
    */
   time = 0
-
-  /**
-   * The EntityManager for the World
-   * Manages Entities and Components
-   */
-  entityManager: EntityManager
 
   /**
    * The QueryManager for the World
@@ -67,18 +66,25 @@ export class World {
   componentRegistry: ComponentRegistry
 
   /**
-   * Entities in the World
+   * Object pool for components
    */
-  entities: Map<string, Entity> = new Map()
+  componentPool: ComponentPool
+
+  /**
+   * Object pool for entities
+   */
+  entityPool: EntityPool
 
   /**
    * Constructor for a World
    */
   constructor() {
+    super()
     this.componentRegistry = new ComponentRegistry(this)
-    this.entityManager = new EntityManager(this)
     this.queryManager = new QueryManager(this)
     this.systemManager = new SystemManager(this)
+    this.componentPool = new ComponentPool()
+    this.entityPool = new EntityPool(this)
   }
 
   /**
@@ -86,7 +92,11 @@ export class World {
    */
   init(): void {
     this.initialised = true
-    this.entityManager.init()
+
+    for (const entity of this.entities) {
+      this.initialiseEntity(entity)
+    }
+
     this.systemManager.init()
   }
 
@@ -100,13 +110,20 @@ export class World {
   }
 
   /**
-   * Destroys the World
+   * Resets the World.
+   *
+   * This removes all entities, and calls onDestroy on all Systems.
+   * Components and Systems will remain registered.
+   * The World will need to be initialised again after this.
    */
-  destroy(): void {
+  reset(): void {
     this.time = 0
     this.initialised = false
     this.systemManager.destroy()
-    this.entityManager.destroy()
+
+    for (const entity of this.entities.values()) {
+      this.destroy(entity)
+    }
   }
 
   /**
@@ -131,13 +148,41 @@ export class World {
    * ```
    */
   create(initFn?: (entity: Entity) => void): Entity {
-    const entity = this.entityManager.createEntity()
+    const entity = this.entityPool.request()
+
+    if (this.initialised) {
+      this.initialiseEntity(entity)
+    }
 
     if (initFn) {
       entity.bulk(initFn)
     }
 
+    this._addEntity(entity)
+
     return entity
+  }
+
+  /**
+   * Destroys an Entity
+   * @param entity the Entity to destroy
+   */
+  destroy(entity: Entity): void {
+    this._removeEntity(entity)
+
+    entity._updateQueries = false
+    entity._updateBitSet = false
+
+    for (const component of Object.values(entity._components)) {
+      const internal = component as InternalComponentInstanceProperties
+      entity.remove(internal._arancini_component_definition!)
+    }
+
+    entity._updateQueries = true
+    entity._updateBitSet = true
+
+    this.queryManager.onEntityRemoved(entity)
+    this.entityPool.recycle(entity)
   }
 
   /**
@@ -207,5 +252,19 @@ export class World {
    */
   getSystems(): System[] {
     return Array.from(this.systemManager.systems.values())
+  }
+
+  private initialiseEntity(e: Entity): void {
+    e.initialised = true
+
+    for (const component of Object.values(e._components)) {
+      const internal = component as InternalComponentInstanceProperties
+      if (
+        internal._arancini_component_definition?.type ===
+        ComponentDefinitionType.CLASS
+      ) {
+        ;(component as Component).onInit()
+      }
+    }
   }
 }

@@ -1,5 +1,3 @@
-/* eslint-disable no-bitwise */
-
 /**
  * Minimal implementation of a bitset / bit array
  *

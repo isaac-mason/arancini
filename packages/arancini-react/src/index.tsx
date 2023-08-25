@@ -10,7 +10,7 @@ import React, {
   useMemo,
   useState,
 } from 'react'
-import { useIsomorphicLayoutEffect, useRerender } from './hooks'
+import { useIsomorphicLayoutEffect } from './hooks'
 
 type EntityProviderContext = {
   entity: A.Entity
@@ -41,6 +41,8 @@ export type ComponentProps<T extends A.ComponentDefinition<unknown>> = {
   args?: A.ComponentDefinitionArgs<T>
   children?: ReactNode
 }
+
+export type ECS = ReturnType<typeof createECS>
 
 export const createECS = (world: A.World) => {
   const entityContext = createContext(null! as EntityProviderContext)
@@ -110,7 +112,11 @@ export const createECS = (world: A.World) => {
       return world.query(q)
     }, [q])
 
-    const rerender = useRerender()
+    const [, setVersion] = useState(-1)
+
+    const rerender = () => {
+      setVersion((v) => v + 1)
+    }
 
     useIsomorphicLayoutEffect(() => {
       query.onEntityAdded.add(rerender)
@@ -120,17 +126,20 @@ export const createECS = (world: A.World) => {
         query.onEntityAdded.remove(rerender)
         query.onEntityRemoved.remove(rerender)
       }
-    }, [rerender])
+    }, [])
 
     useIsomorphicLayoutEffect(rerender, [])
 
     return query
   }
 
-  const QueryEntities = ({ query, children }: QueryEntitiesProps) => {
-    const { entities } = useQuery(query)
+  const QueryEntities = ({
+    query: queryDescription,
+    children,
+  }: QueryEntitiesProps) => {
+    const query = useQuery(queryDescription)
 
-    return <Entities entities={entities} children={children} />
+    return <Entities entities={[...query.entities]} children={children} />
   }
 
   const Component = <T extends A.ComponentDefinition<unknown>>({

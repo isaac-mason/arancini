@@ -100,7 +100,7 @@ export const PlayerInventoryEvents = () => {
 
     return () => {
       running = false
-      world.destroy()
+      world.reset()
     }
   })
 

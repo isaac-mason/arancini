@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { Component, Entity, System, World } from '../src'
+import { Entity, Component, System, World } from '../src'
 
 class TestComponentOne extends Component {}
 class TestComponentTwo extends Component {}
@@ -167,7 +167,7 @@ describe('System', () => {
     testSystem.enabled = false
     world.update()
 
-    world.destroy()
+    world.reset()
 
     expect(systemInitJestFn).toHaveBeenCalledTimes(1)
 
@@ -260,14 +260,7 @@ describe('System', () => {
 
   test('systems can be removed, and queries will be removed if they are no longer used by any systems', () => {
     world.registerSystem(TestSystemWithQuery)
-    const systemOne = world.getSystem(
-      TestSystemWithQuery
-    ) as TestSystemWithQuery
-
     world.registerSystem(AnotherTestSystemWithQuery)
-    const systemTwo = world.getSystem(
-      AnotherTestSystemWithQuery
-    ) as AnotherTestSystemWithQuery
 
     expect(
       world.queryManager.hasQuery({
@@ -275,7 +268,7 @@ describe('System', () => {
       })
     ).toBe(true)
 
-    systemOne.destroy()
+    world.unregisterSystem(TestSystemWithQuery)
 
     expect(
       world.queryManager.hasQuery({
@@ -283,7 +276,7 @@ describe('System', () => {
       })
     ).toBe(true)
 
-    systemTwo.destroy()
+    world.unregisterSystem(AnotherTestSystemWithQuery)
 
     expect(
       world.queryManager.hasQuery({
@@ -314,23 +307,15 @@ describe('System', () => {
     ).toBe(true)
 
     // destroy both systems using the query
-    systemOne.destroy()
-    systemTwo.destroy()
+    systemOne.unregister()
+    systemTwo.unregister()
 
-    expect(
-      world.queryManager.hasQuery({
-        all: [TestComponentOne],
-      })
-    ).toBe(true)
+    expect(world.queryManager.hasQuery(testSystemQueryDescription)).toBe(true)
 
     // remove the query manually
     query.destroy()
 
-    expect(
-      world.queryManager.hasQuery({
-        all: [TestComponentOne],
-      })
-    ).toBe(false)
+    expect(world.queryManager.hasQuery(testSystemQueryDescription)).toBe(false)
   })
 
   test('onUpdate will not be called if any required queries have no results', () => {
@@ -381,7 +366,6 @@ describe('System', () => {
     const testComponentOne = testEntity.add(TestComponentOne)
 
     expect(system.singletonComponent).toBe(testComponentOne)
-    expect(system.singletonComponent?._arancini_entity).toBe(testEntity)
 
     // system should update as the singleton is now defined
     world.update()
@@ -392,17 +376,34 @@ describe('System', () => {
     expect(system.singletonComponent).toBe(undefined)
 
     // ensure the old entity and component is not re-used
-    world.entityManager.entityPool.free(1)
-    world.entityManager.componentPool.free(TestComponentOne, 1)
+    world.entityPool.free(1)
+    world.componentPool.free(TestComponentOne, 1)
 
     // singletonComponent should be set after a new entity with the component is created
     const newTestEntity = world.create()
     const newTestComponentOne = newTestEntity.add(TestComponentOne)
 
     expect(system.singletonComponent).toBe(newTestComponentOne)
-    expect(system.singletonComponent?._arancini_entity).toBe(newTestEntity)
 
     expect(system.singletonComponent).not.toBe(testComponentOne)
     expect(system.singletonComponent).not.toBe(testEntity)
+  })
+
+  test('systems can attach other systems', () => {
+    class TestSystemWithAttachedSystem extends System {
+      systemOne = this.attach(SystemOne)
+    }
+
+    world.registerSystem(TestSystemWithAttachedSystem)
+    world.registerSystem(SystemOne)
+
+    const system = world.getSystem(TestSystemWithAttachedSystem)!
+
+    expect(system.systemOne).toBeTruthy()
+    expect(system.systemOne).toBeInstanceOf(SystemOne)
+
+    world.unregisterSystem(SystemOne)
+
+    expect(system.systemOne).toBe(undefined)
   })
 })

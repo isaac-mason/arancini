@@ -1,6 +1,6 @@
-import * as A from '@arancini/core'
+import { Component, System, World } from '@arancini/core'
 import { Bounds, PerspectiveCamera } from '@react-three/drei'
-import { useFrame, Vector3 } from '@react-three/fiber'
+import { Vector3, useFrame } from '@react-three/fiber'
 import React, { useState } from 'react'
 import * as THREE from 'three'
 import { createECS } from '../../src'
@@ -12,15 +12,15 @@ export default {
 
 /* components */
 
-const SelectedComponent = A.Component.tag('Selected')
+const SelectedComponent = Component.tag('Selected')
 
-const CameraComponent = A.Component.object<THREE.PerspectiveCamera>('Camera')
+const CameraComponent = Component.object<THREE.PerspectiveCamera>('Camera')
 
-const Object3DComponent = A.Component.object<THREE.Object3D>('Object3D')
+const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
 
 /* systems */
 
-class CameraSystem extends A.System {
+class CameraSystem extends System {
   selectedQuery = this.query([SelectedComponent, Object3DComponent])
 
   camera = this.singleton(CameraComponent, { required: true })!
@@ -46,7 +46,7 @@ class CameraSystem extends A.System {
   }
 }
 
-const world = new A.World()
+const world = new World()
 world.registerComponent(Object3DComponent)
 world.registerComponent(SelectedComponent)
 world.registerComponent(CameraComponent)
