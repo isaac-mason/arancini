@@ -1,5 +1,18 @@
 # @arancini/react
 
+## 4.0.0
+
+### Patch Changes
+
+- abad33b: feat: export createECS return type, 'ECS'
+- abad33b: feat: refactor useQuery component
+- Updated dependencies [abad33b]
+- Updated dependencies [abad33b]
+- Updated dependencies [abad33b]
+- Updated dependencies [abad33b]
+- Updated dependencies [abad33b]
+  - @arancini/core@4.0.0
+
 ## 3.1.1
 
 ### Patch Changes

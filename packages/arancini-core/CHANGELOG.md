@@ -1,5 +1,42 @@
 # @arancini/core
 
+## 4.0.0
+
+### Major Changes
+
+- abad33b: BREAKING CHANGE: the api for defining components has changed
+
+  Object and Tag components are now defined with the `defineComponent` and `defineTagComponent` utilities:
+
+  ```js
+  // this
+  const MyComponent = Component.object<{ x: 0 }>()
+  const MyTagComponent = Component.tag<{ x: 0 }>()
+
+  // has changed to
+  const MyComponent = defineComponent<{ x: 0 }>()
+  const MyTagComponent = defineTagComponent()
+  ```
+
+- abad33b: feat: class components are no longer object pooled by default, they must opted in with the `@objectPooled` annotation, or by setting the `objectPooled` property on the component definition
+
+  ```ts
+  @objectPooled()
+  class MyComponent extends Component { /* ... */ }
+
+  // or
+
+  = class MyComponent extends Component { /* ... */ };
+
+  MyComponent.objectPooled = true;
+  ```
+
+### Minor Changes
+
+- abad33b: feat: rename world.destroy() to world.reset(), add world.destroy(entity: Entity)
+- abad33b: feat: refactor query manager
+- abad33b: feat: world.entities is now a list, was a map
+
 ## 3.1.1
 
 ### Patch Changes
