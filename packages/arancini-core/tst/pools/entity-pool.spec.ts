@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { Entity } from '../../src/entity'
-import { EntityPool } from '../../src/pools/entity-pool'
+import { EntityPool } from '../../src/pools'
 import { World } from '../../src/world'
 
 describe('EntityPool', () => {
@@ -9,7 +9,7 @@ describe('EntityPool', () => {
 
   beforeEach(() => {
     world = new World()
-    pool = world.entityManager.entityPool
+    pool = world.entityPool
   })
 
   it('should return an entity on request', () => {

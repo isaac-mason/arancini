@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Entity, QueryDescription } from '../src'
-import { Component, Query, System, World } from '../src'
+import {
+  Component,
+  Query,
+  System,
+  World,
+  getQueryDedupeString,
+} from '../src'
 
 class TestComponentOne extends Component {}
 class TestComponentTwo extends Component {}
@@ -87,14 +93,18 @@ describe('Query', () => {
     // creating an entity matching the removed query should not update the query
     const entityTwo = world.create()
     entityTwo.add(TestComponentOne)
-    expect(query).toBeTruthy()
     expect(query.entities.length).toBe(1)
     expect(query.entities.includes(entityOne)).toBeTruthy()
     expect(query.entities.includes(entityTwo)).toBeFalsy()
 
     // removing a query that isn't in the world is swallowed silently
     world.queryManager.removeQuery(
-      new Query({} as World, 'some key not in the query manager')
+      new Query(
+        {} as World,
+        'some key not in the query manager',
+        description,
+        undefined!
+      )
     )
 
     // removing an already removed query is swallowed silently
@@ -253,9 +263,7 @@ describe('Query', () => {
       entity.remove(TestComponentOne)
 
       expect(
-        world.queryManager.dedupedQueries
-          .get(system.testQuery.key)
-          ?.entitySet.has(entity)
+        world.queryManager.queries.get(system.testQuery.key)?.has(entity)
       ).toBe(false)
 
       expect(system.testQuery.entities.length).toBe(0)
@@ -416,17 +424,13 @@ describe('Query', () => {
       entityTwo.add(TestComponentOne)
       entityTwo.add(TestComponentTwo)
 
-      expect(
-        world.queryManager.dedupedQueries
-          .get(query.key)
-          ?.entitySet.has(entityOne)
-      ).toBe(true)
+      expect(world.queryManager.queries.get(query.key)?.has(entityOne)).toBe(
+        true
+      )
 
-      expect(
-        world.queryManager.dedupedQueries
-          .get(query.key)
-          ?.entitySet.has(entityTwo)
-      ).toBe(true)
+      expect(world.queryManager.queries.get(query.key)?.has(entityTwo)).toBe(
+        true
+      )
 
       expect(query.entities.length).toBe(2)
       expect(query.entities.includes(entityOne)).toBeTruthy()
@@ -438,17 +442,13 @@ describe('Query', () => {
       // destroy entityOne, removing it from the query
       entityOne.destroy()
 
-      expect(
-        world.queryManager.dedupedQueries
-          .get(query.key)
-          ?.entitySet.has(entityOne)
-      ).toBe(false)
+      expect(world.queryManager.queries.get(query.key)?.has(entityOne)).toBe(
+        false
+      )
 
-      expect(
-        world.queryManager.dedupedQueries
-          .get(query.key)
-          ?.entitySet.has(entityTwo)
-      ).toBe(true)
+      expect(world.queryManager.queries.get(query.key)?.has(entityTwo)).toBe(
+        true
+      )
 
       expect(query.entities.length).toBe(1)
       expect(query.entities.includes(entityOne)).toBeFalsy()
@@ -462,7 +462,7 @@ describe('Query', () => {
         all: [TestComponentOne, TestComponentTwo],
       }
 
-      expect(Query.getDescriptionDedupeString(queryOne)).toEqual('0&1')
+      expect(getQueryDedupeString(queryOne)).toEqual('0&1')
     })
 
     it('should return the same key for two matching query descriptions', () => {
@@ -478,8 +478,8 @@ describe('Query', () => {
         any: [TestComponentTwo, TestComponentOne],
       }
 
-      expect(Query.getDescriptionDedupeString(queryOne)).toEqual(
-        Query.getDescriptionDedupeString(queryTwo)
+      expect(getQueryDedupeString(queryOne)).toEqual(
+        getQueryDedupeString(queryTwo)
       )
     })
 
@@ -492,9 +492,9 @@ describe('Query', () => {
         all: [TestComponentOne],
       }
 
-      expect(
-        Query.getDescriptionDedupeString(differentComponentsOne)
-      ).not.toEqual(Query.getDescriptionDedupeString(differentComponentsTwo))
+      expect(getQueryDedupeString(differentComponentsOne)).not.toEqual(
+        getQueryDedupeString(differentComponentsTwo)
+      )
 
       const differentConditionOne: QueryDescription = {
         all: [TestComponentOne],
@@ -504,9 +504,9 @@ describe('Query', () => {
         not: [TestComponentOne],
       }
 
-      expect(
-        Query.getDescriptionDedupeString(differentConditionOne)
-      ).not.toEqual(Query.getDescriptionDedupeString(differentConditionTwo))
+      expect(getQueryDedupeString(differentConditionOne)).not.toEqual(
+        getQueryDedupeString(differentConditionTwo)
+      )
 
       const partiallyDifferentOne: QueryDescription = {
         all: [TestComponentOne],
@@ -517,9 +517,9 @@ describe('Query', () => {
         not: [TestComponentTwo],
       }
 
-      expect(
-        Query.getDescriptionDedupeString(partiallyDifferentOne)
-      ).not.toEqual(Query.getDescriptionDedupeString(partiallyDifferentTwo))
+      expect(getQueryDedupeString(partiallyDifferentOne)).not.toEqual(
+        getQueryDedupeString(partiallyDifferentTwo)
+      )
     })
   })
 })

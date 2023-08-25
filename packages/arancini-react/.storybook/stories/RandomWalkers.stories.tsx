@@ -1,8 +1,11 @@
-import * as A from '@arancini/core'
+import {
+  System,
+  World,
+  defineObjectComponent,
+  defineTagComponent,
+} from '@arancini/core'
 import { OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-
-import { Component, System, World } from '@arancini/core'
 import React from 'react'
 import { createECS } from '../../src'
 import { Setup } from '../Setup'
@@ -11,9 +14,9 @@ export default {
   title: 'Random Walkers',
 }
 
-const WalkingComponent = Component.tag('Walking')
+const WalkingComponent = defineTagComponent('Walking')
 
-const Object3DComponent = A.Component.object<THREE.Object3D>('Object3D')
+const Object3DComponent = defineObjectComponent<THREE.Object3D>('Object3D')
 
 class WalkingSystem extends System {
   walking = this.query([Object3DComponent, WalkingComponent])

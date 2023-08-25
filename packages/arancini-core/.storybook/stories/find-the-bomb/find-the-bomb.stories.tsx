@@ -1,21 +1,31 @@
-import { Component, Entity, System, World } from '@arancini/core'
+import {
+  Entity,
+  System,
+  World,
+  defineObjectComponent,
+  defineTagComponent,
+} from '@arancini/core'
 import React, { useEffect } from 'react'
 
 import './find-the-bomb.css'
 
-const GameState = Component.object<{ clicks: number; foundBomb: boolean }>('GameState')
+const GameState = defineObjectComponent<{ clicks: number; foundBomb: boolean }>(
+  'GameState'
+)
 
-const Emoji = Component.object<{
+const Emoji = defineObjectComponent<{
   revealed: boolean
   dirty: boolean
   domElement: HTMLElement
 }>('Emoji')
 
-const Position = Component.object<{ x: number; y: number }>('Position')
+const Position = defineObjectComponent<{ x: number; y: number }>('Position')
 
-const DistanceToTarget = Component.object<{ distance: number }>('DistanceToTarget')
+const DistanceToTarget = defineObjectComponent<{ distance: number }>(
+  'DistanceToTarget'
+)
 
-const Target = Component.tag('Target')
+const Target = defineTagComponent('Target')
 
 class EmojiRendererSystem extends System {
   queries = {
@@ -219,7 +229,7 @@ export const FindTheBomb = () => {
       }
 
       return () => {
-        world.destroy()
+        world.reset()
       }
     }
 
@@ -257,7 +267,7 @@ export const FindTheBomb = () => {
 
     return () => {
       running = false
-      world.destroy()
+      world.reset()
     }
   })
 

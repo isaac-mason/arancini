@@ -1,10 +1,13 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { Component } from '../../src/component'
-import { ComponentPool } from '../../src/pools/component-pool'
+import { Component, objectPooled } from '../../src/component'
+import { ComponentPool } from '../../src/pools'
 import { World } from '../../src/world'
 
 describe('ComponentPool', () => {
+  @objectPooled()
   class ExampleComponentOne extends Component {}
+
+  @objectPooled()
   class ExampleComponentTwo extends Component {}
 
   let world: World
@@ -14,7 +17,7 @@ describe('ComponentPool', () => {
     world = new World()
     world.registerComponent(ExampleComponentOne)
     world.registerComponent(ExampleComponentTwo)
-    pool = world.entityManager.componentPool
+    pool = world.componentPool
   })
 
   it('should create a new pool on retrieving a component for the first time', () => {
@@ -55,8 +58,9 @@ describe('ComponentPool', () => {
     expect(pool.size).toBe(0)
     expect(pool.available).toBe(0)
     expect(pool.used).toBe(0)
-
-    const component = world.create().add(ExampleComponentOne)
+    
+    const entity = world.create()
+    const component = entity.add(ExampleComponentOne)
 
     expect(pool.totalPools).toBe(1)
     expect(pool.size).toBe(1)
@@ -66,7 +70,7 @@ describe('ComponentPool', () => {
     expect(component).toBeTruthy()
     expect(component instanceof ExampleComponentOne).toBeTruthy()
 
-    pool.recycle(component)
+    entity.remove(ExampleComponentOne)
 
     expect(pool.totalPools).toBe(1)
     expect(pool.size).toBe(1)

@@ -1,4 +1,4 @@
-import { Component, System, World } from '@arancini/core'
+import { System, World, defineObjectComponent } from '@arancini/core'
 import { createECS } from '@arancini/react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as P2 from 'p2-es'
@@ -19,15 +19,9 @@ const boxBoxContactMaterial = new P2.ContactMaterial(
   { friction: 0.75 }
 )
 
-const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
+const Object3DComponent = defineObjectComponent<THREE.Object3D>('Object3D')
 
-class RigidBodyComponent extends Component {
-  body!: P2.Body
-
-  construct(body: P2.Body) {
-    this.body = body
-  }
-}
+const RigidBodyComponent = defineObjectComponent<P2.Body>('RigidBody')
 
 class PhysicsSystem extends System {
   bodiesQuery = this.query([RigidBodyComponent])
@@ -41,7 +35,7 @@ class PhysicsSystem extends System {
     this.physicsWorld.addContactMaterial(boxBoxContactMaterial)
 
     this.bodiesQuery.onEntityAdded.add((added) => {
-      const body = added.get(RigidBodyComponent).body
+      const body = added.get(RigidBodyComponent)
       this.bodies.set(added.id, body)
       this.physicsWorld.addBody(body)
     })
@@ -62,7 +56,7 @@ class PhysicsSystem extends System {
       const object3D = entity.find(Object3DComponent)
       if (object3D === undefined) continue
 
-      const { body } = entity.get(RigidBodyComponent)
+      const body = entity.get(RigidBodyComponent)
       object3D.position.set(body.position[0], body.position[1], 0)
       object3D.rotation.set(0, 0, body.angle)
     }
@@ -149,12 +143,12 @@ const App = () => {
       {/* render rigid bodies */}
       <ECS.QueryEntities query={Queries.TO_RENDER}>
         {(entity) => {
-          const colliderComponent = entity.get(RigidBodyComponent)
+          const body = entity.get(RigidBodyComponent)
 
           const boxes: P2.Box[] = []
           const planes: P2.Plane[] = []
 
-          for (const shape of colliderComponent.body.shapes) {
+          for (const shape of body.shapes) {
             if (shape instanceof P2.Box) {
               boxes.push(shape)
             } else if (shape instanceof P2.Plane) {

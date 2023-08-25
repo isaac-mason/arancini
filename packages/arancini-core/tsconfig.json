@@ -18,7 +18,8 @@
     "allowSyntheticDefaultImports": true,
     "noEmit": false,
     "declaration": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "experimentalDecorators": true,
   },
   "files": ["./src/index.ts"]
 }

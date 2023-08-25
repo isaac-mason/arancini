@@ -76,7 +76,7 @@ export const OverlappingCircles = () => {
 
     return () => {
       running = false
-      world.destroy()
+      world.reset()
     }
   })
 

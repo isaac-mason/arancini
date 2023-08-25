@@ -10,7 +10,7 @@ import React, {
   useMemo,
   useState,
 } from 'react'
-import { useIsomorphicLayoutEffect, useRerender } from './hooks'
+import { useIsomorphicLayoutEffect } from './hooks'
 
 type EntityProviderContext = {
   entity: A.Entity
@@ -41,6 +41,8 @@ export type ComponentProps<T extends A.ComponentDefinition<unknown>> = {
   args?: A.ComponentDefinitionArgs<T>
   children?: ReactNode
 }
+
+export type ECS = ReturnType<typeof createECS>
 
 export const createECS = (world: A.World) => {
   const entityContext = createContext(null! as EntityProviderContext)
@@ -110,7 +112,11 @@ export const createECS = (world: A.World) => {
       return world.query(q)
     }, [q])
 
-    const rerender = useRerender()
+    const [version, setVersion] = useState(-1)
+
+    const rerender = () => {
+      setVersion(query.version)
+    }
 
     useIsomorphicLayoutEffect(() => {
       query.onEntityAdded.add(rerender)
@@ -120,7 +126,7 @@ export const createECS = (world: A.World) => {
         query.onEntityAdded.remove(rerender)
         query.onEntityRemoved.remove(rerender)
       }
-    }, [rerender])
+    }, [version])
 
     useIsomorphicLayoutEffect(rerender, [])
 

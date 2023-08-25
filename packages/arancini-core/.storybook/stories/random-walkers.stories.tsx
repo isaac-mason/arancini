@@ -1,10 +1,16 @@
-import { Component, System, World } from '@arancini/core'
+import {
+  Component,
+  System,
+  World,
+  defineObjectComponent,
+  defineTagComponent,
+} from '@arancini/core'
 import React, { useEffect } from 'react'
 
-const Position = Component.object<{ x: number; y: number }>('Position')
+const Position = defineObjectComponent<{ x: number; y: number }>('Position')
 
-const Red = Component.tag('Red')
-const Blue = Component.tag('Blue')
+const Red = defineTagComponent('Red')
+const Blue = defineTagComponent('Blue')
 
 class CanvasContext extends Component {
   ctx!: CanvasRenderingContext2D
@@ -187,7 +193,7 @@ export const RandomColorChangingWalkers = () => {
 
     return () => {
       running = false
-      world.destroy()
+      world.reset()
     }
   })
 

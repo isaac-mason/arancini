@@ -1,4 +1,4 @@
-import { World, Component, System } from 'arancini'
+import { World, Component, System } from '@arancini/core'
 
 class Position extends Component {
   construct() {
@@ -6,6 +6,7 @@ class Position extends Component {
     this.y = 0
   }
 }
+Position.objectPooled = true
 
 class Velocity extends Component {
   construct() {
@@ -13,13 +14,12 @@ class Velocity extends Component {
     this.dy = Math.random() - 0.5
   }
 }
+Velocity.objectPooled = true
 
 let updateCount = 0
 
 class MovementSystem extends System {
-  onInit() {
-    this.movement = this.query([Velocity, Position])
-  }
+  movement = this.query([Velocity, Position])
 
   onUpdate() {
     for (let i = 0; i < this.movement.entities.length; i++) {

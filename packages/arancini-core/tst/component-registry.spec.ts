@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { Component, World } from '../src'
+import {
+  Component,
+  World,
+  defineObjectComponent,
+  defineTagComponent,
+} from '../src'
 import { ComponentRegistry } from '../src/component-registry'
 
 describe('ComponentRegistry', () => {
@@ -43,14 +48,16 @@ describe('ComponentRegistry', () => {
   })
 
   it('should support registering tag components', () => {
-    const TagComponent = Component.tag()
+    const TagComponent = defineTagComponent('tag')
     world.registerComponent(TagComponent)
 
     expect(TagComponent.componentIndex).toBe(0)
   })
 
   it('should support registering object components', () => {
-    const ObjectComponent = Component.object<{ x: number; y: number }>()
+    const ObjectComponent = defineObjectComponent<{ x: number; y: number }>(
+      'Object Component'
+    )
     world.registerComponent(ObjectComponent)
 
     expect(ObjectComponent.componentIndex).toBe(0)

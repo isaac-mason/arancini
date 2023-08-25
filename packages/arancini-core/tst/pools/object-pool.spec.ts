@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { describe, expect, it } from 'vitest'
-import { ObjectPool } from '../../src/pools/object-pool'
+import { ObjectPool } from '../../src/pools'
 
 describe('ObjectPool', () => {
   it('should construct with and without an initial size argument', () => {

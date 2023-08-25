@@ -1,6 +1,7 @@
-import { Component } from '@arancini/core'
+import { Component, objectPooled } from '@arancini/core'
 import { Vector2 } from './utils'
 
+@objectPooled()
 export class Movement extends Component {
   velocity: Vector2
   acceleration: Vector2
@@ -11,6 +12,7 @@ export class Movement extends Component {
   }
 }
 
+@objectPooled()
 export class Circle extends Component {
   position: Vector2
   radius: number

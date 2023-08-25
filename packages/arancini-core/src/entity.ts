@@ -1,7 +1,11 @@
-import type {
-  ComponentDefinition,
-  ComponentDefinitionArgs,
-  ComponentDefinitionInstance,
+import {
+  ComponentDefinitionType,
+  InternalComponentInstanceProperties,
+  type ComponentDefinition,
+  type ComponentDefinitionArgs,
+  type ComponentInstance,
+  ComponentType,
+  Component,
 } from './component'
 import { uniqueId } from './utils'
 import { BitSet } from './utils/bit-set'
@@ -15,31 +19,31 @@ import type { World } from './world'
  * Aside from containing Components, Entities also have an event system that can be used to share data.
  *
  * ```ts
- * import { Component, World } from '@arancini/core'
+ * import { defineTagComponent, World } from '@arancini/core'
  *
  * // example tag component without any data or behavior
- * class ExampleComponent extends Component {}
+ * const TagComponent = defineTagComponent('TagComponent')
  *
  * // create a world and register the component
  * const world = new World()
- * world.registerComponent(ExampleComponent)
+ * world.registerComponent(TagComponent)
  *
  * // create an entitty
  * const entity = world.create()
  *
  * // try retrieving a component that isn't in the entity
- * entity.find(ExampleComponent) // returns `undefined`
- * entity.get(ExampleComponent) // throws Error
+ * entity.find(TagComponent) // returns `undefined`
+ * entity.get(TagComponent) // throws Error
  *
- * // add ExampleComponent to the entity
- * const exampleComponent = entity.add(ExampleComponent)
+ * // add TagComponent to the entity
+ * const tagComponent = entity.add(TagComponent)
  *
- * entity.has(ExampleComponent) // returns `true`
- * entity.get(ExampleComponent) // returns `exampleComponent`
- * entity.get(ExampleComponent) // returns `exampleComponent`
+ * entity.has(TagComponent) // returns `true`
+ * entity.get(TagComponent) // returns `tagComponent`
+ * entity.get(TagComponent) // returns `tagComponent`
  *
  * // remove the component
- * entity.remove(ExampleComponent);
+ * entity.remove(TagComponent);
  *
  * // destroy the entity
  * entity.destroy();
@@ -74,11 +78,14 @@ export class Entity {
   _components: { [index: string]: unknown } = {}
 
   /**
-   * Whether to update queries when components are added or removed
-   * Used by the `bulk` method to control when queries are updated
-   * @private
+   * @private internal
    */
   _updateQueries = true
+
+  /**
+   * @private internal
+   */
+  _updateBitSet = true
 
   /**
    * Adds a component to the entity
@@ -87,13 +94,44 @@ export class Entity {
   add<C extends ComponentDefinition<unknown>>(
     componentDefinition: C,
     ...args: ComponentDefinitionArgs<C>
-  ): ComponentDefinitionInstance<C> {
-    // add the component to this entity
-    const component = this.world.entityManager.addComponentToEntity(
-      this,
-      componentDefinition,
-      args
-    )
+  ): ComponentInstance<C> {
+    if (this._components[componentDefinition.componentIndex]) {
+      throw new Error(
+        `Cannot add component ${componentDefinition.name}, entity with id ${this.id} already has this component`
+      )
+    }
+
+    let component: ComponentInstance<C>
+
+    if (componentDefinition.type === ComponentDefinitionType.CLASS) {
+      component = (
+        componentDefinition.objectPooled
+          ? this.world.componentPool.request(componentDefinition)
+          : new (componentDefinition as any)()
+      ) as ComponentInstance<C>
+      ;(component as Component).construct(...args)
+    } else if (componentDefinition.type === ComponentDefinitionType.OBJECT) {
+      component = args[0] as ComponentInstance<C>
+    } else {
+      component = {} as ComponentInstance<C>
+    }
+
+    const internal = component as InternalComponentInstanceProperties
+    internal._arancini_entity = this
+    internal._arancini_id = uniqueId()
+    internal._arancini_component_definition = componentDefinition
+
+    this._components[componentDefinition.componentIndex] = component
+    this._componentsBitSet.add(componentDefinition.componentIndex)
+
+    if (
+      componentDefinition.type === ComponentDefinitionType.CLASS &&
+      this.initialised
+    ) {
+      if ((component as ComponentType).onInit) {
+        ;(component as ComponentType).onInit!()
+      }
+    }
 
     if (this._updateQueries) {
       this.world.queryManager.onEntityComponentChange(this)
@@ -106,8 +144,39 @@ export class Entity {
    * Removes a component from the entity and destroys it
    * @param value the component to remove and destroy
    */
-  remove(component: ComponentDefinition<unknown>): Entity {
-    this.world.entityManager.removeComponentFromEntity(this, component, true)
+  remove(componentDefinition: ComponentDefinition<unknown>): Entity {
+    const component = this.find(componentDefinition)
+
+    if (component === undefined) {
+      throw new Error('Component does not exist in Entity')
+    }
+
+    const internal = component as InternalComponentInstanceProperties
+    const { componentIndex } = internal._arancini_component_definition!
+
+    delete this._components[componentIndex]
+
+    if (this._updateBitSet) {
+      this._componentsBitSet.remove(componentIndex)
+    }
+
+    if (
+      internal._arancini_component_definition!.type ===
+      ComponentDefinitionType.CLASS
+    ) {
+      const classComponent = component as ComponentType
+      classComponent.onDestroy()
+
+      internal._arancini_entity = undefined
+
+      if (internal._arancini_component_definition!.objectPooled) {
+        this.world.componentPool.recycle(component)
+      }
+    } else {
+      delete internal._arancini_entity
+      delete internal._arancini_component_definition
+      delete internal._arancini_id
+    }
 
     if (this._updateQueries) {
       this.world.queryManager.onEntityComponentChange(this)
@@ -146,23 +215,23 @@ export class Entity {
 
   /**
    * Retrieves a component on an entity by type, throws an error if the component is not in the entity
-   * @param value a constructor for the component type to retrieve
+   * @param componentDefinition the component to to get
    * @returns the component
    */
   get<T extends ComponentDefinition<unknown>>(
-    value: T
-  ): ComponentDefinitionInstance<T> {
-    const component = this._components[value.componentIndex]
+    componentDefinition: T
+  ): ComponentInstance<T> {
+    const component = this._components[componentDefinition.componentIndex]
 
-    if (component) {
-      return component as ComponentDefinitionInstance<T>
+    if (!component) {
+      throw new Error(
+        `Component ${componentDefinition}} with componentIndex ${
+          componentDefinition.componentIndex
+        } not in entity ${this.id} - ${Object.keys(this._components)}`
+      )
     }
 
-    throw new Error(
-      `Component ${value}} with componentIndex ${
-        value.componentIndex
-      } not in entity ${this.id} - ${Object.keys(this._components)}`
-    )
+    return component as ComponentInstance<T>
   }
 
   /**
@@ -180,9 +249,9 @@ export class Entity {
    */
   find<T extends ComponentDefinition<unknown>>(
     value: T
-  ): ComponentDefinitionInstance<T> | undefined {
+  ): ComponentInstance<T> | undefined {
     return this._components[value.componentIndex] as
-      | ComponentDefinitionInstance<T>
+      | ComponentInstance<T>
       | undefined
   }
 
@@ -196,11 +265,9 @@ export class Entity {
   }
 
   /**
-   * Destroy the Entity's components and remove the Entity from the world
+   * Destroys the Entity
    */
   destroy(): void {
-    if (!this.world) return
-
-    this.world.entityManager.destroyEntity(this)
+    this.world?.destroy(this)
   }
 }

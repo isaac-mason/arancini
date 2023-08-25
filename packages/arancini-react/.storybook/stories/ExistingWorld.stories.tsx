@@ -1,5 +1,5 @@
-import * as A from '@arancini/core'
-import { Html, Text } from '@react-three/drei'
+import { World } from '@arancini/core'
+import { Html } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import React, { useEffect, useState } from 'react'
 import { Lifetime, Repeat } from 'timeline-composer'
@@ -10,7 +10,7 @@ export default {
   title: 'Existing World',
 }
 
-const world = new A.World()
+const world = new World()
 world.init()
 
 const ECS = createECS(world)
@@ -28,7 +28,7 @@ export const ExistingWorld = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const n = world.entities.size
+      const n = world.entities.length
 
       setWorldStats(`${n} ${n === 1 ? 'entity' : 'entities'}`)
     }, 1 / 10)
