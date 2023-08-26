@@ -86,7 +86,7 @@ __metadata:
     "@babel/preset-typescript": ^7.21.4
     "@mdx-js/react": ^2.3.0
     "@react-three/drei": ^9.80.4
-    "@react-three/fiber": ^8.13.4
+    "@react-three/fiber": ^8.13.7
     "@rollup/plugin-commonjs": ^25.0.4
     "@rollup/plugin-node-resolve": ^15.0.1
     "@rollup/plugin-terser": ^0.4.3
@@ -3567,9 +3567,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/fiber@npm:^8.13.4":
-  version: 8.13.5
-  resolution: "@react-three/fiber@npm:8.13.5"
+"@react-three/fiber@npm:^8.13.7":
+  version: 8.13.7
+  resolution: "@react-three/fiber@npm:8.13.7"
   dependencies:
     "@babel/runtime": ^7.17.8
     "@types/react-reconciler": ^0.26.7
@@ -3598,7 +3598,7 @@ __metadata:
       optional: true
     react-native:
       optional: true
-  checksum: 4cfae361babec37a6af55081568ac74b788520899470f98df50f0603e84c2c0f496f0992a0395e2b29c914742855188683ceb688019e8ec3a4e45e2ea320fd03
+  checksum: 129dee751f60bd7114fdcdc718af22eca22fbc8de80c2f0c2aa0c8016dbe1515cf056c03a69183ef60ed3e7d954343f7ac6102b797211fa8d30079dbde743417
   languageName: node
   linkType: hard
 
@@ -12493,7 +12493,7 @@ __metadata:
   resolution: "react-demo@workspace:apps/react-demo"
   dependencies:
     "@react-three/drei": ^9.80.4
-    "@react-three/fiber": ^8.13.4
+    "@react-three/fiber": ^8.13.7
     "@types/react": ^18.2.20
     "@types/react-dom": ^18.0.10
     "@types/three": ^0.155.0
