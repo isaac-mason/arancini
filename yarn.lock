@@ -100,7 +100,7 @@ __metadata:
     "@storybook/testing-library": ^0.2.0
     "@testing-library/jest-dom": ^6.0.0
     "@testing-library/react": ^14.0.0
-    "@types/react": ^18.0.14
+    "@types/react": ^18.2.20
     "@types/react-dom": ^18.0.5
     "@types/three": ^0.155.0
     "@vitest/coverage-v8": ^0.33.0
@@ -5219,7 +5219,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:>=16, @types/react@npm:^18.0.14, @types/react@npm:^18.0.27":
+"@types/react@npm:*, @types/react@npm:>=16":
   version: 18.2.16
   resolution: "@types/react@npm:18.2.16"
   dependencies:
@@ -5227,6 +5227,17 @@ __metadata:
     "@types/scheduler": "*"
     csstype: ^3.0.2
   checksum: 3d4fdc12509e0098e0dbb4bacdea53e8ccc6632e9df63d9f2711c77aa81ce3b2bb9c76d087f284034b25fd7245680167f4832bf6e4df960c5af2634b52adfd0c
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^18.2.20":
+  version: 18.2.20
+  resolution: "@types/react@npm:18.2.20"
+  dependencies:
+    "@types/prop-types": "*"
+    "@types/scheduler": "*"
+    csstype: ^3.0.2
+  checksum: 30f699c60e5e4bfef273ce64d320651cdd60f5c6a08361c6c7eca8cebcccda1ac953d2ee57c9f321b5ae87f8a62c72b6d35ca42df0e261d337849952daab2141
   languageName: node
   linkType: hard
 
@@ -12483,7 +12494,7 @@ __metadata:
   dependencies:
     "@react-three/drei": ^9.80.4
     "@react-three/fiber": ^8.13.4
-    "@types/react": ^18.0.27
+    "@types/react": ^18.2.20
     "@types/react-dom": ^18.0.10
     "@types/three": ^0.155.0
     "@vitejs/plugin-react": ^4.0.1
