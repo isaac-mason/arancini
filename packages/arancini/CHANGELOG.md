@@ -1,5 +1,39 @@
 # arancini
 
+## 3.2.0
+
+### Minor Changes
+
+- 695e4bb: feat: rename world.destroy() to world.reset(), add world.destroy(entity: Entity)
+- 695e4bb: feat: refactor query manager
+- 695e4bb: feat: world.entities is now a list, was a map
+- 695e4bb: feat: class components are no longer object pooled by default, they must opted in with the `@objectPooled` annotation, or by setting the `objectPooled` property on the component definition
+
+  ```ts
+  @objectPooled()
+  class MyComponent extends Component {
+    /* ... */
+  }
+
+  // or
+
+  class MyComponent extends Component {
+    /* ... */
+  }
+  MyComponent.objectPooled = true;
+  ```
+
+### Patch Changes
+
+- Updated dependencies [695e4bb]
+- Updated dependencies [695e4bb]
+- Updated dependencies [695e4bb]
+- Updated dependencies [695e4bb]
+- Updated dependencies [695e4bb]
+- Updated dependencies [695e4bb]
+  - @arancini/core@3.2.0
+  - @arancini/react@3.2.0
+
 ## 3.1.1
 
 ### Patch Changes
