@@ -253,16 +253,16 @@ describe('Entities and Components', () => {
     // uninitialized world
     world = new World()
 
-    const componentInitJestFn = vi.fn()
-    const componentDestroyJestFn = vi.fn()
+    const componentInitFn = vi.fn()
+    const componentDestroyFn = vi.fn()
 
     class TestComponentOne extends Component {
       onInit(): void {
-        componentInitJestFn()
+        componentInitFn()
       }
 
       onDestroy(): void {
-        componentDestroyJestFn()
+        componentDestroyFn()
       }
     }
 
@@ -272,16 +272,16 @@ describe('Entities and Components', () => {
     entity.add(TestComponentOne)
 
     expect(world.initialised).toBe(false)
-    expect(componentInitJestFn).toHaveBeenCalledTimes(0)
+    expect(componentInitFn).toHaveBeenCalledTimes(0)
 
     world.init()
 
     expect(world.initialised).toBe(true)
-    expect(componentInitJestFn).toHaveBeenCalledTimes(1)
+    expect(componentInitFn).toHaveBeenCalledTimes(1)
 
     entity.destroy()
     world.update(0)
-    expect(componentDestroyJestFn).toHaveBeenCalledTimes(1)
+    expect(componentDestroyFn).toHaveBeenCalledTimes(1)
   })
 
   describe('Component', () => {

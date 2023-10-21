@@ -136,20 +136,20 @@ describe('System', () => {
   })
 
   test('onInit, onUpdate, and onDestroy lifecycle methods are called', () => {
-    const systemInitJestFn = vi.fn()
-    const systemUpdateJestFn = vi.fn()
-    const systemDestroyJestFn = vi.fn()
+    const systemInitFn = vi.fn()
+    const systemUpdateFn = vi.fn()
+    const systemDestroyFn = vi.fn()
     class TestSystem extends System {
       onDestroy(): void {
-        systemDestroyJestFn()
+        systemDestroyFn()
       }
 
       onInit(): void {
-        systemInitJestFn()
+        systemInitFn()
       }
 
       onUpdate(delta: number): void {
-        systemUpdateJestFn(delta)
+        systemUpdateFn(delta)
       }
     }
 
@@ -169,13 +169,13 @@ describe('System', () => {
 
     world.reset()
 
-    expect(systemInitJestFn).toHaveBeenCalledTimes(1)
+    expect(systemInitFn).toHaveBeenCalledTimes(1)
 
-    expect(systemUpdateJestFn).toHaveBeenCalledTimes(2)
-    expect(systemUpdateJestFn.mock.calls[0][0]).toBe(deltaUpdateOne)
-    expect(systemUpdateJestFn.mock.calls[1][0]).toBe(deltaUpdateTwo)
+    expect(systemUpdateFn).toHaveBeenCalledTimes(2)
+    expect(systemUpdateFn.mock.calls[0][0]).toBe(deltaUpdateOne)
+    expect(systemUpdateFn.mock.calls[1][0]).toBe(deltaUpdateTwo)
 
-    expect(systemDestroyJestFn).toHaveBeenCalledTimes(1)
+    expect(systemDestroyFn).toHaveBeenCalledTimes(1)
   })
 
   test('silently swallows attempting to unregister a system that is not registered or has already been unregistered', () => {
