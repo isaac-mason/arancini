@@ -1,7 +1,6 @@
-import { Component, objectPooled } from '@arancini/core'
+import { Component } from '@arancini/core'
 import { Vector2 } from './utils'
 
-@objectPooled()
 export class Movement extends Component {
   velocity: Vector2
   acceleration: Vector2
@@ -10,9 +9,10 @@ export class Movement extends Component {
     this.velocity = new Vector2()
     this.acceleration = new Vector2()
   }
+  
+  static objectPooled = true
 }
 
-@objectPooled()
 export class Circle extends Component {
   position: Vector2
   radius: number
@@ -25,6 +25,8 @@ export class Circle extends Component {
     this.acceleration = new Vector2()
     this.radius = 0
   }
+
+  static objectPooled = true
 }
 
 export class CanvasContext extends Component {

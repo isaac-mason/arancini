@@ -166,11 +166,13 @@ describe('Pools', () => {
   })
 
   describe('ComponentPool', () => {
-    @objectPooled()
-    class ExampleComponentOne extends Component {}
+    class ExampleComponentOne extends Component {
+      static objectPooled = true
+    }
 
-    @objectPooled()
-    class ExampleComponentTwo extends Component {}
+    class ExampleComponentTwo extends Component {
+      static objectPooled = true
+    }
 
     let world: World
     let pool: ComponentPool

@@ -112,14 +112,15 @@ class ExampleComponent extends Component {
   }
 }
 
-// optionally object pool the component - this helps avoid garbage collection
-@objectPooled()
 class InventoryComponent extends Component {
   inventory = new Map<string, number>()
 
   construct() {
     this.inventory.clear()
   }
+
+  // optionally object pool the component - this helps avoid garbage collection if the component is expensive to create
+  static objectPooled = true
 }
 
 world.registerComponent(PositionComponent)

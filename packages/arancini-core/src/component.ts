@@ -80,38 +80,12 @@ export type ComponentDefinitionArgs<T extends ComponentDefinition<unknown>> =
     : never
 
 /**
- * Decorator for opting ia class component into being object objectPooled.
- *
- * @example defining an object pooled component using the @objectPool decorator
- * ```ts
- * import { Component, objectPooled, World } from '@arancini/core'
- *
- * @objectPooled()
- * class ExampleComponent extends Component {}
- * ```
- *
- * This can also be achieved by setting the `objectPooled` property on a component class
- * @example vanilla js
- * ```js
- * import { Component } from '@arancini/core'
- *
- * class ExampleComponent extends Component {}
- * ExampleComponent.objectPooled = true
- * ```
- */
-export const objectPooled =
-  () => (target: { new (): Component; objectPooled: boolean }, _v?: any) => {
-    target.objectPooled = true
-  }
-
-/**
  * The base class for class components.
  *
- *  * @example defining and creating a class component that extends the `Component` class and uses the `@objectPooled` decorator
+ *  * @example defining and creating a class component that extends the `Component` class, and is opted into object pooling
  * ```ts
  * import { Component, objectPooled, World } from '@arancini/core'
  *
- * @objectPooled()
  * class ExampleComponent extends Component {
  *   // When using typescript, the `!:` not null assertion can be used as a "late-init" syntax.
  *   // You must take care to set all class properties in the `construct` method.
@@ -134,6 +108,9 @@ export const objectPooled =
  *   onDestroy() {
  *     // called on destroying the component
  *   }
+ * 
+ *   // opt-in to object pooling
+ *   static objectPooled = true
  * }
  *
  * // create a world and register the component
