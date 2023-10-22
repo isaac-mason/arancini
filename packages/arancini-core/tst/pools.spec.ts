@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { beforeEach, describe, expect, it } from 'vitest'
-import { Component, objectPooled } from '../src/component'
+import { Component } from '../src/component'
 import { Entity } from '../src/entity'
 import { ComponentPool, EntityPool, ObjectPool } from '../src/pools'
 import { World } from '../src/world'

@@ -44,4 +44,15 @@ export default [
     ],
     plugins,
   },
+  {
+    input: `./src/net.ts`,
+    external: ['@arancini/core'],
+    output: [
+      {
+        file: `./net.js`,
+        ...commonOutput,
+      },
+    ],
+    plugins,
+  },
 ]

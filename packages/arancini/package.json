@@ -16,12 +16,13 @@
   },
   "scripts": {
     "build": "yarn build:before && rollup --config rollup.config.js --bundleConfigAsCjs",
-    "build:before": "(rm index.js index.d.ts react.js react.d.ts || true)",
+    "build:before": "(rm index.js index.d.ts react.js react.d.ts net.js net.d.ts || true)",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
   "dependencies": {
     "@arancini/core": "3.2.0",
+    "@arancini/net": "3.2.0",
     "@arancini/react": "3.2.0"
   },
   "peerDependencies": {
@@ -66,6 +67,9 @@
     },
     "./react": {
       "import": "./react.js"
+    },
+    "./net": {
+      "import": "./net.js"
     }
   },
   "files": [

@@ -23,19 +23,4 @@ dist-ssr
 *.sln
 *.sw?
 
-# jest coverage
 coverage
-
-storybook-static
-
-index.js
-index.js.map
-index.d.ts
-
-react.js
-react.js.map
-react.d.ts
-
-net.js
-net.js.map
-net.d.ts

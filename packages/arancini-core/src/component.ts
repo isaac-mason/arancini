@@ -84,7 +84,7 @@ export type ComponentDefinitionArgs<T extends ComponentDefinition<unknown>> =
  *
  *  * @example defining and creating a class component that extends the `Component` class, and is opted into object pooling
  * ```ts
- * import { Component, objectPooled, World } from '@arancini/core'
+ * import { Component, World } from '@arancini/core'
  *
  * class ExampleComponent extends Component {
  *   // When using typescript, the `!:` not null assertion can be used as a "late-init" syntax.
