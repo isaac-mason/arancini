@@ -1,4 +1,11 @@
+import { QueryDescription } from '.'
 import { Entity } from './entity'
+import {
+  getFirstQueryResult,
+  getQueryBitSets,
+  getQueryConditions,
+  getQueryResults,
+} from './query-utils'
 import { Topic } from './topic'
 
 export class EntityContainer {
@@ -14,6 +21,20 @@ export class EntityContainer {
 
   get first(): Entity | undefined {
     return this.entities[0] || undefined
+  }
+
+  filter(queryDescription: QueryDescription): Entity[] {
+    const conditions = getQueryConditions(queryDescription)
+    const conditionsBitSets = getQueryBitSets(conditions)
+
+    return getQueryResults(conditionsBitSets, this.entities)
+  }
+
+  find(queryDescription: QueryDescription): Entity | undefined {
+    const conditions = getQueryConditions(queryDescription)
+    const conditionsBitSets = getQueryBitSets(conditions)
+
+    return getFirstQueryResult(conditionsBitSets, this.entities)
   }
 
   [Symbol.iterator]() {

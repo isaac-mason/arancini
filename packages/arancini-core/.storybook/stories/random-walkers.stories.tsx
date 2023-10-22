@@ -12,39 +12,26 @@ class CanvasContext extends Component {
   height!: number
 }
 
-const Queries = {
-  ToDraw: {
-    all: [Position],
-    any: [Red, Blue],
-  },
-  Context: [CanvasContext],
-  WalkerPosition: [Position],
-  Color: {
-    any: [Red, Blue],
-  },
-}
-
 const BOX_SIZE = 10
 
 class DrawSystem extends System {
   // get the canvas context
-  context = this.query(Queries.Context)
+  context = this.singleton(CanvasContext)!
 
   // A `System` can have many queries for entities, filtering by what components they have
   // this query is called `toDraw`
-  toDraw = this.query(Queries.ToDraw)
+  toDraw = this.query((entities) => entities.with(Position).and.any(Red, Blue))
 
   // On each update, let's draw
   onUpdate() {
     // get the first entity from our canvas context query
-    const context = this.context.first!.get(CanvasContext)
-    const ctx = context.ctx
+    const { ctx, width, height } = this.context
 
     // clear the canvas
-    ctx.clearRect(0, 0, context.width, context.height)
+    ctx.clearRect(0, 0, width, height)
 
-    const xOffset = context.width / 2
-    const yOffset = context.height / 2
+    const xOffset = width / 2
+    const yOffset = height / 2
 
     // the results of the `toDraw` query are available in `this.toDraw.entities`
     // to get entities that have been matched and unmatched from the query
@@ -70,7 +57,7 @@ class DrawSystem extends System {
 
 class WalkSystem extends System {
   // query for walkers
-  walkers = this.query(Queries.WalkerPosition)
+  walkers = this.query((entities) => entities.with(Position))
 
   // keep track of when our walkers should move again
   static timeBetweenMovements = 0.05
@@ -98,7 +85,7 @@ class WalkSystem extends System {
 }
 
 class FlipSystem extends System {
-  walkers = this.query(Queries.Color)
+  walkers = this.query((entities) => entities.some(Red, Blue))
 
   onUpdate() {
     for (const entity of this.walkers) {

@@ -1,8 +1,14 @@
 import { ComponentDefinition, ComponentInstance } from './component'
-import type { QueryDescription } from './query'
+import type { QueryDescription } from './query-utils'
 import { Query } from './query'
-import { isSubclassMethodOverridden } from './utils'
 import type { World } from './world'
+
+const isSubclassMethodOverridden = (
+  clazz: { new (...args: never[]): unknown },
+  methodName: string
+): boolean => {
+  return Object.getOwnPropertyNames(clazz.prototype).includes(methodName)
+}
 
 export type SystemQueryOptions = {
   required?: boolean
@@ -335,7 +341,7 @@ export class SystemManager {
   /**
    * Creates a query for a system
    * @param system the system to create the query for
-   * @param queryDescription the query description
+   * @param queryDescription the query to create
    * @param options the options for the query
    */
   createSystemQuery(

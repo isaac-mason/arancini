@@ -6,8 +6,8 @@ import {
   type ComponentInstance,
   Component,
 } from './component'
-import { uniqueId } from './utils'
-import { BitSet } from './utils/bit-set'
+import { uniqueId } from './unique-id'
+import { BitSet } from './bit-set'
 import type { World } from './world'
 
 /**

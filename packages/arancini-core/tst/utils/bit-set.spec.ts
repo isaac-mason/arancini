@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { BitSet } from '../../src/utils/bit-set'
+import { BitSet } from '../../src/bit-set'
+
+const fail = () => {
+  throw new Error()
+}
 
 describe('BitSet', () => {
   describe('add, remove, has', () => {

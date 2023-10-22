@@ -1,23 +1,14 @@
-import { Query, System } from '@arancini/core'
+import { System } from '@arancini/core'
 import { CanvasContext, Circle, Intersecting, Movement } from './components'
 import { drawLine, fillCircle, intersection } from './utils'
 
-const Queries = {
-  MovingCircles: [Movement, Circle],
-  Context: [CanvasContext],
-  Circles: [Circle],
-  Intersecting: [Intersecting],
-}
-
 export class MovementSystem extends System {
-  movingCircles = this.query(Queries.MovingCircles)
-  context = this.query(Queries.Context)
+  movingCircles = this.query((entities) => entities.with(Movement, Circle))
+  context = this.singleton(CanvasContext)!
 
   onUpdate(delta: number) {
-    const context = this.context.first!
-
-    let canvasWidth = context.get(CanvasContext).width
-    let canvasHeight = context.get(CanvasContext).height
+    let canvasWidth = this.context.width
+    let canvasHeight = this.context.height
     let multiplier = 0.5
 
     let entities = this.movingCircles.entities
@@ -52,11 +43,7 @@ export class MovementSystem extends System {
 }
 
 export class IntersectionSystem extends System {
-  circles!: Query
-
-  onInit() {
-    this.circles = this.query(Queries.Circles)
-  }
+  circles = this.query((entities) => entities.with(Circle))
 
   onUpdate() {
     let entities = this.circles.entities
@@ -105,19 +92,15 @@ export class IntersectionSystem extends System {
 }
 
 export class Renderer extends System {
-  circles = this.query(Queries.Circles)
-  intersectingCircles = this.query(Queries.Intersecting)
-  context = this.query(Queries.Context)
+  circles = this.query((entities) => entities.with(Circle))
+  intersectingCircles = this.query((entities) => entities.with(Intersecting))
+  context = this.singleton(CanvasContext)!
 
   onUpdate() {
-    const context = this.context.first!
-    let canvasComponent = context.get(CanvasContext)
-    let ctx = canvasComponent.ctx
-    let canvasWidth = canvasComponent.width
-    let canvasHeight = canvasComponent.height
+    const { ctx, width, height } = this.context
 
     ctx.fillStyle = 'black'
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+    ctx.fillRect(0, 0, width, width)
 
     let circles = this.circles.entities
     for (let i = 0; i < circles.length; i++) {

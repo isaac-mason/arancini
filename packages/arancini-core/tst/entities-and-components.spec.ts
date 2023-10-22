@@ -1,9 +1,5 @@
 import { beforeEach, describe, expect, it, test, vi } from 'vitest'
-import {
-  Component,
-  World,
-  cloneComponentDefinition,
-} from '../src'
+import { Component, World, cloneComponentDefinition } from '../src'
 import { InternalComponentInstanceProperties } from '../dist'
 
 describe('Entities and Components', () => {
@@ -109,7 +105,6 @@ describe('Entities and Components', () => {
     )
     const Clone = cloneComponentDefinition(TestComponent)
 
-
     world.registerComponent(TestComponent)
     world.registerComponent(Clone)
 
@@ -124,12 +119,12 @@ describe('Entities and Components', () => {
     expect(world.componentRegistry.components.size).toBe(4)
   })
 
-  test('creating an entity with initial components', () => {
+  test('entity initial components should be added in a bulk update', () => {
     class TestComponent extends Component {}
 
     world.registerComponent(TestComponent)
 
-    const query = world.query([TestComponent])
+    const query = world.query((entities) => entities.with(TestComponent))
 
     let added = 0
     let removed = 0

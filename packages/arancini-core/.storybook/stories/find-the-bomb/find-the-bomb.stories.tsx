@@ -1,4 +1,4 @@
-import { Component, Entity, System, World } from '@arancini/core'
+import { Component, System, World } from '@arancini/core'
 import React, { useEffect } from 'react'
 
 import './find-the-bomb.css'
@@ -22,14 +22,14 @@ const DistanceToTarget = Component.object<{ distance: number }>(
 const Target = Component.tag('Target')
 
 class EmojiRendererSystem extends System {
-  queries = {
-    toRender: this.query([Position, Emoji, DistanceToTarget]),
-  }
+  emojisToRender = this.query((entities) =>
+    entities.with(Position, Emoji, DistanceToTarget)
+  )
 
   emojisDomElement = document.getElementById('emojis')!
 
   onInit(): void {
-    this.queries.toRender.onEntityAdded.add((entity) => {
+    this.emojisToRender.onEntityAdded.add((entity) => {
       const emoji = entity.get(Emoji)
       this.emojisDomElement.appendChild(emoji.domElement)
       emoji.dirty = true
@@ -37,14 +37,14 @@ class EmojiRendererSystem extends System {
   }
 
   onDestroy(): void {
-    for (const entity of this.queries.toRender) {
+    for (const entity of this.emojisToRender) {
       const emoji = entity.get(Emoji)
       emoji.domElement.remove()
     }
   }
 
   onUpdate() {
-    for (const entity of this.queries.toRender) {
+    for (const entity of this.emojisToRender) {
       const emoji = entity.get(Emoji)
       if (!emoji.dirty) continue
 
@@ -87,24 +87,15 @@ class EmojiRendererSystem extends System {
 }
 
 class DistanceSystem extends System {
-  queries = {
-    emojis: this.query({
-      all: [Position, Emoji],
-    }),
-    target: this.query({
-      all: [Target],
-    }),
-  }
+  emojis = this.query((entities) => entities.with(Emoji, Position))
 
-  get target(): Entity {
-    return this.queries.target.first!
-  }
+  target = this.query((entities) => entities.with(Target, Position))
 
   onInit(): void {
-    this.queries.emojis.onEntityAdded.add((entity) => {
+    this.emojis.onEntityAdded.add((entity) => {
       const { x, y } = entity.get(Position)
 
-      const targetPosition = this.target.get(Position)
+      const targetPosition = this.target.first!.get(Position)
 
       const distance = Math.sqrt(
         Math.pow(targetPosition.x - x, 2) + Math.pow(targetPosition.y - y, 2)
@@ -116,10 +107,9 @@ class DistanceSystem extends System {
 }
 
 class InteractionSystem extends System {
-  queries = {
-    emojis: this.query([Emoji]),
-    target: this.query([Target, Position]),
-  }
+  emojis = this.query((entities) => entities.with(Emoji))
+
+  target = this.query((entities) => entities.with(Target, Position))
 
   gameState = this.singleton(GameState, { required: true })
 
@@ -130,7 +120,7 @@ class InteractionSystem extends System {
 
     this.nRevealedDomElement.innerText = 'Click on an emoji to start'
 
-    this.queries.emojis.onEntityAdded.add((entity) => {
+    this.emojis.onEntityAdded.add((entity) => {
       const emoji = entity.get(Emoji)
 
       emoji.domElement.addEventListener('click', () => {
@@ -140,7 +130,7 @@ class InteractionSystem extends System {
           emoji.revealed = true
           this.gameState.clicks += 1
 
-          const target = this.queries.target.first!
+          const target = this.target.first!
           const targetPosition = target.get(Position)
 
           const clickedPosition = entity.get(Position)
@@ -235,9 +225,11 @@ export const FindTheBomb = () => {
     })
 
     window.addEventListener('resize', () => {
-      world.find([Emoji]).forEach((entity) => {
-        entity.get(Emoji).dirty = true
-      })
+      world
+        .filter((entities) => entities.with(Emoji))
+        .forEach((entity) => {
+          entity.get(Emoji).dirty = true
+        })
     })
 
     const now = () => performance.now() / 1000

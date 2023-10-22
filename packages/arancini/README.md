@@ -55,17 +55,17 @@ React glue for arancini.
 A world represents your game or simulation. It maintains the entities, components, queries and systems in the ECS.
 
 ```ts
-import { World } from 'arancini'
+import { World } from "arancini";
 
 // create a world
-const world = new World()
+const world = new World();
 
 // register components and systems
-world.registerComponent(MyComponent)
-world.registerSystem(MySystem)
+world.registerComponent(MyComponent);
+world.registerSystem(MySystem);
 
 // initialise the world
-world.init()
+world.init();
 ```
 
 ### 🍱 Entity
@@ -74,17 +74,17 @@ An entity is a container for components.
 
 ```ts
 // create an entity
-const entity = world.create()
+const entity = world.create();
 
 // remove all components and remove from the world
-entity.destroy()
+entity.destroy();
 ```
 
 > **Note:** You should avoid storing references to entities and components. Use queries to find entities that have certain components, run logic on them, and then discard the references.
 
 ### 📦 Component
 
-Components are containers for data. There are multiple ways to define components:
+You can use components to store data. Components can be defined as class components, object components, or tag components.
 
 #### Class Components
 
@@ -95,12 +95,12 @@ To define a class component, create a new class extending the `Component` class.
 ```ts
 class ExampleComponent extends Component {
   // **Note:** In typescript you can use the not null `!:` syntax to indicate that properties set in `construct` will be be defined
-  x!: number
-  y!: number
+  x!: number;
+  y!: number;
 
   construct(x: number, y: number) {
-    this.x = x
-    this.y = y
+    this.x = x;
+    this.y = y;
   }
 
   onInit() {
@@ -113,24 +113,24 @@ class ExampleComponent extends Component {
 }
 
 class InventoryComponent extends Component {
-  inventory = new Map<string, number>()
+  inventory = new Map<string, number>();
 
   construct() {
-    this.inventory.clear()
+    this.inventory.clear();
   }
 
-  // optionally object pool the component - this helps avoid garbage collection if the component is expensive to create
-  static objectPooled = true
+  // optionally object pool the component - this helps avoid garbage collection if a component is expensive to create
+  static objectPooled = true;
 }
 
-world.registerComponent(PositionComponent)
-world.registerComponent(InventoryComponent)
+world.registerComponent(PositionComponent);
+world.registerComponent(InventoryComponent);
 
-entity.add(Position, 10, 20)
-entity.add(Inventory)
+entity.add(Position, 10, 20);
+entity.add(Inventory);
 
-entity.remove(Position)
-entity.remove(Inventory)
+entity.remove(Position);
+entity.remove(Inventory);
 ```
 
 #### Object Components
@@ -140,16 +140,16 @@ You can use `Component.object()` to create a object component definition.
 Object components are useful for integrating with libraries. For example, you might create an object component for a three.js Object3D, or your physics library's physics body type.
 
 ```ts
-import { Component } from 'arancini'
-import { Object3D } from 'three'
+import { Component } from "arancini";
+import { Object3D } from "three";
 
-const Object3DComponent = Component.object<Object3D>()
+const Object3DComponent = Component.object<Object3D>();
 
-world.registerComponent(Object3DComponent)
+world.registerComponent(Object3DComponent);
 
-const entity = world.create()
+const entity = world.create();
 
-const object3D = entity.add(Object3DComponent, new Object3D())
+const object3D = entity.add(Object3DComponent, new Object3D());
 ```
 
 #### Tag Components
@@ -157,16 +157,16 @@ const object3D = entity.add(Object3DComponent, new Object3D())
 You can use `Component.tag()` to define a tag component. Tag components are useful for components that don't need to store any data.
 
 ```ts
-import { Component } from 'arancini'
+import { Component } from "arancini";
 
-const PlayerComponent = Component.tag()
+const PlayerComponent = Component.tag();
 
-world.registerComponent(PlayerComponent)
+world.registerComponent(PlayerComponent);
 
-const entity = world.create()
-entity.add(PlayerComponent)
+const entity = world.create();
+entity.add(PlayerComponent);
 
-console.log(entity.has(PlayerComponent)) // true
+console.log(entity.has(PlayerComponent)); // true
 ```
 
 #### Registering components
@@ -179,10 +179,10 @@ Adding or removing a component from an entity will cause queries to be updated. 
 
 ```ts
 entity.bulk(() => {
-  entity.add(Position, 10, 20)
-  entity.add(Velocity, 1, 2)
-  entity.remove(Health)
-})
+  entity.add(Position, 10, 20);
+  entity.add(Velocity, 1, 2);
+  entity.remove(Health);
+});
 ```
 
 #### Using components in multiple worlds
@@ -191,34 +191,35 @@ entity.bulk(() => {
 
 ```ts
 /* lib.ts */
-import { Component } from 'arancini'
+import { Component } from "arancini";
 
 export class MyComponent extends Component {
   /* ... */
 }
 
 /* some-world.ts */
-import { World } from 'arancini'
-import { MyComponent as MyComponentImpl } from './lib'
+import { World } from "arancini";
+import { MyComponent as MyComponentImpl } from "./lib";
 
-const MyComponent = cloneComponentDefinition(MyComponentImpl)
+const MyComponent = cloneComponentDefinition(MyComponentImpl);
 
-const world = new World()
-world.registerComponent(MyComponent)
+const world = new World();
+world.registerComponent(MyComponent);
 ```
 
 ### 🔎 Query
 
-You can use queries to find entities that have certain components. Queries support `all`, `one`, and `none` filters. Queries with the same filters are deduplicated by arancini, so you can create multiple queries with the same filters without performance penalty.
+You can use queries to find entities that have certain components. Queries support `all`, `one`, and `none` filters. Queries with the same filters are deduped by arancini, so you can create multiple queries with the same filters without performance penalty.
 
 ```ts
-const basicQuery = world.query([Position])
+const basicQuery = world.query([Position]);
 
-const advancedQuery = world.query({
-  all: [Position, Velocity],
-  one: [EitherThisComponent, OrThisComponent],
-  none: [NotThisComponent],
-})
+const advancedQuery = world.query((entities) =>
+  entities
+    .all(Position, Velocity)
+    .any(EitherThisComponent, OrThisComponent)
+    .not(NotThisComponent),
+);
 ```
 
 #### Iterating over query results
@@ -228,7 +229,7 @@ The `Query` class has a `Symbol.iterator` method which can be used to iterate ov
 Alternatively, you can simply iterate over entities in `query.entities`.
 
 ```ts
-const query = world.query([Position])
+const query = world.query([Position]);
 
 for (const entity of query) {
   // iterates over entities in reverse order
@@ -244,17 +245,17 @@ for (const entity of query.entities) {
 Queries are reactive and can emit events when entities are added or removed from the query.
 
 ```ts
-const query = world.query([Position])
+const query = world.query([Position]);
 
 const handler = (entity: Entity) => {
   // ...
-}
+};
 
-query.onEntityAdded.add(handler)
-query.onEntityRemoved.add(handler)
+query.onEntityAdded.add(handler);
+query.onEntityRemoved.add(handler);
 
-query.onEntityAdded.remove(handler)
-query.onEntityRemoved.remove(handler)
+query.onEntityAdded.remove(handler);
+query.onEntityRemoved.remove(handler);
 ```
 
 ### 🧠 System
@@ -266,8 +267,8 @@ Arancini has built-in support for systems, but you can also use queries alone to
 If you have systems registered in the world, you can use `world.update()` to run the systems. If you don't have any systems registered, you don't need to call `update`! Arancini is fully reactive, queries will be updated as the composition of entities change.
 
 ```ts
-const delta = 1 / 60
-world.update(delta)
+const delta = 1 / 60;
+world.update(delta);
 ```
 
 #### System lifecycle methods
@@ -297,15 +298,15 @@ You can use `this.query` to create a query linked to the system. These queries w
 
 ```ts
 class MovementSystem extends System {
-  moving = this.query([Position, Velocity])
+  moving = this.query([Position, Velocity]);
 
   onUpdate() {
     for (const entity of this.moving) {
-      const position = entity.get(Position)
-      const velocity = entity.get(Velocity)
+      const position = entity.get(Position);
+      const velocity = entity.get(Velocity);
 
-      position.x += velocity.x
-      position.y += velocity.y
+      position.x += velocity.x;
+      position.y += velocity.y;
     }
   }
 }
@@ -315,10 +316,10 @@ System queries can be marked as 'required', meaning that the system will only be
 
 ```ts
 class ExampleSystem extends System {
-  requiredQuery = this.query([ExampleComponent], { required: true })
+  requiredQuery = this.query([ExampleComponent], { required: true });
 
   onUpdate() {
-    const { data } = this.requiredQuery.first!.get(ExampleComponent)
+    const { data } = this.requiredQuery.first!.get(ExampleComponent);
   }
 }
 ```
@@ -328,8 +329,8 @@ class ExampleSystem extends System {
 Systems can be registered with a priority. The order systems run in is first determined by priority, then by the order systems were registered.
 
 ```ts
-const priority = 10
-world.registerSystem(MovementSystem, priority)
+const priority = 10;
+world.registerSystem(MovementSystem, priority);
 ```
 
 #### Singleton components
@@ -340,10 +341,10 @@ The `singleton` method creates a query for a single component, and sets the prop
 
 ```ts
 class ExampleSystem extends System {
-  player = this.singleton(PlayerComponent, { required: true })
+  player = this.singleton(PlayerComponent, { required: true });
 
   onUpdate() {
-    player.ENERGY -= 1
+    player.ENERGY -= 1;
   }
 }
 ```
@@ -357,34 +358,34 @@ Let's use arancini to make a simple random walk simulation!
 ### 1. Import everything we need
 
 ```ts
-import { Component, Query, System, World } from 'arancini'
+import { Component, Query, System, World } from "arancini";
 ```
 
 ### 2. Create components to store data
 
 ```ts
 class Position extends Component {
-  x!: number
-  y!: number
+  x!: number;
+  y!: number;
 
   construct(x: number, y: number) {
-    this.x = x
-    this.y = y
+    this.x = x;
+    this.y = y;
   }
 }
 
 class Color extends Component {
-  color!: 'red' | 'blue'
+  color!: "red" | "blue";
 
-  construct(color: 'red' | 'blue') {
-    this.color = color
+  construct(color: "red" | "blue") {
+    this.color = color;
   }
 }
 
 class CanvasContext extends Component {
-  ctx!: CanvasRenderingContext2D
-  width!: number
-  height!: number
+  ctx!: CanvasRenderingContext2D;
+  width!: number;
+  height!: number;
 }
 ```
 
@@ -392,33 +393,31 @@ class CanvasContext extends Component {
 
 ```ts
 class DrawSystem extends System {
-  canvasContext = this.query([CanvasContext])
+  context = this.singleton(CanvasContext)!;
 
-  boxesToDraw = this.query({
-    all: [Position, Color],
-  })
+  toDraw = this.query((entities) => entities.with(Position).and.any(Red, Blue));
 
   onUpdate() {
-    const context = this.canvasContext.first!.get(CanvasContext)
+    const { ctx, width, height } = this.context;
 
-    context.ctx.clearRect(0, 0, context.width, context.height)
+    ctx.clearRect(0, 0, width, height);
 
-    const xOffset = context.width / 2
-    const yOffset = context.height / 2
+    const boxSize = 10;
+    const xOffset = width / 2;
+    const yOffset = height / 2;
 
-    const boxSize = 10
+    for (const entity of this.toDraw) {
+      const { x, y } = entity.get(Position);
 
-    for (const entity of this.boxesToDraw.entities) {
-      const { x, y } = entity.get(Position)
-      const { color } = entity.get(Color)
+      const color: "red" | "blue" = entity.has(Red) ? "red" : "blue";
 
-      context.ctx.fillStyle = color
-      context.ctx.fillRect(
+      ctx.fillStyle = color;
+      ctx.fillRect(
         xOffset + (x - boxSize / 2),
         yOffset + (y - boxSize / 2),
         boxSize,
-        boxSize
-      )
+        boxSize,
+      );
     }
   }
 }
@@ -427,26 +426,24 @@ class DrawSystem extends System {
 ### 4. Create a System that moves entities with a `Position` Component
 
 ```ts
-const TIME_BETWEEN_MOVEMENTS = 0.05 // seconds
+const TIME_BETWEEN_MOVEMENTS = 0.05; // seconds
 
 class WalkSystem extends System {
-  movementCountdown = TIME_BETWEEN_MOVEMENTS
+  movementCountdown = TIME_BETWEEN_MOVEMENTS;
 
-  walkers = this.query({
-    all: [Position],
-  })
+  walkers = this.query([Position]);
 
   onUpdate(delta: number) {
-    this.movementCountdown -= delta
+    this.movementCountdown -= delta;
 
     if (this.movementCountdown <= 0) {
       for (const entity of this.walkers.entities) {
-        const position = entity.get(Position)
-        position.x += (Math.random() - 0.5) * 3
-        position.y += (Math.random() - 0.5) * 3
+        const position = entity.get(Position);
+        position.x += (Math.random() - 0.5) * 3;
+        position.y += (Math.random() - 0.5) * 3;
       }
 
-      this.movementCountdown = TIME_BETWEEN_MOVEMENTS
+      this.movementCountdown = TIME_BETWEEN_MOVEMENTS;
     }
   }
 }
@@ -457,58 +454,57 @@ class WalkSystem extends System {
 First, create a new `World`
 
 ```ts
-const world = new World()
+const world = new World();
 ```
 
 Next, let's register the Components and Systems we created.
 
 ```ts
-world.registerComponent(Position)
-world.registerComponent(Color)
-world.registerComponent(CanvasContext)
+world.registerComponent(Position);
+world.registerComponent(Color);
+world.registerComponent(CanvasContext);
 
-world.registerSystem(WalkSystem)
-world.registerSystem(DrawSystem)
-world.registerSystem(FlipSystem)
+world.registerSystem(WalkSystem);
+world.registerSystem(DrawSystem);
 ```
 
 Now let's create some random walkers. We'll create 100 random walkers, and give them a random position and color.
 
 ```ts
-const N = 100
+const N = 100;
 
-const randomPosition = () => Math.random() * 10 - 5
-const randomColor = () => (Math.random() > 0.5 ? 'red' : 'blue')
+const randomPosition = () => Math.random() * 10 - 5;
+const randomColor = () => (Math.random() > 0.5 ? "red" : "blue");
 
 for (let i = 0; i < N; i++) {
-  const entity = world.create()
-  entity.add(Position, randomPosition(), randomPosition())
-  entity.add(Color, randomColor())
+  const entity = world.create();
+  entity.add(Position, randomPosition(), randomPosition());
+  entity.add(Color, randomColor());
 }
 ```
 
 Next we'll create an entity with the `CanvasContext` component, which will contain the HTML canvas context. We'll also add a handler for window resizing.
 
 ```ts
-const canvasContext = world.create()
+const canvasContext = world.create();
 
 const canvasElement = document.querySelector(
-  '#example-canvas'
-) as HTMLCanvasElement
-canvasElement.width = window.innerWidth
-canvasElement.height = window.innerHeight
+  "#example-canvas",
+) as HTMLCanvasElement;
+canvasElement.width = window.innerWidth;
+canvasElement.height = window.innerHeight;
 
-const canvasComponent = canvasContext.add(CanvasContext)
-canvasComponent.ctx = canvasElement.getContext('2d')!
-canvasComponent.width = canvasElement.width
-canvasComponent.height = canvasElement.height
+const canvasComponent = canvasContext.add(CanvasContext);
+canvasComponent.ctx = canvasElement.getContext("2d")!;
+canvasComponent.width = canvasElement.width;
+canvasComponent.height = canvasElement.height;
 
 const resize = () => {
-  canvasComponent.width = canvasElement.width = window.innerWidth
-  canvasComponent.height = canvasElement.height = window.innerHeight
-}
-window.addEventListener('resize', resize, false)
-resize()
+  canvasComponent.width = canvasElement.width = window.innerWidth;
+  canvasComponent.height = canvasElement.height = window.innerHeight;
+};
+window.addEventListener("resize", resize, false);
+resize();
 ```
 
 ### 6. The loop
@@ -516,21 +512,21 @@ resize()
 Finally, let's initialise the World and run our simulation!
 
 ```ts
-world.init()
+world.init();
 
-const now = () => performance.now() / 1000
+const now = () => performance.now() / 1000;
 
-let lastTime = now()
+let lastTime = now();
 
 const loop = () => {
-  requestAnimationFrame(loop)
+  requestAnimationFrame(loop);
 
-  const time = now()
-  const delta = time - lastTime
-  lastTime = time
+  const time = now();
+  const delta = time - lastTime;
+  lastTime = time;
 
-  world.update(delta)
-}
+  world.update(delta);
+};
 
-loop()
+loop();
 ```

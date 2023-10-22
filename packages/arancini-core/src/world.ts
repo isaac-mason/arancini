@@ -1,14 +1,15 @@
 import {
+  Component,
+  ComponentDefinitionType,
   InternalComponentInstanceProperties,
   type ComponentDefinition,
-  ComponentDefinitionType,
-  Component,
 } from './component'
 import { ComponentRegistry } from './component-registry'
 import type { Entity } from './entity'
 import { EntityContainer } from './entity-container'
 import { ComponentPool, EntityPool } from './pools'
-import type { Query, QueryDescription } from './query'
+import type { Query } from './query'
+import type { QueryDescription } from './query-utils'
 import { QueryManager } from './query'
 import type { System, SystemAttributes, SystemClass } from './system'
 import { SystemManager } from './system'
@@ -187,7 +188,7 @@ export class World extends EntityContainer {
 
   /**
    * Creates a Query
-   * @param queryDescription the query description
+   * @param queryDescription the query to create
    * @returns the Query
    */
   query(queryDescription: QueryDescription): Query {
@@ -195,12 +196,33 @@ export class World extends EntityContainer {
   }
 
   /**
-   * Finds entities that match a given query description.
-   * @param queryDescription the query description
+   * Filters entities that match a given query description.
+   * @param queryDescription the query conditions to match
    * @returns entities matching the query description
    */
-  find(queryDescription: QueryDescription): Entity[] {
-    return this.queryManager.find(queryDescription)
+  filter(queryDescription: QueryDescription): Entity[] {
+    const query = this.queryManager.findQuery(queryDescription)
+
+    if (query) {
+      return query.entities
+    }
+
+    return super.filter(queryDescription)
+  }
+
+  /**
+   * Finds an entity that matches a given query description.
+   * @param queryDescription the query conditions to match
+   * @returns the first entity matching the query description
+   */
+  find(queryDescription: QueryDescription): Entity | undefined {
+    const query = this.queryManager.findQuery(queryDescription)
+
+    if (query) {
+      return query.first
+    }
+
+    return super.find(queryDescription)
   }
 
   /**

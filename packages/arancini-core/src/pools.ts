@@ -3,7 +3,7 @@ import {
   type ComponentInstance,
 } from './component'
 import { Entity } from './entity'
-import { uniqueId } from './utils'
+import { uniqueId } from './unique-id'
 import { World } from './world'
 
 /**

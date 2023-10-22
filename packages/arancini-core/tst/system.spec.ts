@@ -40,16 +40,12 @@ class TestSystemWithOnUpdate extends System {
   }
 }
 
-const testSystemQueryDescription = {
-  all: [TestComponentOne],
-}
-
 class TestSystemWithQuery extends System {
-  exampleQuery = this.query(testSystemQueryDescription)
+  exampleQuery = this.query((entities) => entities.with(TestComponentOne))
 }
 
 class AnotherTestSystemWithQuery extends System {
-  exampleQuery = this.query(testSystemQueryDescription)
+  exampleQuery = this.query((entities) => entities.with(TestComponentOne))
 }
 
 describe('System', () => {
@@ -94,9 +90,9 @@ describe('System', () => {
     const onAddedFn = vi.fn()
     const onRemovedFn = vi.fn()
     class TestSystem extends System {
-      testQuery = this.query({
-        all: [TestComponentOne, TestComponentTwo],
-      })
+      testQuery = this.query((entities) =>
+        entities.with(TestComponentOne, TestComponentTwo)
+      )
 
       onInit(): void {
         this.testQuery.onEntityAdded.add((e) => this.onAdded(e))
@@ -263,31 +259,27 @@ describe('System', () => {
     world.registerSystem(AnotherTestSystemWithQuery)
 
     expect(
-      world.queryManager.hasQuery({
-        all: [TestComponentOne],
-      })
-    ).toBe(true)
+      world.queryManager.findQuery((entities) => entities.with(TestComponentOne))
+    ).toBeTruthy()
 
     world.unregisterSystem(TestSystemWithQuery)
 
     expect(
-      world.queryManager.hasQuery({
-        all: [TestComponentOne],
-      })
-    ).toBe(true)
+      world.queryManager.findQuery((entities) => entities.with(TestComponentOne))
+    ).toBeTruthy()
 
     world.unregisterSystem(AnotherTestSystemWithQuery)
 
     expect(
-      world.queryManager.hasQuery({
-        all: [TestComponentOne],
-      })
-    ).toBe(false)
+      world.queryManager.findQuery((entities) => entities.with(TestComponentOne))
+    ).toBeFalsy()
   })
 
   test('systems can be removed, and queries will not be removed if they are used standalone outside of systems', () => {
+    const queryDescription = (entities) => entities.with(TestComponentOne)
+
     // use the query outside of a system
-    const query = world.query(testSystemQueryDescription)
+    const query = world.query(queryDescription)
 
     world.registerSystem(TestSystemWithQuery)
     const systemOne = world.getSystem(
@@ -300,27 +292,26 @@ describe('System', () => {
     ) as AnotherTestSystemWithQuery
 
     // assert the query exists
-    expect(
-      world.queryManager.hasQuery({
-        all: [TestComponentOne],
-      })
-    ).toBe(true)
+    expect(world.queryManager.findQuery(queryDescription)).toBeTruthy()
 
     // destroy both systems using the query
     systemOne.unregister()
     systemTwo.unregister()
 
-    expect(world.queryManager.hasQuery(testSystemQueryDescription)).toBe(true)
+    expect(world.queryManager.findQuery(queryDescription)).toBeTruthy()
 
     // remove the query manually
     query.destroy()
 
-    expect(world.queryManager.hasQuery(testSystemQueryDescription)).toBe(false)
+    expect(world.queryManager.findQuery(queryDescription)).toBeFalsy()
   })
 
   test('onUpdate will not be called if any required queries have no results', () => {
     class TestSystemWithRequiredQuery extends System {
-      requiredQuery = this.query([TestComponentOne], { required: true })
+      requiredQuery = this.query(
+        (entities) => entities.with(TestComponentOne),
+        { required: true }
+      )
 
       onUpdate(): void {
         systemUpdateFn()
