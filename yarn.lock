@@ -108,7 +108,7 @@ __metadata:
     eslint-plugin-storybook: ^0.6.15
     jsdom: ^22.1.0
     leva: ^0.9.35
-    p2-es: ^1.1.8
+    p2-es: ^1.2.2
     prop-types: ^15.8.1
     react: ^18.2.0
     react-dom: ^18.2.0
@@ -12515,12 +12515,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"p2-es@npm:^1.1.8":
-  version: 1.1.8
-  resolution: "p2-es@npm:1.1.8"
+"p2-es@npm:^1.2.2":
+  version: 1.2.2
+  resolution: "p2-es@npm:1.2.2"
   dependencies:
-    poly-decomp-es: 0.4.1
-  checksum: a8ef25a117575df2ee9c2c687ae9ef36b39113bd0a71869d41b68a9c5fac881d00248706b6763d796d9be36e0976be0eaf55bec5cb6493fccb5b8eee09ade998
+    poly-decomp-es: 0.4.2
+  checksum: c86e0f4e6561c0e8c13d53daaa8943bd1885bb7dc7d4c3d8cd370d5ed9106e16f333e33241721fe68b962fb67540e90f01288349eeabed54d8bcd8ee10b5474f
   languageName: node
   linkType: hard
 
@@ -12785,10 +12785,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"poly-decomp-es@npm:0.4.1":
-  version: 0.4.1
-  resolution: "poly-decomp-es@npm:0.4.1"
-  checksum: 86eabb1ebbb39673503fe346dd71fed72b969680a60e9ea9c68b5478388f466b75b634f311e0d5dc36fd6aae1cac48073872d7d4419a13ef6bce5adc87b6f184
+"poly-decomp-es@npm:0.4.2":
+  version: 0.4.2
+  resolution: "poly-decomp-es@npm:0.4.2"
+  checksum: 4876f8eef7eee87b46007faae0c6dc5a78b39498be3016c49948abcf77f144ad7faad3124c4985cd39dd0e8e3ae5810d5f25797a0be56de938900a061acbbdcd
   languageName: node
   linkType: hard
 
