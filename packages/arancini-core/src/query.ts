@@ -34,14 +34,14 @@ import type { World } from './world'
  * class ExampleComponentTwo extends Component {}
  *
  * // get once-off query results, re-using existing query results if available
- * world.filter((e) => e.all(ExampleComponentOne, ExampleComponentTwo))
+ * world.filter((q) => q.all(ExampleComponentOne, ExampleComponentTwo))
  *
  * // get a query that will update reactively
- * const query = world.query((e) => e.all(ExampleComponentOne, ExampleComponentTwo))
+ * const query = world.query((q) => q.all(ExampleComponentOne, ExampleComponentTwo))
  *
  * // create a system with a query
  * class ExampleSystem extends System {
- *   exampleQueryName = this.query((e) => e.all(ExampleComponentOne, ExampleComponentTwo))
+ *   exampleQueryName = this.query((q) => q.all(ExampleComponentOne, ExampleComponentTwo))
  *
  *   onUpdate() {
  *     this.exampleQueryName.entities.forEach((entity) => console.log(entity))
@@ -90,7 +90,6 @@ export class QueryManager {
     owner: unknown = 'standalone'
   ): Query {
     const conditions = getQueryConditions(queryDescription)
-
     const dedupe = getQueryDedupeString(conditions)
 
     let query = this.queries.get(dedupe)
@@ -160,12 +159,6 @@ export class QueryManager {
       } else if (!matchesQuery && inQuery) {
         query._removeEntity(entity)
       }
-    }
-  }
-
-  onEntityRemoved(entity: Entity): void {
-    for (const query of this.queries.values()) {
-      query._removeEntity(entity)
     }
   }
 }

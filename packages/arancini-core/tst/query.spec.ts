@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, test, vi } from 'vitest'
 import type { Entity, QueryDescription } from '../src'
 import { Component, Query, System, World } from '../src'
-import { getQueryDedupeString } from '../src/query-utils'
+import { getQueryConditions, getQueryDedupeString } from '../src/query-utils'
 
 class TestComponentOne extends Component {}
 class TestComponentTwo extends Component {}
@@ -31,7 +31,18 @@ describe('Query', () => {
       world.query([])
       throw new Error('Expected an error to be thrown')
     } catch (e) {
-      expect(e.message).toBe('Query must have at least one condition')
+      expect(e.message).toBe(
+        'Query conditions must have at least one component'
+      )
+    }
+
+    try {
+      world.query((q) => q.all())
+      throw new Error('Expected an error to be thrown')
+    } catch (e) {
+      expect(e.message).toBe(
+        'Query conditions must have at least one component'
+      )
     }
   })
 
@@ -95,11 +106,7 @@ describe('Query', () => {
     const descriptionTwo: QueryDescription = (entities) =>
       entities.all(TestComponentOne)
 
-    const descriptionThree: QueryDescription = [
-      {
-        all: [TestComponentOne],
-      },
-    ]
+    const descriptionThree: QueryDescription = [TestComponentOne]
 
     const queryOne = world.query(descriptionOne)
     const queryTwo = world.query(descriptionTwo)
@@ -218,7 +225,7 @@ describe('Query', () => {
       expect(onceOffQueryResults).toBeTruthy()
       expect(onceOffQueryResults.includes(entityOne)).toBeTruthy()
       expect(onceOffQueryResults.length).toBe(activeQuery.entities.length)
-      
+
       expect(onceOffFindResult).toBe(activeQuery.first)
     })
   })
@@ -496,7 +503,7 @@ describe('Query', () => {
   })
 
   describe('getDescriptionDedupeString', () => {
-    it('should contain class names', () => {
+    it('should contain component ids', () => {
       const query = world.query((entities) =>
         entities.with(TestComponentOne, TestComponentTwo)
       )
@@ -504,86 +511,81 @@ describe('Query', () => {
       expect(getQueryDedupeString(query.conditions)).toEqual('0,1')
     })
 
-    it('should return the same key for two matching query descriptions', () => {
-      const queryOne: QueryDescription = [
-        {
-          any: [TestComponentOne, TestComponentTwo],
-        },
-        {
-          all: [TestComponentThree, TestComponentFour],
-        },
-        {
-          not: [TestComponentFive, TestComponentSix],
-        },
-      ]
+    it('should return the same key for matching query descriptions', () => {
+      const queryDescriptionOne: QueryDescription = (q) =>
+        q
+          .any(TestComponentOne, TestComponentTwo)
+          .all(TestComponentThree)
+          .all(TestComponentFour)
+          .not(TestComponentFive, TestComponentSix)
 
-      const queryTwo: QueryDescription = [
-        {
-          not: [TestComponentSix, TestComponentFive],
-        },
-        {
-          all: [TestComponentFour, TestComponentThree],
-        },
-        {
-          any: [TestComponentTwo, TestComponentOne],
-        },
-      ]
-
-      expect(getQueryDedupeString(queryOne)).toEqual(
-        getQueryDedupeString(queryTwo)
+      const queryDedupeOne = getQueryDedupeString(
+        getQueryConditions(queryDescriptionOne)
       )
+
+      const queryDescriptionTwo: QueryDescription = (q) =>
+        q
+          .any(TestComponentOne, TestComponentTwo)
+          .all(TestComponentThree, TestComponentFour)
+          .not(TestComponentFive, TestComponentSix)
+
+      const queryDedupeTwo = getQueryDedupeString(
+        getQueryConditions(queryDescriptionTwo)
+      )
+
+      const queryDescriptionThree: QueryDescription = [
+        {
+          type: 'any',
+          components: [TestComponentOne, TestComponentTwo],
+        },
+        {
+          type: 'all',
+          components: [TestComponentThree, TestComponentFour],
+        },
+        {
+          type: 'not',
+          components: [TestComponentFive, TestComponentSix],
+        },
+      ]
+
+      const queryDedupeThree = getQueryDedupeString(
+        getQueryConditions(queryDescriptionThree)
+      )
+
+      expect(queryDedupeOne).toEqual(queryDedupeTwo)
+      expect(queryDedupeTwo).toEqual(queryDedupeThree)
     })
 
     it('should return a different key for two different query descriptions', () => {
-      const differentComponentsOne: QueryDescription = [
-        {
-          all: [TestComponentOne],
-        },
-      ]
+      const differentComponentsOne: QueryDescription = [TestComponentOne]
 
-      const differentComponentsTwo: QueryDescription = [
-        {
-          all: [TestComponentTwo],
-        },
-      ]
+      const differentComponentsTwo: QueryDescription = [TestComponentTwo]
 
-      expect(getQueryDedupeString(differentComponentsOne)).not.toEqual(
-        getQueryDedupeString(differentComponentsTwo)
+      expect(
+        getQueryDedupeString(getQueryConditions(differentComponentsOne))
+      ).not.toEqual(
+        getQueryDedupeString(getQueryConditions(differentComponentsTwo))
       )
 
-      const differentConditionOne: QueryDescription = [
-        {
-          all: [TestComponentOne],
-        },
-      ]
+      const differentConditionOne: QueryDescription = [TestComponentOne]
 
-      const differentConditionTwo: QueryDescription = [
-        {
-          not: [TestComponentOne],
-        },
-      ]
+      const differentConditionTwo: QueryDescription = [TestComponentTwo]
 
-      expect(getQueryDedupeString(differentConditionOne)).not.toEqual(
-        getQueryDedupeString(differentConditionTwo)
+      expect(
+        getQueryDedupeString(getQueryConditions(differentConditionOne))
+      ).not.toEqual(
+        getQueryDedupeString(getQueryConditions(differentConditionTwo))
       )
 
-      const partiallyDifferentOne: QueryDescription = [
-        {
-          all: [TestComponentOne],
-        },
-      ]
+      const partiallyDifferentOne: QueryDescription = [TestComponentOne]
 
-      const partiallyDifferentTwo: QueryDescription = [
-        {
-          all: [TestComponentOne],
-        },
-        {
-          not: [TestComponentTwo],
-        },
-      ]
+      const partiallyDifferentTwo: QueryDescription = (q) =>
+        q.all(TestComponentOne).not(TestComponentTwo)
 
-      expect(getQueryDedupeString(partiallyDifferentOne)).not.toEqual(
-        getQueryDedupeString(partiallyDifferentTwo)
+      expect(
+        getQueryDedupeString(getQueryConditions(partiallyDifferentOne))
+      ).not.toEqual(
+        getQueryDedupeString(getQueryConditions(partiallyDifferentTwo))
       )
     })
   })

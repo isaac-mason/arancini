@@ -92,6 +92,11 @@ export abstract class System {
      * Queries that must have at least one result for onUpdate to be called
      */
     requiredQueries: Query[]
+
+    /**
+     * Whether the system has any required queries
+     */
+    hasRequiredQueries: boolean
   } = {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     class: null!,
@@ -99,6 +104,7 @@ export abstract class System {
     priority: 0,
     order: 0,
     requiredQueries: [],
+    hasRequiredQueries: false,
   }
 
   constructor(world: World) {
@@ -202,14 +208,7 @@ type SingletonQueryPlaceholder = {
 }
 
 /**
- * SystemManager is an internal class that manages Systems and calls their lifecycle hooks.
- *
- * Handles adding and removing systems and providing them with queries via the `QueryManager`.
- *
- * Maintains the usage of queries by systems and removes queries from the `QueryManager` if no systems are
- * using a query.
- *
- * @private internal class, do not use directly
+ * @ignore internal
  */
 export class SystemManager {
   /**
@@ -217,7 +216,7 @@ export class SystemManager {
    */
   systems: Map<SystemClass, System> = new Map()
 
-  private sortedSystems: System[] = []
+  sortedSystems: System[] = []
 
   private systemCounter = 0
 
@@ -241,28 +240,6 @@ export class SystemManager {
     }
 
     this.sortSystems()
-  }
-
-  /**
-   * Updates Systems in the SystemManager
-   * @param delta the time elapsed in seconds
-   * @param time the current time in seconds
-   */
-  update(delta: number, time: number): void {
-    for (const system of this.sortedSystems.values()) {
-      if (!system.enabled) {
-        continue
-      }
-
-      if (
-        system.__internal.requiredQueries.length > 0 &&
-        system.__internal.requiredQueries.some((q) => q.entities.length === 0)
-      ) {
-        continue
-      }
-
-      system.onUpdate(delta, time)
-    }
   }
 
   /**
@@ -355,6 +332,7 @@ export class SystemManager {
 
     if (options?.required) {
       system.__internal.requiredQueries.push(query)
+      system.__internal.hasRequiredQueries = true
     }
 
     return query

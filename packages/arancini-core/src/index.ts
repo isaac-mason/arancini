@@ -3,9 +3,9 @@ export * from './entity'
 export { ObjectPool } from './pools'
 export { Query } from './query'
 export {
-  type QueryDescription,
+  type QueryBuilderFn,
   type QueryConditions,
-  type QueryConditionsBuilderFn,
+  type QueryDescription,
 } from './query-utils'
 export * from './system'
 export * from './topic'

@@ -258,6 +258,22 @@ query.onEntityAdded.remove(handler);
 query.onEntityRemoved.remove(handler);
 ```
 
+#### Ad-hoc queries
+
+You can use `world.filter` and `world.find` to perform ad-hoc queries. If there is an existing query with the same filters, the results will be reused, otherwise a once-off query will be performed.
+
+```ts
+// get all entities matching a query description
+const entities = world.filter((entities) =>
+  entities.with(DesiredComponent).but.not(UndesiredComponent),
+);
+
+// find one entity matching a query description
+const entity = world.find((entity) =>
+  entity.has(DesiredComponent).but.not(UndesiredComponent),
+);
+```
+
 ### 🧠 System
 
 Arancini has built-in support for systems, but you can also use queries alone to create your own "System" logic if you prefer. Systems are just a convenient way to organise your logic.
@@ -345,6 +361,20 @@ class ExampleSystem extends System {
 
   onUpdate() {
     player.ENERGY -= 1;
+  }
+}
+```
+
+#### Attaching other systems
+
+Systems can be attached to other systems with `this.attach`. This is useful for sharing logic or system state that don't belong components.
+
+```ts
+class ExampleSystem extends System {
+  otherSystem = this.attach(OtherSystem);
+
+  onUpdate() {
+    this.otherSystem.foo();
   }
 }
 ```

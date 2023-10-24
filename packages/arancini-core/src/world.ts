@@ -107,7 +107,22 @@ export class World extends EntityContainer {
    */
   update(delta = 0): void {
     this.time += delta
-    this.systemManager.update(delta, this.time)
+
+    /* update systems */
+    for (const system of this.systemManager.sortedSystems.values()) {
+      if (!system.enabled) {
+        continue
+      }
+
+      if (
+        system.__internal.hasRequiredQueries &&
+        system.__internal.requiredQueries.some((q) => q.entities.length === 0)
+      ) {
+        continue
+      }
+
+      system.onUpdate(delta, this.time)
+    }
   }
 
   /**
@@ -171,6 +186,7 @@ export class World extends EntityContainer {
   destroy(entity: Entity): void {
     this._removeEntity(entity)
 
+    /* remove components without updating queries or bitsets */
     entity._updateQueries = false
     entity._updateBitSet = false
 
@@ -182,7 +198,12 @@ export class World extends EntityContainer {
     entity._updateQueries = true
     entity._updateBitSet = true
 
-    this.queryManager.onEntityRemoved(entity)
+    /* remove entity from queries */
+    for (const query of this.queryManager.queries.values()) {
+      query._removeEntity(entity)
+    }
+
+    /* recycle the entity object */
     this.entityPool.recycle(entity)
   }
 

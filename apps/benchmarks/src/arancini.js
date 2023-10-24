@@ -5,16 +5,18 @@ class Position extends Component {
     this.x = 0
     this.y = 0
   }
+
+  static objectPooled = true
 }
-Position.objectPooled = true
 
 class Velocity extends Component {
   construct() {
     this.dx = Math.random() - 0.5
     this.dy = Math.random() - 0.5
   }
+
+  static objectPooled = true
 }
-Velocity.objectPooled = true
 
 let updateCount = 0
 

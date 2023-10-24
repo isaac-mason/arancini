@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { BitSet } from '../../src/bit-set'
+import { BitSet } from '../src/bit-set'
 
 const fail = () => {
   throw new Error()

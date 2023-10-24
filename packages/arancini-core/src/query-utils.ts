@@ -4,15 +4,14 @@ import { BitSet } from './bit-set'
 
 export type QueryConditionType = 'all' | 'any' | 'not'
 
-export type QueryConditions = {
-  all?: ComponentDefinition[]
-  not?: ComponentDefinition[]
-  any?: ComponentDefinition[]
-}[]
+export type QueryCondition = {
+  type: QueryConditionType
+  components: ComponentDefinition[]
+}
 
-export type QueryConditionsBuilderFn = (
-  q: InstanceType<typeof QueryBuilder>
-) => unknown
+export type QueryConditions = QueryCondition[]
+
+export type QueryBuilderFn = (q: InstanceType<typeof QueryBuilder>) => unknown
 
 export type QueryBitSets = {
   all?: BitSet
@@ -22,17 +21,14 @@ export type QueryBitSets = {
 
 export type QueryDescription =
   | ComponentDefinition[]
+  | QueryBuilderFn
   | QueryConditions
-  | QueryConditionsBuilderFn
 
 export const getQueryDedupeString = (
   queryConditions: QueryConditions
 ): string => {
   return queryConditions
-    .map((queryPart) => {
-      const type = Object.keys(queryPart)[0] as QueryConditionType
-      const components = queryPart[type]!
-
+    .map(({ type, components }) => {
       if (type === 'all') {
         return components
           .map((c) => `${c.componentIndex}`)
@@ -56,52 +52,55 @@ export const getQueryConditions = (
 ): QueryConditions => {
   let queryConditions: QueryConditions
 
+  /* get conditions */
   if (typeof queryDescription === 'function') {
-    queryConditions = [] as QueryConditions
-    queryDescription(new QueryBuilder(queryConditions))
+    const queryBuilder = new QueryBuilder()
+    queryDescription(queryBuilder)
+    queryConditions = queryBuilder.conditions
   } else if (
     (queryDescription as ComponentDefinition[]).every(
       (v) => 'componentIndex' in v
     )
   ) {
-    queryConditions = [{ all: queryDescription as ComponentDefinition[] }]
+    queryConditions = [
+      { type: 'all', components: queryDescription as ComponentDefinition[] },
+    ]
   } else {
     queryConditions = queryDescription as QueryConditions
   }
 
-  if (queryDescription.length <= 0) {
+  /* validate */
+  if (queryConditions.length <= 0) {
     throw new Error('Query must have at least one condition')
   }
 
-  return queryConditions
+  if (queryConditions.some((condition) => condition.components.length <= 0)) {
+    throw new Error('Query conditions must have at least one component')
+  }
+
+  /* combine the 'all' conditions */
+  const allCondition: QueryCondition = { type: 'all', components: [] }
+  const others: QueryConditions = []
+
+  for (const condition of queryConditions) {
+    if (condition.type === 'all') {
+      allCondition.components.push(...condition.components)
+    } else {
+      others.push(condition)
+    }
+  }
+
+  return [allCondition, ...others]
 }
 
 export const getQueryBitSets = (
   queryDescription: QueryConditions
-): QueryBitSets => {
-  const queryBitSets: QueryBitSets = []
-
-  for (const queryPart of queryDescription) {
-    const type = Object.keys(queryPart)[0] as QueryConditionType
-    const components = queryPart[type]!
-
-    if (type === 'all') {
-      queryBitSets.push({
-        all: new BitSet(components.map((c) => c.componentIndex)),
-      })
-    } else if (type === 'any') {
-      queryBitSets.push({
-        any: new BitSet(components.map((c) => c.componentIndex)),
-      })
-    } else if (type === 'not') {
-      queryBitSets.push({
-        not: new BitSet(components.map((c) => c.componentIndex)),
-      })
-    }
-  }
-
-  return queryBitSets
-}
+): QueryBitSets =>
+  queryDescription.map((condition) => ({
+    [condition.type]: new BitSet(
+      condition.components.map((c) => c.componentIndex)
+    ),
+  }))
 
 export const evaluateQueryBitSets = (
   queryBitSets: QueryBitSets,
@@ -153,39 +152,41 @@ export const getQueryResults = (
 }
 
 export class QueryBuilder {
-  constructor(private conditions: QueryConditions) {}
+  conditions: QueryConditions = []
+
+  constructor() {}
 
   all = (...components: ComponentDefinition[]) => {
-    this.conditions.push({ all: components })
+    this.conditions.push({ type: 'all', components })
     return this
   }
-
-  with = this.all
-  
-  have = this.all
-
-  has = this.all
-
-  every = this.all
 
   any = (...components: ComponentDefinition[]) => {
-    this.conditions.push({ any: components })
+    this.conditions.push({ type: 'any', components })
     return this
   }
-
-  some = this.any
-
-  one = this.any
 
   not = (...components: ComponentDefinition[]) => {
-    this.conditions.push({ not: components })
+    this.conditions.push({ type: 'not', components })
     return this
   }
 
-  none = this.not
+  /* 'all' aliases */
+  with = this.all
+  have = this.all
+  has = this.all
+  every = this.all
 
+  /* 'any' aliases */
+  some = this.any
+  one = this.any
+  withAny = this.any
+
+  /* 'not' aliases */
+  none = this.not
   without = this.not
 
+  /* grammar */
   get and() {
     return this
   }
@@ -198,7 +199,15 @@ export class QueryBuilder {
     return this
   }
 
+  get that() {
+    return this
+  }
+
   get are() {
+    return this
+  }
+
+  get also() {
     return this
   }
 }
