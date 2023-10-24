@@ -1,5 +1,15 @@
 # @arancini/react
 
+## 3.3.0
+
+### Patch Changes
+
+- Updated dependencies [617ceda]
+- Updated dependencies [617ceda]
+- Updated dependencies [efbf3b9]
+- Updated dependencies [a9ddbdc]
+  - @arancini/core@3.3.0
+
 ## 3.2.0
 
 ### Patch Changes

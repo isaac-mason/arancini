@@ -1,5 +1,37 @@
 # @arancini/core
 
+## 3.3.0
+
+### Minor Changes
+
+- 617ceda: feat: rename `world.find` to `world.filter` for getting multiple query results, `world.find` for getting a single result
+
+  ```ts
+  // get all entities with ExampleComponent
+  const entities = world.filter([ExampleComponent]);
+
+  // find the first entity with ExampleComponent
+  const entity = world.find([ExampleComponent]);
+  ```
+
+- 617ceda: feat: function query definition
+
+  ```ts
+  world.query((entities) => entities.with(Position, Velocity).and.not(Dead));
+  ```
+
+- efbf3b9: feat: change api for defining object and tag components, paving the way for future params
+
+  ```
+  // before:
+  const Object3DComponent = Component.object<THREE.Object3D>("Object3D");
+
+  // after:
+  const Object3DComponent = Component.object({ name: "Object3D" });
+  ```
+
+- a9ddbdc: feat: remove @objectPooled annotation, prefer setting the 'objectPooled' static property instead
+
 ## 3.2.0
 
 ### Minor Changes
