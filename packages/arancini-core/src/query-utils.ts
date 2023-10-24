@@ -164,6 +164,8 @@ export class QueryBuilder {
   
   have = this.all
 
+  has = this.all
+
   every = this.all
 
   any = (...components: ComponentDefinition[]) => {
@@ -172,6 +174,8 @@ export class QueryBuilder {
   }
 
   some = this.any
+
+  one = this.any
 
   not = (...components: ComponentDefinition[]) => {
     this.conditions.push({ not: components })

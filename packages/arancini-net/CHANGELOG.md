@@ -1,2 +1,0 @@
-# @arancini/net
-
