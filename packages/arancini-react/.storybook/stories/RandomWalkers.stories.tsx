@@ -9,9 +9,9 @@ export default {
   title: 'Random Walkers',
 }
 
-const WalkingComponent = Component.tag('Walking')
+const WalkingComponent = Component.tag({ name: 'Walking' })
 
-const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
+const Object3DComponent = Component.object<THREE.Object3D>({ name: 'Object3D' })
 
 class WalkingSystem extends System {
   walking = this.query([Object3DComponent, WalkingComponent])

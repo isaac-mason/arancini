@@ -21,7 +21,7 @@ import type { World } from './world'
  * import { Component, World } from '@arancini/core'
  *
  * // example tag component without any data or behavior
- * const TagComponent = Component.tag('TagComponent')
+ * const TagComponent = Component.tag({ name: 'TagComponent' })
  *
  * // create a world and register the component
  * const world = new World()

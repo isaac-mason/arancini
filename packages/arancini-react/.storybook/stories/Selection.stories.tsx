@@ -12,11 +12,13 @@ export default {
 
 /* components */
 
-const SelectedComponent = Component.tag('Selected')
+const SelectedComponent = Component.tag({ name: 'Selected' })
 
-const CameraComponent = Component.object<THREE.PerspectiveCamera>('Camera')
+const CameraComponent = Component.object<THREE.PerspectiveCamera>({
+  name: 'Camera',
+})
 
-const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
+const Object3DComponent = Component.object<THREE.Object3D>({ name: 'Object3D' })
 
 /* systems */
 

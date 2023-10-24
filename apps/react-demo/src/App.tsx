@@ -3,7 +3,7 @@ import { Component, System, World } from 'arancini'
 import { createECS } from 'arancini/react'
 import { Vector3, Vector3Tuple } from 'three'
 
-const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
+const Object3DComponent = Component.object<THREE.Object3D>({ name: 'Object3D' })
 
 class AngularVelocity extends Component {
   linvel!: Vector3

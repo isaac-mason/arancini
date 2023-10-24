@@ -58,9 +58,9 @@ describe('Entities and Components', () => {
   })
 
   test('object component', () => {
-    const TestComponent = Component.object<{ x: number; y: number }>(
-      'TestComponent'
-    )
+    const TestComponent = Component.object<{ x: number; y: number }>({
+      name: 'TestComponent',
+    })
 
     world.registerComponent(TestComponent)
 
@@ -87,7 +87,7 @@ describe('Entities and Components', () => {
   })
 
   test('tag component', () => {
-    const TagComponent = Component.tag('TagComponent')
+    const TagComponent = Component.tag({ name: 'TagComponent' })
 
     world.registerComponent(TagComponent)
 
@@ -100,9 +100,9 @@ describe('Entities and Components', () => {
   })
 
   test('cloneComponentDefinition', () => {
-    const TestComponent = Component.object<{ x: number; y: number }>(
-      'TestComponent'
-    )
+    const TestComponent = Component.object<{ x: number; y: number }>({
+      name: 'TestComponent',
+    })
     const Clone = cloneComponentDefinition(TestComponent)
 
     world.registerComponent(TestComponent)

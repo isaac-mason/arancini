@@ -79,6 +79,20 @@ export type ComponentDefinitionArgs<T extends ComponentDefinition<unknown>> =
     ? []
     : never
 
+export type ObjectComponentDefinitionParams = {
+  /**
+   * The name of the component
+   */
+  name?: string
+}
+
+export type TagComponentDefinitionParams = {
+  /**
+   * The name of the component
+   */
+  name?: string
+}
+
 /**
  * The base class for class components.
  *
@@ -108,7 +122,7 @@ export type ComponentDefinitionArgs<T extends ComponentDefinition<unknown>> =
  *   onDestroy() {
  *     // called on destroying the component
  *   }
- * 
+ *
  *   // opt-in to object pooling
  *   static objectPooled = true
  * }
@@ -150,14 +164,14 @@ export class Component {
   /**
    * Creates an object component definition with the given type.
    *
-   * @param name a name for the component
+   * @param param0 the object component definition parameters
    * @return object component definition
    *
    *  * @example defining an object component
    * ```ts
    * import { Component, World } from '@arancini/core'
    *
-   * const PositionComponent = Component.object<{ x: number, y: number }>('Position')
+   * const PositionComponent = Component.object<{ x: number, y: number }>({ name: 'Position' })
    *
    * const world = new World()
    * world.registerComponent(PositionComponent)
@@ -167,7 +181,7 @@ export class Component {
    * entity.add(PositionComponent, { x: 1, y: 2 })
    * ```
    */
-  static object<T>(name: string) {
+  static object<T>({ name }: ObjectComponentDefinitionParams) {
     const componentDefinition: ObjectComponentDefinition<T> = {
       name,
       type: ComponentDefinitionType.OBJECT,
@@ -180,7 +194,8 @@ export class Component {
 
   /**
    * Creates a tag component definition.
-   * @param name an name for the component
+   *
+   * @param param0 the tag component definition parameters
    * @returns tag component definition
    *
    * @example defining a tag component
@@ -197,7 +212,7 @@ export class Component {
    * entity.add(PoweredUpComponent)
    * ```
    */
-  static tag(name: string) {
+  static tag({ name }: TagComponentDefinitionParams) {
     const componentDefinition: TagComponentDefinition = {
       name,
       type: ComponentDefinitionType.TAG,

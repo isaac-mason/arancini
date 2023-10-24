@@ -19,9 +19,9 @@ const boxBoxContactMaterial = new P2.ContactMaterial(
   { friction: 0.75 }
 )
 
-const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
+const Object3DComponent = Component.object<THREE.Object3D>({ name: 'Object3D' })
 
-const RigidBodyComponent = Component.object<P2.Body>('RigidBody')
+const RigidBodyComponent = Component.object<P2.Body>({ name: 'RigidBody' })
 
 class PhysicsSystem extends System {
   bodiesQuery = this.query([RigidBodyComponent])

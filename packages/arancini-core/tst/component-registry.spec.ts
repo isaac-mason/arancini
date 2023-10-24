@@ -43,16 +43,16 @@ describe('ComponentRegistry', () => {
   })
 
   it('should support registering tag components', () => {
-    const TagComponent = Component.tag('tag')
+    const TagComponent = Component.tag({ name: 'tag' })
     world.registerComponent(TagComponent)
 
     expect(TagComponent.componentIndex).toBe(0)
   })
 
   it('should support registering object components', () => {
-    const ObjectComponent = Component.object<{ x: number; y: number }>(
-      'Object Component'
-    )
+    const ObjectComponent = Component.object<{ x: number; y: number }>({
+      name: 'Object Component',
+    })
     world.registerComponent(ObjectComponent)
 
     expect(ObjectComponent.componentIndex).toBe(0)

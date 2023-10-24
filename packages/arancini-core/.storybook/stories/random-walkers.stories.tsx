@@ -1,10 +1,10 @@
 import { Component, System, World } from '@arancini/core'
 import React, { useEffect } from 'react'
 
-const Position = Component.object<{ x: number; y: number }>('Position')
+const Position = Component.object<{ x: number; y: number }>({ name: 'Position' })
 
-const Red = Component.tag('Red')
-const Blue = Component.tag('Blue')
+const Red = Component.tag({ name: 'Red' })
+const Blue = Component.tag({ name: 'Blue' })
 
 class CanvasContext extends Component {
   ctx!: CanvasRenderingContext2D

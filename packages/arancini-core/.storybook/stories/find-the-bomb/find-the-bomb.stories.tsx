@@ -3,23 +3,25 @@ import React, { useEffect } from 'react'
 
 import './find-the-bomb.css'
 
-const GameState = Component.object<{ clicks: number; foundBomb: boolean }>(
-  'GameState'
-)
+const GameState = Component.object<{ clicks: number; foundBomb: boolean }>({
+  name: 'GameState',
+})
 
 const Emoji = Component.object<{
   revealed: boolean
   dirty: boolean
   domElement: HTMLElement
-}>('Emoji')
+}>({ name: 'Emoji' })
 
-const Position = Component.object<{ x: number; y: number }>('Position')
+const Position = Component.object<{ x: number; y: number }>({
+  name: 'Position',
+})
 
-const DistanceToTarget = Component.object<{ distance: number }>(
-  'DistanceToTarget'
-)
+const DistanceToTarget = Component.object<{ distance: number }>({
+  name: 'DistanceToTarget',
+})
 
-const Target = Component.tag('Target')
+const Target = Component.tag({ name: 'Target' })
 
 class EmojiRendererSystem extends System {
   emojisToRender = this.query((entities) =>
