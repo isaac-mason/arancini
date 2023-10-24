@@ -1,164 +1,213 @@
-import type { Entity } from './entity'
+import { BitSet } from './bit-set'
 import { EntityContainer } from './entity-container'
-import {
-  QueryBitSets,
-  QueryConditions,
-  QueryDescription,
-  evaluateQueryBitSets,
-  getQueryBitSets,
-  getQueryConditions,
-  getQueryDedupeString,
-  getQueryResults,
-} from './query-utils'
-import type { World } from './world'
+import { ARANCINI_SYMBOL, EntityWithInternalProperties } from './internal'
+import type { ComponentRegistry, World } from './world'
 
-/**
- * A Query for Entities with specified Components.
- *
- * Queries can contain a minimum of one and a maximum of three conditions, the `entities`, `one`, and `not` QueryConditionType conditions.
- *
- * Queries can either be created as part of Systems, or they can be created standalone.
- *
- * Changes to Entity Components are queued, and Query results are updated as part of the World update loop.
- *
- * Query results can also be retrieved once-off without creating a persistent query with `world.find(...)`.
- *
- * ```ts
- * import { Component, System, World } from '@arancini/core'
- *
- * // create a world
- * const world = new World()
- *
- * // create some example components
- * class ExampleComponentOne extends Component {}
- * class ExampleComponentTwo extends Component {}
- *
- * // get once-off query results, re-using existing query results if available
- * world.filter((q) => q.all(ExampleComponentOne, ExampleComponentTwo))
- *
- * // get a query that will update reactively
- * const query = world.query((q) => q.all(ExampleComponentOne, ExampleComponentTwo))
- *
- * // create a system with a query
- * class ExampleSystem extends System {
- *   exampleQueryName = this.query((q) => q.all(ExampleComponentOne, ExampleComponentTwo))
- *
- *   onUpdate() {
- *     this.exampleQueryName.entities.forEach((entity) => console.log(entity))
- *   }
- * }
- *
- * world.registerSystem(ExampleSystem)
- * ```
- */
-export class Query extends EntityContainer {
+export type With<E, P extends keyof E> = E & Required<Pick<E, P>>
+
+export type Without<E, P extends keyof E> = Pick<E, Exclude<keyof E, P>> &
+  Partial<Pick<E, P>>
+
+export type QueryConditionType = 'all' | 'any' | 'not'
+
+export type QueryCondition<E> = {
+  type: QueryConditionType
+  components: (keyof E)[]
+}
+
+export type QueryConditions<E> = QueryCondition<E>[]
+
+export type QueryBitSets = {
+  type: QueryConditionType
+  bitset: BitSet
+}[]
+
+export type QueryDescription<E, R> = (q: QueryBuilder<E>) => QueryBuilder<R>
+
+export class Query<E> extends EntityContainer<E> {
   constructor(
     public world: World,
     public key: string,
-    public conditions: QueryConditions,
+    public conditions: QueryConditions<E>,
     public bitSets: QueryBitSets
   ) {
     super()
   }
 
-  /**
-   * Destroys the Query
-   */
-  destroy(): void {
-    this.world.queryManager.removeQuery(this)
+  destroy() {
+    this.world.destroyQuery(this)
   }
 }
 
-/**
- * QueryManager is an internal class that manages Query instances
- *
- * @private internal class, do not use directly
- */
-export class QueryManager {
-  queries: Map<string, Query> = new Map()
+export const getQueryResults = <E>(
+  queryBitSets: QueryBitSets,
+  entities: Iterable<E>
+): E[] => {
+  const matches: E[] = []
 
-  queryOwners: Map<string, unknown[]> = new Map()
-
-  private world: World
-
-  constructor(world: World) {
-    this.world = world
+  for (const entity of entities) {
+    if (evaluateQueryBitSets(queryBitSets, entity)) {
+      matches.push(entity)
+    }
   }
 
-  createQuery(
-    queryDescription: QueryDescription,
-    owner: unknown = 'standalone'
-  ): Query {
-    const conditions = getQueryConditions(queryDescription)
-    const dedupe = getQueryDedupeString(conditions)
+  return matches
+}
 
-    let query = this.queries.get(dedupe)
+export const getFirstQueryResult = <E>(
+  queryBitSets: QueryBitSets,
+  entities: Iterable<E>
+): E | undefined => {
+  for (const entity of entities) {
+    if (evaluateQueryBitSets(queryBitSets, entity)) {
+      return entity
+    }
+  }
 
-    if (query === undefined) {
-      query = new Query(
-        this.world,
-        dedupe,
-        conditions,
-        getQueryBitSets(conditions)
-      )
+  return undefined
+}
 
-      const matches = getQueryResults(
-        query.bitSets,
-        this.world.entities.values()
-      )
+export const evaluateQueryBitSets = <E>(
+  queryBitSets: QueryBitSets,
+  entity: E
+): boolean => {
+  const internal = entity as EntityWithInternalProperties<E>
 
-      for (const entity of matches) {
-        query._addEntity(entity)
+  for (const queryPart of queryBitSets) {
+    if (
+      queryPart.type === 'all' &&
+      !internal[ARANCINI_SYMBOL].bitset.containsAll(queryPart.bitset)
+    ) {
+      return false
+    } else if (
+      queryPart.type === 'any' &&
+      !internal[ARANCINI_SYMBOL].bitset.containsAny(queryPart.bitset)
+    ) {
+      return false
+    } else if (
+      queryPart.type === 'not' &&
+      internal[ARANCINI_SYMBOL].bitset.containsAny(queryPart.bitset)
+    ) {
+      return false
+    }
+  }
+
+  return true
+}
+
+export const getQueryConditions = (
+  queryDescription: QueryDescription<any, any>
+): QueryConditions<any> => {
+  /* get conditions */
+  const queryBuilder = new QueryBuilder()
+  queryDescription(queryBuilder)
+  const queryConditions = queryBuilder.conditions
+
+  /* validate */
+  if (queryConditions.length <= 0) {
+    throw new Error('Query must have at least one condition')
+  }
+
+  if (queryConditions.some((condition) => condition.components.length <= 0)) {
+    throw new Error('Query conditions must have at least one component')
+  }
+
+  /* combine the 'all' conditions */
+  const allCondition: QueryCondition<any> = { type: 'all', components: [] }
+  const others: QueryConditions<any> = []
+
+  for (const condition of queryConditions) {
+    if (condition.type === 'all') {
+      allCondition.components.push(...condition.components)
+    } else {
+      others.push(condition)
+    }
+  }
+
+  return [allCondition, ...others]
+}
+
+export const getQueryDedupeString = (
+  componentRegistry: ComponentRegistry,
+  queryConditions: QueryConditions<unknown>
+): string => {
+  return queryConditions
+    .map(({ type, components }) => {
+      if (type === 'all') {
+        return components
+          .map((c) => componentRegistry[c])
+          .sort()
+          .join(',')
       }
 
-      this.queries.set(dedupe, query)
-    }
+      return [
+        `${type}:${components
+          .map((c) => componentRegistry[c])
+          .sort()
+          .join(',')}`,
+      ]
+    })
+    .sort()
+    .join('&')
+}
 
-    if (owner) {
-      const queryOwners = this.queryOwners.get(dedupe) ?? []
-      queryOwners.push(owner)
-      this.queryOwners.set(dedupe, queryOwners)
-    }
+export const getQueryBitSets = (
+  componentRegistry: ComponentRegistry,
+  conditions: QueryConditions<any>
+) => {
+  return conditions.map((condition) => ({
+    type: condition.type,
+    bitset: new BitSet(
+      condition.components.map((c) => componentRegistry[c as string])
+    ),
+  }))
+}
 
-    return query
+export class QueryBuilder<E> {
+  T!: E
+
+  conditions: QueryConditions<E> = []
+
+  all = <C extends keyof E>(...components: C[]) => {
+    this.conditions.push({ type: 'all', components })
+    return this as unknown as QueryBuilder<With<E, C>>
   }
 
-  removeQuery(query: Query, owner: unknown = 'standalone'): void {
-    if (!this.queries.has(query.key)) {
-      return
-    }
-
-    let usages = this.queryOwners.get(query.key) ?? []
-
-    usages = usages.filter((usage) => usage !== owner)
-
-    if (usages.length > 0) {
-      this.queryOwners.set(query.key, usages)
-      return
-    }
-
-    this.queries.delete(query.key)
-    this.queryOwners.delete(query.key)
-    query.onEntityAdded.clear()
-    query.onEntityRemoved.clear()
+  any = <C extends keyof E>(...components: C[]): QueryBuilder<E> => {
+    this.conditions.push({ type: 'any', components })
+    return this
   }
 
-  findQuery(queryDescription: QueryDescription): Query | undefined {
-    const conditions = getQueryConditions(queryDescription)
-    const dedupeString = getQueryDedupeString(conditions)
-    return this.queries.get(dedupeString)
+  not = <C extends keyof E>(...components: C[]) => {
+    this.conditions.push({ type: 'not', components })
+    return this as unknown as QueryBuilder<Without<E, C>>
   }
 
-  onEntityComponentChange(entity: Entity): void {
-    for (const query of this.queries.values()) {
-      const matchesQuery = evaluateQueryBitSets(query.bitSets, entity)
-      const inQuery = query.has(entity)
+  with = this.all
+  have = this.all
+  has = this.all
+  every = this.all
+  is = this.all
 
-      if (matchesQuery && !inQuery) {
-        query._addEntity(entity)
-      } else if (!matchesQuery && inQuery) {
-        query._removeEntity(entity)
-      }
-    }
+  some = this.any
+  one = this.any
+
+  none = this.not
+  without = this.not
+
+  get and() {
+    return this
+  }
+
+  get but() {
+    return this
+  }
+
+  get where() {
+    return this
+  }
+
+  get are() {
+    return this
   }
 }

@@ -1,38 +1,38 @@
-import { Component, System, World } from '@arancini/core'
+import { System, World } from '@arancini/core'
 import React, { useEffect } from 'react'
 
 import './find-the-bomb.css'
 
-const GameState = Component.object<{ clicks: number; foundBomb: boolean }>({
-  name: 'GameState',
-})
+type Entity = {
+  gameState?: {
+    clicks: number
+    foundBomb: boolean
+  }
+  emoji?: {
+    revealed: boolean
+    dirty: boolean
+    domElement: HTMLElement
+  }
+  position?: {
+    x: number
+    y: number
+  }
+  distanceToTarget?: {
+    distance: number
+  }
+  target?: boolean
+}
 
-const Emoji = Component.object<{
-  revealed: boolean
-  dirty: boolean
-  domElement: HTMLElement
-}>({ name: 'Emoji' })
-
-const Position = Component.object<{ x: number; y: number }>({
-  name: 'Position',
-})
-
-const DistanceToTarget = Component.object<{ distance: number }>({
-  name: 'DistanceToTarget',
-})
-
-const Target = Component.tag({ name: 'Target' })
-
-class EmojiRendererSystem extends System {
+class EmojiRendererSystem extends System<Entity> {
   emojisToRender = this.query((entities) =>
-    entities.with(Position, Emoji, DistanceToTarget)
+    entities.with('position', 'emoji', 'distanceToTarget')
   )
 
   emojisDomElement = document.getElementById('emojis')!
 
   onInit(): void {
     this.emojisToRender.onEntityAdded.add((entity) => {
-      const emoji = entity.get(Emoji)
+      const { emoji } = entity
       this.emojisDomElement.appendChild(emoji.domElement)
       emoji.dirty = true
     })
@@ -40,18 +40,17 @@ class EmojiRendererSystem extends System {
 
   onDestroy(): void {
     for (const entity of this.emojisToRender) {
-      const emoji = entity.get(Emoji)
+      const { emoji } = entity
       emoji.domElement.remove()
     }
   }
 
   onUpdate() {
     for (const entity of this.emojisToRender) {
-      const emoji = entity.get(Emoji)
+      const { emoji } = entity
       if (!emoji.dirty) continue
 
-      const pos = entity.get(Position)
-      const distanceToTarget = entity.find(DistanceToTarget)
+      const { position, distanceToTarget } = entity
       if (!distanceToTarget) continue
 
       const { distance } = distanceToTarget
@@ -75,8 +74,8 @@ class EmojiRendererSystem extends System {
       }
 
       const paddingPx = 28
-      const x = pos.x * paddingPx
-      const y = pos.y * paddingPx
+      const x = position.x * paddingPx
+      const y = position.y * paddingPx
       emoji.domElement.className = `emoji ${emoji.revealed ? 'revealed' : ''}`
       emoji.domElement.style.left = `${
         x + document.body.clientWidth / 2 - paddingPx / 2
@@ -88,32 +87,32 @@ class EmojiRendererSystem extends System {
   }
 }
 
-class DistanceSystem extends System {
-  emojis = this.query((entities) => entities.with(Emoji, Position))
+class DistanceSystem extends System<Entity> {
+  emojis = this.query((entities) => entities.with('emoji', 'position'))
 
-  target = this.query((entities) => entities.with(Target, Position))
+  target = this.query((entities) => entities.with('target', 'position'))
 
   onInit(): void {
     this.emojis.onEntityAdded.add((entity) => {
-      const { x, y } = entity.get(Position)
+      const { position: { x, y } } = entity
 
-      const targetPosition = this.target.first!.get(Position)
+      const { position } = this.target.first!
 
       const distance = Math.sqrt(
-        Math.pow(targetPosition.x - x, 2) + Math.pow(targetPosition.y - y, 2)
+        Math.pow(position.x - x, 2) + Math.pow(position.y - y, 2)
       )
 
-      entity.add(DistanceToTarget, { distance })
+      this.world.add(entity, 'distanceToTarget', { distance })
     })
   }
 }
 
-class InteractionSystem extends System {
-  emojis = this.query((entities) => entities.with(Emoji))
+class InteractionSystem extends System<Entity> {
+  emojis = this.query((entities) => entities.with('emoji', 'position'))
 
-  target = this.query((entities) => entities.with(Target, Position))
+  target = this.query((entities) => entities.with('target', 'position'))
 
-  gameState = this.singleton(GameState, { required: true })
+  gameState = this.singleton('gameState', { required: true })
 
   nRevealedDomElement = document.createElement('p')
 
@@ -123,7 +122,7 @@ class InteractionSystem extends System {
     this.nRevealedDomElement.innerText = 'Click on an emoji to start'
 
     this.emojis.onEntityAdded.add((entity) => {
-      const emoji = entity.get(Emoji)
+      const { emoji } = entity
 
       emoji.domElement.addEventListener('click', () => {
         if (!this.gameState || this.gameState.foundBomb) return
@@ -133,9 +132,8 @@ class InteractionSystem extends System {
           this.gameState.clicks += 1
 
           const target = this.target.first!
-          const targetPosition = target.get(Position)
-
-          const clickedPosition = entity.get(Position)
+          const { position: targetPosition } = target
+          const { position: clickedPosition } = entity
 
           if (
             targetPosition.x === clickedPosition.x &&
@@ -165,14 +163,17 @@ class InteractionSystem extends System {
 
 export const FindTheBomb = () => {
   useEffect(() => {
-    const world = new World()
+    const world = new World<Entity>({
+      components: [
+        'position',
+        'emoji',
+        'distanceToTarget',
+        'target',
+        'gameState',
+      ]
+    })
 
     world
-      .registerComponent(GameState)
-      .registerComponent(Position)
-      .registerComponent(Emoji)
-      .registerComponent(Target)
-      .registerComponent(DistanceToTarget)
       .registerSystem(DistanceSystem)
       .registerSystem(EmojiRendererSystem)
       .registerSystem(InteractionSystem)
@@ -183,7 +184,8 @@ export const FindTheBomb = () => {
       Math.floor(Math.random() * (max - min + 1) + min)
 
     const setupGame = () => {
-      world.create((e) => e.add(GameState, { clicks: 0, foundBomb: false }))
+      const gameState = { gameState: { clicks: 0, foundBomb: false } }
+      world.create(gameState)
 
       const rows = 11
       const rowsLower = -Math.floor(rows / 2)
@@ -193,24 +195,27 @@ export const FindTheBomb = () => {
       const colsLower = -Math.floor(cols / 2)
       const colsUpper = Math.ceil(cols / 2)
 
-      world.create((e) => {
-        e.add(Position, {
+      const target = {
+        position: {
           x: randomBetween(rowsLower + 2, rowsUpper - 2),
           y: randomBetween(colsLower + 2, colsUpper - 2),
-        })
-        e.add(Target)
-      })
+        },
+        target: true,
+      }
+
+      world.create(target)
 
       for (let i = rowsLower; i < rowsUpper; i++) {
         for (let j = colsLower; j < colsUpper; j++) {
-          world.create((e) => {
-            e.add(Position, { x: j, y: i })
-            e.add(Emoji, {
+          const emoji = {
+            position: { x: j, y: i },
+            emoji: {
               revealed: false,
               dirty: false,
               domElement: document.createElement('div'),
-            })
-          })
+            },
+          }
+          world.create(emoji)
         }
       }
 
@@ -228,9 +233,9 @@ export const FindTheBomb = () => {
 
     window.addEventListener('resize', () => {
       world
-        .filter((entities) => entities.with(Emoji))
+        .filter((entities) => entities.with('emoji'))
         .forEach((entity) => {
-          entity.get(Emoji).dirty = true
+          entity.emoji.dirty = true
         })
     })
 
@@ -248,7 +253,7 @@ export const FindTheBomb = () => {
       const delta = time - lastTime
       lastTime = time
 
-      world.update(delta)
+      world.step(delta)
     }
 
     update()

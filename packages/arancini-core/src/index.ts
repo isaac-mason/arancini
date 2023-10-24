@@ -1,12 +1,12 @@
-export * from './component'
-export * from './entity'
-export { ObjectPool } from './pools'
-export { Query } from './query'
+export * from './object-pool'
 export {
-  type QueryBuilderFn,
+  Query,
+  QueryBuilder,
   type QueryConditions,
   type QueryDescription,
-} from './query-utils'
-export * from './system'
+  type With,
+  type Without,
+} from './query'
+export { System, type SystemClass } from './system'
 export * from './topic'
-export * from './world'
+export { World, type WorldOptions, type AnyEntity } from './world'

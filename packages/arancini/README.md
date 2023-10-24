@@ -1,16 +1,262 @@
 # arancini
 
-Arancini is an object based Entity Component System. You can use arancini to structure demanding applications such as games and simulations.
+Arancini is an object based Entity Component System.
 
+```
+> npm i arancini
+```
+
+- 💙 ‎ TypeScript friendly
 - 💪 ‎ Flexible and extensible
 - 🔍 ‎ Fast reactive queries powered by bitsets
-- 🗑️ ‎ Built-in object pooling to help avoid garbage collection
-- 🍃 ‎ Less than 4kB minified + gzipped
+- 🍃 ‎ Zero dependencies
 - 🖇 ‎ [Easy integration with React](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-react)
+
+## Introduction
+
+In arancini, entities are regular javascript objects, and components are properties on those objects. You can use arancini to structure demanding applications such as games and simulations.
 
 If you aren't familiar with Entity Component Systems, this is a good read: https://github.com/SanderMertens/ecs-faq
 
-TL;DR: ECS is a data-oriented architecture for structuring your application.
+TL;DR - Entity Component Systems are a data-oriented approach to structuring applications.
+
+## Getting Started
+
+### 🌎 Creating a World
+
+A world represents your game or simulation. It maintains the entities, components, queries and systems in the ECS.
+
+```ts
+import { World } from "arancini";
+
+// (optional) define a type for entities in the world
+type Entity = {
+  position?: { x: number; y: number };
+  health?: number;
+  velocity?: { x: number; y: number };
+  inventory?: { items: string[] };
+};
+
+// create a world
+const world = new World<Entity>({
+  // components that can be added to entities
+  components: ["position", "health", "velocity", "inventory"],
+});
+
+// initialise the world
+world.init();
+```
+
+### 🍱 Creating Entities
+
+In arancini, entities are regular objects, and components are properties on those objects.
+
+You can use `world.create` to create an entity from any object. This registers the entity with the world, and adds any components that are defined on the object.
+
+```ts
+const playerEntity = { position: { x: 0, y: 0 } };
+
+world.create(playerEntity);
+```
+
+### 📦 Adding and Removing Components
+
+To add and remove components from an entity, you can use `world.add`, `world.remove`, and `world.update`.
+
+```ts
+/* add a component */
+world.add(playerEntity, "health", 100);
+
+/* remove a component */
+world.remove(playerEntity, "health");
+
+/* add and remove multiple components with a partial entity */
+world.update(playerEntity, {
+  // add a component
+  velocity: { x: 1, y: 0 },
+  // remove a component
+  poisioned: undefined,
+});
+
+/* add and remove multiple components with an update callback */
+world.update(playerEntity, (e) => {
+  // add a component
+  e.velocity = { x: 1, y: 0 };
+
+  // remove a component
+  delete e.poisioned;
+});
+```
+
+### 🗑 Destroying Entities
+
+To destroy an entity, use `world.destroy`. Note that destroying an entity does not remove any properties/components from the entity object.
+
+```ts
+world.destroy(playerEntity);
+```
+
+### 🔎 Querying Entities
+
+You can query entities based on what components they have with `all`, `one`, and `none` filters.
+
+```ts
+const monsters = world.query((q) => q.all("health", "position", "velocity"));
+
+const updateMonsters = () => {
+  for (const monster of monsters) {
+    monster.position.x += monster.velocity.x;
+    monster.position.y += monster.velocity.y;
+  }
+};
+```
+
+Arancini also supports more advanced queries. The query builder has some aliases for the main three conditions and noop grammar to make queries easier to read.
+
+```ts
+const monsters = world.query((entities) =>
+  entities
+    .with("health", "position")
+    .and.any("skeleton", "zombie")
+    .but.not("dead"),
+);
+```
+
+Queries have a `Symbol.iterator` method, so you can iterate over them with a `for...of` loop. This will iterate over entities in reverse order, which must be done to avoid issues when making changes that will remove entities from queries.
+
+```ts
+const query = world.query((e) => e.has("position"));
+
+// iteratee over entities in reverse order
+for (const entity of query) {
+  // ...
+}
+
+// regular iteration
+for (const entity of query.entities) {
+  // ...
+}
+```
+
+Arancini attempts to normalise queries with equivelant filters, so you can generally create multiple of the same query without performance penalty.
+
+### Advanced
+
+#### Reactive Query events
+
+Queries emit events when entities are added or removed.
+
+These events will be emitted after internal structures are updated to reflect the change, but before components are removed from the entity object.
+
+```ts
+const query = world.query((e) => e.has("position"));
+
+const handler = (entity: Entity) => {
+  // ...
+};
+
+query.onEntityAdded.add(handler);
+query.onEntityAdded.remove(handler);
+
+query.onEntityRemoved.add(handler);
+query.onEntityRemoved.remove(handler);
+```
+
+### 🧠 Systems
+
+Arancini has built-in support for systems, but there is nothing special about them. You can write your own "System" logic if you prefer. Arancini Systems just offer a convenient way of organising logic.
+
+```ts
+class MovementSystem extends System<Entity> {
+  moving = this.query((e) => e.has("position", "velocity"));
+
+  onUpdate(delta: number, time: number) {
+    for (const entity of this.moving) {
+      const position = entity.get("position");
+      const velocity = entity.get("velocity");
+
+      position.x += velocity.x;
+      position.y += velocity.y;
+    }
+  }
+
+  onInit() {
+    // called when the world is initialised,
+    // or when the system is registered in an initialised world
+  }
+
+  onDestroy() {
+    // called when the world is destroyed or the system is unregistered
+  }
+}
+
+// Register the system
+world.registerSystem(ExampleSystem);
+
+// Use `world.step()` to run all registered systems
+world.step(1 / 60);
+```
+
+#### System Execution Order
+
+Systems can be registered with a priority. The order systems run in is first determined by priority, then by the order systems were registered.
+
+```ts
+const priority = 10;
+world.registerSystem(MovementSystem, priority);
+```
+
+### Advanced
+
+#### Registering components after creating the world
+
+Components must be registered with the world before they can be used. You can register components after the world is initialised with `world.registerComponents`, but doing so will cause a small performance hit as internal data structures need to be updated.
+
+#### Required system queries
+
+System queries can be marked as 'required', meaning that the system will only be updated if the query has at least one result.
+
+```ts
+class ExampleSystem extends System {
+  requiredQuery = this.query((q) => q.has("position"), { required: true });
+
+  onUpdate() {
+    const { x, y } = this.requiredQuery.first;
+  }
+}
+```
+
+#### System Singleton Queries
+
+Singleton components queries can be defined for cases where systems need to access shared data, like a camera or player component.
+
+The `singleton` method creates a query for a single component, and sets the property on the system to the given component from the first matching entity.
+
+```ts
+class ExampleSystem extends System {
+  player = this.singleton("player", { required: true });
+
+  onUpdate() {
+    console.log(player);
+  }
+}
+```
+
+> **Note:** Singleton components must be defined on a top-level property of the system. The property must not be a ES2022 private field (prefixed with `#`).
+
+#### Attaching systems to other systems
+
+Systems can be attached to other systems with this.attach. This is useful for sharing logic or system state that doesn't belong in a component.
+
+```ts
+class ExampleSystem extends System {
+  otherSystem = this.attach(OtherSystem);
+
+  onUpdate() {
+    this.otherSystem.foo();
+  }
+}
+```
 
 ## Packages
 
@@ -46,517 +292,4 @@ React glue for arancini.
 
 ```bash
 > npm install @arancini/react
-```
-
-## Getting Started
-
-### 🌎 World
-
-A world represents your game or simulation. It maintains the entities, components, queries and systems in the ECS.
-
-```ts
-import { World } from "arancini";
-
-// create a world
-const world = new World();
-
-// register components and systems
-world.registerComponent(MyComponent);
-world.registerSystem(MySystem);
-
-// initialise the world
-world.init();
-```
-
-### 🍱 Entity
-
-An entity is a container for components.
-
-```ts
-// create an entity
-const entity = world.create();
-
-// remove all components and remove from the world
-entity.destroy();
-```
-
-> **Note:** You should avoid storing references to entities and components. Use queries to find entities that have certain components, run logic on them, and then discard the references.
-
-### 📦 Component
-
-You can use components to store data. Components can be defined as class components, object components, or tag components.
-
-#### Class Components
-
-To get the most out of arancini, you should define components as class components. Components defined this way can exploit all of arancini's features.
-
-To define a class component, create a new class extending the `Component` class.
-
-```ts
-class ExampleComponent extends Component {
-  // **Note:** In typescript you can use the not null `!:` syntax to indicate that properties set in `construct` will be be defined
-  x!: number;
-  y!: number;
-
-  construct(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-  }
-
-  onInit() {
-    // called on initialising the component
-  }
-
-  onDestroy() {
-    // called on destroying the component
-  }
-}
-
-class InventoryComponent extends Component {
-  inventory = new Map<string, number>();
-
-  construct() {
-    this.inventory.clear();
-  }
-
-  // optionally object pool the component - this helps avoid garbage collection if a component is expensive to create
-  static objectPooled = true;
-}
-
-world.registerComponent(PositionComponent);
-world.registerComponent(InventoryComponent);
-
-entity.add(Position, 10, 20);
-entity.add(Inventory);
-
-entity.remove(Position);
-entity.remove(Inventory);
-```
-
-#### Object Components
-
-You can use `Component.object()` to create a object component definition.
-
-Object components are useful for integrating with libraries. For example, you might create an object component for a three.js Object3D, or your physics library's physics body type.
-
-```ts
-import { Component } from "arancini";
-import { Object3D } from "three";
-
-const Object3DComponent = Component.object<Object3D>();
-
-world.registerComponent(Object3DComponent);
-
-const entity = world.create();
-
-const object3D = entity.add(Object3DComponent, new Object3D());
-```
-
-#### Tag Components
-
-You can use `Component.tag()` to define a tag component. Tag components are useful for components that don't need to store any data.
-
-```ts
-import { Component } from "arancini";
-
-const PlayerComponent = Component.tag();
-
-world.registerComponent(PlayerComponent);
-
-const entity = world.create();
-entity.add(PlayerComponent);
-
-console.log(entity.has(PlayerComponent)); // true
-```
-
-#### Registering components
-
-Components must be registered with the world before they can be used. You can register components after the world is initialised, but doing so will cause a small performance hit as internal data structures need to be updated.
-
-#### Bulk updates
-
-Adding or removing a component from an entity will cause queries to be updated. To avoid unnecessary updates, you can use `entity.bulk` to add or remove multiple components in a single operation.
-
-```ts
-entity.bulk(() => {
-  entity.add(Position, 10, 20);
-  entity.add(Velocity, 1, 2);
-  entity.remove(Health);
-});
-```
-
-#### Using components in multiple worlds
-
-**You can only register a component with one world.** You can use the `cloneComponentDefinition` utility to create a copy of a component definition that can be registered with another world.
-
-```ts
-/* lib.ts */
-import { Component } from "arancini";
-
-export class MyComponent extends Component {
-  /* ... */
-}
-
-/* some-world.ts */
-import { World } from "arancini";
-import { MyComponent as MyComponentImpl } from "./lib";
-
-const MyComponent = cloneComponentDefinition(MyComponentImpl);
-
-const world = new World();
-world.registerComponent(MyComponent);
-```
-
-### 🔎 Query
-
-You can use queries to find entities that have certain components. Queries support `all`, `one`, and `none` filters. Queries with the same filters are deduped by arancini, so you can create multiple queries with the same filters without performance penalty.
-
-```ts
-const basicQuery = world.query([Position]);
-
-const advancedQuery = world.query((entities) =>
-  entities
-    .all(Position, Velocity)
-    .any(EitherThisComponent, OrThisComponent)
-    .not(NotThisComponent),
-);
-```
-
-#### Iterating over query results
-
-The `Query` class has a `Symbol.iterator` method which can be used to iterate over all entities that match the query in reverse order. When removing entities from within the loop, entities must be iterated over in reverse order.
-
-Alternatively, you can simply iterate over entities in `query.entities`.
-
-```ts
-const query = world.query([Position]);
-
-for (const entity of query) {
-  // iterates over entities in reverse order
-}
-
-for (const entity of query.entities) {
-  // regular forward iteration
-}
-```
-
-#### Reactive queries
-
-Queries are reactive and can emit events when entities are added or removed from the query.
-
-```ts
-const query = world.query([Position]);
-
-const handler = (entity: Entity) => {
-  // ...
-};
-
-query.onEntityAdded.add(handler);
-query.onEntityRemoved.add(handler);
-
-query.onEntityAdded.remove(handler);
-query.onEntityRemoved.remove(handler);
-```
-
-#### Ad-hoc queries
-
-You can use `world.filter` and `world.find` to perform ad-hoc queries. If there is an existing query with the same filters, the results will be reused, otherwise a once-off query will be performed.
-
-```ts
-// get all entities matching a query description
-const entities = world.filter((entities) =>
-  entities.with(DesiredComponent).but.not(UndesiredComponent),
-);
-
-// find one entity matching a query description
-const entity = world.find((entity) =>
-  entity.has(DesiredComponent).but.not(UndesiredComponent),
-);
-```
-
-### 🧠 System
-
-Arancini has built-in support for systems, but you can also use queries alone to create your own "System" logic if you prefer. Systems are just a convenient way to organise your logic.
-
-#### Updating systems
-
-If you have systems registered in the world, you can use `world.update()` to run the systems. If you don't have any systems registered, you don't need to call `update`! Arancini is fully reactive, queries will be updated as the composition of entities change.
-
-```ts
-const delta = 1 / 60;
-world.update(delta);
-```
-
-#### System lifecycle methods
-
-Systems have lifecycle methods that are called on world initialisation and teardown, and when the world is updated.
-
-```ts
-class ExampleSystem extends System {
-  onInit() {
-    // called when the world is initialised,
-    // or when the system is registered in an initialised world
-  }
-
-  onDestroy() {
-    // called when the world is destroyed or the system is unregistered
-  }
-
-  onUpdate(delta: number, time: number) {
-    // called when updating the world
-  }
-}
-```
-
-#### Creating system queries
-
-You can use `this.query` to create a query linked to the system. These queries will automatically be destroyed when the system is destroyed.
-
-```ts
-class MovementSystem extends System {
-  moving = this.query([Position, Velocity]);
-
-  onUpdate() {
-    for (const entity of this.moving) {
-      const position = entity.get(Position);
-      const velocity = entity.get(Velocity);
-
-      position.x += velocity.x;
-      position.y += velocity.y;
-    }
-  }
-}
-```
-
-System queries can be marked as 'required', meaning that the system will only be updated if the query has at least one result.
-
-```ts
-class ExampleSystem extends System {
-  requiredQuery = this.query([ExampleComponent], { required: true });
-
-  onUpdate() {
-    const { data } = this.requiredQuery.first!.get(ExampleComponent);
-  }
-}
-```
-
-#### Execution Order
-
-Systems can be registered with a priority. The order systems run in is first determined by priority, then by the order systems were registered.
-
-```ts
-const priority = 10;
-world.registerSystem(MovementSystem, priority);
-```
-
-#### Singleton components
-
-Singleton components queries can be defined for cases where systems need to access shared data, like a camera or player component.
-
-The `singleton` method creates a query for a single component, and sets the property on the system to the given component from the first matching entity.
-
-```ts
-class ExampleSystem extends System {
-  player = this.singleton(PlayerComponent, { required: true });
-
-  onUpdate() {
-    player.ENERGY -= 1;
-  }
-}
-```
-
-#### Attaching other systems
-
-Systems can be attached to other systems with `this.attach`. This is useful for sharing logic or system state that don't belong components.
-
-```ts
-class ExampleSystem extends System {
-  otherSystem = this.attach(OtherSystem);
-
-  onUpdate() {
-    this.otherSystem.foo();
-  }
-}
-```
-
-> **Note:** Singleton components must be defined on a top-level property of the system. The property must not be a ES2022 private field (prefixed with `#`).
-
-## Example
-
-Let's use arancini to make a simple random walk simulation!
-
-### 1. Import everything we need
-
-```ts
-import { Component, Query, System, World } from "arancini";
-```
-
-### 2. Create components to store data
-
-```ts
-class Position extends Component {
-  x!: number;
-  y!: number;
-
-  construct(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-  }
-}
-
-class Color extends Component {
-  color!: "red" | "blue";
-
-  construct(color: "red" | "blue") {
-    this.color = color;
-  }
-}
-
-class CanvasContext extends Component {
-  ctx!: CanvasRenderingContext2D;
-  width!: number;
-  height!: number;
-}
-```
-
-### 3. Create a System that draws entities with `Position` and `Color` components
-
-```ts
-class DrawSystem extends System {
-  context = this.singleton(CanvasContext)!;
-
-  toDraw = this.query((entities) => entities.with(Position).and.any(Red, Blue));
-
-  onUpdate() {
-    const { ctx, width, height } = this.context;
-
-    ctx.clearRect(0, 0, width, height);
-
-    const boxSize = 10;
-    const xOffset = width / 2;
-    const yOffset = height / 2;
-
-    for (const entity of this.toDraw) {
-      const { x, y } = entity.get(Position);
-
-      const color: "red" | "blue" = entity.has(Red) ? "red" : "blue";
-
-      ctx.fillStyle = color;
-      ctx.fillRect(
-        xOffset + (x - boxSize / 2),
-        yOffset + (y - boxSize / 2),
-        boxSize,
-        boxSize,
-      );
-    }
-  }
-}
-```
-
-### 4. Create a System that moves entities with a `Position` Component
-
-```ts
-const TIME_BETWEEN_MOVEMENTS = 0.05; // seconds
-
-class WalkSystem extends System {
-  movementCountdown = TIME_BETWEEN_MOVEMENTS;
-
-  walkers = this.query([Position]);
-
-  onUpdate(delta: number) {
-    this.movementCountdown -= delta;
-
-    if (this.movementCountdown <= 0) {
-      for (const entity of this.walkers.entities) {
-        const position = entity.get(Position);
-        position.x += (Math.random() - 0.5) * 3;
-        position.y += (Math.random() - 0.5) * 3;
-      }
-
-      this.movementCountdown = TIME_BETWEEN_MOVEMENTS;
-    }
-  }
-}
-```
-
-### 5. Bringing it all together
-
-First, create a new `World`
-
-```ts
-const world = new World();
-```
-
-Next, let's register the Components and Systems we created.
-
-```ts
-world.registerComponent(Position);
-world.registerComponent(Color);
-world.registerComponent(CanvasContext);
-
-world.registerSystem(WalkSystem);
-world.registerSystem(DrawSystem);
-```
-
-Now let's create some random walkers. We'll create 100 random walkers, and give them a random position and color.
-
-```ts
-const N = 100;
-
-const randomPosition = () => Math.random() * 10 - 5;
-const randomColor = () => (Math.random() > 0.5 ? "red" : "blue");
-
-for (let i = 0; i < N; i++) {
-  const entity = world.create();
-  entity.add(Position, randomPosition(), randomPosition());
-  entity.add(Color, randomColor());
-}
-```
-
-Next we'll create an entity with the `CanvasContext` component, which will contain the HTML canvas context. We'll also add a handler for window resizing.
-
-```ts
-const canvasContext = world.create();
-
-const canvasElement = document.querySelector(
-  "#example-canvas",
-) as HTMLCanvasElement;
-canvasElement.width = window.innerWidth;
-canvasElement.height = window.innerHeight;
-
-const canvasComponent = canvasContext.add(CanvasContext);
-canvasComponent.ctx = canvasElement.getContext("2d")!;
-canvasComponent.width = canvasElement.width;
-canvasComponent.height = canvasElement.height;
-
-const resize = () => {
-  canvasComponent.width = canvasElement.width = window.innerWidth;
-  canvasComponent.height = canvasElement.height = window.innerHeight;
-};
-window.addEventListener("resize", resize, false);
-resize();
-```
-
-### 6. The loop
-
-Finally, let's initialise the World and run our simulation!
-
-```ts
-world.init();
-
-const now = () => performance.now() / 1000;
-
-let lastTime = now();
-
-const loop = () => {
-  requestAnimationFrame(loop);
-
-  const time = now();
-  const delta = time - lastTime;
-  lastTime = time;
-
-  world.update(delta);
-};
-
-loop();
 ```

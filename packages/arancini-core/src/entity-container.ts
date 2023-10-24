@@ -1,40 +1,23 @@
-import { QueryDescription } from '.'
-import { Entity } from './entity'
-import {
-  getFirstQueryResult,
-  getQueryBitSets,
-  getQueryConditions,
-  getQueryResults,
-} from './query-utils'
 import { Topic } from './topic'
+import type { AnyEntity } from './world'
 
-export class EntityContainer {
-  version = 0
-
+export class EntityContainer<Entity> {
   entities: Entity[] = []
+
+  version = 0
 
   onEntityAdded = new Topic<[Entity]>()
 
   onEntityRemoved = new Topic<[Entity]>()
 
-  private entityPositions = new Map<Entity, number>()
+  /** @ignore */
+  _entityPositions = new Map<Entity, number>()
+
+  /** @ignore */
+  _entitySet = new Set<Entity>()
 
   get first(): Entity | undefined {
     return this.entities[0] || undefined
-  }
-
-  filter(queryDescription: QueryDescription): Entity[] {
-    const conditions = getQueryConditions(queryDescription)
-    const conditionsBitSets = getQueryBitSets(conditions)
-
-    return getQueryResults(conditionsBitSets, this.entities)
-  }
-
-  find(queryDescription: QueryDescription): Entity | undefined {
-    const conditions = getQueryConditions(queryDescription)
-    const conditionsBitSets = getQueryBitSets(conditions)
-
-    return getFirstQueryResult(conditionsBitSets, this.entities)
   }
 
   [Symbol.iterator]() {
@@ -58,44 +41,46 @@ export class EntityContainer {
   }
 
   has(entity: Entity): boolean {
-    return this.entityPositions.has(entity)
+    return this._entitySet.has(entity)
+  }
+}
+
+export const addEntityToContainer = <E extends AnyEntity>(
+  container: EntityContainer<E>,
+  entity: E
+): void => {
+  if (entity && !container.has(entity)) {
+    container.entities.push(entity)
+    container._entityPositions.set(entity, container.entities.length - 1)
+    container._entitySet.add(entity)
+
+    container.version++
+
+    container.onEntityAdded.emit(entity)
+  }
+}
+
+export const removeEntityFromContainer = <E extends AnyEntity>(
+  container: EntityContainer<E>,
+  entity: E
+): void => {
+  if (!container.has(entity)) {
+    return
   }
 
-  /**
-   * @ignore internal
-   */
-  _addEntity(entity: Entity): void {
-    if (entity && !this.has(entity)) {
-      this.entities.push(entity)
-      this.entityPositions.set(entity, this.entities.length - 1)
+  const index = container._entityPositions.get(entity)!
+  container._entityPositions.delete(entity)
+  container._entitySet.delete(entity)
 
-      this.version++
-
-      this.onEntityAdded.emit(entity)
-    }
+  const other = container.entities[container.entities.length - 1]
+  if (other !== entity) {
+    container.entities[index] = other
+    container._entityPositions.set(other, index)
   }
 
-  /**
-   * @ignore internal
-   */
-  _removeEntity(entity: Entity): void {
-    if (!this.has(entity)) {
-      return
-    }
+  container.entities.pop()
 
-    const index = this.entityPositions.get(entity)!
-    this.entityPositions.delete(entity)
+  container.version++
 
-    const other = this.entities[this.entities.length - 1]
-    if (other !== entity) {
-      this.entities[index] = other
-      this.entityPositions.set(other, index)
-    }
-
-    this.entities.pop()
-
-    this.version++
-
-    this.onEntityRemoved.emit(entity)
-  }
+  container.onEntityRemoved.emit(entity)
 }

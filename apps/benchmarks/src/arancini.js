@@ -1,34 +1,15 @@
-import { World, Component, System } from '@arancini/core'
-
-class Position extends Component {
-  construct() {
-    this.x = 0
-    this.y = 0
-  }
-
-  static objectPooled = true
-}
-
-class Velocity extends Component {
-  construct() {
-    this.dx = Math.random() - 0.5
-    this.dy = Math.random() - 0.5
-  }
-
-  static objectPooled = true
-}
+import { World, System } from '@arancini/core'
 
 let updateCount = 0
 
 class MovementSystem extends System {
-  movement = this.query([Velocity, Position])
+  movement = this.query((e) => e.has('position', 'velocity'))
 
   onUpdate() {
     for (let i = 0; i < this.movement.entities.length; i++) {
       const e = this.movement.entities[i]
 
-      const velocity = e.get(Velocity)
-      const position = e.get(Position)
+      const { position, velocity } = e
 
       position.x += velocity.dx
       position.y += velocity.dy
@@ -40,10 +21,7 @@ class MovementSystem extends System {
 
 export const arancini = {
   setup() {
-    this.world = new World()
-    
-    this.world.registerComponent(Position)
-    this.world.registerComponent(Velocity)
+    this.world = new World({ components: ['position', 'velocity'] })
 
     this.world.registerSystem(MovementSystem)
 
@@ -51,28 +29,33 @@ export const arancini = {
     updateCount = 0
   },
   createEntity() {
-    return this.world.create()
+    const entity = {}
+    this.world.create(entity)
+    return entity
   },
   addPositionComponent(entity) {
-    entity.add(Position)
+    this.world.add(entity, 'position', { x: 0, y: 0 })
   },
   addVelocityComponent(entity) {
-    entity.add(Velocity)
+    this.world.add(entity, 'velocity', {
+      dx: Math.random() - 0.5,
+      dy: Math.random() - 0.5,
+    })
   },
   removePositionComponent(entity) {
-    entity.remove(Position)
+    this.world.remove(entity, 'position')
   },
   removeVelocityComponent(entity) {
-    entity.remove(Velocity)
+    entity.remove(entity, 'velocity')
   },
   destroyEntity(entity) {
-    entity.destroy()
+    this.world.destroy(entity)
   },
   cleanup() {
-    this.world.destroy()
+    this.world.reset()
   },
   updateMovementSystem() {
-    this.world.update()
+    this.world.step()
   },
   getMovementSystemUpdateCount() {
     return updateCount

@@ -1,116 +1,158 @@
 import * as A from '@arancini/core'
 import React, {
   createContext,
+  ForwardedRef,
   forwardRef,
   memo,
+  PropsWithRef,
   ReactElement,
   ReactNode,
   useContext,
+  useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import { useIsomorphicLayoutEffect } from './hooks'
 
-type EntityProviderContext = {
-  entity: A.Entity
-}
+type EntityProviderContext<Entity extends A.AnyEntity> = Entity | undefined
 
 export type WorldProps = {
   children?: React.ReactNode
 }
 
-export type EntityProps = {
-  name?: string
-  entity?: A.Entity
+export type EntityProps<Entity extends A.AnyEntity> = {
+  entity?: Entity
   children?: React.ReactNode
+} & (
+  | {
+      [C in keyof Entity]?: Entity[C]
+    }
+  | {}
+)
+
+export type EntitiesProps<Entity extends A.AnyEntity> = {
+  entities: Entity[]
+  children: ReactNode | ((entity: Entity) => ReactNode)
 }
 
-export type EntitiesProps = {
-  entities: A.Entity[]
-  children: ReactNode | ((entity: A.Entity) => ReactNode)
+export type QueryEntitiesProps<E extends A.AnyEntity, QueryResult> = {
+  query: A.QueryDescription<E, QueryResult>
+  children: ReactNode | ((entity: QueryResult) => ReactNode)
 }
 
-export type QueryEntitiesProps = {
-  query: A.Query | A.QueryDescription
-  children: ReactNode | ((entity: A.Entity) => ReactNode)
-}
-
-export type ComponentProps<T extends A.ComponentDefinition<unknown>> = {
-  type: T
-  args?: A.ComponentDefinitionArgs<T>
+export type ComponentProps<E, C extends keyof E> = {
+  name: C
+  data?: E[C]
   children?: ReactNode
 }
 
-export type ECS = ReturnType<typeof createECS>
+export type ECS<E extends A.AnyEntity> = ReturnType<typeof createECS<E>>
 
-export const createECS = (world: A.World) => {
-  const entityContext = createContext(null! as EntityProviderContext)
+export const createECS = <E extends A.AnyEntity>(world: A.World<E>) => {
+  const entityContext = createContext(null! as EntityProviderContext<E>)
 
-  const update = (delta: number) => {
-    world.update(delta)
+  const step = (delta: number) => {
+    world.step(delta)
   }
 
-  const useCurrentEntity = (): A.Entity | undefined => {
+  const useCurrentEntity = (): E | undefined => {
     const context = useContext(entityContext)
-    return context ? context.entity : undefined
+    return context ? context : undefined
   }
 
-  const Entity = memo(
-    forwardRef<A.Entity, EntityProps>(
-      ({ children, entity: existingEntity }, ref) => {
-        const [context, setContext] = useState<{ entity: A.Entity }>(null!)
+  const RawEntity = <T extends E>(
+    {
+      children,
+      entity: existingEntity,
+      ...propComponents
+    }: EntityProps<T> & { ref?: ForwardedRef<T> },
+    ref: React.ForwardedRef<E>
+  ) => {
+    const [newEntity] = useState(() => ({}) as E)
+    const entity = existingEntity ?? newEntity
 
-        useImperativeHandle(ref, () => context?.entity, [context])
+    const [init, setInit] = useState(false)
 
-        useIsomorphicLayoutEffect(() => {
-          if (existingEntity) {
-            setContext({ entity: existingEntity })
-            return
-          }
-
-          const newEntity = world.create()
-          setContext({ entity: newEntity })
-
-          const { id } = newEntity
-
-          return () => {
-            setContext(null!)
-
-            // if the entity hasn't already been recycled
-            if (id === newEntity.id) {
-              newEntity.destroy()
-            }
-          }
-        }, [])
-
-        return (
-          <entityContext.Provider value={context}>
-            {children}
-          </entityContext.Provider>
-        )
+    useEffect(() => {
+      if (world.has(entity)) {
+        setInit(true)
+        return
       }
-    )
-  )
 
-  const Entities = ({ entities, children }: EntitiesProps) => (
+      world.create(entity)
+
+      setInit(true)
+
+      return () => {
+        setInit(false)
+
+        if (world.has(entity)) {
+          world.destroy(entity)
+        }
+      }
+    }, [entity])
+
+    const lastComponents = useRef<E>({} as E)
+
+    useEffect(() => {
+      const components = propComponents as E
+
+      const removed = (
+        Object.keys(lastComponents.current) as Array<keyof E>
+      ).filter((name) => components[name] === undefined)
+
+      world.update(entity, (e) => {
+        for (const name in components) {
+          e[name] = components[name]
+        }
+
+        for (const name of removed) {
+          delete e[name]
+        }
+
+        return entity
+      })
+
+      return () => {
+        lastComponents.current = components
+      }
+    }, [propComponents])
+
+    useImperativeHandle(ref, () => entity)
+
+    return (
+      <entityContext.Provider value={init ? entity : undefined}>
+        {children}
+      </entityContext.Provider>
+    )
+  }
+
+  const Entity = memo(forwardRef(RawEntity)) as <D extends E>(
+    props: PropsWithRef<EntityProps<D> & { ref?: ForwardedRef<D> }>
+  ) => ReactNode
+
+  const Entities = <T extends E>({ entities, children }: EntitiesProps<T>) => (
     <>
       {entities.map((entity) => (
-        <Entity key={entity.id} entity={entity}>
+        <Entity key={world.id(entity)} entity={entity}>
           {typeof children === 'function' ? children(entity) : children}
         </Entity>
       ))}
     </>
   )
 
-  const useQuery = (q: A.Query | A.QueryDescription) => {
+  const useQuery = <R extends E>(q: A.QueryDescription<E, R>) => {
+    const queryDescription = useMemo(() => q, [])
+
     const query = useMemo(() => {
       if (q instanceof A.Query) {
         return q
       }
 
-      return world.query(q)
-    }, [q])
+      return world.query<R>(queryDescription)
+    }, [queryDescription])
 
     const [, setVersion] = useState(-1)
 
@@ -130,60 +172,49 @@ export const createECS = (world: A.World) => {
 
     useIsomorphicLayoutEffect(rerender, [])
 
-    return query
+    return query as A.Query<R>
   }
 
-  const QueryEntities = ({
-    query: queryDescription,
+  const QueryEntities = <QueryResult extends E>({
+    query: q,
     children,
-  }: QueryEntitiesProps) => {
-    const query = useQuery(queryDescription)
+  }: QueryEntitiesProps<E, QueryResult>) => {
+    const query = useQuery(q)
 
     return <Entities entities={[...query.entities]} children={children} />
   }
 
-  const Component = <T extends A.ComponentDefinition<unknown>>({
-    args: argsProp,
+  const Component = <C extends keyof E>({
+    name,
+    data,
     children,
-    type,
-  }: ComponentProps<T>) => {
+  }: ComponentProps<E, C>): ReactNode => {
     const [childRef, setChildRef] = useState<never>(null!)
 
-    const entityCtx = useContext(entityContext)
+    const entity = useContext(entityContext)
 
     useIsomorphicLayoutEffect(() => {
-      if (!entityCtx || !entityCtx.entity) {
+      if (!entity) {
         return
       }
 
-      if (children && !childRef) {
-        return
-      }
-
-      const { entity } = entityCtx
-
-      let args: A.ComponentDefinitionArgs<T>
-      if (children) {
+      let componentData: E[C]
+      if (children !== undefined) {
         // if children are passed in, use them as the component's args
-        args = [childRef] as never
+        componentData = childRef as never
       } else {
         // otherwise, use the args prop
-        args = argsProp ?? ([] as never)
+        componentData = data!
       }
 
-      const newComponent = entity.add(type, ...args)
+      world.add(entity, name, componentData!)
 
       return () => {
-        // check if the entity has the component before removing it
-        const internal = newComponent as A.InternalComponentInstanceProperties
-        if (
-          internal?._arancini_component_definition &&
-          entity.has(internal._arancini_component_definition!)
-        ) {
-          entity.remove(internal._arancini_component_definition!)
+        if (entity[name]) {
+          world.remove(entity, name)
         }
       }
-    }, [entityCtx, childRef, type, ...(argsProp ?? [])])
+    }, [entity, childRef, name, data])
 
     // capture ref of child
     if (children) {
@@ -204,7 +235,7 @@ export const createECS = (world: A.World) => {
     Component,
     useQuery,
     useCurrentEntity,
-    update,
+    step,
     world,
     entityContext,
   }

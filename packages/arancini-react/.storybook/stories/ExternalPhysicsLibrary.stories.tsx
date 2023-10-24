@@ -1,4 +1,4 @@
-import { Component, System, World } from '@arancini/core'
+import { System, World } from '@arancini/core'
 import { createECS } from '@arancini/react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as P2 from 'p2-es'
@@ -19,31 +19,26 @@ const boxBoxContactMaterial = new P2.ContactMaterial(
   { friction: 0.75 }
 )
 
-const Object3DComponent = Component.object<THREE.Object3D>({ name: 'Object3D' })
+type EntityType = {
+  object3D: THREE.Object3D
+  rigidBody: P2.Body
+}
 
-const RigidBodyComponent = Component.object<P2.Body>({ name: 'RigidBody' })
-
-class PhysicsSystem extends System {
-  bodiesQuery = this.query([RigidBodyComponent])
+class PhysicsSystem extends System<EntityType> {
+  bodiesQuery = this.query((e) => e.has('rigidBody'))
 
   physicsWorld = new P2.World({ gravity: [0, -9.81] })
-
-  bodies = new Map<string, P2.Body>()
 
   onInit() {
     this.physicsWorld.addContactMaterial(boxGroundContactMaterial)
     this.physicsWorld.addContactMaterial(boxBoxContactMaterial)
 
     this.bodiesQuery.onEntityAdded.add((added) => {
-      const body = added.get(RigidBodyComponent)
-      this.bodies.set(added.id, body)
-      this.physicsWorld.addBody(body)
+      this.physicsWorld.addBody(added.rigidBody)
     })
 
     this.bodiesQuery.onEntityRemoved.add((removed) => {
-      const body = this.bodies.get(removed.id)!
-      this.bodies.delete(removed.id)
-      this.physicsWorld.removeBody(body)
+      this.physicsWorld.removeBody(removed.rigidBody)
     })
   }
 
@@ -53,23 +48,25 @@ class PhysicsSystem extends System {
     this.physicsWorld.step(stepSize, delta, maxSubSteps)
 
     for (const entity of this.bodiesQuery) {
-      const object3D = entity.find(Object3DComponent)
+      const { object3D } = entity
       if (object3D === undefined) continue
 
-      const body = entity.get(RigidBodyComponent)
-      object3D.position.set(body.position[0], body.position[1], 0)
-      object3D.rotation.set(0, 0, body.angle)
+      const { rigidBody } = entity
+      object3D.position.set(rigidBody.position[0], rigidBody.position[1], 0)
+      object3D.rotation.set(0, 0, rigidBody.angle)
     }
   }
 }
 
-const world = new World()
-world.registerComponent(RigidBodyComponent)
-world.registerComponent(Object3DComponent)
+const world = new World<EntityType>({
+  components: ['object3D', 'rigidBody'],
+})
+
 world.registerSystem(PhysicsSystem)
+
 world.init()
 
-const ECS = createECS(world)
+const { step, Entity, Component, QueryEntities } = createECS(world)
 
 const Plane = () => {
   const planeBody = useMemo(() => {
@@ -82,11 +79,7 @@ const Plane = () => {
     return body
   }, [])
 
-  return (
-    <ECS.Entity>
-      <ECS.Component type={RigidBodyComponent} args={[planeBody]} />
-    </ECS.Entity>
-  )
+  return <Entity rigidBody={planeBody} />
 }
 
 type BoxProps = {
@@ -110,16 +103,12 @@ const Box = ({ position, width, height }: BoxProps) => {
     return body
   }, [])
 
-  return (
-    <ECS.Entity>
-      <ECS.Component type={RigidBodyComponent} args={[boxBody]} />
-    </ECS.Entity>
-  )
+  return <Entity rigidBody={boxBody} />
 }
 
 const App = () => {
   useFrame((_, delta) => {
-    ECS.update(delta)
+    step(delta)
   })
 
   return (
@@ -137,14 +126,14 @@ const App = () => {
       </Repeat>
 
       {/* render rigid bodies */}
-      <ECS.QueryEntities query={[RigidBodyComponent]}>
+      <QueryEntities query={(e) => e.has('rigidBody')}>
         {(entity) => {
-          const body = entity.get(RigidBodyComponent)
+          const { rigidBody } = entity
 
           const boxes: P2.Box[] = []
           const planes: P2.Plane[] = []
 
-          for (const shape of body.shapes) {
+          for (const shape of rigidBody.shapes) {
             if (shape.type === P2.Shape.BOX) {
               boxes.push(shape as P2.Box)
             } else if (shape.type === P2.Shape.PLANE) {
@@ -153,7 +142,7 @@ const App = () => {
           }
 
           return (
-            <ECS.Component type={Object3DComponent}>
+            <Component name="object3D">
               <group>
                 {/* render box shapes */}
                 {boxes.map((box, index) => (
@@ -177,10 +166,10 @@ const App = () => {
                   </mesh>
                 ))}
               </group>
-            </ECS.Component>
+            </Component>
           )
         }}
-      </ECS.QueryEntities>
+      </QueryEntities>
 
       {/* lights */}
       <ambientLight intensity={1.5} />

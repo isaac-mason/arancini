@@ -1,6 +1,5 @@
 import { World } from '@arancini/core'
 import { Html } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
 import React, { useEffect, useState } from 'react'
 import { Lifetime, Repeat } from 'timeline-composer'
 import { createECS } from '../../src'
@@ -11,17 +10,10 @@ export default {
 }
 
 const world = new World()
+
 world.init()
 
-const ECS = createECS(world)
-
-const R3FStepper = () => {
-  useFrame((_, delta) => {
-    ECS.update(delta)
-  })
-
-  return null
-}
+const { Entity } = createECS(world)
 
 export const ExistingWorld = () => {
   const [worldStats, setWorldStats] = useState('')
@@ -41,13 +33,11 @@ export const ExistingWorld = () => {
   return (
     <>
       <Setup cameraPosition={[0, 0, 20]}>
-        <R3FStepper />
-
-        <ECS.Entity />
+        <Entity />
 
         <Repeat seconds={4}>
           <Lifetime seconds={2}>
-            <ECS.Entity />
+            <Entity />
           </Lifetime>
         </Repeat>
 

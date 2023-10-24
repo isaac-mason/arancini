@@ -1,4 +1,4 @@
-import { Component, System, World } from '@arancini/core'
+import { System, World } from '@arancini/core'
 import { OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import React from 'react'
@@ -9,16 +9,17 @@ export default {
   title: 'Random Walkers',
 }
 
-const WalkingComponent = Component.tag({ name: 'Walking' })
+type EntityType = {
+  object3D?: THREE.Object3D
+  walking?: boolean
+}
 
-const Object3DComponent = Component.object<THREE.Object3D>({ name: 'Object3D' })
-
-class WalkingSystem extends System {
-  walking = this.query([Object3DComponent, WalkingComponent])
+class WalkingSystem extends System<EntityType> {
+  walking = this.query((e) => e.has('object3D', 'walking'))
 
   onUpdate(delta: number) {
     for (const walker of this.walking) {
-      const object3D = walker.get(Object3DComponent)
+      const { object3D } = walker
 
       object3D.position.x += (Math.random() - 0.5) * 2 * delta
       object3D.position.y += (Math.random() - 0.5) * 2 * delta
@@ -31,42 +32,31 @@ class WalkingSystem extends System {
   }
 }
 
-const world = new World()
-world.registerComponent(WalkingComponent)
-world.registerComponent(Object3DComponent)
+const world = new World<EntityType>({
+  components: ['object3D', 'walking'],
+})
+
 world.registerSystem(WalkingSystem)
+
 world.init()
 
-const ECS = createECS(world)
-
-const R3FStepper = () => {
-  useFrame((_, delta) => {
-    ECS.update(delta)
-  })
-
-  return null
-}
+const { step, Entity, QueryEntities, Component } = createECS(world)
 
 const App = () => {
+  useFrame((_, delta) => {
+    step(delta)
+  })
+
   return (
     <>
-      {/* stepper for r3f */}
-      <R3FStepper />
-
-      {/* create some walkers */}
       {Array.from({ length: 10 }).map((_, idx) => (
-        <ECS.Entity key={idx}>
-          {/* give the walkers the "walking" tag component */}
-          <ECS.Component type={WalkingComponent} />
-        </ECS.Entity>
+        <Entity key={idx} walking />
       ))}
 
-      {/* render the walkers */}
-      <ECS.QueryEntities query={[WalkingComponent]}>
+      <QueryEntities query={(e) => e.has('walking')}>
         {() => (
-          <ECS.Component type={Object3DComponent}>
+          <Component name="object3D">
             <mesh
-              // random initial position
               position={[
                 (Math.random() - 0.5) * 4,
                 (Math.random() - 0.5) * 4,
@@ -76,9 +66,9 @@ const App = () => {
               <boxGeometry args={[1, 1, 1]} />
               <meshNormalMaterial />
             </mesh>
-          </ECS.Component>
+          </Component>
         )}
-      </ECS.QueryEntities>
+      </QueryEntities>
 
       <OrbitControls />
     </>

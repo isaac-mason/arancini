@@ -1,4 +1,4 @@
-import { Component, System, World } from '@arancini/core'
+import { System, World } from '@arancini/core'
 import { Bounds, PerspectiveCamera } from '@react-three/drei'
 import { Vector3, useFrame } from '@react-three/fiber'
 import React, { useState } from 'react'
@@ -10,28 +10,22 @@ export default {
   title: 'Selection',
 }
 
-/* components */
+type EntityType = {
+  object3D?: THREE.Object3D
+  camera?: THREE.PerspectiveCamera
+  selected?: boolean
+}
 
-const SelectedComponent = Component.tag({ name: 'Selected' })
+class CameraSystem extends System<EntityType> {
+  selectedQuery = this.query((e) => e.has('selected', 'object3D'))
 
-const CameraComponent = Component.object<THREE.PerspectiveCamera>({
-  name: 'Camera',
-})
-
-const Object3DComponent = Component.object<THREE.Object3D>({ name: 'Object3D' })
-
-/* systems */
-
-class CameraSystem extends System {
-  selectedQuery = this.query([SelectedComponent, Object3DComponent])
-
-  camera = this.singleton(CameraComponent, { required: true })!
+  camera = this.singleton('camera', { required: true })!
 
   private lerpedLookAt = new THREE.Vector3(0, 0, 0)
 
   onUpdate(delta: number) {
-    const selected = this.selectedQuery.entities.map((entity) =>
-      entity.get(Object3DComponent)
+    const selected = this.selectedQuery.entities.map(
+      (entity) => entity.object3D
     )
 
     const lookAt = new THREE.Vector3(0, 0, 0)
@@ -48,28 +42,29 @@ class CameraSystem extends System {
   }
 }
 
-const world = new World()
-world.registerComponent(Object3DComponent)
-world.registerComponent(SelectedComponent)
-world.registerComponent(CameraComponent)
+const world = new World<EntityType>({
+  components: ['object3D', 'camera', 'selected'],
+})
+
 world.registerSystem(CameraSystem)
+
 world.init()
 
-const ECS = createECS(world)
+const { step, useCurrentEntity, Component, Entity } = createECS(world)
 
 const SelectableBox = (props: JSX.IntrinsicElements['mesh']) => {
-  const entity = ECS.useCurrentEntity()
+  const entity = useCurrentEntity()
   const [selected, setSelected] = useState(false)
   const [hovered, setHovered] = useState(false)
 
   const toggleSelection = () => {
     if (!entity) return
 
-    if (entity.has(SelectedComponent)) {
-      entity.remove(SelectedComponent)
+    if (entity.selected) {
+      world.remove(entity, 'selected')
       setSelected(false)
     } else {
-      entity.add(SelectedComponent)
+      world.add(entity, 'selected', true)
       setSelected(true)
     }
   }
@@ -83,7 +78,7 @@ const SelectableBox = (props: JSX.IntrinsicElements['mesh']) => {
   }
 
   return (
-    <ECS.Component type={Object3DComponent}>
+    <Component name="object3D">
       <mesh
         {...props}
         onClick={toggleSelection}
@@ -93,7 +88,7 @@ const SelectableBox = (props: JSX.IntrinsicElements['mesh']) => {
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial color={color} />
       </mesh>
-    </ECS.Component>
+    </Component>
   )
 }
 
@@ -109,33 +104,33 @@ const boxPositions = Array.from({ length: rows * cols }, (_, i) => {
 const SelectableBoxes = () => (
   <>
     {boxPositions.map((position, i) => (
-      <ECS.Entity key={i}>
+      <Entity key={i}>
         <SelectableBox position={position} />
-      </ECS.Entity>
+      </Entity>
     ))}
   </>
 )
 
 const Camera = () => (
-  <ECS.Entity>
-    <ECS.Component type={CameraComponent}>
+  <Entity>
+    <Component name="camera">
       <PerspectiveCamera makeDefault fov={30} position={[0, 0, 30]} />
-    </ECS.Component>
-  </ECS.Entity>
+    </Component>
+  </Entity>
 )
 
 const App = () => {
   useFrame((_, delta) => {
-    ECS.update(delta)
+    step(delta)
   })
 
   return (
     <>
+      <Camera />
+
       <Bounds fit clip observe>
         <SelectableBoxes />
       </Bounds>
-
-      <Camera />
 
       <ambientLight intensity={1.5} />
       <directionalLight intensity={3} position={[5, 10, 5]} />

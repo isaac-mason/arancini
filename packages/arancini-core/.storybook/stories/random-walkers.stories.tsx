@@ -1,26 +1,29 @@
-import { Component, System, World } from '@arancini/core'
+import { System, World } from '@arancini/core'
 import React, { useEffect } from 'react'
 
-const Position = Component.object<{ x: number; y: number }>({ name: 'Position' })
-
-const Red = Component.tag({ name: 'Red' })
-const Blue = Component.tag({ name: 'Blue' })
-
-class CanvasContext extends Component {
-  ctx!: CanvasRenderingContext2D
-  width!: number
-  height!: number
+type Entity = {
+  position?: {
+    x: number
+    y: number
+  }
+  red?: true
+  blue?: true
+  canvasContext?: {
+    ctx: CanvasRenderingContext2D
+    width: number
+    height: number
+  }
 }
 
 const BOX_SIZE = 10
 
-class DrawSystem extends System {
+class DrawSystem extends System<Entity> {
   // get the canvas context
-  context = this.singleton(CanvasContext)!
+  context = this.singleton('canvasContext')!
 
   // A `System` can have many queries for entities, filtering by what components they have
   // this query is called `toDraw`
-  toDraw = this.query((entities) => entities.with(Position).and.any(Red, Blue))
+  toDraw = this.query((entities) => entities.with('position').and.any('red', 'blue'))
 
   // On each update, let's draw
   onUpdate() {
@@ -37,10 +40,10 @@ class DrawSystem extends System {
     // to get entities that have been matched and unmatched from the query
     for (const entity of this.toDraw) {
       // let's get the position of the random walker
-      const { x, y } = entity.get(Position)
+      const { position: { x, y } } = entity
 
       // let's also get the color for this random walker
-      const color: 'red' | 'blue' = entity.has(Red) ? 'red' : 'blue'
+      const color: 'red' | 'blue' = entity.red ? 'red' : 'blue'
 
       // draw the box
       ctx.fillStyle = color
@@ -55,9 +58,9 @@ class DrawSystem extends System {
   }
 }
 
-class WalkSystem extends System {
+class WalkSystem extends System<Entity> {
   // query for walkers
-  walkers = this.query((entities) => entities.with(Position))
+  walkers = this.query((entities) => entities.with('position'))
 
   // keep track of when our walkers should move again
   static timeBetweenMovements = 0.05
@@ -73,7 +76,7 @@ class WalkSystem extends System {
     if (this.movementCountdown <= 0) {
       // move all walkers in a random direction
       for (const entity of this.walkers) {
-        const position = entity.get(Position)
+        const { position } = entity
         position.x = position.x + (Math.random() - 0.5) * 3
         position.y = position.y + (Math.random() - 0.5) * 3
       }
@@ -84,19 +87,19 @@ class WalkSystem extends System {
   }
 }
 
-class FlipSystem extends System {
-  walkers = this.query((entities) => entities.some(Red, Blue))
+class FlipSystem extends System<Entity> {
+  walkers = this.query((entities) => entities.some('red', 'blue'))
 
   onUpdate() {
     for (const entity of this.walkers) {
       // small chance of changing color
       if (Math.random() >= 0.95) {
-        if (entity.has(Blue)) {
-          entity.remove(Blue)
-          entity.add(Red)
+        if (entity.blue) {
+          this.world.remove(entity, 'blue')
+          this.world.add(entity, 'red', true)
         } else {
-          entity.remove(Red)
-          entity.add(Blue)
+          this.world.remove(entity, 'red')
+          this.world.add(entity, 'blue', true)
         }
       }
     }
@@ -105,12 +108,9 @@ class FlipSystem extends System {
 
 export const RandomColorChangingWalkers = () => {
   useEffect(() => {
-    const world = new World()
-
-    world.registerComponent(Position)
-    world.registerComponent(Red)
-    world.registerComponent(Blue)
-    world.registerComponent(CanvasContext)
+    const world = new World<Entity>({
+      components: ['position', 'red', 'blue', 'canvasContext']
+    })
 
     world.registerSystem(WalkSystem)
     world.registerSystem(DrawSystem)
@@ -121,32 +121,43 @@ export const RandomColorChangingWalkers = () => {
 
     // create entities in the World's default
     for (let i = 0; i < n; i++) {
-      const entity = world.create()
-      entity.add(Position, {
-        x: (Math.random() - 0.5) * 300,
-        y: (Math.random() - 0.5) * 300,
-      })
-      entity.add(i % 2 === 0 ? Red : Blue)
+      const entity: Entity = {
+        position: {
+          x: (Math.random() - 0.5) * 300,
+          y: (Math.random() - 0.5) * 300,
+        },
+      }
+
+      if (i % 2 === 0) {
+        entity.red = true
+      } else {
+        entity.blue = true
+      }
+      
+      world.create(entity)
     }
 
     // create an entity with a component containing the canvas context
-    const context = world.create()
-
-    const canvas = document.querySelector(
+    const canvasElement = document.querySelector(
       '#example-canvas'
     ) as HTMLCanvasElement
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+    canvasElement.width = window.innerWidth
+    canvasElement.height = window.innerHeight
 
-    const canvasComponent = context.add(CanvasContext)
-    canvasComponent.ctx = canvas.getContext('2d')!
-    canvasComponent.width = canvas.width
-    canvasComponent.height = canvas.height
+    const canvasEntity = {
+      canvasContext: {
+        ctx: canvasElement.getContext('2d')!,
+        width: canvasElement.width,
+        height: canvasElement.height,
+      }
+    }
+
+    world.create(canvasEntity)
 
     // handle resizing
     const resize = () => {
-      canvasComponent.width = canvas.width = window.innerWidth
-      canvasComponent.height = canvas.height = window.innerHeight
+      canvasEntity.canvasContext.width = canvasElement.width = window.innerWidth
+      canvasEntity.canvasContext.height = canvasElement.height = window.innerHeight
     }
     window.addEventListener('resize', resize, false)
     resize()
@@ -167,7 +178,7 @@ export const RandomColorChangingWalkers = () => {
       const delta = time - lastTime
       lastTime = time
 
-      world.update(delta)
+      world.step(delta)
     }
 
     update()

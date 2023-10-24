@@ -1,23 +1,18 @@
-import * as A from '@arancini/core'
+import { System, World } from '@arancini/core'
 import '@testing-library/jest-dom'
 import { act, render, renderHook } from '@testing-library/react'
 import React, { forwardRef, useImperativeHandle } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { createECS } from '../src'
 
-class ExampleComponent extends A.Component {}
-
-class ExampleComponentWithArgs extends A.Component {
-  exampleProperty!: string
-
-  construct(exampleArg: string) {
-    this.exampleProperty = exampleArg
-  }
+type Entity = {
+  foo?: boolean
+  bar?: string
 }
 
 describe('createECS', () => {
   it('should be truthy', () => {
-    const world = new A.World()
+    const world = new World<Entity>({ components: ['foo', 'bar'] })
     world.init()
 
     const ECS = createECS(world)
@@ -26,9 +21,9 @@ describe('createECS', () => {
     expect(ECS.world).toBeTruthy()
   })
 
-  describe('<Entity>', () => {
+  describe('<Entity />', () => {
     it('should create an entity', () => {
-      const world = new A.World()
+      const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
       const ECS = createECS(world)
@@ -39,12 +34,12 @@ describe('createECS', () => {
     })
 
     it('should support taking an existing entity via props', () => {
-      const world = new A.World()
+      const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
       const ECS = createECS(world)
 
-      const entity = world.create()
+      const entity = world.create({})
 
       render(<ECS.Entity entity={entity} />)
 
@@ -53,13 +48,13 @@ describe('createECS', () => {
     })
 
     it('supports refs', () => {
-      const world = new A.World()
+      const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
       const ECS = createECS(world)
 
-      const ref = React.createRef<A.Entity>()
-      const entity = world.create()
+      const ref = React.createRef<Entity>()
+      const entity = world.create({})
 
       render(<ECS.Entity ref={ref} entity={entity} />)
 
@@ -68,161 +63,97 @@ describe('createECS', () => {
     })
   })
 
-  describe('<Entities>', () => {
+  describe('<Entities />', () => {
     it('should add components to entities', () => {
-      const world = new A.World()
+      const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
       const ECS = createECS(world)
 
-      world.registerComponent(ExampleComponent)
-
-      const entities = [world.create(), world.create(), world.create()]
+      const entities = [world.create({}), world.create({}), world.create({})]
 
       render(
         <ECS.Entities entities={entities}>
-          <ECS.Component type={ExampleComponent} />
+          <ECS.Component name="foo" data={true} />
         </ECS.Entities>
       )
 
-      expect(entities.every((entity) => entity.has(ExampleComponent))).toBe(
-        true
-      )
+      expect(entities.every((entity) => !!entity.foo)).toBe(true)
     })
   })
 
-  describe('<QueryEntities>', () => {
+  describe('<QueryEntities />', () => {
     it('should render entities that match the query description', () => {
-      const world = new A.World()
+      const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
       const ECS = createECS(world)
 
-      world.registerComponent(ExampleComponent)
-      world.registerComponent(ExampleComponentWithArgs)
+      const entities = [world.create({}), world.create({}), world.create({})]
 
-      const entities = [world.create(), world.create(), world.create()]
+      world.update(entities[0], (e) => {
+        e.foo = true
+      })
 
-      entities[0].add(ExampleComponent)
-      entities[1].add(ExampleComponent)
+      world.update(entities[1], (e) => {
+        e.foo = true
+      })
 
       render(
-        <ECS.QueryEntities query={[ExampleComponent]}>
-          <ECS.Component type={ExampleComponentWithArgs} />
+        <ECS.QueryEntities query={(e) => e.has('foo')}>
+          <ECS.Component name="bar" data="123" />
         </ECS.QueryEntities>
       )
 
-      expect(entities[0].has(ExampleComponentWithArgs)).toBe(true)
-      expect(entities[1].has(ExampleComponentWithArgs)).toBe(true)
-      expect(entities[2].has(ExampleComponentWithArgs)).toBe(false)
+      expect(!!entities[0].bar).toBe(true)
+      expect(!!entities[1].bar).toBe(true)
+      expect(!!entities[2].bar).toBe(false)
 
       act(() => {
-        entities[2].add(ExampleComponent)
+        world.add(entities[2], 'foo', true)
       })
 
-      expect(entities[2].has(ExampleComponentWithArgs)).toBe(true)
+      expect(!!entities[2].bar).toBe(true)
 
       act(() => {
-        entities[2].remove(ExampleComponent)
+        world.remove(entities[2], 'foo')
       })
 
-      expect(entities[2].has(ExampleComponentWithArgs)).toBe(false)
-    })
-
-    it('should render entities that match the query instance', () => {
-      const world = new A.World()
-      world.init()
-
-      const ECS = createECS(world)
-
-      world.registerComponent(ExampleComponent)
-      world.registerComponent(ExampleComponentWithArgs)
-
-      const entities = [world.create(), world.create(), world.create()]
-
-      entities[0].add(ExampleComponent)
-      entities[1].add(ExampleComponent)
-
-      const query = world.query([ExampleComponent])
-
-      render(
-        <ECS.QueryEntities query={query}>
-          <ECS.Component type={ExampleComponentWithArgs} />
-        </ECS.QueryEntities>
-      )
-
-      expect(entities[0].has(ExampleComponentWithArgs)).toBe(true)
-      expect(entities[1].has(ExampleComponentWithArgs)).toBe(true)
-      expect(entities[2].has(ExampleComponentWithArgs)).toBe(false)
-
-      act(() => {
-        entities[2].add(ExampleComponent)
-      })
-
-      expect(entities[2].has(ExampleComponentWithArgs)).toBe(true)
-
-      act(() => {
-        entities[2].remove(ExampleComponent)
-      })
-
-      expect(entities[2].has(ExampleComponentWithArgs)).toBe(false)
+      expect(!!entities[2].bar).toBe(false)
     })
   })
 
-  describe('<Component>', () => {
+  describe('<Component />', () => {
     it('should add and remove the given component to an entity', () => {
-      const world = new A.World()
+      const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
       const ECS = createECS(world)
 
-      world.registerComponent(ExampleComponent)
-
-      const entity = world.create()
+      const entity = world.create({})
 
       const { unmount } = render(
         <ECS.Entity entity={entity}>
-          <ECS.Component type={ExampleComponent} />
+          <ECS.Component name="foo" data={true} />
         </ECS.Entity>
       )
 
-      expect(entity.get(ExampleComponent)).toBeInstanceOf(ExampleComponent)
+      expect(entity.foo).toBe(true)
 
       act(() => {
         unmount()
       })
 
-      expect(entity.has(ExampleComponent)).toBe(false)
-    })
-
-    it('should call construct with the args prop', () => {
-      const world = new A.World()
-      world.init()
-
-      const ECS = createECS(world)
-
-      world.registerComponent(ExampleComponentWithArgs)
-
-      const entity = world.create()
-
-      render(
-        <ECS.Entity entity={entity}>
-          <ECS.Component type={ExampleComponentWithArgs} args={['test']} />
-        </ECS.Entity>
-      )
-
-      expect(entity.get(ExampleComponentWithArgs).exampleProperty).toBe('test')
+      expect(!!entity.foo).toBe(false)
     })
 
     it('should capture child ref and use it as a component arg', () => {
-      const world = new A.World()
+      const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
       const ECS = createECS(world)
 
-      world.registerComponent(ExampleComponentWithArgs)
-
-      const entity = world.create()
+      const entity = world.create({})
 
       const refValue = 'refValue'
 
@@ -233,66 +164,35 @@ describe('createECS', () => {
 
       render(
         <ECS.Entity entity={entity}>
-          <ECS.Component type={ExampleComponentWithArgs}>
+          <ECS.Component name="bar">
             <TestComponentWithRef />
           </ECS.Component>
         </ECS.Entity>
       )
 
-      expect(entity.get(ExampleComponentWithArgs).exampleProperty).toBe(
-        refValue
-      )
+      expect(entity.bar).toBe(refValue)
     })
   })
 
   describe('useQuery', () => {
     it('should return a reactive query instance when given a query description', () => {
-      const world = new A.World()
+      const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
       const ECS = createECS(world)
 
-      world.registerComponent(ExampleComponent)
-
-      const entities = [world.create(), world.create(), world.create()]
+      const entities = [world.create({}), world.create({}), world.create({})]
 
       entities.forEach((e) => {
-        e.add(ExampleComponent)
+        world.add(e, 'foo', true)
       })
 
-      const { result } = renderHook(() => ECS.useQuery([ExampleComponent]))
+      const { result } = renderHook(() => ECS.useQuery((e) => e.has('foo')))
 
       expect(result.current.entities).toEqual(entities)
 
       act(() => {
-        entities[2].remove(ExampleComponent)
-      })
-
-      expect(result.current.entities).toEqual([entities[0], entities[1]])
-    })
-
-    it('should return a reactive query instance when given a query instance', () => {
-      const world = new A.World()
-      world.init()
-
-      const ECS = createECS(world)
-
-      world.registerComponent(ExampleComponent)
-
-      const entities = [world.create(), world.create(), world.create()]
-
-      entities.forEach((e) => {
-        e.add(ExampleComponent)
-      })
-
-      const query = world.query([ExampleComponent])
-
-      const { result } = renderHook(() => ECS.useQuery(query))
-
-      expect(result.current.entities).toEqual(entities)
-
-      act(() => {
-        entities[2].remove(ExampleComponent)
+        world.remove(entities[2], 'foo')
       })
 
       expect(result.current.entities).toEqual([entities[0], entities[1]])
@@ -301,12 +201,12 @@ describe('createECS', () => {
 
   describe('useCurrentEntity', () => {
     it('should return the current entity', () => {
-      const world = new A.World()
+      const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
       const ECS = createECS(world)
 
-      const entity = world.create()
+      const entity = world.create({})
 
       const { result } = renderHook(() => ECS.useCurrentEntity(), {
         wrapper: ({ children }) => (
@@ -318,9 +218,9 @@ describe('createECS', () => {
     })
   })
 
-  describe('update', () => {
-    it('should update the world', () => {
-      const world = new A.World()
+  describe('step', () => {
+    it('should step the world', () => {
+      const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
       const ECS = createECS(world)
@@ -328,7 +228,7 @@ describe('createECS', () => {
       const onUpdate = vi.fn()
 
       world.systemManager.registerSystem(
-        class extends A.System {
+        class extends System {
           onUpdate(delta: number, time: number) {
             onUpdate(delta, time)
           }
@@ -337,10 +237,10 @@ describe('createECS', () => {
 
       const delta = 0.01
 
-      ECS.update(delta)
+      ECS.step(delta)
       expect(onUpdate).toBeCalledWith(delta, delta)
 
-      ECS.update(delta)
+      ECS.step(delta)
       expect(onUpdate).toBeCalledWith(delta, delta * 2)
     })
   })

@@ -1,6 +1,4 @@
-import { ComponentDefinition, ComponentInstance } from './component'
-import type { QueryDescription } from './query-utils'
-import { Query } from './query'
+import type { Query, QueryDescription } from './query'
 import type { World } from './world'
 
 const isSubclassMethodOverridden = (
@@ -53,7 +51,7 @@ export type SystemClass<T extends System = System> = {
  * }
  * ```
  */
-export abstract class System {
+export abstract class System<E extends {} = any> {
   /**
    * Whether the system is enabled and should update
    */
@@ -62,7 +60,7 @@ export abstract class System {
   /**
    * The World the system is in
    */
-  world: World
+  world: World<E>
 
   /**
    * @private used internally, do not use directly
@@ -76,7 +74,7 @@ export abstract class System {
     /**
      * A set of queries used by the system
      */
-    queries: Set<Query>
+    queries: Set<Query<E>>
 
     /**
      * The priority of the system, determines system run order.
@@ -91,12 +89,7 @@ export abstract class System {
     /**
      * Queries that must have at least one result for onUpdate to be called
      */
-    requiredQueries: Query[]
-
-    /**
-     * Whether the system has any required queries
-     */
-    hasRequiredQueries: boolean
+    requiredQueries: Query<any>[]
   } = {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     class: null!,
@@ -104,7 +97,6 @@ export abstract class System {
     priority: 0,
     order: 0,
     requiredQueries: [],
-    hasRequiredQueries: false,
   }
 
   constructor(world: World) {
@@ -141,10 +133,10 @@ export abstract class System {
    * @param options optional options for the system query
    * @returns the query
    */
-  protected query(
-    queryDescription: QueryDescription,
+  protected query<ResultEntity>(
+    queryDescription: QueryDescription<E, ResultEntity>,
     options?: SystemQueryOptions
-  ): Query {
+  ): Query<ResultEntity> {
     return this.world.systemManager.createSystemQuery(
       this,
       queryDescription,
@@ -156,19 +148,19 @@ export abstract class System {
    * Shortcut for creating a query for a singleton component.
    * @param componentDefinition the singleton component
    */
-  protected singleton<T extends ComponentDefinition<unknown>>(
-    componentDefinition: T,
+  protected singleton<C extends keyof E>(
+    component: C,
     options?: SystemQueryOptions
-  ): ComponentInstance<T> | undefined {
+  ): E[C] | undefined {
     const placeholder: SingletonQueryPlaceholder = {
       __internal: {
         systemSingletonPlaceholder: true,
-        componentDefinition,
+        component: component as string,
         options,
       },
     }
 
-    return placeholder as ComponentInstance<T> | undefined
+    return placeholder as E[C] | undefined
   }
 
   /**
@@ -202,7 +194,7 @@ type AttachedSystemPlaceholder = {
 type SingletonQueryPlaceholder = {
   __internal: {
     systemSingletonPlaceholder: true
-    componentDefinition: ComponentDefinition<unknown>
+    component: string
     options?: SystemQueryOptions
   }
 }
@@ -211,12 +203,9 @@ type SingletonQueryPlaceholder = {
  * @ignore internal
  */
 export class SystemManager {
-  /**
-   * Systems in the System Manager
-   */
   systems: Map<SystemClass, System> = new Map()
 
-  sortedSystems: System[] = []
+  private sortedSystems: System[] = []
 
   private systemCounter = 0
 
@@ -231,9 +220,6 @@ export class SystemManager {
     this.world = world
   }
 
-  /**
-   * Initialises the system manager
-   */
   init(): void {
     for (const system of this.systems.values()) {
       this.initSystem(system)
@@ -242,19 +228,31 @@ export class SystemManager {
     this.sortSystems()
   }
 
-  /**
-   * Destroys all systems
-   */
+  update(delta: number, time: number): void {
+    for (let i = 0; i < this.sortedSystems.length; i++) {
+      const system = this.sortedSystems[i]
+
+      if (!system.enabled) {
+        continue
+      }
+
+      if (
+        system.__internal.requiredQueries.length > 0 &&
+        system.__internal.requiredQueries.some((q) => q.entities.length === 0)
+      ) {
+        continue
+      }
+
+      system.onUpdate(delta, time)
+    }
+  }
+
   destroy(): void {
     for (const system of this.systems.values()) {
       system.onDestroy()
     }
   }
 
-  /**
-   * Adds a system to the system manager
-   * @param Clazz the system class to add
-   */
   registerSystem(Clazz: SystemClass, attributes?: SystemAttributes): void {
     if (this.systems.has(Clazz)) {
       throw new Error(`System "${Clazz.name}" has already been registered`)
@@ -290,10 +288,6 @@ export class SystemManager {
     }
   }
 
-  /**
-   * Unregisters a System from the SystemManager
-   * @param clazz the System to remove
-   */
   unregisterSystem(clazz: SystemClass): void {
     const system = this.systems.get(clazz)
     if (!system) {
@@ -305,8 +299,8 @@ export class SystemManager {
       (s) => s.__internal.class !== clazz
     )
 
-    system.__internal.queries.forEach((query: Query) => {
-      this.world.queryManager.removeQuery(query, system)
+    system.__internal.queries.forEach((query: Query<unknown>) => {
+      this.world.destroyQuery(query, system)
     })
     system.__internal.requiredQueries = []
 
@@ -315,24 +309,15 @@ export class SystemManager {
     this.updateAllSystemAttachments()
   }
 
-  /**
-   * Creates a query for a system
-   * @param system the system to create the query for
-   * @param queryDescription the query to create
-   * @param options the options for the query
-   */
-  createSystemQuery(
-    system: System,
-    queryDescription: QueryDescription,
+  createSystemQuery<E extends {}, ResultEntity>(
+    system: System<E>,
+    queryDescription: QueryDescription<E, ResultEntity>,
     options?: SystemQueryOptions
-  ): Query {
-    const query = this.world.queryManager.createQuery(queryDescription, system)
-
-    system.__internal.queries.add(query)
+  ): Query<ResultEntity> {
+    const query = this.world.query(queryDescription, { owner: system })
 
     if (options?.required) {
       system.__internal.requiredQueries.push(query)
-      system.__internal.hasRequiredQueries = true
     }
 
     return query
@@ -350,17 +335,16 @@ export class SystemManager {
 
       if (field?.__internal?.systemSingletonPlaceholder) {
         const {
-          __internal: { componentDefinition, options },
+          __internal: { component, options },
         } = field as SingletonQueryPlaceholder
 
-        const query = this.createSystemQuery(
-          system,
-          [componentDefinition],
-          options
-        )
+        const queryDescription: QueryDescription<any, any> = (q) =>
+          q.has(component)
+
+        const query = this.createSystemQuery(system, queryDescription, options)
 
         const onQueryChange = () => {
-          _system[fieldName] = query.first?.get(componentDefinition)
+          _system[fieldName] = query.first?.[component]
         }
 
         query.onEntityAdded.add(onQueryChange)

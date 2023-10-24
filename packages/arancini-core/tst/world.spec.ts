@@ -1,42 +1,37 @@
-import { beforeEach, describe, expect, test } from 'vitest'
-import { System, World } from '../src'
+import { describe, expect, it } from 'vitest'
+import { World } from '../src/world'
+
+type Entity = {
+  foo?: string
+  bar?: number
+}
 
 describe('World', () => {
-  let world: World
+  it('supports registering components after init', () => {
+    const world = new World<Entity>()
 
-  beforeEach(() => {
-    world = new World()
     world.init()
+
+    const entityOne = {}
+    const entityTwo = {}
+
+    world.create(entityOne)
+    world.create(entityTwo)
+
+    world.registerComponents(['foo', 'bar'])
   })
 
-  test('getSystem', () => {
-    class TestSystem extends System {}
+  it('supports computing an id for an entity, then retrieving an entity by id later', () => {
+    const world = new World<Entity>()
 
-    world.registerSystem(TestSystem)
+    world.init()
 
-    const testSystem = world.getSystem(TestSystem)
-    expect(testSystem?.__internal.class).toBe(TestSystem)
-  })
+    const entityOne = {}
 
-  test('getSystems', () => {
-    class TestSystem extends System {}
+    world.create(entityOne)
 
-    world.registerSystem(TestSystem)
+    const id = world.id(entityOne)!
 
-    const systems = world.getSystems()
-    expect(systems.length).toBe(1)
-    expect(systems[0].__internal.class).toBe(TestSystem)
-  })
-
-  test('reset', () => {
-    world.create()
-
-    expect(world.initialised).toBe(true)
-    expect(world.entities.length).toBe(1)
-
-    world.reset()
-
-    expect(world.initialised).toBe(false)
-    expect(world.entities.length).toBe(0)
+    expect(world.entity(id)).toBe(entityOne)
   })
 })

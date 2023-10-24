@@ -16,10 +16,17 @@ To get started, use `createECS` to get glue components and hooks scoped to a giv
 import { World } from '@arancini/core'
 import { createECS } from '@arancini/react'
 
-const world = new World()
+type Entity = {
+  health: number
+  position: [number, number]
+}
 
-world.registerComponent(MyComponent)
+const world = new World<Entity>({
+  components: ['position', 'health'],
+})
+
 world.registerSystem(MySystem)
+
 world.init()
 
 const ECS = createECS(world)
@@ -34,28 +41,10 @@ import { useFrame } from '@react-three/fiber'
 
 const Stepper = () => {
   useFrame((_, delta) => {
-    ECS.update(delta)
+    ECS.step(delta)
   })
 
   return null
-}
-```
-
-If arancini needs to be integrated into an existing game loop, instead of calling `update`, you can decide when to update particular systems.
-
-```tsx
-const world = new World()
-const ECS = createECS(world)
-
-const Example = () => {
-  useFrame(({ clock: { elapsedTime }, delta) => {
-    // update all systems
-    this.systemManager.update(delta, elapsedTime)
-
-    // or update a particular system
-    const exampleSystem = world.getSystem(ExampleSystem)
-    exampleSystem.update(delta, elapsedTime)
-  })
 }
 ```
 
@@ -64,19 +53,9 @@ const Example = () => {
 `<Entity />` can be used to declaratively create entities, and `<Component />` can be used to add components to an entity.
 
 ```tsx
-class PositionComponent extends Component {
-  x!: number
-  y!: number
-
-  construct(x: number, y: number) {
-    this.x = x
-    this.y = y
-  }
-}
-
 const Example = () => (
   <ECS.Entity>
-    <ECS.Component type={PositionComponent} args={[0, 0]} />
+    <ECS.Component name="health" data={100} />
   </ECS.Entity>
 )
 ```
@@ -89,7 +68,7 @@ const entity = world.create.entity()
 const Example = () => (
   <ECS.Entity entity={entity}>
     {/* this will add the Position component to the existing entity */}
-    <ECS.Component type={PositionComponent} args={[0, 0]} />
+    <ECS.Component name="position" data={[0, 0]} />
   </ECS.Entity>
 )
 ```
@@ -105,7 +84,7 @@ const SimpleExample = () => (
 
 const AddComponentToEntities = () => (
   <ECS.Entities entities={[entity1, entity2]}>
-    <ECS.Component type={PositionComponent} args={[0, 0]} />
+    <ECS.Component name="position" data={[0, 0]} />
   </ECS.Entities>
 )
 
@@ -126,7 +105,7 @@ The `useQuery` hook queries the world for entities with given components and wil
 
 ```tsx
 const Example = () => {
-  const entities = ECS.useQuery([PositionComponent])
+  const entities = ECS.useQuery((e) => e.with('health'))
 
   // ...
 }
@@ -141,7 +120,7 @@ const world = new World()
 const ECS = createECS(world)
 
 const SimpleExample = () => (
-  <ECS.QueryEntities query={[ExampleTagComponent]}>
+  <ECS.QueryEntities query={(e) => e.with('exampleTag')}>
     <mesh>
       <boxGeometry args={[1, 1, 1]} />
       <meshNormalMaterial />
@@ -150,7 +129,7 @@ const SimpleExample = () => (
 )
 
 const RenderProps = () => (
-  <ECS.QueryEntities query={[ExampleTagComponent]}>
+  <ECS.QueryEntities query={(e) => e.with('exampleTag')}>
     {(entity) => {
       return (
         <mesh>
@@ -169,10 +148,10 @@ const RenderProps = () => (
 )
 
 const EnhanceExistingEntities = () => (
-  <ECS.QueryEntities query={[ExampleTagComponent]}>
+  <ECS.QueryEntities query={(e) => e.with('exampleTag')}>
     {(entity) => {
       return (
-        <ECS.Component type={Object3DComponent}>
+        <ECS.Component name="object3D">
           <mesh>
             <boxGeometry
               position={[
@@ -192,24 +171,19 @@ const EnhanceExistingEntities = () => (
 
 ### Capturing React Component refs
 
-If a child is passed to `Component`, it will be captured and passed to the component's `construct` method. This is useful for keeping ECS code decoupled from React code.
+If a child is passed to `Component`, it will be captured and used as the value of the component. This is useful for keeping ECS code decoupled from React code.
 
 ```tsx
 const world = new A.World()
 const ECS = createECS(world)
 
-class CanvasElementComponent extends A.Component {
-  canvasElement!: HTMLCanvasElement
-
-  construct(canvasElement: HTMLCanvasElement) {
-    this.canvasElement = canvasElement
-  }
-}
-
 const Example = () => (
   <ECS.Entity>
-    <ECS.Component type={CanvasElementComponent}>
-      <canvas />
+    <ECS.Component name="object3D">
+      <mesh>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshNormalMaterial />
+      </mesh>
     </ECS.Component>
   </ECS.Entity>
 )
@@ -226,16 +200,6 @@ import { Component } from '@arancini/core'
 import { createECS } from '@arancini/react'
 
 const ECS = createECS()
-
-class Position extends Component {
-  x!: number
-  y!: number
-
-  construct(x: number, y: number) {
-    this.x = x
-    this.y = y
-  }
-}
 
 const Example = () => {
   const entity = useCurrentEntity()
