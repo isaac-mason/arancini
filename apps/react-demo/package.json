@@ -12,7 +12,7 @@
     "@react-three/drei": "^9.81.0",
     "@react-three/fiber": "^8.13.7",
     "@types/three": "^0.155.0",
-    "arancini": "^3.2.0",
+    "arancini": "^3.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "three": "^0.156.1"
