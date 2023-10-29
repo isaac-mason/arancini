@@ -1,6 +1,6 @@
 # arancini
 
-Arancini is an object based Entity Component System.
+Arancini is a JavaScript object based Entity Component System.
 
 ```
 > npm i arancini
@@ -12,7 +12,10 @@ Arancini is an object based Entity Component System.
 - 🍃 ‎ Zero dependencies
 - 🖇 ‎ [Easy integration with React](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-react)
 
+
 ## Introduction
+
+Arancini is an Entity Component System (ECS) library for JavaScript. It aims to strike a balance between ease of use and performance.
 
 In arancini, entities are regular javascript objects, and components are properties on those objects. You can use arancini to structure demanding applications such as games and simulations.
 
@@ -24,7 +27,7 @@ TL;DR - Entity Component Systems are a data-oriented approach to structuring app
 
 ### 🌎 Creating a World
 
-A world represents your game or simulation. It maintains the entities, components, queries and systems in the ECS.
+A world represents your game or simulation. It contains entities, updates queries, and runs systems.
 
 ```ts
 import { World } from "arancini";
@@ -39,7 +42,6 @@ type Entity = {
 
 // create a world
 const world = new World<Entity>({
-  // components that can be added to entities
   components: ["position", "health", "velocity", "inventory"],
 });
 
@@ -47,11 +49,14 @@ const world = new World<Entity>({
 world.init();
 ```
 
+> **Note:**
+> Components must be registered before they can be used. You can register components in an existing world using `world.registerComponents`, but doing so after initialising the world will cause a small performance hit.
+
 ### 🍱 Creating Entities
 
 In arancini, entities are regular objects, and components are properties on those objects.
 
-You can use `world.create` to create an entity from any object. This registers the entity with the world, and adds any components that are defined on the object.
+You can use `world.create` to create an entity from any object. This adds the entity to the world, and adds any components that are defined on the object.
 
 ```ts
 const playerEntity = { position: { x: 0, y: 0 } };
@@ -90,30 +95,31 @@ world.update(playerEntity, (e) => {
 
 ### 🗑 Destroying Entities
 
-To destroy an entity, use `world.destroy`. Note that destroying an entity does not remove any properties/components from the entity object.
+To destroy an entity, use `world.destroy`.
 
 ```ts
 world.destroy(playerEntity);
 ```
 
+> **Note:** Destroying an entity does not remove any properties/components from the entity object, it just removes the entity from the world and all queries.
+
 ### 🔎 Querying Entities
 
-You can query entities based on what components they have with `all`, `one`, and `none` filters.
+You can query entities based on their components with `world.query`. Queries are reactive, they will update as entities in the world change.
 
 ```ts
 const monsters = world.query((q) => q.all("health", "position", "velocity"));
-
-const updateMonsters = () => {
-  for (const monster of monsters) {
-    monster.position.x += monster.velocity.x;
-    monster.position.y += monster.velocity.y;
-  }
-};
 ```
 
-Arancini also supports more advanced queries. The query builder has some aliases for the main three conditions and noop grammar to make queries easier to read.
+> **Note:** Arancini dedupe queries with the same filters, so you can create multiple of the same query without performance penalty!
+
+Arancini supports `all`, `any`, and `none` filters. The query builder has some aliases for the main three conditions and noop grammar to make queries easier to read.
 
 ```ts
+const monsters = world.query((q) =>
+  q.all("health", "position").any("skeleton", "zombie").none("dead"),
+);
+
 const monsters = world.query((entities) =>
   entities
     .with("health", "position")
@@ -122,31 +128,31 @@ const monsters = world.query((entities) =>
 );
 ```
 
-Queries have a `Symbol.iterator` method, so you can iterate over them with a `for...of` loop. This will iterate over entities in reverse order, which must be done to avoid issues when making changes that will remove entities from queries.
+You can iterate over queries using a `for...of` loop (via `Symbol.iterator`). This will iterate over entities in reverse order, which must be done to avoid issues when making changes that will remove entities from queries. You can also use `query.entities` directly.
 
 ```ts
-const query = world.query((e) => e.has("position"));
+const monsters = world.query((q) => q.all("health", "position", "velocity"));
 
-// iteratee over entities in reverse order
-for (const entity of query) {
-  // ...
-}
+const updateMonsters = () => {
+  /* iterates over entities in reverse order */
+  for (const monster of monsters) {
+    if (monster.health <= 0) {
+      world.destroy(monster);
+    }
 
-// regular iteration
-for (const entity of query.entities) {
-  // ...
-}
+    monster.position.x += monster.velocity.x;
+    monster.position.y += monster.velocity.y;
+  }
+};
+
+console.log(monsters.entities);
 ```
 
-Arancini attempts to normalise queries with equivelant filters, so you can generally create multiple of the same query without performance penalty.
-
-### Advanced
-
-#### Reactive Query events
+### 📡 Query Events
 
 Queries emit events when entities are added or removed.
 
-These events will be emitted after internal structures are updated to reflect the change, but before components are removed from the entity object.
+These events are be emitted after internal structures are updated to reflect the change, but before destructive changes are made to entities, e.g. removing components.
 
 ```ts
 const query = world.query((e) => e.has("position"));
@@ -162,9 +168,25 @@ query.onEntityRemoved.add(handler);
 query.onEntityRemoved.remove(handler);
 ```
 
+### 👀 Ad-hoc Queries
+
+You can use `world.filter` and `world.find` to get ad-hoc query results.
+
+This is useful for cases where you want to get results infrequently, without the cost of evaluating a reactive query as the world changes.
+
+```ts
+const monsters = world.filter((e) => e.has("health", "position", "velocity"));
+
+const player = world.find((e) => e.has("player"));
+```
+
 ### 🧠 Systems
 
-Arancini has built-in support for systems, but there is nothing special about them. You can write your own "System" logic if you prefer. Arancini Systems just offer a convenient way of organising logic.
+Systems contain logic that operate on entities.
+
+In arancini, systems are classes that extend `System`. Systems are registered with a world, and are updated when `world.step` is called.
+
+While arancini has built-in support for systems, it's worth noting that there's nothing special about systems. You can write your own "System" logic using queries directly. Arancini Systems just offer a convenient way of organising logic.
 
 ```ts
 class MovementSystem extends System<Entity> {
@@ -181,12 +203,11 @@ class MovementSystem extends System<Entity> {
   }
 
   onInit() {
-    // called when the world is initialised,
-    // or when the system is registered in an initialised world
+    // Called when the world is initialised, or when the system is registered in an initialised world
   }
 
   onDestroy() {
-    // called when the world is destroyed or the system is unregistered
+    // Called when the world is destroyed or the system is unregistered
   }
 }
 
@@ -197,7 +218,7 @@ world.registerSystem(ExampleSystem);
 world.step(1 / 60);
 ```
 
-#### System Execution Order
+#### System priority
 
 Systems can be registered with a priority. The order systems run in is first determined by priority, then by the order systems were registered.
 
@@ -206,15 +227,9 @@ const priority = 10;
 world.registerSystem(MovementSystem, priority);
 ```
 
-### Advanced
-
-#### Registering components after creating the world
-
-Components must be registered with the world before they can be used. You can register components after the world is initialised with `world.registerComponents`, but doing so will cause a small performance hit as internal data structures need to be updated.
-
 #### Required system queries
 
-System queries can be marked as 'required', meaning that the system will only be updated if the query has at least one result.
+System queries can be marked as 'required', which will cause `onUpdate` to only be called if the query has at least one result.
 
 ```ts
 class ExampleSystem extends System {
@@ -226,11 +241,11 @@ class ExampleSystem extends System {
 }
 ```
 
-#### System Singleton Queries
+#### Singleton Queries
 
-Singleton components queries can be defined for cases where systems need to access shared data, like a camera or player component.
+The `singleton` method creates a query for a single component, and sets the property to the given component from the first matching entity.
 
-The `singleton` method creates a query for a single component, and sets the property on the system to the given component from the first matching entity.
+Singletons are useful for accessing components that are expected to exist on a single entity, such as a camera, or a player in a single player game.
 
 ```ts
 class ExampleSystem extends System {
@@ -246,7 +261,7 @@ class ExampleSystem extends System {
 
 #### Attaching systems to other systems
 
-Systems can be attached to other systems with this.attach. This is useful for sharing logic or system state that doesn't belong in a component.
+Systems can be attached to other systems with `this.attach`. This is useful for sharing logic or system state that doesn't belong in a component.
 
 ```ts
 class ExampleSystem extends System {

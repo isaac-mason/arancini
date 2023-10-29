@@ -8,7 +8,7 @@ React glue for the [arancini](https://github.com/isaac-mason/arancini/tree/main/
 > npm install @arancini/react
 ```
 
-## Usage
+## Creating the React glue
 
 To get started, use `createECS` to get glue components and hooks scoped to a given arancini world. Because the react glue is scoped, libraries can use @arancini/react without worrying about context conflicts.
 
@@ -16,12 +16,12 @@ To get started, use `createECS` to get glue components and hooks scoped to a giv
 import { World } from '@arancini/core'
 import { createECS } from '@arancini/react'
 
-type Entity = {
-  health: number
-  position: [number, number]
+type EntityType = {
+  health?: number
+  position?: [number, number]
 }
 
-const world = new World<Entity>({
+const world = new World<EntityType>({
   components: ['position', 'health'],
 })
 
@@ -32,25 +32,23 @@ world.init()
 const ECS = createECS(world)
 ```
 
-### Updating Systems
+## Entities and Components
 
-`@arancini/react` does not automatically update systems for you. If you are using arancini with `@react-three/fiber`, you can use the `useFrame` hook to update systems in the world.
+`<Entity />` can be used to declaratively create entities with components.
 
 ```tsx
-import { useFrame } from '@react-three/fiber'
-
-const Stepper = () => {
-  useFrame((_, delta) => {
-    ECS.step(delta)
-  })
-
-  return null
-}
+const Example = () => <ECS.Entity health={100} position={[0, 0]} />
 ```
 
-### Entities and Components
+You can also pass an existing entity to `<Entity />`.
 
-`<Entity />` can be used to declaratively create entities, and `<Component />` can be used to add components to an entity.
+```tsx
+const entity = world.create({ position: [0, 0] })
+
+const Example = () => <ECS.Entity entity={entity} health={100} />
+```
+
+`<Component />` can be used to add components to an entity.
 
 ```tsx
 const Example = () => (
@@ -60,26 +58,33 @@ const Example = () => (
 )
 ```
 
-You can also pass an existing entity to `<Entity />`.
+### Capturing React Component refs
+
+If a child is passed to `Component`, it will be captured and used as the value of the component. This is useful for keeping ECS code decoupled from React code.
 
 ```tsx
-const entity = world.create.entity()
+const world = new A.World()
+const ECS = createECS(world)
 
 const Example = () => (
-  <ECS.Entity entity={entity}>
-    {/* this will add the Position component to the existing entity */}
-    <ECS.Component name="position" data={[0, 0]} />
+  <ECS.Entity>
+    <ECS.Component name="object3D">
+      <mesh>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshNormalMaterial />
+      </mesh>
+    </ECS.Component>
   </ECS.Entity>
 )
 ```
+
+### Rendering multiple entities
 
 `@arancini/react` also provides an `<Entities />` component that can be used to render a list of entities or add components to existing entities. `<Entities />` also supports [render props](https://reactjs.org/docs/render-props.html).
 
 ```tsx
 const SimpleExample = () => (
-  <ECS.Entities entities={[entity1, entity2]}>
-    {/* ... */}
-  </ECS.Entities>
+  <ECS.Entities entities={[entity1, entity2]}>{/* ... */}</ECS.Entities>
 )
 
 const AddComponentToEntities = () => (
@@ -97,9 +102,9 @@ const RenderProps = () => (
 )
 ```
 
-### Querying the world
+## Querying the world
 
-#### `useQuery`
+### `useQuery`
 
 The `useQuery` hook queries the world for entities with given components and will re-render when the query results change.
 
@@ -111,7 +116,7 @@ const Example = () => {
 }
 ```
 
-#### `QueryEntities`
+### `QueryEntities`
 
 `QueryEntities` can be used to render entities, as well as enhance existing ones. It will re-render whenever the query results change. It also supports [render props](https://reactjs.org/docs/render-props.html).
 
@@ -169,24 +174,20 @@ const EnhanceExistingEntities = () => (
 )
 ```
 
-### Capturing React Component refs
+## Updating Systems
 
-If a child is passed to `Component`, it will be captured and used as the value of the component. This is useful for keeping ECS code decoupled from React code.
+`@arancini/react` does not automatically update systems for you. If you are using arancini with `@react-three/fiber`, you can use the `useFrame` hook to update systems in the world.
 
 ```tsx
-const world = new A.World()
-const ECS = createECS(world)
+import { useFrame } from '@react-three/fiber'
 
-const Example = () => (
-  <ECS.Entity>
-    <ECS.Component name="object3D">
-      <mesh>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshNormalMaterial />
-      </mesh>
-    </ECS.Component>
-  </ECS.Entity>
-)
+const Stepper = () => {
+  useFrame((_, delta) => {
+    ECS.step(delta)
+  })
+
+  return null
+}
 ```
 
 ## Advanced Usage
