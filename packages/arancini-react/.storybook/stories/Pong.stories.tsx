@@ -14,10 +14,10 @@ type EntityType = {
   object3D?: THREE.Object3D
   position?: THREE.Vector2Tuple
   velocity?: THREE.Vector2Tuple
-  isPlayer?: boolean
-  isAi?: boolean
   ball?: { size: number; speed: number }
   paddle?: { height: number; width: number; speed: number }
+  player?: boolean
+  ai?: boolean
   input?: {
     up: boolean
     down: boolean
@@ -33,8 +33,8 @@ const world = new World<EntityType>({
     'object3D',
     'position',
     'velocity',
-    'isPlayer',
-    'isAi',
+    'player',
+    'ai',
     'ball',
     'paddle',
     'input',
@@ -48,8 +48,8 @@ const { Entity, Component, QueryEntities } = createECS(world)
 
 const queries = {
   paddles: world.query((e) => e.has('paddle', 'input', 'position', 'velocity')),
-  aiPaddles: world.query((e) => e.has('paddle', 'position', 'input', 'isAi')),
-  ball: world.query((e) => e.has('ball', 'position', 'velocity')),
+  ai: world.query((e) => e.has('ai', 'paddle', 'position', 'input')),
+  balls: world.query((e) => e.has('ball', 'position', 'velocity')),
   score: world.query((e) => e.has('score')),
 }
 
@@ -60,22 +60,42 @@ const WIDTH = 20
 
 const INITIAL_BALL_SPEED = 4
 
+/* naive AI that moves the paddle towards the y position of the closest ball moving towards the paddle */
 const aiSystem = () => {
-  const ball = queries.ball.first!
-
-  for (const paddle of queries.aiPaddles) {
+  for (const paddle of queries.ai) {
     const { input } = paddle
 
-    const [, ballY] = ball.position
+    const [paddleX, paddleY] = paddle.position
 
-    const [, paddleY] = paddle.position
+    const balls = [...queries.balls.entities].sort((a, b) => {
+      const { position: aPosition, velocity: aVelocity } = a
+      const { position: bPosition, velocity: bVelocity } = b
+
+      const aMovingTowardsPaddle =
+        (aVelocity[0] > 0 && aPosition[0] < paddleX) ||
+        (aVelocity[0] < 0 && aPosition[0] > paddleX)
+
+      const bMovingTowardsPaddle =
+        (bVelocity[0] > 0 && bPosition[0] < paddleX) ||
+        (bVelocity[0] < 0 && bPosition[0] > paddleX)
+
+      if (aMovingTowardsPaddle === bMovingTowardsPaddle) {
+        const aDistance = Math.abs(aPosition[0] - paddleX)
+        const bDistance = Math.abs(bPosition[0] - paddleX)
+        return aDistance - bDistance
+      } else {
+        return aMovingTowardsPaddle ? -1 : 1
+      }
+    })
+
+    const chosenBallYPosition = balls[0].position[1]
 
     const graceBuffer = 0.5
 
-    if (ballY > paddleY + graceBuffer) {
+    if (chosenBallYPosition > paddleY + graceBuffer) {
       input.up = true
       input.down = false
-    } else if (ballY < paddleY - graceBuffer) {
+    } else if (chosenBallYPosition < paddleY - graceBuffer) {
       input.up = false
       input.down = true
     } else {
@@ -118,97 +138,95 @@ const paddleSystem = (delta: number) => {
 }
 
 const ballSystem = (delta: number) => {
-  const ball = queries.ball.first
+  for (const ball of queries.balls) {
+    const {
+      position: ballPosition,
+      velocity: ballVelocity,
+      ball: ballConfig,
+    } = ball
 
-  if (!ball) return
+    // move ball
+    const magnitude = Math.sqrt(ballVelocity[0] ** 2 + ballVelocity[1] ** 2)
 
-  const {
-    position: ballPosition,
-    velocity: ballVelocity,
-    ball: ballConfig,
-  } = ball
+    let ballDx = (ballVelocity[0] /= magnitude)
+    let ballDy = (ballVelocity[1] /= magnitude)
 
-  // move ball
-  const magnitude = Math.sqrt(ballVelocity[0] ** 2 + ballVelocity[1] ** 2)
+    ballDx *= ballConfig.speed
+    ballDy *= ballConfig.speed
 
-  let ballDx = (ballVelocity[0] /= magnitude)
-  let ballDy = (ballVelocity[1] /= magnitude)
+    ballPosition[0] += ballDx * delta
+    ballPosition[1] += ballDy * delta
 
-  ballDx *= ballConfig.speed
-  ballDy *= ballConfig.speed
+    // bounce off top/bottom
+    if (ballPosition[1] > TOP - ballConfig.size / 2) {
+      ballVelocity[1] *= -1
+      ballPosition[1] = TOP - ballConfig.size / 2
+    } else if (ballPosition[1] < BOTTOM + ballConfig.size / 2) {
+      ballVelocity[1] *= -1
+      ballPosition[1] = BOTTOM + ballConfig.size / 2
+    }
 
-  ballPosition[0] += ballDx * delta
-  ballPosition[1] += ballDy * delta
+    // bounce off paddles
+    for (const entity of queries.paddles) {
+      const { position: paddlePosition, paddle: paddleConfig } = entity
 
-  // bounce off top/bottom
-  if (ballPosition[1] > TOP - ballConfig.size / 2) {
-    ballVelocity[1] *= -1
-    ballPosition[1] = TOP - ballConfig.size / 2
-  } else if (ballPosition[1] < BOTTOM + ballConfig.size / 2) {
-    ballVelocity[1] *= -1
-    ballPosition[1] = BOTTOM + ballConfig.size / 2
-  }
+      // check if the ball overlaps the paddle
+      if (
+        ballPosition[0] - ballConfig.size / 2 <=
+          paddlePosition[0] + paddleConfig.width / 2 &&
+        ballPosition[0] + ballConfig.size / 2 >=
+          paddlePosition[0] - paddleConfig.width / 2 &&
+        ballPosition[1] - ballConfig.size / 2 <=
+          paddlePosition[1] + paddleConfig.height / 2 &&
+        ballPosition[1] + ballConfig.size / 2 >=
+          paddlePosition[1] - paddleConfig.height / 2
+      ) {
+        // bounce off paddle
+        ballVelocity[0] *= -1
 
-  // bounce off paddles
-  for (const entity of queries.paddles) {
-    const { position: paddlePosition, paddle: paddleConfig } = entity
+        // move the ball out of the paddle
+        ballPosition[0] =
+          paddlePosition[0] +
+          Math.sign(ballVelocity[0]) *
+            (paddleConfig.width / 2 + ballConfig.size / 2)
 
-    // check if the ball overlaps the paddle
-    if (
-      ballPosition[0] - ballConfig.size / 2 <=
-        paddlePosition[0] + paddleConfig.width / 2 &&
-      ballPosition[0] + ballConfig.size / 2 >=
-        paddlePosition[0] - paddleConfig.width / 2 &&
-      ballPosition[1] - ballConfig.size / 2 <=
-        paddlePosition[1] + paddleConfig.height / 2 &&
-      ballPosition[1] + ballConfig.size / 2 >=
-        paddlePosition[1] - paddleConfig.height / 2
-    ) {
-      // bounce off paddle
-      ballVelocity[0] *= -1
+        // set the ball's y velocity based on where it hit the paddle
+        ballVelocity[1] =
+          (ballPosition[1] - paddlePosition[1]) / ballConfig.size / 2
 
-      // move the ball out of the paddle
-      ballPosition[0] =
-        paddlePosition[0] +
-        Math.sign(ballVelocity[0]) *
-          (paddleConfig.width / 2 + ballConfig.size / 2)
-
-      // set the ball's y velocity based on where it hit the paddle
-      ballVelocity[1] =
-        (ballPosition[1] - paddlePosition[1]) / ballConfig.size / 2
-
-      // increase speed
-      if (ballConfig.speed < 20) {
-        ballConfig.speed *= 1.2
+        // increase speed
+        if (ballConfig.speed < 20) {
+          ballConfig.speed *= 1.2
+        }
       }
     }
-  }
 
-  // check if the ball is out of bounds, and if so, reset the ball and update the score
-  const { score } = queries.score.first!
+    // check if the ball is out of bounds, and if so, reset the ball and update the score
+    const { score } = queries.score.first!
 
-  if (ballPosition[0] < -WIDTH / 2) {
-    // player lost
-    score.set((s) => ({ ...s, right: s.right + 1 }))
+    if (ballPosition[0] < -WIDTH / 2) {
+      // player lost
+      score.set((s) => ({ ...s, right: s.right + 1 }))
 
-    ballConfig.speed = INITIAL_BALL_SPEED
+      ballConfig.speed = INITIAL_BALL_SPEED
 
-    ballPosition[0] = 0
-    ballPosition[1] = 0
+      ballPosition[0] = 0
+      ballPosition[1] = 0
 
-    ballVelocity[0] = -1
-    ballVelocity[1] = -1
-  } else if (ballPosition[0] > WIDTH / 2) {
-    // ai lost
-    score.set((s) => ({ ...s, left: s.left + 1 }))
+      ballVelocity[0] = -1
+      ballVelocity[1] = -1
+    } else if (ballPosition[0] > WIDTH / 2) {
+      // ai lost
+      score.set((s) => ({ ...s, left: s.left + 1 }))
 
-    ballConfig.speed = INITIAL_BALL_SPEED
+      ballConfig.speed = INITIAL_BALL_SPEED
 
-    ballPosition[0] = 0
-    ballPosition[1] = 0
+      ballPosition[0] = 0
+      ballPosition[1] = 0
 
-    ballVelocity[0] = 1
-    ballVelocity[1] = 1
+      ballVelocity[0] = 1
+      ballVelocity[1] = 1
+    }
   }
 }
 
@@ -222,7 +240,7 @@ const threeSystem = () => {
   }
 }
 
-const Player = () => {
+const PlayerPaddle = () => {
   const playerInput = useMemo(() => ({ up: false, down: false }), [])
 
   useEffect(() => {
@@ -256,8 +274,8 @@ const Player = () => {
 
   return (
     <Entity
+      player
       paddle={{ height: 3, width: 1, speed: 1 }}
-      isPlayer
       position={[-WIDTH / 2, 0]}
       velocity={[0, 0]}
       input={playerInput}
@@ -265,26 +283,42 @@ const Player = () => {
   )
 }
 
-const AiOpponent = () => (
+const AiPaddle = () => (
   <Entity
+    ai
     paddle={{ height: 3, width: 1, speed: 1 }}
-    isAi
     position={[WIDTH / 2, 0]}
     velocity={[0, 0]}
     input={{ up: false, down: false }}
   />
 )
 
-const Ball = () => (
-  <Entity ball={{ size: 1, speed: 5 }} position={[0, 0]} velocity={[-1, -1]}>
-    <Component name="object3D">
-      <mesh>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshNormalMaterial />
-      </mesh>
-    </Component>
-  </Entity>
-)
+const Balls = () => {
+  const balls: { velocity: THREE.Vector2Tuple }[] = [
+    { velocity: [-1, -1] },
+    { velocity: [1, 1] },
+  ]
+
+  return (
+    <>
+      {balls.map(({ velocity }, index) => (
+        <Entity
+          key={index}
+          ball={{ size: 1, speed: 5 }}
+          position={[0, 0]}
+          velocity={velocity}
+        >
+          <Component name="object3D">
+            <mesh>
+              <boxGeometry args={[1, 1, 1]} />
+              <meshNormalMaterial />
+            </mesh>
+          </Component>
+        </Entity>
+      ))}
+    </>
+  )
+}
 
 const Paddles = () => (
   <QueryEntities query={(e) => e.has('paddle')}>
@@ -330,9 +364,11 @@ const App = () => {
 
   return (
     <>
-      <Player />
-      <AiOpponent />
-      <Ball />
+      <PlayerPaddle />
+
+      <AiPaddle />
+
+      <Balls />
 
       <Paddles />
 
@@ -341,6 +377,10 @@ const App = () => {
       <Bounds fit observe margin={1.2}>
         <PlayArea />
       </Bounds>
+
+      <Text position={[0, BOTTOM - 1, 0.5]} color="#fff" fontSize={0.8}>
+        Use the up and down arrow keys or W and S to move!
+      </Text>
 
       <PerspectiveCamera makeDefault position={[0, 0, 20]} />
     </>
