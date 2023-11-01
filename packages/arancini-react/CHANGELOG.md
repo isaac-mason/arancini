@@ -4,7 +4,7 @@
 
 ### Patch Changes
 
-- 84657c6: fix: change Entity and Component return types to ReactElement, not ReactNode
+- 84657c6: fix: Entity and Component return types
   - @arancini/core@4.0.1
 
 ## 4.0.0
