@@ -1,5 +1,13 @@
 # @arancini/core
 
+## 4.0.0
+
+### Major Changes
+
+- 324ecc1: Arancini v4 is a near-complete rewrite.
+
+  Entities are now regular objects, and components are properties of entity objects.
+
 ## 3.2.0
 
 ### Minor Changes

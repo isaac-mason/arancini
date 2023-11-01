@@ -1,5 +1,19 @@
 # arancini
 
+## 4.0.0
+
+### Major Changes
+
+- 324ecc1: Arancini v4 is a near-complete rewrite.
+
+  Entities are now regular objects, and components are properties of entity objects.
+
+### Patch Changes
+
+- Updated dependencies [324ecc1]
+  - @arancini/react@4.0.0
+  - @arancini/core@4.0.0
+
 ## 3.2.0
 
 ### Minor Changes
