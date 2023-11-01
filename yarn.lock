@@ -109,7 +109,7 @@ __metadata:
     eslint-plugin-storybook: ^0.6.15
     jsdom: ^22.1.0
     leva: ^0.9.35
-    p2-es: ^1.2.2
+    p2-es: ^1.2.3
     prop-types: ^15.8.1
     react: ^18.2.0
     react-dom: ^18.2.0
@@ -12531,12 +12531,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"p2-es@npm:^1.2.2":
-  version: 1.2.2
-  resolution: "p2-es@npm:1.2.2"
+"p2-es@npm:^1.2.3":
+  version: 1.2.3
+  resolution: "p2-es@npm:1.2.3"
   dependencies:
     poly-decomp-es: 0.4.2
-  checksum: c86e0f4e6561c0e8c13d53daaa8943bd1885bb7dc7d4c3d8cd370d5ed9106e16f333e33241721fe68b962fb67540e90f01288349eeabed54d8bcd8ee10b5474f
+  checksum: d467360855767a4ec453daa28599c4c413fe2d1d2af2513a5992cb3d4a6933ab619c77aa2c17ebba2ff09ea76445efe1bfdd585b016e5a140ba5790427c38bed
   languageName: node
   linkType: hard
 
