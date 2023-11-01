@@ -67,7 +67,7 @@ __metadata:
     react: ^18.2.0
     react-dom: ^18.2.0
     rollup: ^3.26.3
-    rollup-plugin-copy: ^3.4.0
+    rollup-plugin-copy: ^3.5.0
     rollup-plugin-filesize: ^10.0.0
     storybook: ^7.5.1
     typescript: ^5.1.3
@@ -114,7 +114,7 @@ __metadata:
     react: ^18.2.0
     react-dom: ^18.2.0
     rollup: ^3.26.3
-    rollup-plugin-copy: ^3.4.0
+    rollup-plugin-copy: ^3.5.0
     rollup-plugin-filesize: ^10.0.0
     storybook: ^7.5.1
     three: ^0.156.1
@@ -6701,7 +6701,7 @@ __metadata:
     eslint-plugin-typescript-enum: ^2.1.0
     prettier: ^3.0.1
     rollup: ^3.26.3
-    rollup-plugin-copy: ^3.4.0
+    rollup-plugin-copy: ^3.5.0
     rollup-plugin-filesize: ^10.0.0
     typescript: ^5.1.3
     vite: ^4.2.1
@@ -13785,16 +13785,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup-plugin-copy@npm:^3.4.0":
-  version: 3.4.0
-  resolution: "rollup-plugin-copy@npm:3.4.0"
+"rollup-plugin-copy@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "rollup-plugin-copy@npm:3.5.0"
   dependencies:
     "@types/fs-extra": ^8.0.1
     colorette: ^1.1.0
     fs-extra: ^8.1.0
     globby: 10.0.1
     is-plain-object: ^3.0.0
-  checksum: 6eed5b2498fbe44d694f65ae9a9287b13a606b98a232b5a144a94140e8631efae5f5953b573ba68bf2dc59ab11c223ad3ea6f6cd15b51f42287f4bcc234f0e8b
+  checksum: 706ba6bd2052b95d1037f12963ff4b50749730f18aefad10544f9574aff7c035c88c5dd9ae1f0c0408cf09862e595a0ea4d68e13c2717addaea2bda3ade0d0e0
   languageName: node
   linkType: hard
 
