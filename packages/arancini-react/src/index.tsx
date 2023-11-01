@@ -131,7 +131,7 @@ export const createECS = <E extends A.AnyEntity>(world: A.World<E>) => {
 
   const Entity = memo(forwardRef(RawEntity)) as <D extends E>(
     props: PropsWithRef<EntityProps<D> & { ref?: ForwardedRef<D> }>
-  ) => ReactNode
+  ) => ReactElement
 
   const Entities = <T extends E>({ entities, children }: EntitiesProps<T>) => (
     <>
@@ -188,7 +188,7 @@ export const createECS = <E extends A.AnyEntity>(world: A.World<E>) => {
     name,
     data,
     children,
-  }: ComponentProps<E, C>): ReactNode => {
+  }: ComponentProps<E, C>): ReactElement => {
     const [childRef, setChildRef] = useState<never>(null!)
 
     const entity = useContext(entityContext)
