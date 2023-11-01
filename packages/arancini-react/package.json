@@ -56,7 +56,7 @@
     "eslint-plugin-storybook": "^0.6.15",
     "jsdom": "^22.1.0",
     "leva": "^0.9.35",
-    "p2-es": "^1.1.8",
+    "p2-es": "^1.2.2",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
