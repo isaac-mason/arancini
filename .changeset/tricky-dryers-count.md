@@ -4,4 +4,6 @@
 "arancini": major
 ---
 
-feat: make entities regular objects, and components properties of entity objects
+Arancini v4 is a near-complete rewrite.
+
+Entities are now regular objects, and components are properties of entity objects.
