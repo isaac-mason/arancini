@@ -188,7 +188,7 @@ export const createECS = <E extends A.AnyEntity>(world: A.World<E>) => {
     name,
     data,
     children,
-  }: ComponentProps<E, C>): ReactElement => {
+  }: ComponentProps<E, C>) => {
     const [childRef, setChildRef] = useState<never>(null!)
 
     const entity = useContext(entityContext)
