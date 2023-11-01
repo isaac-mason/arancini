@@ -3,7 +3,7 @@ import { OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import React from 'react'
 import { createECS } from '../../src'
-import { Setup } from '../Setup'
+import { Setup } from '../setup'
 
 export default {
   title: 'Random Walkers',

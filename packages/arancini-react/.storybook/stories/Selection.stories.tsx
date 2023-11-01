@@ -4,7 +4,7 @@ import { Vector3, useFrame } from '@react-three/fiber'
 import React, { useState } from 'react'
 import * as THREE from 'three'
 import { createECS } from '../../src'
-import { Setup } from '../Setup'
+import { Setup } from '../setup'
 
 export default {
   title: 'Selection',

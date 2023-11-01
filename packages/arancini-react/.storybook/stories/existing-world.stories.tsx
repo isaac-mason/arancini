@@ -3,7 +3,7 @@ import { Html } from '@react-three/drei'
 import React, { useEffect, useState } from 'react'
 import { Lifetime, Repeat } from 'timeline-composer'
 import { createECS } from '../../src'
-import { Setup } from '../Setup'
+import { Setup } from '../setup'
 
 export default {
   title: 'Existing World',
