@@ -29,7 +29,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@arancini/core@4.0.1, @arancini/core@workspace:packages/arancini-core":
+"@arancini/core@4.0.2, @arancini/core@workspace:packages/arancini-core":
   version: 0.0.0-use.local
   resolution: "@arancini/core@workspace:packages/arancini-core"
   dependencies:
@@ -75,11 +75,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@arancini/react@4.0.1, @arancini/react@workspace:packages/arancini-react":
+"@arancini/react@4.0.2, @arancini/react@workspace:packages/arancini-react":
   version: 0.0.0-use.local
   resolution: "@arancini/react@workspace:packages/arancini-react"
   dependencies:
-    "@arancini/core": 4.0.1
+    "@arancini/core": 4.0.2
     "@babel/core": ^7.22.11
     "@babel/preset-env": ^7.22.15
     "@babel/preset-react": ^7.22.15
@@ -6677,8 +6677,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "arancini@workspace:packages/arancini"
   dependencies:
-    "@arancini/core": 4.0.1
-    "@arancini/react": 4.0.1
+    "@arancini/core": 4.0.2
+    "@arancini/react": 4.0.2
     "@babel/preset-env": ^7.22.15
     "@babel/preset-react": ^7.22.15
     "@babel/preset-typescript": ^7.23.2

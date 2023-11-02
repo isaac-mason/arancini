@@ -1,5 +1,11 @@
 # @arancini/core
 
+## 4.0.2
+
+### Patch Changes
+
+- ce979c5: feat: add 'Strict' utility type that removes optional properties
+
 ## 4.0.1
 
 ## 4.0.0
