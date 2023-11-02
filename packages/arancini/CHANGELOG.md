@@ -1,5 +1,14 @@
 # arancini
 
+## 4.0.2
+
+### Patch Changes
+
+- ce979c5: feat: add 'Strict' utility type that removes optional properties
+- Updated dependencies [ce979c5]
+  - @arancini/core@4.0.2
+  - @arancini/react@4.0.2
+
 ## 4.0.1
 
 ### Patch Changes
