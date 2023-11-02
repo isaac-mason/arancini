@@ -8,6 +8,17 @@ export type With<E, P extends keyof E> = E & Required<Pick<E, P>>
 export type Without<E, P extends keyof E> = Pick<E, Exclude<keyof E, P>> &
   Partial<Pick<E, P>>
 
+export type Strict<E> = WithoutOptionalProperties<E>
+
+type OptionalProperties<T> = {
+  [P in keyof T]-?: undefined extends T[P] ? P : never
+}
+
+type WithoutOptionalProperties<T> = Pick<
+  T,
+  Exclude<keyof T, OptionalProperties<T>[keyof T]>
+>
+
 export type QueryConditionType = 'all' | 'any' | 'not'
 
 export type QueryCondition<E> = {
