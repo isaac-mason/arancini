@@ -1,6 +1,6 @@
 import { BitSet } from './bit-set'
 import { EntityContainer } from './entity-container'
-import { ARANCINI_SYMBOL, EntityWithInternalProperties } from './internal'
+import { ARANCINI_SYMBOL, EntityWithMetadata } from './entity-metadata'
 import type { ComponentRegistry, World } from './world'
 
 export type With<E, P extends keyof E> = E & Required<Pick<E, P>>
@@ -82,7 +82,7 @@ export const evaluateQueryBitSets = <E>(
   queryBitSets: QueryBitSets,
   entity: E
 ): boolean => {
-  const internal = entity as EntityWithInternalProperties<E>
+  const internal = entity as EntityWithMetadata<E>
 
   for (const queryPart of queryBitSets) {
     if (

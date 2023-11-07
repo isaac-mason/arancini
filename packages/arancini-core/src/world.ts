@@ -5,9 +5,9 @@ import {
 } from './entity-container'
 import {
   ARANCINI_SYMBOL,
-  EntityWithInternalProperties,
-  internalEntityPropertiesPool,
-} from './internal'
+  EntityWithMetadata,
+  entityMetadataPool,
+} from './entity-metadata'
 import {
   Query,
   QueryDescription,
@@ -100,7 +100,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   id(entity: E) {
     if (!this.has(entity)) return undefined
 
-    const internal = entity as EntityWithInternalProperties<E>
+    const internal = entity as EntityWithMetadata<E>
 
     let id = internal[ARANCINI_SYMBOL].id
 
@@ -139,8 +139,8 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   create(entity: E): E {
     addEntityToContainer(this, entity)
 
-    const internal = entity as EntityWithInternalProperties<E>
-    internal[ARANCINI_SYMBOL] = internalEntityPropertiesPool.request()
+    const internal = entity as EntityWithMetadata<E>
+    internal[ARANCINI_SYMBOL] = entityMetadataPool.request()
     internal[ARANCINI_SYMBOL].bitset.add(
       ...Object.keys(entity).map((c) => this.componentRegistry[c])
     )
@@ -163,7 +163,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   destroy(entity: E) {
     removeEntityFromContainer(this, entity)
 
-    const internal = entity as EntityWithInternalProperties<E>
+    const internal = entity as EntityWithMetadata<E>
     internal[ARANCINI_SYMBOL].bitset.reset()
 
     this.index(entity)
@@ -177,7 +177,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
 
     internal[ARANCINI_SYMBOL].bitset.reset()
     internal[ARANCINI_SYMBOL].id = undefined
-    internalEntityPropertiesPool.recycle(internal[ARANCINI_SYMBOL])
+    entityMetadataPool.recycle(internal[ARANCINI_SYMBOL])
     delete (internal as Partial<typeof internal>)[ARANCINI_SYMBOL]
   }
 
@@ -202,7 +202,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
 
     entity[component] = value
 
-    const internal = entity as EntityWithInternalProperties<E>
+    const internal = entity as EntityWithMetadata<E>
     internal[ARANCINI_SYMBOL].bitset.add(
       this.componentRegistry[component as string]
     )
@@ -230,7 +230,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     if (entity[component] === undefined) return
 
     if (this.has(entity)) {
-      const internal = entity as EntityWithInternalProperties<E>
+      const internal = entity as EntityWithMetadata<E>
       internal[ARANCINI_SYMBOL].bitset.remove(
         this.componentRegistry[component as string]
       )
@@ -482,7 +482,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     // if the world has already been initialised, resize all entity components bitsets
     if (this.initialised) {
       for (const entity of this.entities.values()) {
-        const internal = entity as EntityWithInternalProperties<E>
+        const internal = entity as EntityWithMetadata<E>
         internal[ARANCINI_SYMBOL].bitset.resize(this.componentIndexCounter)
       }
     }
