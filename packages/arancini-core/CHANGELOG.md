@@ -1,5 +1,12 @@
 # @arancini/core
 
+## 4.1.0
+
+### Patch Changes
+
+- 89d5442: refactor: entity metadata
+- ba10ed9: feat: export EntityContainer
+
 ## 4.0.2
 
 ### Patch Changes

@@ -1,5 +1,20 @@
 # @arancini/react
 
+## 4.1.0
+
+### Minor Changes
+
+- 5ec01eb: feat: rename createECS to createReactAPI
+- ba10ed9: feat: remove QueryEntities, add 'where' prop to Entities that takes a query description
+- 5ec01eb: feat(Component): rename 'data' prop to 'value'
+- ba10ed9: feat: support passing useQuery and Entities a query instance
+
+### Patch Changes
+
+- Updated dependencies [89d5442]
+- Updated dependencies [ba10ed9]
+  - @arancini/core@4.1.0
+
 ## 4.0.2
 
 ### Patch Changes
