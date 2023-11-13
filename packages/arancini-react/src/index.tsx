@@ -18,10 +18,6 @@ import { useIsomorphicLayoutEffect } from './hooks'
 
 type EntityProviderContext<Entity extends A.AnyEntity> = Entity | undefined
 
-export type WorldProps = {
-  children?: React.ReactNode
-}
-
 export type EntityProps<Entity extends A.AnyEntity> = {
   entity?: Entity
   children?: React.ReactNode
@@ -44,13 +40,15 @@ export type QueryEntitiesProps<E extends A.AnyEntity, QueryResult> = {
 
 export type ComponentProps<E, C extends keyof E> = {
   name: C
-  data?: E[C]
+  value?: E[C]
   children?: ReactNode
 }
 
-export type ECS<E extends A.AnyEntity> = ReturnType<typeof createECS<E>>
+export type ReactAPI<E extends A.AnyEntity> = ReturnType<
+  typeof createReactAPI<E>
+>
 
-export const createECS = <E extends A.AnyEntity>(world: A.World<E>) => {
+export const createReactAPI = <E extends A.AnyEntity>(world: A.World<E>) => {
   const entityContext = createContext(null! as EntityProviderContext<E>)
 
   const step = (delta: number) => {
@@ -129,8 +127,8 @@ export const createECS = <E extends A.AnyEntity>(world: A.World<E>) => {
     )
   }
 
-  const Entity = memo(forwardRef(RawEntity)) as <D extends E>(
-    props: PropsWithRef<EntityProps<D> & { ref?: ForwardedRef<D> }>
+  const Entity = memo(forwardRef(RawEntity)) as <T extends E>(
+    props: PropsWithRef<EntityProps<T> & { ref?: ForwardedRef<T> }>
   ) => ReactElement
 
   const Entities = <T extends E>({ entities, children }: EntitiesProps<T>) => (
@@ -143,7 +141,7 @@ export const createECS = <E extends A.AnyEntity>(world: A.World<E>) => {
     </>
   )
 
-  const useQuery = <R extends E>(q: A.QueryDescription<E, R>) => {
+  const useQuery = <T extends E>(q: A.QueryDescription<E, T>) => {
     const queryDescription = useMemo(() => q, [])
 
     const query = useMemo(() => {
@@ -151,7 +149,7 @@ export const createECS = <E extends A.AnyEntity>(world: A.World<E>) => {
         return q
       }
 
-      return world.query<R>(queryDescription)
+      return world.query<T>(queryDescription)
     }, [queryDescription])
 
     const [, setVersion] = useState(-1)
@@ -172,13 +170,13 @@ export const createECS = <E extends A.AnyEntity>(world: A.World<E>) => {
 
     useIsomorphicLayoutEffect(rerender, [])
 
-    return query as A.Query<R>
+    return query as A.Query<T>
   }
 
-  const QueryEntities = <QueryResult extends E>({
+  const QueryEntities = <T extends E>({
     query: q,
     children,
-  }: QueryEntitiesProps<E, QueryResult>) => {
+  }: QueryEntitiesProps<E, T>) => {
     const query = useQuery(q)
 
     return <Entities entities={[...query.entities]} children={children} />
@@ -186,7 +184,7 @@ export const createECS = <E extends A.AnyEntity>(world: A.World<E>) => {
 
   const Component = <C extends keyof E>({
     name,
-    data,
+    value,
     children,
   }: ComponentProps<E, C>) => {
     const [childRef, setChildRef] = useState<never>(null!)
@@ -204,7 +202,7 @@ export const createECS = <E extends A.AnyEntity>(world: A.World<E>) => {
         componentData = childRef as never
       } else {
         // otherwise, use the args prop
-        componentData = data!
+        componentData = value!
       }
 
       world.add(entity, name, componentData!)
@@ -214,7 +212,7 @@ export const createECS = <E extends A.AnyEntity>(world: A.World<E>) => {
           world.remove(entity, name)
         }
       }
-    }, [entity, childRef, name, data])
+    }, [entity, childRef, name, value])
 
     // capture ref of child
     if (children) {

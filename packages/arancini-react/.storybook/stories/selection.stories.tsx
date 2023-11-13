@@ -1,9 +1,9 @@
 import { System, World } from '@arancini/core'
+import { createReactAPI } from '@arancini/react'
 import { Bounds, PerspectiveCamera } from '@react-three/drei'
 import { Vector3, useFrame } from '@react-three/fiber'
 import React, { useState } from 'react'
 import * as THREE from 'three'
-import { createECS } from '../../src'
 import { Setup } from '../setup'
 
 export default {
@@ -50,7 +50,7 @@ world.registerSystem(CameraSystem)
 
 world.init()
 
-const { step, useCurrentEntity, Component, Entity } = createECS(world)
+const { step, useCurrentEntity, Component, Entity } = createReactAPI(world)
 
 const SelectableBox = (props: JSX.IntrinsicElements['mesh']) => {
   const entity = useCurrentEntity()

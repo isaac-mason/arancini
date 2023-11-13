@@ -1,5 +1,5 @@
 import { System, World } from '@arancini/core'
-import { createECS } from '@arancini/react'
+import { createReactAPI } from '@arancini/react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as P2 from 'p2-es'
 import React, { useMemo } from 'react'
@@ -66,7 +66,7 @@ world.registerSystem(PhysicsSystem)
 
 world.init()
 
-const { step, Entity, Component, QueryEntities } = createECS(world)
+const { step, Entity, Component, QueryEntities } = createReactAPI(world)
 
 const Plane = () => {
   const planeBody = useMemo(() => {

@@ -2,7 +2,7 @@ import { System, World } from '@arancini/core'
 import { OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import React from 'react'
-import { createECS } from '../../src'
+import { createReactAPI } from '@arancini/react'
 import { Setup } from '../setup'
 
 export default {
@@ -40,7 +40,7 @@ world.registerSystem(WalkingSystem)
 
 world.init()
 
-const { step, Entity, QueryEntities, Component } = createECS(world)
+const { step, Entity, QueryEntities, Component } = createReactAPI(world)
 
 const App = () => {
   useFrame((_, delta) => {
