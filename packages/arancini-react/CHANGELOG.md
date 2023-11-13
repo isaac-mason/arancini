@@ -1,5 +1,17 @@
 # @arancini/react
 
+## 4.1.0
+
+### Minor Changes
+
+- 148dec5: feat: rename createECS to createReactAPI
+- 148dec5: feat(Component): rename 'data' prop to 'value'
+
+### Patch Changes
+
+- Updated dependencies [89d5442]
+  - @arancini/core@4.1.0
+
 ## 4.0.2
 
 ### Patch Changes

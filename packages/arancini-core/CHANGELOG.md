@@ -1,5 +1,11 @@
 # @arancini/core
 
+## 4.1.0
+
+### Patch Changes
+
+- 89d5442: refactor: entity metadata
+
 ## 4.0.2
 
 ### Patch Changes

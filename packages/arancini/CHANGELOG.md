@@ -1,5 +1,16 @@
 # arancini
 
+## 4.1.0
+
+### Patch Changes
+
+- 89d5442: refactor: entity metadata
+- Updated dependencies [148dec5]
+- Updated dependencies [89d5442]
+- Updated dependencies [148dec5]
+  - @arancini/react@4.1.0
+  - @arancini/core@4.1.0
+
 ## 4.0.2
 
 ### Patch Changes
