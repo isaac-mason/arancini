@@ -50,7 +50,7 @@ world.registerSystem(CameraSystem)
 
 world.init()
 
-const { step, useCurrentEntity, Component, Entity } = createReactAPI(world)
+const { useCurrentEntity, Component, Entity } = createReactAPI(world)
 
 const SelectableBox = (props: JSX.IntrinsicElements['mesh']) => {
   const entity = useCurrentEntity()
@@ -121,7 +121,7 @@ const Camera = () => (
 
 const App = () => {
   useFrame((_, delta) => {
-    step(delta)
+    world.step(delta)
   })
 
   return (

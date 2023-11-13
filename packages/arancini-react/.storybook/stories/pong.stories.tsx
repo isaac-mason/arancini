@@ -44,7 +44,7 @@ const world = new World<EntityType>({
 
 world.init()
 
-const { Entity, Component, QueryEntities } = createReactAPI(world)
+const { Entity, Component, Entities } = createReactAPI(world)
 
 const queries = {
   paddles: world.query((e) => e.has('paddle', 'input', 'position', 'velocity')),
@@ -321,7 +321,7 @@ const Balls = () => {
 }
 
 const Paddles = () => (
-  <QueryEntities query={(e) => e.has('paddle')}>
+  <Entities where={(e) => e.has('paddle')}>
     {(e) => (
       <Component name="object3D">
         <mesh>
@@ -330,7 +330,7 @@ const Paddles = () => (
         </mesh>
       </Component>
     )}
-  </QueryEntities>
+  </Entities>
 )
 
 const PlayArea = () => (

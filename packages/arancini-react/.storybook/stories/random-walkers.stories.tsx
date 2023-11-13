@@ -40,11 +40,11 @@ world.registerSystem(WalkingSystem)
 
 world.init()
 
-const { step, Entity, QueryEntities, Component } = createReactAPI(world)
+const { Entity, Entities, Component } = createReactAPI(world)
 
 const App = () => {
   useFrame((_, delta) => {
-    step(delta)
+    world.step(delta)
   })
 
   return (
@@ -53,7 +53,7 @@ const App = () => {
         <Entity key={idx} walking />
       ))}
 
-      <QueryEntities query={(e) => e.has('walking')}>
+      <Entities where={(e) => e.has('walking')}>
         {() => (
           <Component name="object3D">
             <mesh
@@ -68,7 +68,7 @@ const App = () => {
             </mesh>
           </Component>
         )}
-      </QueryEntities>
+      </Entities>
 
       <OrbitControls />
     </>

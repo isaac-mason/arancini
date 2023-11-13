@@ -29,7 +29,8 @@ world.registerSystem(MySystem)
 
 world.init()
 
-const ECS = createReactAPI(world)
+const { Entity, Entities, Component, useQuery, step } =
+  createReactAPI(world)
 ```
 
 ## Entities and Components
@@ -37,7 +38,7 @@ const ECS = createReactAPI(world)
 `<Entity />` can be used to declaratively create entities with components.
 
 ```tsx
-const Example = () => <ECS.Entity health={100} position={[0, 0]} />
+const Example = () => <Entity health={100} position={[0, 0]} />
 ```
 
 You can also pass an existing entity to `<Entity />`.
@@ -45,16 +46,16 @@ You can also pass an existing entity to `<Entity />`.
 ```tsx
 const entity = world.create({ position: [0, 0] })
 
-const Example = () => <ECS.Entity entity={entity} health={100} />
+const Example = () => <Entity entity={entity} health={100} />
 ```
 
 `<Component />` can be used to add components to an entity.
 
 ```tsx
 const Example = () => (
-  <ECS.Entity>
-    <ECS.Component name="health" data={100} />
-  </ECS.Entity>
+  <Entity>
+    <Component name="health" data={100} />
+  </Entity>
 )
 ```
 
@@ -67,38 +68,51 @@ const world = new A.World()
 const ECS = createReactAPI(world)
 
 const Example = () => (
-  <ECS.Entity>
-    <ECS.Component name="object3D">
+  <Entity>
+    <Component name="object3D">
       <mesh>
         <boxGeometry args={[1, 1, 1]} />
         <meshNormalMaterial />
       </mesh>
-    </ECS.Component>
-  </ECS.Entity>
+    </Component>
+  </Entity>
 )
 ```
 
 ### Rendering multiple entities
 
-`@arancini/react` also provides an `<Entities />` component that can be used to render a list of entities or add components to existing entities. `<Entities />` also supports [render props](https://reactjs.org/docs/render-props.html).
+`@arancini/react` also provides an `<Entities />` component that can be used to render a collection of entities or add components to existing entities. `<Entities />` also supports [render props](https://reactjs.org/docs/render-props.html).
 
 ```tsx
-const SimpleExample = () => (
-  <ECS.Entities entities={[entity1, entity2]}>{/* ... */}</ECS.Entities>
+const Simple = () => (
+  <Entities in={[entity1, entity2]}>{/* ... */}</Entities>
 )
 
 const AddComponentToEntities = () => (
-  <ECS.Entities entities={[entity1, entity2]}>
-    <ECS.Component name="position" data={[0, 0]} />
-  </ECS.Entities>
+  <Entities in={[entity1, entity2]}>
+    <Component name="position" data={[0, 0]} />
+  </Entities>
 )
 
 const RenderProps = () => (
-  <ECS.Entities entities={[entity1, entity2]}>
+  <Entities in={[entity1, entity2]}>
     {(entity) => {
       // ...
     }}
-  </ECS.Entities>
+  </Entities>
+)
+```
+
+`Entities` also supports a `where` prop that takes a query description.
+
+```tsx
+const SimpleExample = () => (
+  <Entities where={(e) => e.with('exampleTag')}>
+    <mesh>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshNormalMaterial />
+    </mesh>
+  </Entities>
 )
 ```
 
@@ -110,109 +124,26 @@ The `useQuery` hook queries the world for entities with given components and wil
 
 ```tsx
 const Example = () => {
-  const entities = ECS.useQuery((e) => e.with('health'))
+  const entities = useQuery((e) => e.with('health'))
 
   // ...
 }
-```
-
-### `QueryEntities`
-
-`QueryEntities` can be used to render entities, as well as enhance existing ones. It will re-render whenever the query results change. It also supports [render props](https://reactjs.org/docs/render-props.html).
-
-```tsx
-const world = new World()
-const ECS = createReactAPI(world)
-
-const SimpleExample = () => (
-  <ECS.QueryEntities query={(e) => e.with('exampleTag')}>
-    <mesh>
-      <boxGeometry args={[1, 1, 1]} />
-      <meshNormalMaterial />
-    </mesh>
-  </ECS.QueryEntities>
-)
-
-const RenderProps = () => (
-  <ECS.QueryEntities query={(e) => e.with('exampleTag')}>
-    {(entity) => {
-      return (
-        <mesh>
-          <boxGeometry
-            position={[
-              (Math.random() - 0.5) * 2,
-              (Math.random() - 0.5) * 2,
-              (Math.random() - 0.5) * 2,
-            ]}
-          />
-          <meshNormalMaterial />
-        </mesh>
-      )
-    }}
-  </ECS.QueryEntities>
-)
-
-const EnhanceExistingEntities = () => (
-  <ECS.QueryEntities query={(e) => e.with('exampleTag')}>
-    {(entity) => {
-      return (
-        <ECS.Component name="object3D">
-          <mesh>
-            <boxGeometry
-              position={[
-                (Math.random() - 0.5) * 2,
-                (Math.random() - 0.5) * 2,
-                (Math.random() - 0.5) * 2,
-              ]}
-            />
-            <meshNormalMaterial />
-          </mesh>
-        </ECS.Component>
-      )
-    }}
-  </ECS.QueryEntities>
-)
 ```
 
 ## Updating Systems
 
-`@arancini/react` does not automatically update systems for you. If you are using arancini with `@react-three/fiber`, you can use the `useFrame` hook to update systems in the world.
+`@arancini/react` does not automatically update systems for you. You will need to call `world.step` yourself. For example, if you are using arancini with `@react-three/fiber`, you can use the `useFrame` hook.
 
 ```tsx
 import { useFrame } from '@react-three/fiber'
 
-const Stepper = () => {
+const Game = () => {
   useFrame((_, delta) => {
-    ECS.step(delta)
+    world.step(delta)
   })
 
-  return null
+  return (
+    // ...
+  )
 }
 ```
-
-## Advanced Usage
-
-### Entity context
-
-You can use the `useCurrentEntitiy` hook to access the current entity in a React component.
-
-```tsx
-import { Component } from '@arancini/core'
-import { createReactAPI } from '@arancini/react'
-
-const ECS = createReactAPI()
-
-const Example = () => {
-  const entity = useCurrentEntity()
-
-  // ...
-}
-
-const App = () => (
-  <ECS.Entity>
-    <Example />
-  </ECS.Entity>
-)
-```
-
-For extra advanced usage, `createReactAPI` also returns the entity react context `entityContext`.

@@ -66,7 +66,7 @@ world.registerSystem(PhysicsSystem)
 
 world.init()
 
-const { step, Entity, Component, QueryEntities } = createReactAPI(world)
+const { Entity, Component, Entities } = createReactAPI(world)
 
 const Plane = () => {
   const planeBody = useMemo(() => {
@@ -108,7 +108,7 @@ const Box = ({ position, width, height }: BoxProps) => {
 
 const App = () => {
   useFrame((_, delta) => {
-    step(delta)
+    world.step(delta)
   })
 
   return (
@@ -126,7 +126,7 @@ const App = () => {
       </Repeat>
 
       {/* render rigid bodies */}
-      <QueryEntities query={(e) => e.has('rigidBody')}>
+      <Entities where={(e) => e.has('rigidBody')}>
         {(entity) => {
           const { rigidBody } = entity
 
@@ -169,7 +169,7 @@ const App = () => {
             </Component>
           )
         }}
-      </QueryEntities>
+      </Entities>
 
       {/* lights */}
       <ambientLight intensity={1.5} />
