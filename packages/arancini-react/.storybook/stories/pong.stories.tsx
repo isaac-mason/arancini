@@ -1,9 +1,9 @@
 import { World } from '@arancini/core'
+import { createReactAPI } from '@arancini/react'
 import { Bounds, PerspectiveCamera, Text } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import React, { useEffect, useMemo, useState } from 'react'
 import * as THREE from 'three'
-import { createECS } from '../../src'
 import { Setup } from '../setup'
 
 export default {
@@ -44,7 +44,7 @@ const world = new World<EntityType>({
 
 world.init()
 
-const { Entity, Component, QueryEntities } = createECS(world)
+const { Entity, Component, QueryEntities } = createReactAPI(world)
 
 const queries = {
   paddles: world.query((e) => e.has('paddle', 'input', 'position', 'velocity')),

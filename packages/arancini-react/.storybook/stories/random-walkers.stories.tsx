@@ -2,7 +2,7 @@ import { System, World } from '@arancini/core'
 import { OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import React from 'react'
-import { createECS } from '../../src'
+import { createReactAPI } from '@arancini/react'
 import { Setup } from '../setup'
 
 export default {

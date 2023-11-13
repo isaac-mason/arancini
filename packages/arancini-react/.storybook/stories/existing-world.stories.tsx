@@ -1,8 +1,8 @@
 import { World } from '@arancini/core'
+import { createReactAPI } from '@arancini/react'
 import { Html } from '@react-three/drei'
 import React, { useEffect, useState } from 'react'
 import { Lifetime, Repeat } from 'timeline-composer'
-import { createECS } from '../../src'
 import { Setup } from '../setup'
 
 export default {
@@ -13,7 +13,7 @@ const world = new World()
 
 world.init()
 
-const { Entity } = createECS(world)
+const { Entity } = createReactAPI(world)
 
 export const ExistingWorld = () => {
   const [worldStats, setWorldStats] = useState('')
