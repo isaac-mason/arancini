@@ -3,22 +3,22 @@ import '@testing-library/jest-dom'
 import { act, render, renderHook } from '@testing-library/react'
 import React, { forwardRef, useImperativeHandle } from 'react'
 import { describe, expect, it, vi } from 'vitest'
-import { createECS } from '../src'
+import { createReactAPI } from '../src'
 
 type Entity = {
   foo?: boolean
   bar?: string
 }
 
-describe('createECS', () => {
+describe('createReactAPI', () => {
   it('should be truthy', () => {
     const world = new World<Entity>({ components: ['foo', 'bar'] })
     world.init()
 
-    const ECS = createECS(world)
+    const reactAPI = createReactAPI(world)
 
-    expect(ECS).toBeTruthy()
-    expect(ECS.world).toBeTruthy()
+    expect(reactAPI).toBeTruthy()
+    expect(reactAPI.world).toBeTruthy()
   })
 
   describe('<Entity />', () => {
@@ -26,9 +26,9 @@ describe('createECS', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
-      const ECS = createECS(world)
+      const reactAPI = createReactAPI(world)
 
-      render(<ECS.Entity />)
+      render(<reactAPI.Entity />)
 
       expect(world.entities.length).toBe(1)
     })
@@ -37,11 +37,11 @@ describe('createECS', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
-      const ECS = createECS(world)
+      const reactAPI = createReactAPI(world)
 
       const entity = world.create({})
 
-      render(<ECS.Entity entity={entity} />)
+      render(<reactAPI.Entity entity={entity} />)
 
       expect(world.entities.length).toBe(1)
       expect(world.has(entity)).toBe(true)
@@ -51,12 +51,12 @@ describe('createECS', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
-      const ECS = createECS(world)
+      const reactAPI = createReactAPI(world)
 
       const ref = React.createRef<Entity>()
       const entity = world.create({})
 
-      render(<ECS.Entity ref={ref} entity={entity} />)
+      render(<reactAPI.Entity ref={ref} entity={entity} />)
 
       expect(ref.current).not.toBeNull()
       expect(ref.current).toBe(entity)
@@ -68,14 +68,14 @@ describe('createECS', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
-      const ECS = createECS(world)
+      const reactAPI = createReactAPI(world)
 
       const entities = [world.create({}), world.create({}), world.create({})]
 
       render(
-        <ECS.Entities entities={entities}>
-          <ECS.Component name="foo" data={true} />
-        </ECS.Entities>
+        <reactAPI.Entities entities={entities}>
+          <reactAPI.Component name="foo" value={true} />
+        </reactAPI.Entities>
       )
 
       expect(entities.every((entity) => !!entity.foo)).toBe(true)
@@ -87,7 +87,7 @@ describe('createECS', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
-      const ECS = createECS(world)
+      const reactAPI = createReactAPI(world)
 
       const entities = [world.create({}), world.create({}), world.create({})]
 
@@ -100,9 +100,9 @@ describe('createECS', () => {
       })
 
       render(
-        <ECS.QueryEntities query={(e) => e.has('foo')}>
-          <ECS.Component name="bar" data="123" />
-        </ECS.QueryEntities>
+        <reactAPI.QueryEntities query={(e) => e.has('foo')}>
+          <reactAPI.Component name="bar" value="123" />
+        </reactAPI.QueryEntities>
       )
 
       expect(!!entities[0].bar).toBe(true)
@@ -128,14 +128,14 @@ describe('createECS', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
-      const ECS = createECS(world)
+      const reactAPI = createReactAPI(world)
 
       const entity = world.create({})
 
       const { unmount } = render(
-        <ECS.Entity entity={entity}>
-          <ECS.Component name="foo" data={true} />
-        </ECS.Entity>
+        <reactAPI.Entity entity={entity}>
+          <reactAPI.Component name="foo" value={true} />
+        </reactAPI.Entity>
       )
 
       expect(entity.foo).toBe(true)
@@ -151,7 +151,7 @@ describe('createECS', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
-      const ECS = createECS(world)
+      const reactAPI = createReactAPI(world)
 
       const entity = world.create({})
 
@@ -163,11 +163,11 @@ describe('createECS', () => {
       })
 
       render(
-        <ECS.Entity entity={entity}>
-          <ECS.Component name="bar">
+        <reactAPI.Entity entity={entity}>
+          <reactAPI.Component name="bar">
             <TestComponentWithRef />
-          </ECS.Component>
-        </ECS.Entity>
+          </reactAPI.Component>
+        </reactAPI.Entity>
       )
 
       expect(entity.bar).toBe(refValue)
@@ -179,7 +179,7 @@ describe('createECS', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
-      const ECS = createECS(world)
+      const reactAPI = createReactAPI(world)
 
       const entities = [world.create({}), world.create({}), world.create({})]
 
@@ -187,7 +187,9 @@ describe('createECS', () => {
         world.add(e, 'foo', true)
       })
 
-      const { result } = renderHook(() => ECS.useQuery((e) => e.has('foo')))
+      const { result } = renderHook(() =>
+        reactAPI.useQuery((e) => e.has('foo'))
+      )
 
       expect(result.current.entities).toEqual(entities)
 
@@ -204,13 +206,13 @@ describe('createECS', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
-      const ECS = createECS(world)
+      const reactAPI = createReactAPI(world)
 
       const entity = world.create({})
 
-      const { result } = renderHook(() => ECS.useCurrentEntity(), {
+      const { result } = renderHook(() => reactAPI.useCurrentEntity(), {
         wrapper: ({ children }) => (
-          <ECS.Entity entity={entity}>{children}</ECS.Entity>
+          <reactAPI.Entity entity={entity}>{children}</reactAPI.Entity>
         ),
       })
 
@@ -223,7 +225,7 @@ describe('createECS', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
       world.init()
 
-      const ECS = createECS(world)
+      const reactAPI = createReactAPI(world)
 
       const onUpdate = vi.fn()
 
@@ -237,10 +239,10 @@ describe('createECS', () => {
 
       const delta = 0.01
 
-      ECS.step(delta)
+      reactAPI.step(delta)
       expect(onUpdate).toBeCalledWith(delta, delta)
 
-      ECS.step(delta)
+      reactAPI.step(delta)
       expect(onUpdate).toBeCalledWith(delta, delta * 2)
     })
   })

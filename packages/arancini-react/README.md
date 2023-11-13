@@ -10,11 +10,11 @@ React glue for the [arancini](https://github.com/isaac-mason/arancini/tree/main/
 
 ## Creating the React glue
 
-To get started, use `createECS` to get glue components and hooks scoped to a given arancini world. Because the react glue is scoped, libraries can use @arancini/react without worrying about context conflicts.
+To get started, use `createReactAPI` to get glue components and hooks scoped to a given arancini world. Because the react glue is scoped, libraries can use @arancini/react without worrying about context conflicts.
 
 ```ts
 import { World } from '@arancini/core'
-import { createECS } from '@arancini/react'
+import { createReactAPI } from '@arancini/react'
 
 type EntityType = {
   health?: number
@@ -29,7 +29,7 @@ world.registerSystem(MySystem)
 
 world.init()
 
-const ECS = createECS(world)
+const ECS = createReactAPI(world)
 ```
 
 ## Entities and Components
@@ -64,7 +64,7 @@ If a child is passed to `Component`, it will be captured and used as the value o
 
 ```tsx
 const world = new A.World()
-const ECS = createECS(world)
+const ECS = createReactAPI(world)
 
 const Example = () => (
   <ECS.Entity>
@@ -122,7 +122,7 @@ const Example = () => {
 
 ```tsx
 const world = new World()
-const ECS = createECS(world)
+const ECS = createReactAPI(world)
 
 const SimpleExample = () => (
   <ECS.QueryEntities query={(e) => e.with('exampleTag')}>
@@ -198,9 +198,9 @@ You can use the `useCurrentEntitiy` hook to access the current entity in a React
 
 ```tsx
 import { Component } from '@arancini/core'
-import { createECS } from '@arancini/react'
+import { createReactAPI } from '@arancini/react'
 
-const ECS = createECS()
+const ECS = createReactAPI()
 
 const Example = () => {
   const entity = useCurrentEntity()
@@ -215,4 +215,4 @@ const App = () => (
 )
 ```
 
-For extra advanced usage, `createECS` also returns the entity react context `entityContext`.
+For extra advanced usage, `createReactAPI` also returns the entity react context `entityContext`.
