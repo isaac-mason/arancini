@@ -40,7 +40,7 @@ world.registerSystem(WalkingSystem)
 
 world.init()
 
-const { step, Entity, QueryEntities, Component } = createECS(world)
+const { step, Entity, QueryEntities, Component } = createReactAPI(world)
 
 const App = () => {
   useFrame((_, delta) => {

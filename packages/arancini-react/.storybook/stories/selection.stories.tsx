@@ -1,9 +1,9 @@
 import { System, World } from '@arancini/core'
+import { createReactAPI } from '@arancini/react'
 import { Bounds, PerspectiveCamera } from '@react-three/drei'
 import { Vector3, useFrame } from '@react-three/fiber'
 import React, { useState } from 'react'
 import * as THREE from 'three'
-import { createReactAPI } from '../../src'
 import { Setup } from '../setup'
 
 export default {
