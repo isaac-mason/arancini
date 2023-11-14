@@ -1,3 +1,4 @@
+import { BitSet } from './bit-set'
 import {
   EntityContainer,
   addEntityToContainer,
@@ -5,9 +6,10 @@ import {
 } from './entity-container'
 import {
   ARANCINI_SYMBOL,
+  EntityMetadata,
   EntityWithMetadata,
-  entityMetadataPool,
 } from './entity-metadata'
+import { ObjectPool } from './object-pool'
 import {
   Query,
   QueryDescription,
@@ -47,6 +49,11 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
 
   private bulkUpdateInProgress = false
   private bulkUpdateEntities: Set<E> = new Set()
+
+  private entityMetadataPool = new ObjectPool<EntityMetadata>(() => ({
+    bitset: new BitSet(),
+    id: undefined,
+  }))
 
   constructor(options?: WorldOptions<E>) {
     super()
@@ -140,7 +147,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     addEntityToContainer(this, entity)
 
     const internal = entity as EntityWithMetadata<E>
-    internal[ARANCINI_SYMBOL] = entityMetadataPool.request()
+    internal[ARANCINI_SYMBOL] = this.entityMetadataPool.request()
     internal[ARANCINI_SYMBOL].bitset.add(
       ...Object.keys(entity).map((c) => this.componentRegistry[c])
     )
@@ -177,7 +184,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
 
     internal[ARANCINI_SYMBOL].bitset.reset()
     internal[ARANCINI_SYMBOL].id = undefined
-    entityMetadataPool.recycle(internal[ARANCINI_SYMBOL])
+    this.entityMetadataPool.recycle(internal[ARANCINI_SYMBOL])
     delete (internal as Partial<typeof internal>)[ARANCINI_SYMBOL]
   }
 
