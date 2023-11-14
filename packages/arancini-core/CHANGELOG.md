@@ -1,5 +1,11 @@
 # @arancini/core
 
+## 4.1.1
+
+### Patch Changes
+
+- 9271e1d: feat: move entity metadata object pool to World property
+
 ## 4.1.0
 
 ### Patch Changes
