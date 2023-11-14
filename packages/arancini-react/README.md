@@ -29,7 +29,7 @@ world.registerSystem(MySystem)
 
 world.init()
 
-const { Entity, Entities, Component, useQuery, step } =
+const { Entity, Entities, Component, useQuery } =
   createReactAPI(world)
 ```
 
