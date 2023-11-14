@@ -1,5 +1,13 @@
 # arancini
 
+## 4.1.1
+
+### Patch Changes
+
+- Updated dependencies [9271e1d]
+  - @arancini/core@4.1.1
+  - @arancini/react@4.1.1
+
 ## 4.1.0
 
 ### Patch Changes
