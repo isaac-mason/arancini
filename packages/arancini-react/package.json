@@ -33,7 +33,7 @@
     "@babel/preset-typescript": "^7.23.2",
     "@mdx-js/react": "^2.3.0",
     "@react-three/drei": "^9.88.13",
-    "@react-three/fiber": "^8.15.10",
+    "@react-three/fiber": "^8.15.11",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-terser": "^0.4.4",

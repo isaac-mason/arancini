@@ -86,7 +86,7 @@ __metadata:
     "@babel/preset-typescript": ^7.23.2
     "@mdx-js/react": ^2.3.0
     "@react-three/drei": ^9.88.13
-    "@react-three/fiber": ^8.15.10
+    "@react-three/fiber": ^8.15.11
     "@rollup/plugin-commonjs": ^25.0.7
     "@rollup/plugin-node-resolve": ^15.0.1
     "@rollup/plugin-terser": ^0.4.4
@@ -4143,9 +4143,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/fiber@npm:^8.15.10":
-  version: 8.15.10
-  resolution: "@react-three/fiber@npm:8.15.10"
+"@react-three/fiber@npm:^8.15.11":
+  version: 8.15.11
+  resolution: "@react-three/fiber@npm:8.15.11"
   dependencies:
     "@babel/runtime": ^7.17.8
     "@types/react-reconciler": ^0.26.7
@@ -4180,7 +4180,7 @@ __metadata:
       optional: true
     react-native:
       optional: true
-  checksum: 65fd701b7134c520aa99ded63f337540634d42bb470430740b7fac6ad0dad2fa75926532f9173f13f757a8239f3f067914a33dab9b37b234038d09806383609c
+  checksum: df0e30641e0aaa9f89c8f4770c27aab298b653b1dcb2a47c4c279984ee6e67556c3a043907160f6efc18eabd18b93a44e671af207d890321dbe16f41f38776ee
   languageName: node
   linkType: hard
 
