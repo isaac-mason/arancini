@@ -7,7 +7,7 @@ export class BitSet {
   words: Uint32Array
 
   constructor(indices: Iterable<number> = []) {
-    this.words = new Uint32Array(8)
+    this.words = new Uint32Array(1)
     for (const word of indices) {
       this.add(word)
     }
