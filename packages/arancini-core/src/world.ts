@@ -132,8 +132,17 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   /**
    * Creates a new entity
    * @param entity
-   * @returns a proxied entity that
+   * @returns the created entity
    *
+   * @example
+   * ```ts
+   * const entity = {
+   *   position: { x: 0, y: 0 },
+   *   velocity: { x: 0, y: 0 },
+   * }
+   *
+   * world.create(entity)
+   * ```
    *
    * @example
    * ```ts
@@ -146,11 +155,13 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   create(entity: E): E {
     addEntityToContainer(this, entity)
 
-    const internal = entity as EntityWithMetadata<E>
-    internal[ARANCINI_SYMBOL] = this.entityMetadataPool.request()
-    internal[ARANCINI_SYMBOL].bitset.add(
+    const metadata = this.entityMetadataPool.request()
+    metadata.bitset.add(
       ...Object.keys(entity).map((c) => this.componentRegistry[c])
     )
+
+    const internal = entity as EntityWithMetadata<E>
+    internal[ARANCINI_SYMBOL] = metadata
 
     this.index(entity)
 
