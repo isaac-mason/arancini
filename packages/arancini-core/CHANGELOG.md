@@ -1,5 +1,12 @@
 # @arancini/core
 
+## 4.1.2
+
+### Patch Changes
+
+- c1b67ea: feat: minor refactor, jsdoc fix
+- 2730c0e: fix(BitSet): reduce initial bitset words array size
+
 ## 4.1.1
 
 ### Patch Changes
