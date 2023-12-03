@@ -1,5 +1,7 @@
 # @arancini/core
 
+## 4.2.0
+
 ## 4.1.3
 
 ### Patch Changes
