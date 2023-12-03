@@ -8,7 +8,7 @@ type Entity = {
 }
 
 describe('Queries', () => {
-  it('should update queries as entity composition changes ', () => {
+  it('should update queries as entity composition changes', () => {
     const world = new World<Entity>({ components: ['foo', 'bar'] })
 
     world.init()
