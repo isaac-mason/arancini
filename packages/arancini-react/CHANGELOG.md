@@ -1,5 +1,13 @@
 # @arancini/react
 
+## 4.1.3
+
+### Patch Changes
+
+- Updated dependencies [fcd47a1]
+- Updated dependencies [fcd47a1]
+  - @arancini/core@4.1.3
+
 ## 4.1.2
 
 ### Patch Changes

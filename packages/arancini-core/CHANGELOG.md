@@ -1,5 +1,12 @@
 # @arancini/core
 
+## 4.1.3
+
+### Patch Changes
+
+- fcd47a1: feat: refactor entity metadata logic to minimise property lookups
+- fcd47a1: feat: don't reindex entities on destroying them, just remove from all queries
+
 ## 4.1.2
 
 ### Patch Changes
