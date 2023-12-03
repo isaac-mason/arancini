@@ -12,8 +12,8 @@
     "change": "yarn changeset",
     "version": "yarn changeset version && yarn install --mode update-lockfile",
     "release": "yarn build && yarn test && yarn build-storybook && changeset publish",
-    "build-storybook": "concurrently \"cd ./packages/arancini-core && yarn build-storybook\" \"cd ./packages/arancini-react && yarn build-storybook\"",
-    "storybook": "concurrently \"cd ./packages/arancini-core && yarn storybook\" \"cd ./packages/arancini-react && yarn storybook\""
+    "build-storybook": "(cd ./packages/arancini && yarn build-storybook)",
+    "storybook": "(cd ./packages/arancini-core && yarn storybook)"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.1",
