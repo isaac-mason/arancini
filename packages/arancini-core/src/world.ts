@@ -107,14 +107,14 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   id(entity: E) {
     if (!this.has(entity)) return undefined
 
-    const internal = entity as EntityWithMetadata<E>
+    const metadata = (entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL]
 
-    let id = internal[ARANCINI_SYMBOL].id
+    let id = metadata.id
 
     if (id === undefined) {
       id = this.entityIdCounter++
+      metadata.id = id
       this.idToEntity.set(id, entity)
-      internal[ARANCINI_SYMBOL].id = id
     }
 
     return id
@@ -159,9 +159,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     metadata.bitset.add(
       ...Object.keys(entity).map((c) => this.componentRegistry[c])
     )
-
-    const internal = entity as EntityWithMetadata<E>
-    internal[ARANCINI_SYMBOL] = metadata
+    ;(entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL] = metadata
 
     this.index(entity)
 
@@ -181,22 +179,23 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   destroy(entity: E) {
     removeEntityFromContainer(this, entity)
 
-    const internal = entity as EntityWithMetadata<E>
-    internal[ARANCINI_SYMBOL].bitset.reset()
-
-    this.index(entity)
-
+    /* remove entity from queries */
     this.queries.forEach((query) => removeEntityFromContainer(query, entity))
 
-    let id = internal[ARANCINI_SYMBOL].id
-    if (id) {
+    /* remove and recycle entity metadata */
+    const metadata = (entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL]
+
+    delete (entity as never)[ARANCINI_SYMBOL]
+
+    let id = metadata.id
+    if (id !== undefined) {
       this.idToEntity.delete(id)
+      metadata.id = undefined
     }
 
-    internal[ARANCINI_SYMBOL].bitset.reset()
-    internal[ARANCINI_SYMBOL].id = undefined
-    this.entityMetadataPool.recycle(internal[ARANCINI_SYMBOL])
-    delete (internal as Partial<typeof internal>)[ARANCINI_SYMBOL]
+    metadata.bitset.reset()
+
+    this.entityMetadataPool.recycle(metadata)
   }
 
   /**
@@ -220,10 +219,8 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
 
     entity[component] = value
 
-    const internal = entity as EntityWithMetadata<E>
-    internal[ARANCINI_SYMBOL].bitset.add(
-      this.componentRegistry[component as string]
-    )
+    const metadata = (entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL]
+    metadata.bitset.add(this.componentRegistry[component as string])
 
     this.index(entity)
 
@@ -248,10 +245,8 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     if (entity[component] === undefined) return
 
     if (this.has(entity)) {
-      const internal = entity as EntityWithMetadata<E>
-      internal[ARANCINI_SYMBOL].bitset.remove(
-        this.componentRegistry[component as string]
-      )
+      const metadata = (entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL]
+      metadata.bitset.remove(this.componentRegistry[component as string])
 
       this.index(entity)
     }
@@ -494,14 +489,17 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
    */
   registerComponents(components: (keyof E)[]) {
     for (const component of components) {
-      this.registerComponent(component)
+      if (this.componentRegistry[component as string] === undefined) {
+        this.componentIndexCounter++
+        this.componentRegistry[component as string] = this.componentIndexCounter
+      }
     }
 
     // if the world has already been initialised, resize all entity components bitsets
     if (this.initialised) {
       for (const entity of this.entities.values()) {
-        const internal = entity as EntityWithMetadata<E>
-        internal[ARANCINI_SYMBOL].bitset.resize(this.componentIndexCounter)
+        const metadata = (entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL]
+        metadata.bitset.resize(this.componentIndexCounter)
       }
     }
   }
@@ -561,18 +559,5 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
         removeEntityFromContainer(query, entity)
       }
     }
-  }
-
-  private registerComponent(component: keyof E): number {
-    let id = this.componentRegistry[component as string]
-
-    if (id === undefined) {
-      this.componentIndexCounter++
-
-      id = this.componentIndexCounter
-      this.componentRegistry[component as string] = id
-    }
-
-    return id
   }
 }
