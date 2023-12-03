@@ -1,5 +1,16 @@
 # arancini
 
+## 4.2.0
+
+### Minor Changes
+
+- 45ef120: feat: move bundles to dist, add note to readme regarding using entrypoints with typescript
+
+### Patch Changes
+
+- @arancini/core@4.2.0
+- @arancini/react@4.2.0
+
 ## 4.1.3
 
 ### Patch Changes
