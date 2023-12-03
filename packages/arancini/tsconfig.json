@@ -23,5 +23,5 @@
   },
   "include": ["./src"],
   "files": ["./src/index.ts", "./src/react.ts"],
-  "exclude": ["./index.d.ts", "./react.d.ts"]
+  "exclude": ["./dist"]
 }

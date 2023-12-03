@@ -282,7 +282,9 @@ class ExampleSystem extends System {
 
 You can install all of arancini with the umbrella `arancini` package, or you can install particular packages.
 
-> **Note:** arancini ships as ECMAScript modules.
+> **Note:** In order to use entrypoints with typescript, you must use a `moduleResolution` option that supports entrypoints, for example `bundler` or `NodeNext`.
+
+> **Note:** Bundles are ECMAScript modules, there are no CommonJS bundles right now.
 
 ### [**`arancini`**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini)
 

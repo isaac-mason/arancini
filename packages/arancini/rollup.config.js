@@ -27,7 +27,7 @@ export default [
     external: ['@arancini/core'],
     output: [
       {
-        file: `./index.js`,
+        file: `./dist/index.js`,
         ...commonOutput,
       },
     ],
@@ -38,7 +38,7 @@ export default [
     external: ['@arancini/core', '@arancini/react', 'react', 'react-dom'],
     output: [
       {
-        file: `./react.js`,
+        file: `./dist/react.js`,
         ...commonOutput,
       },
     ],

@@ -16,7 +16,7 @@
   },
   "scripts": {
     "build": "yarn build:before && rollup --config rollup.config.js --bundleConfigAsCjs",
-    "build:before": "(rm index.js index.d.ts react.js react.d.ts || true)",
+    "build:before": "rm -rf dist",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
@@ -58,21 +58,20 @@
     "vite-plugin-dts": "^3.6.3"
   },
   "type": "module",
-  "main": "./index.js",
-  "types": "./index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./react": {
-      "import": "./react.js"
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js"
     }
   },
   "files": [
-    "index.js",
-    "index.d.ts",
-    "react.js",
-    "react.d.ts",
+    "dist",
     "LICENSE",
     "README.md"
   ]
