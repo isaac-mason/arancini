@@ -4,10 +4,10 @@ import { Bounds, PerspectiveCamera, Text } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import React, { useEffect, useMemo, useState } from 'react'
 import * as THREE from 'three'
-import { Setup } from '../setup'
+import { Setup } from './setup'
 
 export default {
-  title: 'Pong',
+  title: 'React / Pong',
 }
 
 type EntityType = {

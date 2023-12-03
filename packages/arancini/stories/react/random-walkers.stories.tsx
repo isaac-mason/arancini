@@ -1,12 +1,12 @@
 import { System, World } from '@arancini/core'
+import { createReactAPI } from '@arancini/react'
 import { OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import React from 'react'
-import { createReactAPI } from '@arancini/react'
-import { Setup } from '../setup'
+import { Setup } from './setup'
 
 export default {
-  title: 'Random Walkers',
+  title: 'React / Random Walkers',
 }
 
 type EntityType = {

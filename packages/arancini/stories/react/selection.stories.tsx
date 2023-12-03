@@ -4,10 +4,10 @@ import { Bounds, PerspectiveCamera } from '@react-three/drei'
 import { Vector3, useFrame } from '@react-three/fiber'
 import React, { useState } from 'react'
 import * as THREE from 'three'
-import { Setup } from '../setup'
+import { Setup } from './setup'
 
 export default {
-  title: 'Selection',
+  title: 'React / Selection',
 }
 
 type EntityType = {

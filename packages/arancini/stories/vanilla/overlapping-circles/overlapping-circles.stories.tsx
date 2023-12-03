@@ -254,6 +254,6 @@ export const OverlappingCircles = () => {
 }
 
 export default {
-  name: 'Overlapping Circles',
+  name: 'Vanilla / Overlapping Circles',
   component: OverlappingCircles,
 }

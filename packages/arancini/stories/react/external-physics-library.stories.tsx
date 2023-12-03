@@ -2,8 +2,13 @@ import { System, World } from '@arancini/core'
 import { createReactAPI } from '@arancini/react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as P2 from 'p2-es'
-import React, { useMemo } from 'react'
+import React from 'react'
+import { useMemo } from 'react'
 import { Repeat } from 'timeline-composer'
+
+export default {
+  title: 'React / External Physics Library',
+}
 
 const boxMaterial = new P2.Material()
 const groundMaterial = new P2.Material()
@@ -186,6 +191,3 @@ export const Example = () => {
   )
 }
 
-export default {
-  title: 'External Physics Library',
-}

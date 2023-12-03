@@ -1,12 +1,13 @@
 import { World } from '@arancini/core'
 import { createReactAPI } from '@arancini/react'
 import { Html } from '@react-three/drei'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Lifetime, Repeat } from 'timeline-composer'
-import { Setup } from '../setup'
+import { Setup } from './setup'
+import React from 'react'
 
 export default {
-  title: 'Existing World',
+  title: 'React / Existing World',
 }
 
 const world = new World()

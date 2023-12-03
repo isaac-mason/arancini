@@ -193,6 +193,6 @@ export const RandomColorChangingWalkers = () => {
 }
 
 export default {
-  name: 'Random Walkers',
+  name: 'Vanilla / Random Walkers',
   component: RandomColorChangingWalkers,
 }

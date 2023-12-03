@@ -280,6 +280,6 @@ export const FindTheBomb = () => {
 }
 
 export default {
-  name: 'Find The Bomb',
+  name: 'Vanilla / Find The Bomb',
   component: FindTheBomb,
 }

@@ -1,16 +1,15 @@
-import * as React from 'react';
-import { Canvas, Props as CanvasProps } from '@react-three/fiber';
-
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei'
+import { Canvas, Props as CanvasProps } from '@react-three/fiber'
+import * as React from 'react'
 
 type Props = React.PropsWithChildren<
   CanvasProps & {
-    cameraFov?: number;
-    cameraPosition?: [number, number, number];
-    controls?: boolean;
-    lights?: boolean;
+    cameraFov?: number
+    cameraPosition?: [number, number, number]
+    controls?: boolean
+    lights?: boolean
   }
->;
+>
 
 export const Setup = ({
   children,
@@ -36,4 +35,4 @@ export const Setup = ({
       {controls && <OrbitControls />}
     </React.StrictMode>
   </Canvas>
-);
+)
