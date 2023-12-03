@@ -45,7 +45,9 @@
     "vitest": "^0.34.3"
   },
   "files": [
-    "dist"
+    "dist",
+    "LICENSE",
+    "README.md"
   ],
   "type": "module",
   "main": "dist/index.es.js",
