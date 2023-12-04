@@ -1,5 +1,4 @@
 export { EntityContainer } from './entity-container'
-export * from './object-pool'
 export {
   Query,
   QueryBuilder,
@@ -9,5 +8,4 @@ export {
   type Without,
 } from './query'
 export { System, type SystemClass } from './system'
-export * from './topic'
 export { World, type AnyEntity, type WorldOptions } from './world'

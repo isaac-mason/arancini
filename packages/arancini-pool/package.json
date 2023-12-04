@@ -1,6 +1,6 @@
 {
-  "name": "@arancini/core",
-  "description": "An object based Entity Component System",
+  "name": "@arancini/pool",
+  "description": "Object pooling utilities for arancini",
   "keywords": [
     "gamedev",
     "ecs",
@@ -20,10 +20,6 @@
     "build": "yarn build:before && rollup --config rollup.config.js --bundleConfigAsCjs",
     "build:before": "rm -rf dist"
   },
-  "dependencies": {
-    "@arancini/events": "4.2.0",
-    "@arancini/pool": "4.2.0"
-  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.0.1",
@@ -32,7 +28,7 @@
     "@typescript-eslint/eslint-plugin": "^6.2.0",
     "@typescript-eslint/parser": "^6.2.0",
     "@vitest/coverage-v8": "^0.34.6",
-    "eslint": "^8.55.0",
+    "eslint": "^8.48.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.0.0",

@@ -21,27 +21,24 @@ const plugins = [
   filesize(),
 ]
 
+const entrypoint = ({ name, external }) => ({
+  input: `./src/${name}.ts`,
+  external: external ?? [],
+  output: [
+    {
+      file: `./dist/${name}.js`,
+      ...commonOutput,
+    },
+  ],
+  plugins,
+})
+
 export default [
-  {
-    input: `./src/index.ts`,
-    external: ['@arancini/core'],
-    output: [
-      {
-        file: `./dist/index.js`,
-        ...commonOutput,
-      },
-    ],
-    plugins,
-  },
-  {
-    input: `./src/react.ts`,
-    external: ['@arancini/core', '@arancini/react', 'react', 'react-dom'],
-    output: [
-      {
-        file: `./dist/react.js`,
-        ...commonOutput,
-      },
-    ],
-    plugins,
-  },
+  entrypoint({ name: 'index', external: ['@arancini/core'] }),
+  entrypoint({
+    name: 'react',
+    external: ['@arancini/core', 'react', 'react-dom'],
+  }),
+  entrypoint({ name: 'events' }),
+  entrypoint({ name: 'pool' }),
 ]

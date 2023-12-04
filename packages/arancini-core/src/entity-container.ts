@@ -1,4 +1,4 @@
-import { Topic } from './topic'
+import { Topic } from '@arancini/events'
 import type { AnyEntity } from './world'
 
 export class EntityContainer<Entity> {

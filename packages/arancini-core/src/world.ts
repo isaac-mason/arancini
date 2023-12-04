@@ -9,7 +9,7 @@ import {
   EntityMetadata,
   EntityWithMetadata,
 } from './entity-metadata'
-import { ObjectPool } from './object-pool'
+import { ObjectPool } from '@arancini/pool'
 import {
   Query,
   QueryDescription,
