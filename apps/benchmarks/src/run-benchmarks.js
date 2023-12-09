@@ -8,7 +8,7 @@ import { velocity } from './suites/velocity.js'
  * Runs benchmarks
  * @param {*} now function that returns the current time in micro seconds
  */
-export const runBenchmarks = (now) => {
+export const runBenchmarks = (now, log) => {
   const bench = (suite) => {
     suite.setup(arancini)
 
@@ -31,16 +31,14 @@ export const runBenchmarks = (now) => {
       `${average.toFixed(6)}`.padStart(20 + ' ') + ' micro seconds'
     const updateText = updates > 0 ? `${updates} updates`.padStart(20) : ''
 
-    console.log(`${nameTxt} ${averageText} ${sumText} ${updateText}`)
+    log(`${nameTxt} ${averageText} ${sumText} ${updateText}`)
   }
 
-  console.log('running benchmarks...\n')
+  log('running benchmarks...\n')
 
-  setTimeout(() => {
-    const suites = [addRemove, addition, destroy, velocity]
+  const suites = [addRemove, addition, destroy, velocity]
 
-    suites.forEach((suite) => {
-      bench(suite)
-    })
+  suites.forEach((suite) => {
+    bench(suite)
   })
 }

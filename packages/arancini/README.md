@@ -186,11 +186,11 @@ const player = world.find((e) => e.has('player'))
 
 ### 🧠 Systems
 
-The core library does not provide any notion of systems. It doesn't do any scheduling, queries are updated as entities change. A "System" can be as simple as a function that operations on entities in the world, as we saw in the "Querying Entities" section above.
+The core library (`@arancini/core`) does not have a concept of systems. A "System" can be as simple as a function that operations on entities in the world, as we saw in the "Querying Entities" section above.
 
-Arancini does however provide opt-in utilities for writing systems in `arancini/systems`. You don't have to use them, but they provide a convenient way of organising logic if you're not sure where to start.
+Arancini does however provide opt-in utilities for writing systems in `arancini/systems`. This provides a convenient way of organising logic if you're not sure where to start.
 
-In `arancini/systems`, systems are classes that extend the `System` class. Systems are added to an `Executor`, and are updated when calling `executor.update()`.
+In `arancini/systems`, systems are classes that extend `System`. Systems are added to an `Executor`, and are updated when calling `executor.update()`.
 
 ```ts
 import { World } from 'arancini'
@@ -201,6 +201,7 @@ type Entity = {
   velocity?: { x: number; y: number }
 }
 
+// Create a World
 const world = new World<Entity>({
   components: ['position', 'velocity'],
 })
@@ -208,7 +209,7 @@ const world = new World<Entity>({
 // Create an Executor
 const executor = new Executor(world)
 
-// Define a system
+// Define a System
 class MovementSystem extends System<Entity> {
   moving = this.query((e) => e.has('position', 'velocity'))
 
@@ -223,41 +224,41 @@ class MovementSystem extends System<Entity> {
   }
 
   onInit() {
-    // Called when the world is initialised, or when the system is registered in an initialised world
+    // Called when the Executor is initialised, or when the system is added to an already initialised Executor
   }
 
   onDestroy() {
-    // Called when the world is destroyed or the system is unregistered
+    // Called when the Executor is destroyed, or the system is removed
   }
 }
 
 // Add the system to the executor
 executor.add(MovementSystem)
 
-// Use `executor.update()` to run all registered systems
-// Optionally pass a delta time
+// Update all systems, optionally passing a delta time
 executor.update(1 / 60)
 ```
 
 #### System priority
 
-Systems can be registered with a priority. The order systems run in is first determined by priority, then by the order systems were registered.
+Systems can be added with a priority. The order systems run in is first determined by priority, then by the order systems were added.
 
 ```ts
-const priority = 10
-
-executor.add(MovementSystem, { priority })
+executor.add(MovementSystem, { priority: 10 })
 ```
 
 #### Required system queries
 
-System queries can be marked as 'required', which will cause `onUpdate` to only be called if the query has at least one result.
+If a system should only run when a query has results, you can mark the query as required. Then, `onUpdate` will only be called if the query has at least one result.
+
+> **Note:** `onInit` and `onDestroy` will be called regardless of whether required queries have results.
 
 ```ts
 class ExampleSystem extends System<Entity> {
   requiredQuery = this.query((e) => e.has('position'), { required: true })
 
   onUpdate() {
+    // we can safely assume that the query has at least one result
     const { x, y } = this.requiredQuery.first
   }
 }
@@ -265,9 +266,7 @@ class ExampleSystem extends System<Entity> {
 
 #### Singleton Queries
 
-The `singleton` method creates a query for a single component, and sets the property to the given component from the first matching entity.
-
-Singletons are useful for accessing components that are expected to exist on a single entity, such as a camera, or a player in a single player game.
+The `this.singleton` utility method creates a query for a single component, and sets the property to the given component on the first matching entity.
 
 ```ts
 class CameraRigSystem extends System<Entity> {
@@ -374,15 +373,15 @@ Eventing utilities.
 ```ts
 import { Topic } from '@arancini/events'
 
-const topic = new Topic<[string]>()
+const inventoryEvents = new Topic<[item: string, quantity: number]>()
 
-const unsubscribe = topic.add((message) => {
-  console.log(message)
+const unsubscribe = topic.inventoryEvents((item, quantity) => {
+  console.log(item, quantity)
 })
 
-topic.emit('hello world')
+inventoryEvents.emit('apple', 1)
 
-unsubscribe()
+inventoryEvents.clear()
 ```
 
 ### [**`@arancini/pool`**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-pool)
@@ -393,7 +392,7 @@ Object pooling utilities.
 
 ```bash
 > npm install @arancini/pool
-````
+```
 
 ```ts
 import { ObjectPool } from '@arancini/pool'

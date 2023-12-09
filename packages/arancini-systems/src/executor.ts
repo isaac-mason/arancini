@@ -12,7 +12,7 @@ import { isSubclassMethodOverridden } from './utils'
 export class Executor<E extends AnyEntity> {
   world: World<E>
 
-  initialized = false
+  initialised = false
 
   time = 0
 
@@ -36,7 +36,7 @@ export class Executor<E extends AnyEntity> {
   }
 
   init(): void {
-    this.initialized = true
+    this.initialised = true
 
     for (const system of this.systemClassToInstance.values()) {
       this.initSystem(system)
@@ -105,14 +105,14 @@ export class Executor<E extends AnyEntity> {
     this.updateAllSystemAttachments()
 
     // if the system has an onUpdate method, add it to the sorted systems.
-    // systems are sorted immediately if the system manager is initialized, otherwise
+    // systems are sorted immediately if the system manager is initialised, otherwise
     // they are sorted on initialisation.
     const hasOnUpdate = isSubclassMethodOverridden(Clazz, 'onUpdate')
     if (hasOnUpdate) {
       this.systemsToUpdate.push(system)
     }
 
-    if (this.initialized) {
+    if (this.initialised) {
       this.initSystem(system)
 
       if (hasOnUpdate) {
@@ -166,8 +166,8 @@ export class Executor<E extends AnyEntity> {
           __internal: { component, options },
         } = field as SingletonQueryPlaceholder
 
-        const queryDescription: QueryDescription<any, any> = (q) =>
-          q.has(component)
+        const queryDescription: QueryDescription<any, any> = (e) =>
+          e.has(component)
 
         const query = createSystemQuery(
           this.world,

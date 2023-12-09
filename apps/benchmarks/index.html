@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -7,12 +7,34 @@
     <title>arancini benchmarks</title>
   </head>
   <body>
-    <div id="app"></div>
+    <h1>arancini benchmarks</h1>
+
+    <div id="logs"></div>
+
     <script type="module">
-      import { runBenchmarks } from './src/run-benchmarks.js';
+      import { runBenchmarks } from './src/run-benchmarks.js'
 
       const nowInMicroSeconds = () => performance.now() * 1000
-      runBenchmarks(nowInMicroSeconds);
+
+      const logs = []
+
+      runBenchmarks(nowInMicroSeconds, (msg) => {
+        logs.push(msg)
+      })
+
+      for (const log of logs) {
+        const paragraph = document.createElement('p')
+        paragraph.innerText = log
+
+        document.querySelector('#logs').appendChild(paragraph)
+      }
     </script>
+
+    <style>
+      h1, p {
+        font-family: monospace;
+        white-space: pre;
+      }
+    </style>
   </body>
 </html>

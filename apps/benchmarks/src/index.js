@@ -6,4 +6,4 @@ const nowInMicroSeconds = () => {
   return (hr[0] * 1e9 + hr[1]) / 1000
 }
 
-runBenchmarks(nowInMicroSeconds)
+runBenchmarks(nowInMicroSeconds, console.log)
