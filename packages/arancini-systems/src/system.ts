@@ -75,7 +75,7 @@ export abstract class System<E extends AnyEntity = any> {
     /**
      * A set of queries used by the system
      */
-    queries: Set<Query<E>>
+    queries: Set<Query<any>>
 
     /**
      * The priority of the system, determines system run order.

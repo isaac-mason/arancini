@@ -21,6 +21,8 @@ import {
   getQueryResults,
 } from './query'
 
+const DEFAULT_QUERY_HANDLE = 'standalone'
+
 export type ComponentRegistry = { [name: string]: number }
 
 export type WorldOptions<E extends {}> = {
@@ -32,7 +34,7 @@ export type AnyEntity = Record<string, any>
 export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   queries = new Map<string, Query<any>>()
 
-  private queryConsumers: Map<string, unknown[]> = new Map()
+  private queryUsages: Map<string, unknown[]> = new Map()
 
   private componentIndexCounter = -1
   private componentRegistry: ComponentRegistry = {}
@@ -343,13 +345,26 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
    */
   query<ResultEntity extends E>(
     queryDescription: QueryDescription<E, ResultEntity>,
-    options?: { owner: unknown }
+    options?: { handle: unknown }
   ): Query<ResultEntity> {
     const queryConditions = getQueryConditions(queryDescription)
     const key = getQueryDedupeString(this.componentRegistry, queryConditions)
 
+    const handle = options?.handle ?? DEFAULT_QUERY_HANDLE
+
+    let queryUsages = this.queryUsages.get(key)
+
+    if (queryUsages) {
+      queryUsages.push(handle)
+    } else {
+      this.queryUsages.set(key, [handle])
+    }
+
     let query = this.queries.get(key) as Query<ResultEntity>
-    if (query) return query
+
+    if (query) {
+      return query
+    }
 
     query = new Query(
       this,
@@ -366,11 +381,6 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
 
     this.queries.set(key, query)
 
-    const owner = options?.owner ?? 'standalone'
-    const queryOwners = this.queryConsumers.get(query.key) ?? []
-    queryOwners.push(owner)
-    this.queryConsumers.set(query.key, queryOwners)
-
     return query
   }
 
@@ -379,22 +389,24 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
    * @param query the Query to remove
    * @returns
    */
-  destroyQuery(query: Query<any>, owner: unknown = 'standalone'): void {
+  destroyQuery(query: Query<any>, options?: { handle: unknown }): void {
     if (!this.queries.has(query.key)) {
       return
     }
 
-    let usages = this.queryConsumers.get(query.key) ?? []
+    const handle = options?.handle ?? DEFAULT_QUERY_HANDLE
 
-    usages = usages.filter((usage) => usage !== owner)
+    let usages = this.queryUsages.get(query.key) ?? []
+
+    usages = usages.filter((usage) => usage !== handle)
 
     if (usages.length > 0) {
-      this.queryConsumers.set(query.key, usages)
+      this.queryUsages.set(query.key, usages)
       return
     }
 
     this.queries.delete(query.key)
-    this.queryConsumers.delete(query.key)
+    this.queryUsages.delete(query.key)
     query.onEntityAdded.clear()
     query.onEntityRemoved.clear()
   }

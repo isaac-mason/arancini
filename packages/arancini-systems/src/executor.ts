@@ -35,6 +35,9 @@ export class Executor<E extends AnyEntity> {
     this.world = world
   }
 
+  /**
+   * Initialises the Executor. Must be called before update.
+   */
   init(): void {
     this.initialised = true
 
@@ -45,6 +48,10 @@ export class Executor<E extends AnyEntity> {
     this.sortSystems()
   }
 
+  /**
+   * Updates all systems
+   * @param delta optional delta time
+   */
   update(delta: number = 0): void {
     this.time += delta
 
@@ -66,6 +73,9 @@ export class Executor<E extends AnyEntity> {
     }
   }
 
+  /**
+   * Calls onDestroy on all systems
+   */
   destroy(): void {
     for (const system of this.systemClassToInstance.values()) {
       system.onDestroy()
@@ -75,7 +85,7 @@ export class Executor<E extends AnyEntity> {
   /**
    * Retrives a System by class
    * @param clazz the System class
-   * @returns the System, or undefined if it is not registerd
+   * @returns the System, or undefined if it is not present
    */
   get<S extends System>(clazz: SystemClass<S>): S | undefined {
     return this.systemClassToInstance.get(clazz) as S | undefined
@@ -244,7 +254,9 @@ export const createSystemQuery = <
   queryDescription: QueryDescription<Entity, ResultEntity>,
   options?: SystemQueryOptions
 ): Query<ResultEntity> => {
-  const query = world.query(queryDescription, { owner: system })
+  const query = world.query(queryDescription, { handle: system })
+
+  system.__internal.queries.add(query)
 
   if (options?.required) {
     system.__internal.requiredQueries.push(query)
