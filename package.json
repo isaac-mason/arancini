@@ -1,14 +1,14 @@
 {
   "name": "root",
   "private": true,
-  "packageManager": "yarn@3.4.1",
+  "packageManager": "yarn@4.0.2",
   "workspaces": [
     "packages/*",
     "apps/*"
   ],
   "scripts": {
-    "build": "yarn workspaces foreach -t run build",
-    "test": "yarn workspaces foreach -t run test",
+    "build": "yarn workspaces foreach -A -t run build",
+    "test": "yarn workspaces foreach -A -t run test",
     "change": "yarn changeset",
     "version": "yarn changeset version && yarn install --mode update-lockfile",
     "release": "yarn build && yarn test && yarn build-storybook && changeset publish",
