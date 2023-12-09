@@ -1,5 +1,14 @@
 # @arancini/core
 
+## 5.0.0
+
+### Patch Changes
+
+- Updated dependencies [89ce0e9]
+- Updated dependencies [89ce0e9]
+  - @arancini/events@5.0.0
+  - @arancini/pool@5.0.0
+
 ## 4.2.0
 
 ## 4.1.3

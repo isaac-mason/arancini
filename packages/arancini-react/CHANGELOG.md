@@ -1,5 +1,11 @@
 # @arancini/react
 
+## 5.0.0
+
+### Patch Changes
+
+- @arancini/core@5.0.0
+
 ## 4.2.0
 
 ### Patch Changes
