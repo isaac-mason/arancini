@@ -12,8 +12,6 @@ export default {
 
 const world = new World()
 
-world.init()
-
 const { Entity } = createReactAPI(world)
 
 export const ExistingWorld = () => {

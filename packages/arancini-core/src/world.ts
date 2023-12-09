@@ -20,7 +20,6 @@ import {
   getQueryDedupeString,
   getQueryResults,
 } from './query'
-import { System, SystemAttributes, SystemClass, SystemManager } from './system'
 
 export type ComponentRegistry = { [name: string]: number }
 
@@ -31,12 +30,6 @@ export type WorldOptions<E extends {}> = {
 export type AnyEntity = Record<string, any>
 
 export class World<E extends AnyEntity = any> extends EntityContainer<E> {
-  time = 0
-
-  initialised = false
-
-  systemManager: SystemManager
-
   queries = new Map<string, Query<any>>()
 
   private queryConsumers: Map<string, unknown[]> = new Map()
@@ -55,46 +48,22 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     id: undefined,
   }))
 
+  private initialised = false
+
   constructor(options?: WorldOptions<E>) {
     super()
-
-    this.systemManager = new SystemManager(this)
 
     if (options?.components) {
       this.registerComponents(options.components)
     }
-  }
 
-  /**
-   * Initialises the World
-   */
-  init() {
     this.initialised = true
-
-    this.systemManager.init()
   }
 
   /**
-   * Steps the world
-   * @param delta the time elapsed since the last step
-   */
-  step(delta: number) {
-    this.time += delta
-
-    this.systemManager.update(delta, this.time)
-  }
-
-  /**
-   * Resets the world. Removes all entities, and calls onDestroy on all systems.
-   * Components and Systems remain registered.
-   * The world must be initialised again after this.
+   * Removes all entities from the world. Components remain registered, and queries are not destroyed.
    */
   reset() {
-    this.time = 0
-    this.initialised = false
-
-    this.systemManager.destroy()
-
     this.entities.forEach((entity) => this.destroy(entity))
     this.entityIdCounter = 0
     this.idToEntity.clear()
@@ -502,43 +471,6 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
         metadata.bitset.resize(this.componentIndexCounter)
       }
     }
-  }
-
-  /**
-   * Adds a system to the World
-   * @param system the system to add to the World
-   * @returns the World
-   */
-  registerSystem(system: SystemClass, attributes?: SystemAttributes): World {
-    this.systemManager.registerSystem(system, attributes)
-    return this
-  }
-
-  /**
-   * Removes a System from the World
-   * @param system the System to remove from the World
-   * @returns the World
-   */
-  unregisterSystem(system: SystemClass): World {
-    this.systemManager.unregisterSystem(system)
-    return this
-  }
-
-  /**
-   * Retrives a System by class
-   * @param clazz the System class
-   * @returns the System, or undefined if it is not registerd
-   */
-  getSystem<S extends System<E>>(clazz: SystemClass<S>): S | undefined {
-    return this.systemManager.systems.get(clazz) as S | undefined
-  }
-
-  /**
-   * Retrieves a list of all Systems in the world
-   * @returns all Systems in the world
-   */
-  getSystems(): System<E>[] {
-    return Array.from(this.systemManager.systems.values())
   }
 
   private index(entity: E) {

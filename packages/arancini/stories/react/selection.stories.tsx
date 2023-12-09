@@ -1,4 +1,5 @@
-import { System, World } from '@arancini/core'
+import { World } from '@arancini/core'
+import { System, Executor } from '@arancini/systems'
 import { createReactAPI } from '@arancini/react'
 import { Bounds, PerspectiveCamera } from '@react-three/drei'
 import { Vector3, useFrame } from '@react-three/fiber'
@@ -46,9 +47,11 @@ const world = new World<EntityType>({
   components: ['object3D', 'camera', 'selected'],
 })
 
-world.registerSystem(CameraSystem)
+const executor = new Executor(world)
 
-world.init()
+executor.add(CameraSystem)
+
+executor.init()
 
 const { useCurrentEntity, Component, Entity } = createReactAPI(world)
 
@@ -121,7 +124,7 @@ const Camera = () => (
 
 const App = () => {
   useFrame((_, delta) => {
-    world.step(delta)
+    executor.update(delta)
   })
 
   return (

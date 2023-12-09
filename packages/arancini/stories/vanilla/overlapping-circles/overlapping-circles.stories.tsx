@@ -1,4 +1,5 @@
-import { System, World } from '@arancini/core'
+import { World } from '@arancini/core'
+import { Executor, System } from '@arancini/systems'
 import React, { useEffect } from 'react'
 import { Vector2, drawLine, fillCircle, intersection, random } from './utils'
 
@@ -91,10 +92,7 @@ export class IntersectionSystem extends System<Entity> {
         }
       }
 
-      if (
-        entity.intersecting &&
-        entity.intersecting.points.length === 0
-      ) {
+      if (entity.intersecting && entity.intersecting.points.length === 0) {
         this.world.remove(entity, 'intersecting')
       }
     }
@@ -164,44 +162,41 @@ export class Renderer extends System<Entity> {
   }
 }
 
-
 export const OverlappingCircles = () => {
   useEffect(() => {
     const world = new World<Entity>({
       components: ['circle', 'movement', 'intersecting', 'canvas'],
     })
 
-    world
-      .registerSystem(MovementSystem)
-      .registerSystem(Renderer)
-      .registerSystem(IntersectionSystem)
+    const executor = new Executor(world)
 
-      const canvasElement = document.querySelector(
-        '#example-canvas'
-      ) as HTMLCanvasElement
-      canvasElement.width = window.innerWidth
-      canvasElement.height = window.innerHeight
-  
-      const canvasEntity = {
-        canvas: {
-          canvasElement,
-          ctx: canvasElement.getContext('2d')!,
-          width: canvasElement.width,
-          height: canvasElement.height,
-        }
-      }
+    executor.add(MovementSystem).add(Renderer).add(IntersectionSystem)
 
-      world.create(canvasEntity)
-  
-      window.addEventListener(
-        'resize',
-        () => {
-          canvasEntity.canvas.width = canvasElement.width = window.innerWidth
-          canvasEntity.canvas.height = canvasElement.height = window.innerHeight
-        },
-        false
-      )
+    const canvasElement = document.querySelector(
+      '#example-canvas'
+    ) as HTMLCanvasElement
+    canvasElement.width = window.innerWidth
+    canvasElement.height = window.innerHeight
 
+    const canvasEntity = {
+      canvas: {
+        canvasElement,
+        ctx: canvasElement.getContext('2d')!,
+        width: canvasElement.width,
+        height: canvasElement.height,
+      },
+    }
+
+    world.create(canvasEntity)
+
+    window.addEventListener(
+      'resize',
+      () => {
+        canvasEntity.canvas.width = canvasElement.width = window.innerWidth
+        canvasEntity.canvas.height = canvasElement.height = window.innerHeight
+      },
+      false
+    )
 
     for (let i = 0; i < 30; i++) {
       const entity = {
@@ -212,18 +207,21 @@ export const OverlappingCircles = () => {
         movement: {
           velocity: new Vector2(),
           acceleration: new Vector2(),
-        }
+        },
       }
 
       world.create(entity)
 
-      entity.circle.position.set(random(0, canvasEntity.canvas.width), random(0, canvasEntity.canvas.height))
+      entity.circle.position.set(
+        random(0, canvasEntity.canvas.width),
+        random(0, canvasEntity.canvas.height)
+      )
       entity.circle.radius = random(20, 100)
 
       entity.movement.velocity.set(random(-20, 20), random(-20, 20))
     }
 
-    world.init()
+    executor.init()
 
     const now = () => performance.now() / 1000
 
@@ -239,7 +237,7 @@ export const OverlappingCircles = () => {
       const delta = time - lastTime
       lastTime = time
 
-      world.step(delta)
+      executor.update(delta)
     }
 
     update()

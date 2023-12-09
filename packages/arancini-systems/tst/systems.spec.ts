@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from 'vitest'
-import { World } from '../src/world'
-import { System } from '../src/system'
+import { World } from '@arancini/core'
+import { describe, expect, it, vi } from 'vitest'
+import { Executor, System } from '../src'
 
 type Entity = {
   foo?: string
@@ -10,8 +10,7 @@ type Entity = {
 describe('Systems', () => {
   it('should update systems', () => {
     const world = new World<Entity>()
-
-    world.init()
+    const executor = new Executor(world)
 
     const onUpdateFn = vi.fn()
 
@@ -21,24 +20,25 @@ describe('Systems', () => {
       }
     }
 
-    world.registerSystem(ExampleSystem)
+    executor.add(ExampleSystem)
 
-    world.step(0.1)
-    world.step(0.1)
+    executor.update(0.1)
+    executor.update(0.1)
 
     expect(onUpdateFn).toHaveBeenCalledTimes(2)
     expect(onUpdateFn).toHaveBeenCalledWith(0.1, 0.1)
     expect(onUpdateFn).toHaveBeenCalledWith(0.1, 0.2)
 
-    world.unregisterSystem(ExampleSystem)
+    executor.remove(ExampleSystem)
 
-    world.step(0.1)
+    executor.update(0.1)
 
     expect(onUpdateFn).toHaveBeenCalledTimes(2)
   })
 
   it('should support attaching systems to other systems', () => {
     const world = new World<Entity>()
+    const executor = new Executor(world)
 
     class ExampleSystem extends System<Entity> {}
 
@@ -46,19 +46,20 @@ describe('Systems', () => {
       exampleSystem = this.attach(ExampleSystem)!
     }
 
-    world.registerSystem(ExampleSystem)
-    world.registerSystem(ExampleSystemTwo)
+    executor.add(ExampleSystem)
+    executor.add(ExampleSystemTwo)
 
-    world.init()
+    executor.init()
 
-    const exampleSystem = world.getSystem(ExampleSystem)!
-    const exampleSystemTwo = world.getSystem(ExampleSystemTwo)!
+    const exampleSystem = executor.get(ExampleSystem)!
+    const exampleSystemTwo = executor.get(ExampleSystemTwo)!
 
     expect(exampleSystemTwo.exampleSystem).toBe(exampleSystem)
   })
 
   it('should support attaching queries to systems', () => {
     const world = new World<Entity>({ components: ['foo', 'bar'] })
+    const executor = new Executor(world)
 
     class ExampleSystem extends System<Entity> {
       exampleQuery = this.query((q) => q.has('foo'))
@@ -66,11 +67,11 @@ describe('Systems', () => {
       exampleSingleton = this.singleton('foo')!
     }
 
-    world.registerSystem(ExampleSystem)
+    executor.add(ExampleSystem)
 
-    world.init()
+    executor.init()
 
-    const exampleSystem = world.getSystem(ExampleSystem)!
+    const exampleSystem = executor.get(ExampleSystem)!
 
     world.create({ foo: 'bar' })
 
@@ -80,6 +81,7 @@ describe('Systems', () => {
 
   it('should support sorting systems by registration order and priority', () => {
     const world = new World<Entity>()
+    const executor = new Executor(world)
 
     const updateFn = vi.fn()
 
@@ -101,38 +103,21 @@ describe('Systems', () => {
       }
     }
 
-    world.registerSystem(ExampleSystem)
-    world.registerSystem(ExampleSystemTwo, { priority: 1 })
-    world.registerSystem(ExampleSystemThree)
+    executor.add(ExampleSystem)
+    executor.add(ExampleSystemTwo, { priority: 1 })
+    executor.add(ExampleSystemThree)
 
-    world.init()
+    executor.init()
 
-    world.step(0.1)
+    executor.update(0.1)
 
     expect(updateFn).toHaveBeenCalledTimes(3)
-    expect(updateFn).toHaveBeenNthCalledWith(
-      1,
-      world.getSystem(ExampleSystemTwo)
-    )
-    expect(updateFn).toHaveBeenNthCalledWith(2, world.getSystem(ExampleSystem))
+    expect(updateFn).toHaveBeenNthCalledWith(1, executor.get(ExampleSystemTwo))
+    expect(updateFn).toHaveBeenNthCalledWith(2, executor.get(ExampleSystem))
     expect(updateFn).toHaveBeenNthCalledWith(
       3,
-      world.getSystem(ExampleSystemThree)
+      executor.get(ExampleSystemThree)
     )
-  })
-
-  it('silently swallows attempting to unregister a system that is not registered or has already been unregistered', () => {
-    class ExampleSystem extends System {}
-
-    expect(() => {
-      const world = new World<Entity>()
-
-      world
-        .unregisterSystem(ExampleSystem)
-        .registerSystem(ExampleSystem)
-        .unregisterSystem(ExampleSystem)
-        .unregisterSystem(ExampleSystem)
-    }).not.toThrowError()
   })
 
   it('throws an error on attempting to re-register a system', () => {
@@ -140,13 +125,26 @@ describe('Systems', () => {
 
     expect(() => {
       const world = new World<Entity>()
+      const executor = new Executor(world)
 
-      world.registerSystem(ExampleSystem).registerSystem(ExampleSystem)
+      executor.add(ExampleSystem).add(ExampleSystem)
+    }).toThrowError()
+  })
+
+  it('throws an error on attempting to unregister a system that is not registered', () => {
+    class ExampleSystem extends System {}
+
+    expect(() => {
+      const world = new World<Entity>()
+      const executor = new Executor(world)
+
+      executor.remove(ExampleSystem)
     }).toThrowError()
   })
 
   it('should remove queries if they are no longer used by any systems', () => {
     const world = new World<Entity>({ components: ['foo', 'bar'] })
+    const executor = new Executor(world)
 
     class TestSystemWithQuery extends System<Entity> {
       exampleQuery = this.query((entities) => entities.with('foo'))
@@ -156,28 +154,29 @@ describe('Systems', () => {
       exampleQuery = this.query((entities) => entities.with('foo'))
     }
 
-    world.registerSystem(TestSystemWithQuery)
-    world.registerSystem(AnotherTestSystemWithQuery)
+    executor.add(TestSystemWithQuery)
+    executor.add(AnotherTestSystemWithQuery)
 
     world.queries.size === 1
 
-    world.unregisterSystem(TestSystemWithQuery)
+    executor.remove(TestSystemWithQuery)
 
     world.queries.size === 1
 
-    world.unregisterSystem(AnotherTestSystemWithQuery)
+    executor.remove(AnotherTestSystemWithQuery)
 
     world.queries.size === 0
   })
 
   it('should not remove queries used by systems if an equivalent standalone query is in use', () => {
     const world = new World<Entity>({ components: ['foo', 'bar'] })
+    const executor = new Executor(world)
 
     class TestSystemWithQuery extends System<Entity> {
       exampleQuery = this.query((entities) => entities.with('foo'))
     }
 
-    world.registerSystem(TestSystemWithQuery)
+    executor.add(TestSystemWithQuery)
 
     world.queries.size === 1
 
@@ -185,13 +184,14 @@ describe('Systems', () => {
 
     world.queries.size === 1
 
-    world.unregisterSystem(TestSystemWithQuery)
+    executor.remove(TestSystemWithQuery)
 
     world.queries.size === 1
   })
 
   it('supports making queries required, preventing system updates if there are no results', () => {
     const world = new World<Entity>({ components: ['foo', 'bar'] })
+    const executor = new Executor(world)
 
     const onUpdateFn = vi.fn()
 
@@ -207,33 +207,34 @@ describe('Systems', () => {
       }
     }
 
-    world.registerSystem(TestSystemWithQuery)
+    executor.add(TestSystemWithQuery)
 
-    world.init()
+    executor.init()
 
-    world.step(0.1)
+    executor.update(0.1)
     expect(onUpdateFn).toHaveBeenCalledTimes(0)
 
     const entityOne = { foo: 'value' }
     world.create(entityOne)
 
-    world.step(0.1)
+    executor.update(0.1)
     expect(onUpdateFn).toHaveBeenCalledTimes(0)
 
     const entityTwo = { bar: 1 }
     world.create(entityTwo)
 
-    world.step(0.1)
+    executor.update(0.1)
     expect(onUpdateFn).toHaveBeenCalledTimes(1)
 
     world.destroy(entityOne)
 
-    world.step(0.1)
+    executor.update(0.1)
     expect(onUpdateFn).toHaveBeenCalledTimes(1)
   })
 
-  it('should call system onDestroy methods on resetting the world', () => {
+  it('should call system onDestroy methods on destroying the Executor', () => {
     const world = new World<Entity>()
+    const executor = new Executor(world)
 
     const onDestroyFn = vi.fn()
 
@@ -243,17 +244,18 @@ describe('Systems', () => {
       }
     }
 
-    world.registerSystem(ExampleSystem)
+    executor.add(ExampleSystem)
 
-    world.init()
+    executor.init()
 
-    world.reset()
+    executor.destroy()
 
     expect(onDestroyFn).toHaveBeenCalledTimes(1)
   })
 
   it('should not update systems if "enabled" is false', () => {
     const world = new World<Entity>()
+    const executor = new Executor(world)
 
     const onUpdateFn = vi.fn()
 
@@ -263,21 +265,22 @@ describe('Systems', () => {
       }
     }
 
-    world.registerSystem(ExampleSystem)
+    executor.add(ExampleSystem)
 
-    world.init()
+    executor.init()
 
-    world.step(0.1)
+    executor.update(0.1)
     expect(onUpdateFn).toHaveBeenCalledTimes(1)
 
-    world.getSystem(ExampleSystem)!.enabled = false
+    executor.get(ExampleSystem)!.enabled = false
 
-    world.step(0.1)
+    executor.update(0.1)
     expect(onUpdateFn).toHaveBeenCalledTimes(1)
   })
 
   it('should not update systems after they are unregistered', () => {
     const world = new World<Entity>()
+    const executor = new Executor(world)
 
     const onUpdateFn = vi.fn()
 
@@ -287,16 +290,16 @@ describe('Systems', () => {
       }
     }
 
-    world.registerSystem(ExampleSystem)
+    executor.add(ExampleSystem)
 
-    world.init()
+    executor.init()
 
-    world.step(0.1)
+    executor.update(0.1)
     expect(onUpdateFn).toHaveBeenCalledTimes(1)
 
-    world.unregisterSystem(ExampleSystem)
+    executor.remove(ExampleSystem)
 
-    world.step(0.1)
+    executor.update(0.1)
     expect(onUpdateFn).toHaveBeenCalledTimes(1)
   })
 })

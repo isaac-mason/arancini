@@ -13,8 +13,8 @@
 
 - 🍱 ‎ Entities are regular objects, components are properties
 - 🔍 ‎ Fast reactive queries powered by bitsets
-- 🧠 ‎ Define Systems with arancini, or bring your own system logic
 - 🧩 ‎ Framework agnostic, plug arancini into whatever you like
+- 🧠 ‎ Define Systems with `arancini/systems`, or bring your own system logic
 - ⚛️ ‎ [Easy integration with React](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-react)
 - 💙 ‎ TypeScript friendly
 
@@ -49,13 +49,10 @@ type Entity = {
 const world = new World<Entity>({
   components: ['position', 'health', 'velocity', 'inventory'],
 })
-
-// initialise the world
-world.init()
 ```
 
 > **Note:**
-> Components must be registered before they can be used. You can register components in an existing world using `world.registerComponents`, but doing so after initialising the world will cause a small performance hit.
+> Components must be registered before they can be used. You can register components in an existing world using `world.registerComponents`, but doing so will cause a small performance hit as structures for existing entities need to be updated.
 
 ### 🍱 Creating Entities
 
@@ -113,16 +110,16 @@ world.destroy(playerEntity)
 You can query entities based on their components with `world.query`. Queries are reactive, they will update as entities in the world change.
 
 ```ts
-const monsters = world.query((q) => q.all('health', 'position', 'velocity'))
+const monsters = world.query((e) => e.all('health', 'position', 'velocity'))
 ```
 
-> **Note:** Arancini dedupe queries with the same filters, so you can create multiple of the same query without performance penalty!
+> **Note:** Arancini dedupes queries with the same conditions, so you can create multiple of the same query without performance penalty!
 
-Arancini supports `all`, `any`, and `none` filters. The query builder has some aliases for the main three conditions and noop grammar to make queries easier to read.
+Arancini supports `all`, `any`, and `none` conditions. The query builder has some aliases for the main three conditions and noop grammar to make queries easier to read.
 
 ```ts
-const monsters = world.query((q) =>
-  q.all('health', 'position').any('skeleton', 'zombie').none('dead')
+const monsters = world.query((e) =>
+  e.all('health', 'position').any('skeleton', 'zombie').none('dead')
 )
 
 const monsters = world.query((entities) =>
@@ -136,7 +133,7 @@ const monsters = world.query((entities) =>
 You can iterate over queries using a `for...of` loop (via `Symbol.iterator`). This will iterate over entities in reverse order, which must be done to avoid issues when making changes that will remove entities from queries. You can also use `query.entities` directly.
 
 ```ts
-const monsters = world.query((q) => q.all('health', 'position', 'velocity'))
+const monsters = world.query((e) => e.all('health', 'position', 'velocity'))
 
 const updateMonsters = () => {
   /* iterates over entities in reverse order */
@@ -179,6 +176,8 @@ You can use `world.filter` and `world.find` to get ad-hoc query results.
 
 This is useful for cases where you want to get results infrequently, without the cost of evaluating a reactive query as the world changes.
 
+If there is an existing query with the same conditions, the query results will be reused.
+
 ```ts
 const monsters = world.filter((e) => e.has('health', 'position', 'velocity'))
 
@@ -187,13 +186,29 @@ const player = world.find((e) => e.has('player'))
 
 ### 🧠 Systems
 
-Systems contain logic that operate on entities.
+The core library does not provide any notion of systems. It doesn't do any scheduling, queries are updated as entities change. A "System" can be as simple as a function that operations on entities in the world, as we saw in the "Querying Entities" section above.
 
-In arancini, systems are classes that extend `System`. Systems are registered with a world, and are updated when `world.step` is called.
+Arancini does however provide opt-in utilities for writing systems in `arancini/systems`. You don't have to use them, but they provide a convenient way of organising logic if you're not sure where to start.
 
-While arancini has built-in support for systems, it's worth noting that there's nothing special about systems. You can write your own "System" logic using queries directly. Arancini Systems just offer a convenient way of organising logic.
+In `arancini/systems`, systems are classes that extend the `System` class. Systems are added to an `Executor`, and are updated when calling `executor.update()`.
 
 ```ts
+import { World } from 'arancini'
+import { Executor, System } from 'arancini/systems'
+
+type Entity = {
+  position?: { x: number; y: number }
+  velocity?: { x: number; y: number }
+}
+
+const world = new World<Entity>({
+  components: ['position', 'velocity'],
+})
+
+// Create an Executor
+const executor = new Executor(world)
+
+// Define a system
 class MovementSystem extends System<Entity> {
   moving = this.query((e) => e.has('position', 'velocity'))
 
@@ -216,11 +231,12 @@ class MovementSystem extends System<Entity> {
   }
 }
 
-// Register the system
-world.registerSystem(ExampleSystem)
+// Add the system to the executor
+executor.add(MovementSystem)
 
-// Use `world.step()` to run all registered systems
-world.step(1 / 60)
+// Use `executor.update()` to run all registered systems
+// Optionally pass a delta time
+executor.update(1 / 60)
 ```
 
 #### System priority
@@ -229,7 +245,8 @@ Systems can be registered with a priority. The order systems run in is first det
 
 ```ts
 const priority = 10
-world.registerSystem(MovementSystem, priority)
+
+executor.add(MovementSystem, { priority })
 ```
 
 #### Required system queries
@@ -237,8 +254,8 @@ world.registerSystem(MovementSystem, priority)
 System queries can be marked as 'required', which will cause `onUpdate` to only be called if the query has at least one result.
 
 ```ts
-class ExampleSystem extends System {
-  requiredQuery = this.query((q) => q.has('position'), { required: true })
+class ExampleSystem extends System<Entity> {
+  requiredQuery = this.query((e) => e.has('position'), { required: true })
 
   onUpdate() {
     const { x, y } = this.requiredQuery.first
@@ -253,11 +270,11 @@ The `singleton` method creates a query for a single component, and sets the prop
 Singletons are useful for accessing components that are expected to exist on a single entity, such as a camera, or a player in a single player game.
 
 ```ts
-class ExampleSystem extends System {
-  player = this.singleton('player', { required: true })
+class CameraRigSystem extends System<Entity> {
+  camera = this.singleton('camera', { required: true })
 
   onUpdate() {
-    console.log(player)
+    console.log(camera)
   }
 }
 ```
@@ -269,10 +286,10 @@ class ExampleSystem extends System {
 Systems can be attached to other systems with `this.attach`. This is useful for sharing logic or system state that doesn't belong in a component.
 
 ```ts
-class ExampleSystem extends System {
+class ExampleSystem extends System<Entity> {
   otherSystem = this.attach(OtherSystem)
 
-  onUpdate() {
+  onInit() {
     this.otherSystem.foo()
   }
 }
@@ -280,7 +297,7 @@ class ExampleSystem extends System {
 
 ## Packages
 
-You can install all of arancini with the umbrella `arancini` package, or you can install particular packages.
+You can install all of arancini with the umbrella `arancini` package, or you can install individual packages under the `@arancini/*` scope.
 
 > **Note:** In order to use entrypoints with typescript, you must use a `moduleResolution` option that supports entrypoints, for example `bundler` or `NodeNext`.
 
@@ -290,10 +307,16 @@ You can install all of arancini with the umbrella `arancini` package, or you can
 
 [![Version](https://img.shields.io/npm/v/arancini)](https://www.npmjs.com/package/arancini)
 
-The umbrella package for `arancini`. Includes `@arancini/core`, and `@arancini/react` under the `arancini/react` entrypoint.
+The umbrella package for `arancini`.
 
 ```bash
 > npm install arancini
+```
+
+```ts
+import { World } from 'arancini'
+import { Executor, System } from 'arancini/systems'
+import { createReactApi } from 'arancini/react'
 ```
 
 ### [**`@arancini/core`**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-core)
@@ -306,6 +329,24 @@ The core library!
 > npm install @arancini/core
 ```
 
+```ts
+import { World } from '@arancini/core'
+```
+
+### [**`@arancini/systems`**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-systems)
+
+[![Version](https://img.shields.io/npm/v/@arancini/systems)](https://www.npmjs.com/package/@arancini/systems)
+
+Systems for arancini.
+
+```bash
+> npm install @arancini/systems
+```
+
+```ts
+import { Executor, System } from '@arancini/systems'
+```
+
 ### [**`@arancini/react`**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-react)
 
 [![Version](https://img.shields.io/npm/v/@arancini/react)](https://www.npmjs.com/package/@arancini/react)
@@ -314,4 +355,52 @@ React glue for arancini.
 
 ```bash
 > npm install @arancini/react
+```
+
+```ts
+import { createReactApi } from '@arancini/react'
+```
+
+### [**`@arancini/events`**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-events)
+
+[![Version](https://img.shields.io/npm/v/@arancini/events)](https://www.npmjs.com/package/@arancini/events)
+
+Eventing utilities.
+
+```bash
+> npm install @arancini/events
+```
+
+```ts
+import { Topic } from '@arancini/events'
+
+const topic = new Topic<[string]>()
+
+const unsubscribe = topic.add((message) => {
+  console.log(message)
+})
+
+topic.emit('hello world')
+
+unsubscribe()
+```
+
+### [**`@arancini/pool`**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-pool)
+
+[![Version](https://img.shields.io/npm/v/@arancini/pool)](https://www.npmjs.com/package/@arancini/pool)
+
+Object pooling utilities.
+
+```bash
+> npm install @arancini/pool
+````
+
+```ts
+import { ObjectPool } from '@arancini/pool'
+
+const pool = new ObjectPool(() => new Float32Array(1000))
+
+const array = pool.request()
+
+pool.recycle(array)
 ```

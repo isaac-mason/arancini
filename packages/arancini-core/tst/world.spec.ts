@@ -7,10 +7,8 @@ type Entity = {
 }
 
 describe('World', () => {
-  it('supports registering components after init', () => {
+  it('supports registering components on an existing world', () => {
     const world = new World<Entity>()
-
-    world.init()
 
     const entityOne = {}
     const entityTwo = {}
@@ -23,8 +21,6 @@ describe('World', () => {
 
   it('supports computing an id for an entity, then retrieving an entity by id later', () => {
     const world = new World<Entity>()
-
-    world.init()
 
     const entityOne = {}
 

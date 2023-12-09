@@ -1,4 +1,5 @@
-import { System, World } from '@arancini/core'
+import { World } from '@arancini/core'
+import { Executor, System } from '@arancini/systems'
 import { createReactAPI } from '@arancini/react'
 import { OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
@@ -36,15 +37,17 @@ const world = new World<EntityType>({
   components: ['object3D', 'walking'],
 })
 
-world.registerSystem(WalkingSystem)
+const executor = new Executor(world)
 
-world.init()
+executor.add(WalkingSystem)
+
+executor.init()
 
 const { Entity, Entities, Component } = createReactAPI(world)
 
 const App = () => {
   useFrame((_, delta) => {
-    world.step(delta)
+    executor.update(delta)
   })
 
   return (

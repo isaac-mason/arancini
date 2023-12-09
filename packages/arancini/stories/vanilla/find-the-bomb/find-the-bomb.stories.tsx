@@ -1,4 +1,5 @@
-import { System, World } from '@arancini/core'
+import { World } from '@arancini/core'
+import { System, Executor } from '@arancini/systems'
 import React, { useEffect } from 'react'
 
 import './find-the-bomb.css'
@@ -173,12 +174,14 @@ export const FindTheBomb = () => {
       ]
     })
 
-    world
-      .registerSystem(DistanceSystem)
-      .registerSystem(EmojiRendererSystem)
-      .registerSystem(InteractionSystem)
+    const executor = new Executor(world)
 
-    world.init()
+    executor
+      .add(DistanceSystem)
+      .add(EmojiRendererSystem)
+      .add(InteractionSystem)
+
+    executor.init()
 
     const randomBetween = (min: number, max: number) =>
       Math.floor(Math.random() * (max - min + 1) + min)
@@ -253,7 +256,7 @@ export const FindTheBomb = () => {
       const delta = time - lastTime
       lastTime = time
 
-      world.step(delta)
+      executor.update(delta)
     }
 
     update()

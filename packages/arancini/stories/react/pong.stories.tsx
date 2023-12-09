@@ -42,8 +42,6 @@ const world = new World<EntityType>({
   ],
 })
 
-world.init()
-
 const { Entity, Component, Entities } = createReactAPI(world)
 
 const queries = {

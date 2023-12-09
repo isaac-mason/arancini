@@ -23,7 +23,8 @@
   "dependencies": {
     "@arancini/core": "4.2.0",
     "@arancini/events": "4.2.0",
-    "@arancini/react": "4.2.0"
+    "@arancini/react": "4.2.0",
+    "@arancini/systems": "4.2.0"
   },
   "peerDependencies": {
     "react": "^18.0.0",
@@ -95,6 +96,10 @@
     "./pool": {
       "types": "./dist/pool.d.ts",
       "import": "./dist/pool.js"
+    },
+    "./systems": {
+      "types": "./dist/systems.d.ts",
+      "import": "./dist/systems.js"
     }
   },
   "files": [

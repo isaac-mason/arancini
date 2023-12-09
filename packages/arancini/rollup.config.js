@@ -41,4 +41,5 @@ export default [
   }),
   entrypoint({ name: 'events' }),
   entrypoint({ name: 'pool' }),
+  entrypoint({ name: 'systems', external: ['@arancini/core'] }),
 ]

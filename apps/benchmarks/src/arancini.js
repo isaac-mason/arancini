@@ -1,4 +1,5 @@
-import { World, System } from '@arancini/core'
+import { World } from '@arancini/core'
+import { Executor, System } from '@arancini/systems'
 
 let updateCount = 0
 
@@ -23,9 +24,12 @@ export const arancini = {
   setup() {
     this.world = new World({ components: ['position', 'velocity'] })
 
-    this.world.registerSystem(MovementSystem)
+    this.executor = new Executor(this.world)
 
-    this.world.init()
+    this.executor.add(MovementSystem)
+
+    this.executor.init()
+
     updateCount = 0
   },
   createEntity() {
@@ -55,7 +59,7 @@ export const arancini = {
     this.world.reset()
   },
   updateMovementSystem() {
-    this.world.step()
+    this.executor.update()
   },
   getMovementSystemUpdateCount() {
     return updateCount

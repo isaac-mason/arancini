@@ -1,4 +1,5 @@
-import { System, World } from '@arancini/core'
+import { World } from '@arancini/core'
+import { System, Executor } from '@arancini/systems'
 import { createReactAPI } from '@arancini/react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as P2 from 'p2-es'
@@ -67,9 +68,11 @@ const world = new World<EntityType>({
   components: ['object3D', 'rigidBody'],
 })
 
-world.registerSystem(PhysicsSystem)
+const executor = new Executor(world)
 
-world.init()
+executor.add(PhysicsSystem)
+
+executor.init()
 
 const { Entity, Component, Entities } = createReactAPI(world)
 
@@ -113,7 +116,7 @@ const Box = ({ position, width, height }: BoxProps) => {
 
 const App = () => {
   useFrame((_, delta) => {
-    world.step(delta)
+    executor.update(delta)
   })
 
   return (
@@ -190,4 +193,3 @@ export const Example = () => {
     </Canvas>
   )
 }
-

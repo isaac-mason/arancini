@@ -1,4 +1,5 @@
-import { System, World } from '@arancini/core'
+import { World } from '@arancini/core'
+import { Executor, System } from '@arancini/systems'
 import React, { useEffect } from 'react'
 
 type Entity = {
@@ -23,7 +24,9 @@ class DrawSystem extends System<Entity> {
 
   // A `System` can have many queries for entities, filtering by what components they have
   // this query is called `toDraw`
-  toDraw = this.query((entities) => entities.with('position').and.any('red', 'blue'))
+  toDraw = this.query((entities) =>
+    entities.with('position').and.any('red', 'blue')
+  )
 
   // On each update, let's draw
   onUpdate() {
@@ -40,7 +43,9 @@ class DrawSystem extends System<Entity> {
     // to get entities that have been matched and unmatched from the query
     for (const entity of this.toDraw) {
       // let's get the position of the random walker
-      const { position: { x, y } } = entity
+      const {
+        position: { x, y },
+      } = entity
 
       // let's also get the color for this random walker
       const color: 'red' | 'blue' = entity.red ? 'red' : 'blue'
@@ -109,12 +114,14 @@ class FlipSystem extends System<Entity> {
 export const RandomColorChangingWalkers = () => {
   useEffect(() => {
     const world = new World<Entity>({
-      components: ['position', 'red', 'blue', 'canvasContext']
+      components: ['position', 'red', 'blue', 'canvasContext'],
     })
 
-    world.registerSystem(WalkSystem)
-    world.registerSystem(DrawSystem)
-    world.registerSystem(FlipSystem)
+    const executor = new Executor(world)
+
+    executor.add(WalkSystem)
+    executor.add(DrawSystem)
+    executor.add(FlipSystem)
 
     // how many entities to create
     const n = 100
@@ -133,7 +140,7 @@ export const RandomColorChangingWalkers = () => {
       } else {
         entity.blue = true
       }
-      
+
       world.create(entity)
     }
 
@@ -149,7 +156,7 @@ export const RandomColorChangingWalkers = () => {
         ctx: canvasElement.getContext('2d')!,
         width: canvasElement.width,
         height: canvasElement.height,
-      }
+      },
     }
 
     world.create(canvasEntity)
@@ -157,12 +164,13 @@ export const RandomColorChangingWalkers = () => {
     // handle resizing
     const resize = () => {
       canvasEntity.canvasContext.width = canvasElement.width = window.innerWidth
-      canvasEntity.canvasContext.height = canvasElement.height = window.innerHeight
+      canvasEntity.canvasContext.height = canvasElement.height =
+        window.innerHeight
     }
     window.addEventListener('resize', resize, false)
     resize()
 
-    world.init()
+    executor.init()
 
     const now = () => performance.now() / 1000
 
@@ -178,7 +186,7 @@ export const RandomColorChangingWalkers = () => {
       const delta = time - lastTime
       lastTime = time
 
-      world.step(delta)
+      executor.update(delta)
     }
 
     update()

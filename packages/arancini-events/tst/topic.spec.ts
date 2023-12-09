@@ -1,10 +1,6 @@
 import { describe, expect, test, vi } from 'vitest'
 import { Topic } from '../src/topic'
 
-const fail = () => {
-  throw new Error()
-}
-
 describe('Topic', () => {
   test('should emit events to listeners', () => {
     const topic = new Topic()
