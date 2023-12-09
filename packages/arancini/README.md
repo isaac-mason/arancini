@@ -235,8 +235,14 @@ class MovementSystem extends System<Entity> {
 // Add the system to the executor
 executor.add(MovementSystem)
 
+// Initialise the executor
+executor.init()
+
 // Update all systems, optionally passing a delta time
 executor.update(1 / 60)
+
+// Destroy the executor
+executor.destroy()
 ```
 
 #### System priority
