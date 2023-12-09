@@ -10,7 +10,7 @@
     "build": "yarn workspaces foreach -A -t run build",
     "test": "yarn workspaces foreach -A -t run test",
     "change": "yarn changeset",
-    "version": "yarn changeset version && yarn install --mode update-lockfile",
+    "bump": "yarn changeset version && yarn install --mode update-lockfile",
     "release": "yarn build && yarn test && yarn build-storybook && changeset publish",
     "build-storybook": "(cd ./packages/arancini && yarn build-storybook)",
     "storybook": "(cd ./packages/arancini && yarn storybook)"
