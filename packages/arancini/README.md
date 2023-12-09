@@ -352,6 +352,8 @@ import { Executor, System } from '@arancini/systems'
 
 React glue for arancini.
 
+See the [**@arancini/react README**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-react) for docs.
+
 ```bash
 > npm install @arancini/react
 ```

@@ -25,10 +25,6 @@ const world = new World<EntityType>({
   components: ['position', 'health'],
 })
 
-world.registerSystem(MySystem)
-
-world.init()
-
 const { Entity, Entities, Component, useQuery } =
   createReactAPI(world)
 ```
@@ -61,13 +57,10 @@ const Example = () => (
 
 ### Capturing React Component refs
 
-If a child is passed to `Component`, it will be captured and used as the value of the component. This is useful for keeping ECS code decoupled from React code.
+If a child is passed to `Component`, it will be captured and used as the value of the component. This is useful for keeping your logic decoupled from React.
 
 ```tsx
-const world = new A.World()
-const ECS = createReactAPI(world)
-
-const Example = () => (
+const RefCaptureExample = () => (
   <Entity>
     <Component name="object3D">
       <mesh>
@@ -116,7 +109,7 @@ const SimpleExample = () => (
 )
 ```
 
-## Querying the world
+## Queries
 
 ### `useQuery`
 
@@ -124,26 +117,8 @@ The `useQuery` hook queries the world for entities with given components and wil
 
 ```tsx
 const Example = () => {
-  const entities = useQuery((e) => e.with('health'))
+  const entitiesWithHealth = useQuery((e) => e.with('health'))
 
   // ...
-}
-```
-
-## Updating Systems
-
-`@arancini/react` does not automatically update systems for you. You will need to call `world.step` yourself. For example, if you are using arancini with `@react-three/fiber`, you can use the `useFrame` hook.
-
-```tsx
-import { useFrame } from '@react-three/fiber'
-
-const Game = () => {
-  useFrame((_, delta) => {
-    world.step(delta)
-  })
-
-  return (
-    // ...
-  )
 }
 ```
