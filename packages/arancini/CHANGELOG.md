@@ -1,5 +1,20 @@
 # arancini
 
+## 5.0.1
+
+### Patch Changes
+
+- 31b8e1c: fix: query usage tracking
+- 31b8e1c: fix: system singleton queries not being destroyed on removing a system from an executor
+- 31b8e1c: feat: change `owner` arguments to `handle`, align `destroyQuery` second argument with `query`
+- Updated dependencies [31b8e1c]
+- Updated dependencies [31b8e1c]
+- Updated dependencies [31b8e1c]
+  - @arancini/core@5.0.1
+  - @arancini/systems@5.0.1
+  - @arancini/react@5.0.1
+  - @arancini/events@5.0.1
+
 ## 5.0.0
 
 ### Major Changes

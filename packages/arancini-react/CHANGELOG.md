@@ -1,5 +1,13 @@
 # @arancini/react
 
+## 5.0.1
+
+### Patch Changes
+
+- Updated dependencies [31b8e1c]
+- Updated dependencies [31b8e1c]
+  - @arancini/core@5.0.1
+
 ## 5.0.0
 
 ### Patch Changes

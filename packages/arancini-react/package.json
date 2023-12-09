@@ -10,7 +10,7 @@
   "packageManager": "yarn@3.2.1",
   "author": "Isaac Mason <isaac@isaacmason.com>",
   "license": "MIT",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "scripts": {
     "test": "vitest run --coverage",
     "test:watch": "vitest",
@@ -18,7 +18,7 @@
     "build:before": "rm -rf dist"
   },
   "dependencies": {
-    "@arancini/core": "5.0.0"
+    "@arancini/core": "5.0.1"
   },
   "peerDependencies": {
     "react": "^18.0.0",

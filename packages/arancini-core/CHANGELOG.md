@@ -1,5 +1,14 @@
 # @arancini/core
 
+## 5.0.1
+
+### Patch Changes
+
+- 31b8e1c: fix: query usage tracking
+- 31b8e1c: feat: change `owner` arguments to `handle`, align `destroyQuery` second argument with `query`
+  - @arancini/events@5.0.1
+  - @arancini/pool@5.0.1
+
 ## 5.0.0
 
 ### Patch Changes
