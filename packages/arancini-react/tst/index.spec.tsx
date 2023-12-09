@@ -14,7 +14,6 @@ describe('createReactAPI', () => {
   describe('<Entity />', () => {
     it('creates an entity', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
-      world.init()
 
       const reactAPI = createReactAPI(world)
 
@@ -25,7 +24,6 @@ describe('createReactAPI', () => {
 
     it('supports taking an existing entity via props', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
-      world.init()
 
       const reactAPI = createReactAPI(world)
 
@@ -39,7 +37,6 @@ describe('createReactAPI', () => {
 
     it('supports refs', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
-      world.init()
 
       const reactAPI = createReactAPI(world)
 
@@ -56,7 +53,6 @@ describe('createReactAPI', () => {
   describe('<Entities />', () => {
     it('adds components to entities', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
-      world.init()
 
       const reactAPI = createReactAPI(world)
 
@@ -73,7 +69,6 @@ describe('createReactAPI', () => {
 
     it('supports query instances', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
-      world.init()
 
       const reactAPI = createReactAPI(world)
 
@@ -102,7 +97,6 @@ describe('createReactAPI', () => {
 
     it('supports a "where" prop that takes a query description, and renders entities that match the query', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
-      world.init()
 
       const reactAPI = createReactAPI(world)
 
@@ -143,7 +137,6 @@ describe('createReactAPI', () => {
   describe('<Component />', () => {
     it('adds and removes the given component to an entity', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
-      world.init()
 
       const reactAPI = createReactAPI(world)
 
@@ -166,7 +159,6 @@ describe('createReactAPI', () => {
 
     it('captures child ref and use it as a component arg', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
-      world.init()
 
       const reactAPI = createReactAPI(world)
 
@@ -194,7 +186,6 @@ describe('createReactAPI', () => {
   describe('useQuery', () => {
     it('returns a reactive query instance when given a query description', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
-      world.init()
 
       const reactAPI = createReactAPI(world)
 
@@ -221,7 +212,6 @@ describe('createReactAPI', () => {
   describe('useCurrentEntity', () => {
     it('returns the current entity', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
-      world.init()
 
       const reactAPI = createReactAPI(world)
 

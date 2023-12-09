@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build": "yarn workspaces foreach -t run build",
-    "test": "(cd packages/arancini-core && yarn test) && (cd packages/arancini-react && yarn test)",
+    "test": "yarn workspaces foreach -t run test",
     "change": "yarn changeset",
     "version": "yarn changeset version && yarn install --mode update-lockfile",
     "release": "yarn build && yarn test && yarn build-storybook && changeset publish",
