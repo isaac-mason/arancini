@@ -50,7 +50,7 @@ export const arancini = {
     this.world.remove(entity, 'position')
   },
   removeVelocityComponent(entity) {
-    entity.remove(entity, 'velocity')
+    this.world.remove(entity, 'velocity')
   },
   destroyEntity(entity) {
     this.world.destroy(entity)
