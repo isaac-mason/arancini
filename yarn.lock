@@ -6283,7 +6283,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.29.0"
     eslint-plugin-prettier: "npm:^4.0.0"
     eslint-plugin-simple-import-sort: "npm:^10.0.0"
-    eslint-plugin-storybook: "npm:^0.6.12"
+    eslint-plugin-storybook: "npm:^0.6.15"
     eslint-plugin-typescript-enum: "npm:^2.1.0"
     leva: "npm:^0.9.35"
     p2-es: "npm:^1.2.3"
@@ -8547,9 +8547,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-storybook@npm:^0.6.12":
-  version: 0.6.13
-  resolution: "eslint-plugin-storybook@npm:0.6.13"
+"eslint-plugin-storybook@npm:^0.6.15":
+  version: 0.6.15
+  resolution: "eslint-plugin-storybook@npm:0.6.15"
   dependencies:
     "@storybook/csf": "npm:^0.0.1"
     "@typescript-eslint/utils": "npm:^5.45.0"
@@ -8557,7 +8557,7 @@ __metadata:
     ts-dedent: "npm:^2.2.0"
   peerDependencies:
     eslint: ">=6"
-  checksum: dfb4c79c1eff563a03162614707f1f68fc267fa861ed4cf40a202dcd19229d6111d2766e28c0cb03705fcbc09a4e3df7459e50fb70488d0dff9cf9728aec9b6f
+  checksum: 0c278594c8474ce2f176ffc6610240ae9d6c8f9dafbff02be61e6ae05f15081ce858c5b16e64d8995a3a3777c9d1725953fcde4312efab9118aa544a75b27c46
   languageName: node
   linkType: hard
 

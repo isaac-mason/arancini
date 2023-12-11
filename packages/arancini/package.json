@@ -60,7 +60,7 @@
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-simple-import-sort": "^10.0.0",
-    "eslint-plugin-storybook": "^0.6.12",
+    "eslint-plugin-storybook": "^0.6.15",
     "eslint-plugin-typescript-enum": "^2.1.0",
     "leva": "^0.9.35",
     "p2-es": "^1.2.3",
