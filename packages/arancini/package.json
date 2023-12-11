@@ -34,7 +34,7 @@
     "@babel/preset-env": "^7.23.5",
     "@babel/preset-react": "^7.22.15",
     "@babel/preset-typescript": "^7.23.3",
-    "@react-three/drei": "^9.88.13",
+    "@react-three/drei": "^9.92.0",
     "@react-three/fiber": "^8.15.11",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.0.1",
