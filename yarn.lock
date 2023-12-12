@@ -2920,10 +2920,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mediapipe/tasks-vision@npm:0.10.2":
-  version: 0.10.2
-  resolution: "@mediapipe/tasks-vision@npm:0.10.2"
-  checksum: 6e791e6e25640ff26373dd12a7f40b69ea96da67fd5c82c1037f75401ac967e9efa89cfaadb59e1fee6584acf52329b877b0a58ba9af9b85307fe0184dbc757e
+"@mediapipe/tasks-vision@npm:0.10.8":
+  version: 0.10.8
+  resolution: "@mediapipe/tasks-vision@npm:0.10.8"
+  checksum: bc053148b3e656c6860fad150e7b2d46f73cbef1ae5d68ef02fa2110e18420ed36b8a75dd6cc28cda5a49fff94adc2af20af624bb6d41da4640752d8c27636f7
   languageName: node
   linkType: hard
 
@@ -3792,12 +3792,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/drei@npm:^9.88.13":
-  version: 9.88.13
-  resolution: "@react-three/drei@npm:9.88.13"
+"@react-three/drei@npm:^9.92.0":
+  version: 9.92.0
+  resolution: "@react-three/drei@npm:9.92.0"
   dependencies:
     "@babel/runtime": "npm:^7.11.2"
-    "@mediapipe/tasks-vision": "npm:0.10.2"
+    "@mediapipe/tasks-vision": "npm:0.10.8"
     "@react-spring/three": "npm:~9.6.1"
     "@use-gesture/react": "npm:^10.2.24"
     camera-controls: "npm:^2.4.2"
@@ -3811,7 +3811,7 @@ __metadata:
     meshline: "npm:^3.1.6"
     react-composer: "npm:^5.0.3"
     react-merge-refs: "npm:^1.1.0"
-    stats-gl: "npm:^1.0.4"
+    stats-gl: "npm:^2.0.0"
     stats.js: "npm:^0.17.0"
     suspend-react: "npm:^0.1.3"
     three-mesh-bvh: "npm:^0.6.7"
@@ -3828,7 +3828,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: 1876a83675303a424bbcdc1c1609eede2e023a174968cc3a9bac6fd39e0f4af064ab835f75417d5ee12080d488d547ffdd920e426113ba91b2fe50b6cff23c04
+  checksum: b1d6474df9ccd6d08a5f914b84e496aff5313294c802f24ab98edec7934552b3973b4de8f073243a42cb6f8b9246c51c99cb6bba2db6ffb19580cd5b05e1c187
   languageName: node
   linkType: hard
 
@@ -6257,7 +6257,7 @@ __metadata:
     "@babel/preset-env": "npm:^7.23.5"
     "@babel/preset-react": "npm:^7.22.15"
     "@babel/preset-typescript": "npm:^7.23.3"
-    "@react-three/drei": "npm:^9.88.13"
+    "@react-three/drei": "npm:^9.92.0"
     "@react-three/fiber": "npm:^8.15.11"
     "@rollup/plugin-commonjs": "npm:^25.0.7"
     "@rollup/plugin-node-resolve": "npm:^15.0.1"
@@ -14131,10 +14131,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stats-gl@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "stats-gl@npm:1.0.4"
-  checksum: 29bd20aace5fe2278d58f034771d6ea1758239ac95c166b79e4d5d6ca0f6cb3938a366e75ab9b52e36fda36f0a02fde5fb39cf66698bf11f279eed54cd47c399
+"stats-gl@npm:^2.0.0":
+  version: 2.0.1
+  resolution: "stats-gl@npm:2.0.1"
+  checksum: 46d7fde045f3861b4f1fd8efbe419e518d3febb8da3864eb96e2f158203dfc07d39b5f83d86fc4e678be61a3e22275dc457822ecd8cecda6f94c907319bc6dc5
   languageName: node
   linkType: hard
 
