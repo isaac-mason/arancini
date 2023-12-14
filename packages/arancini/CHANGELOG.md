@@ -1,5 +1,16 @@
 # arancini
 
+## 5.0.2
+
+### Patch Changes
+
+- 14b82a9: fix(systems): executor query cleanup
+- Updated dependencies [14b82a9]
+  - @arancini/systems@5.0.2
+  - @arancini/core@5.0.2
+  - @arancini/events@5.0.2
+  - @arancini/react@5.0.2
+
 ## 5.0.1
 
 ### Patch Changes
