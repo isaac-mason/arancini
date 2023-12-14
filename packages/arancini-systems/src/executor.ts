@@ -150,7 +150,7 @@ export class Executor<E extends AnyEntity> {
     )
 
     system.__internal.queries.forEach((query: Query<unknown>) => {
-      this.world.destroyQuery(query, system)
+      this.world.destroyQuery(query, { handle: system })
     })
     system.__internal.requiredQueries = []
 
