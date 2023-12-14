@@ -1,3 +1,4 @@
+import { ObjectPool } from '@arancini/pool'
 import { BitSet } from './bit-set'
 import {
   EntityContainer,
@@ -9,7 +10,6 @@ import {
   EntityMetadata,
   EntityWithMetadata,
 } from './entity-metadata'
-import { ObjectPool } from '@arancini/pool'
 import {
   Query,
   QueryDescription,
