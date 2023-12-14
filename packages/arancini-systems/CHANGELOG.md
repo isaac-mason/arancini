@@ -1,5 +1,12 @@
 # @arancini/systems
 
+## 5.0.2
+
+### Patch Changes
+
+- 14b82a9: fix(systems): executor query cleanup
+  - @arancini/core@5.0.2
+
 ## 5.0.1
 
 ### Patch Changes
