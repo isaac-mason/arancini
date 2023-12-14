@@ -186,7 +186,7 @@ const player = world.find((e) => e.has('player'))
 
 ### 🧠 Systems
 
-The core library (`@arancini/core`) does not have a concept of systems. A "System" can be as simple as a function that operations on entities in the world, as we saw in the "Querying Entities" section above.
+The core library (`@arancini/core`) does not have a concept of systems. A "System" can be as simple as a function that operates on entities in the world, as we saw in the "Querying Entities" section above.
 
 Arancini does however provide opt-in utilities for writing systems in `arancini/systems`. This provides a convenient way of organising logic if you're not sure where to start.
 
