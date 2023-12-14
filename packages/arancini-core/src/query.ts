@@ -82,22 +82,19 @@ export const evaluateQueryBitSets = <E>(
   queryBitSets: QueryBitSets,
   entity: E
 ): boolean => {
-  const internal = entity as EntityWithMetadata<E>
+  const { bitset } = (entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL]
 
   for (const queryPart of queryBitSets) {
-    if (
-      queryPart.type === 'all' &&
-      !internal[ARANCINI_SYMBOL].bitset.containsAll(queryPart.bitset)
-    ) {
+    if (queryPart.type === 'all' && !bitset.containsAll(queryPart.bitset)) {
       return false
     } else if (
       queryPart.type === 'any' &&
-      !internal[ARANCINI_SYMBOL].bitset.containsAny(queryPart.bitset)
+      !bitset.containsAny(queryPart.bitset)
     ) {
       return false
     } else if (
       queryPart.type === 'not' &&
-      internal[ARANCINI_SYMBOL].bitset.containsAny(queryPart.bitset)
+      bitset.containsAny(queryPart.bitset)
     ) {
       return false
     }
