@@ -17,7 +17,7 @@
     "rootDir": "./src",
     "allowSyntheticDefaultImports": true,
     "jsx": "react-jsx",
-    "noEmit": false,
+    "noEmit": true,
     "declaration": true,
     "outDir": "./dist"
   },

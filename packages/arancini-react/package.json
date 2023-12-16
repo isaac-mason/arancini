@@ -12,7 +12,7 @@
   "license": "MIT",
   "version": "5.0.2",
   "scripts": {
-    "test": "vitest run --coverage",
+    "test": "tsc && vitest run --coverage",
     "test:watch": "vitest",
     "build": "yarn build:before && rollup --config rollup.config.js --bundleConfigAsCjs",
     "build:before": "rm -rf dist"

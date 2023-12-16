@@ -16,7 +16,7 @@
     "baseUrl": "./",
     "rootDir": "./src",
     "allowSyntheticDefaultImports": true,
-    "noEmit": false,
+    "noEmit": true,
     "declaration": true,
     "outDir": "./dist",
     "experimentalDecorators": true,
