@@ -46,7 +46,7 @@
     "@storybook/addon-onboarding": "^1.0.9",
     "@storybook/blocks": "^7.6.3",
     "@storybook/react": "^7.6.3",
-    "@storybook/react-vite": "^7.6.3",
+    "@storybook/react-vite": "^7.6.5",
     "@storybook/testing-library": "^0.2.2",
     "@types/three": "^0.159.0",
     "@typescript-eslint/eslint-plugin": "^6.2.0",
