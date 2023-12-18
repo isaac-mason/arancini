@@ -50,7 +50,7 @@ const Example = () => <Entity entity={entity} health={100} />
 ```tsx
 const Example = () => (
   <Entity>
-    <Component name="health" data={100} />
+    <Component name="health" value={100} />
   </Entity>
 )
 ```
@@ -83,7 +83,7 @@ const Simple = () => (
 
 const AddComponentToEntities = () => (
   <Entities in={[entity1, entity2]}>
-    <Component name="position" data={[0, 0]} />
+    <Component name="position" value={[0, 0]} />
   </Entities>
 )
 
