@@ -1,5 +1,12 @@
 # @arancini/core
 
+## 6.0.0
+
+### Patch Changes
+
+- @arancini/events@6.0.0
+- @arancini/pool@6.0.0
+
 ## 5.0.2
 
 ### Patch Changes

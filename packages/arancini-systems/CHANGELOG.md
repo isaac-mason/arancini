@@ -1,5 +1,11 @@
 # @arancini/systems
 
+## 6.0.0
+
+### Patch Changes
+
+- @arancini/core@6.0.0
+
 ## 5.0.2
 
 ### Patch Changes
