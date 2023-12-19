@@ -319,7 +319,7 @@ const Balls = () => {
 }
 
 const Paddles = () => (
-  <Entities where={(e) => e.has('paddle')}>
+  <Entities in={queries.paddles}>
     {(e) => (
       <Component name="object3D">
         <mesh>

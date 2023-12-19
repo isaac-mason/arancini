@@ -1,10 +1,9 @@
 import { World } from '@arancini/core'
-import { System, Executor } from '@arancini/systems'
 import { createReactAPI } from '@arancini/react'
+import { Executor, System } from '@arancini/systems'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as P2 from 'p2-es'
-import React from 'react'
-import { useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { Repeat } from 'timeline-composer'
 
 export default {
@@ -67,6 +66,8 @@ class PhysicsSystem extends System<EntityType> {
 const world = new World<EntityType>({
   components: ['object3D', 'rigidBody'],
 })
+
+const rigidBodyQuery = world.query((e) => e.has('rigidBody'))
 
 const executor = new Executor(world)
 
@@ -134,7 +135,7 @@ const App = () => {
       </Repeat>
 
       {/* render rigid bodies */}
-      <Entities where={(e) => e.has('rigidBody')}>
+      <Entities in={rigidBodyQuery}>
         {(entity) => {
           const { rigidBody } = entity
 

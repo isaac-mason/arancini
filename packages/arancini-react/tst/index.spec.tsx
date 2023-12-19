@@ -1,7 +1,12 @@
 import { World } from '@arancini/core'
 import '@testing-library/jest-dom'
 import { act, render, renderHook } from '@testing-library/react'
-import React, { forwardRef, useImperativeHandle } from 'react'
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from 'react'
 import { describe, expect, it } from 'vitest'
 import { createReactAPI } from '../src'
 
@@ -94,44 +99,6 @@ describe('createReactAPI', () => {
       expect(!!entities[1].bar).toBe(true)
       expect(!!entities[2].bar).toBe(false)
     })
-
-    it('supports a "where" prop that takes a query description, and renders entities that match the query', () => {
-      const world = new World<Entity>({ components: ['foo', 'bar'] })
-
-      const reactAPI = createReactAPI(world)
-
-      const entities = [world.create({}), world.create({}), world.create({})]
-
-      world.update(entities[0], (e) => {
-        e.foo = true
-      })
-
-      world.update(entities[1], (e) => {
-        e.foo = true
-      })
-
-      render(
-        <reactAPI.Entities where={(e) => e.has('foo')}>
-          <reactAPI.Component name="bar" value="123" />
-        </reactAPI.Entities>
-      )
-
-      expect(!!entities[0].bar).toBe(true)
-      expect(!!entities[1].bar).toBe(true)
-      expect(!!entities[2].bar).toBe(false)
-
-      act(() => {
-        world.add(entities[2], 'foo', true)
-      })
-
-      expect(!!entities[2].bar).toBe(true)
-
-      act(() => {
-        world.remove(entities[2], 'foo')
-      })
-
-      expect(!!entities[2].bar).toBe(false)
-    })
   })
 
   describe('<Component />', () => {
@@ -164,10 +131,31 @@ describe('createReactAPI', () => {
 
       const entity = world.create({})
 
-      const refValue = 'refValue'
+      const stateChangeListeners = new Set<() => void>()
+
+      const updateState = () => {
+        stateChangeListeners.forEach((listener) => listener())
+      }
 
       const TestComponentWithRef = forwardRef((_props, ref) => {
-        useImperativeHandle(ref, () => refValue)
+        const [value, setValue] = useState(0)
+
+        useImperativeHandle(ref, () => value, [value])
+
+        useEffect(() => {
+          const fn = () =>
+            setValue((v) => {
+              return v + 1
+            })
+
+          stateChangeListeners.add(fn)
+
+          return () => {
+            stateChangeListeners.delete(fn)
+          }
+        }, [])
+
+
         return null
       })
 
@@ -179,12 +167,20 @@ describe('createReactAPI', () => {
         </reactAPI.Entity>
       )
 
-      expect(entity.bar).toBe(refValue)
+      expect(entity.bar).toBe(0)
+
+      expect(stateChangeListeners.size).toBe(1)
+
+      act(() => {
+        updateState()
+      })
+
+      expect(entity.bar).toBe(1)
     })
   })
 
   describe('useQuery', () => {
-    it('returns a reactive query instance when given a query description', () => {
+    it('rerenders when entities are added to or removed from the query', () => {
       const world = new World<Entity>({ components: ['foo', 'bar'] })
 
       const reactAPI = createReactAPI(world)
@@ -195,9 +191,9 @@ describe('createReactAPI', () => {
         world.add(e, 'foo', true)
       })
 
-      const { result } = renderHook(() =>
-        reactAPI.useQuery((e) => e.has('foo'))
-      )
+      const query = world.query((e) => e.has('foo'))
+
+      const { result } = renderHook(() => reactAPI.useQuery(query))
 
       expect(result.current.entities).toEqual(entities)
 

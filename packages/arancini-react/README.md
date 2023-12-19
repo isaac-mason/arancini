@@ -25,8 +25,7 @@ const world = new World<EntityType>({
   components: ['position', 'health'],
 })
 
-const { Entity, Entities, Component, useQuery } =
-  createReactAPI(world)
+const { Entity, Entities, Component, useQuery } = createReactAPI(world)
 ```
 
 ## Entities and Components
@@ -77,9 +76,7 @@ const RefCaptureExample = () => (
 `@arancini/react` also provides an `<Entities />` component that can be used to render a collection of entities or add components to existing entities. `<Entities />` also supports [render props](https://reactjs.org/docs/render-props.html).
 
 ```tsx
-const Simple = () => (
-  <Entities in={[entity1, entity2]}>{/* ... */}</Entities>
-)
+const Simple = () => <Entities in={[entity1, entity2]}>{/* ... */}</Entities>
 
 const AddComponentToEntities = () => (
   <Entities in={[entity1, entity2]}>
@@ -96,11 +93,13 @@ const RenderProps = () => (
 )
 ```
 
-`Entities` also supports a `where` prop that takes a query description.
+`Entities` can also be passed a query.
 
 ```tsx
+const withExampleTag = world.query((e) => e.with('exampleTag'))
+
 const SimpleExample = () => (
-  <Entities where={(e) => e.with('exampleTag')}>
+  <Entities in={withExampleTag}>
     <mesh>
       <boxGeometry args={[1, 1, 1]} />
       <meshNormalMaterial />
@@ -113,11 +112,13 @@ const SimpleExample = () => (
 
 ### `useQuery`
 
-The `useQuery` hook queries the world for entities with given components and will re-render when entities are added to or removed from the query.
+The `useQuery` hook subscribes a component to a query, re-rendering the component when entities are added to or removed from the query.
 
 ```tsx
+const withHealth = world.query((e) => e.with('health'))
+
 const Example = () => {
-  const entitiesWithHealth = useQuery((e) => e.with('health'))
+  const entitiesWithHealth = useQuery(withHealth)
 
   // ...
 }

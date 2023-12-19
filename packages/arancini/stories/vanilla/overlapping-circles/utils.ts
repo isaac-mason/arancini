@@ -1,38 +1,18 @@
-import type { Circle } from './components'
-
-export class Vector2 {
-  x: number
-  y: number
-
-  constructor() {
-    this.x = 0
-    this.y = 0
-  }
-
-  set(x: number, y: number) {
-    this.x = x
-    this.y = y
-    return this
-  }
-
-  copy(source: Vector2) {
-    this.x = source.x
-    this.y = source.y
-    return this
-  }
-
-  clone() {
-    return new Vector2().set(this.x, this.y)
-  }
-}
+import * as THREE from 'three'
 
 export function random(a: number, b: number) {
   return Math.random() * (b - a) + a
 }
 
 export function intersection(
-  circleA: Circle,
-  circleB: Circle
+  circleA: {
+    position: THREE.Vector2
+    radius: number
+  },
+  circleB: {
+    position: THREE.Vector2
+    radius: number
+  }
 ): [number, number, number, number] | false {
   // dx and dy are the vertical and horizontal distances between the circle centers.
   const dx = circleB.position.x - circleA.position.x

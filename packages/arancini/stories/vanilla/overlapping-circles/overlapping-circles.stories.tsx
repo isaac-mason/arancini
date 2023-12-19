@@ -1,15 +1,16 @@
 import { World } from '@arancini/core'
 import { Executor, System } from '@arancini/systems'
 import React, { useEffect } from 'react'
-import { Vector2, drawLine, fillCircle, intersection, random } from './utils'
+import * as THREE from 'three'
+import { drawLine, fillCircle, intersection, random } from './utils'
 
 type Entity = {
   movement?: {
-    velocity: Vector2
-    acceleration: Vector2
+    velocity: THREE.Vector2
+    acceleration: THREE.Vector2
   }
   circle?: {
-    position: Vector2
+    position: THREE.Vector2
     radius: number
   }
   intersecting?: {
@@ -120,7 +121,7 @@ export class Renderer extends System<Entity> {
     const { ctx, width, height } = this.context
 
     ctx.fillStyle = 'black'
-    ctx.fillRect(0, 0, width, width)
+    ctx.fillRect(0, 0, width, height)
 
     let circles = this.circles.entities
     for (let i = 0; i < circles.length; i++) {
@@ -175,8 +176,6 @@ export const OverlappingCircles = () => {
     const canvasElement = document.querySelector(
       '#example-canvas'
     ) as HTMLCanvasElement
-    canvasElement.width = window.innerWidth
-    canvasElement.height = window.innerHeight
 
     const canvasEntity = {
       canvas: {
@@ -189,36 +188,31 @@ export const OverlappingCircles = () => {
 
     world.create(canvasEntity)
 
-    window.addEventListener(
-      'resize',
-      () => {
-        canvasEntity.canvas.width = canvasElement.width = window.innerWidth
-        canvasEntity.canvas.height = canvasElement.height = window.innerHeight
-      },
-      false
-    )
+    const onResize = () => {
+      const parent = canvasElement.parentElement!
+      canvasEntity.canvas.width = canvasElement.width = parent.clientWidth
+      canvasEntity.canvas.height = canvasElement.height = parent.clientHeight
+    }
+
+    onResize()
+    window.addEventListener('resize', onResize, false)
 
     for (let i = 0; i < 30; i++) {
       const entity = {
         circle: {
-          position: new Vector2(),
-          radius: 0,
+          position: new THREE.Vector2(
+            random(0, canvasEntity.canvas.width),
+            random(0, canvasEntity.canvas.height)
+          ),
+          radius: random(20, 100),
         },
         movement: {
-          velocity: new Vector2(),
-          acceleration: new Vector2(),
+          velocity: new THREE.Vector2(random(-20, 20), random(-20, 20)),
+          acceleration: new THREE.Vector2(),
         },
       }
 
       world.create(entity)
-
-      entity.circle.position.set(
-        random(0, canvasEntity.canvas.width),
-        random(0, canvasEntity.canvas.height)
-      )
-      entity.circle.radius = random(20, 100)
-
-      entity.movement.velocity.set(random(-20, 20), random(-20, 20))
     }
 
     executor.init()

@@ -10,11 +10,15 @@ import React, {
   useContext,
   useEffect,
   useImperativeHandle,
-  useMemo,
   useRef,
   useState,
 } from 'react'
-import { useIsomorphicLayoutEffect } from './hooks'
+import {
+  useIsomorphicLayoutEffect,
+  useOnEntityAdded,
+  useOnEntityRemoved,
+  useRerender,
+} from './hooks'
 
 type Children = ReactNode | JSX.Element
 
@@ -44,8 +48,9 @@ export const createReactAPI = <E extends A.AnyEntity>(world: A.World<E>) => {
   const entityContext = createContext(null! as EntityProviderContext<E>)
 
   const useCurrentEntity = (): E | undefined => {
-    const context = useContext(entityContext)
-    return context ? context : undefined
+    const entity = useContext(entityContext)
+
+    return entity
   }
 
   const RawEntity = <T extends E>(
@@ -56,62 +61,52 @@ export const createReactAPI = <E extends A.AnyEntity>(world: A.World<E>) => {
     }: EntityProps<T> & { ref?: ForwardedRef<T> },
     ref: ForwardedRef<E>
   ) => {
-    const [newEntity] = useState(() => ({}) as E)
-    const entity = existingEntity ?? newEntity
+    const newEntity = useRef({})
 
-    const [init, setInit] = useState(false)
+    const [entity, setEntity] = useState<E>()
 
     useEffect(() => {
-      if (world.has(entity)) {
-        setInit(true)
-        return
-      }
+      const e = existingEntity || world.create(newEntity.current as T)
 
-      world.create(entity)
-
-      setInit(true)
+      setEntity(e)
 
       return () => {
-        setInit(false)
+        if (existingEntity) return
 
-        if (world.has(entity)) {
-          world.destroy(entity)
-        }
+        world.destroy(e)
       }
-    }, [entity])
+    }, [])
+
+    useImperativeHandle(ref, () => entity!, [entity])
 
     const lastComponents = useRef<E>({} as E)
 
     useEffect(() => {
-      const components = propComponents as E
+      if (!entity) return
 
-      const removed = (
-        Object.keys(lastComponents.current) as Array<keyof E>
-      ).filter((name) => components[name] === undefined)
+      if (!world.has(entity)) return
+
+      const components = propComponents as E
 
       world.update(entity, (e) => {
         for (const name in components) {
           e[name] = components[name]
         }
 
-        for (const name of removed) {
-          delete e[name]
+        for (const name in lastComponents.current) {
+          if (components[name] === undefined) {
+            delete e[name]
+          }
         }
-
-        return entity
       })
 
       return () => {
         lastComponents.current = components
       }
-    }, [propComponents])
-
-    useImperativeHandle(ref, () => entity)
+    }, [entity, propComponents])
 
     return (
-      <entityContext.Provider value={init ? entity : undefined}>
-        {children}
-      </entityContext.Provider>
+      <entityContext.Provider value={entity}>{children}</entityContext.Provider>
     )
   }
 
@@ -119,40 +114,65 @@ export const createReactAPI = <E extends A.AnyEntity>(world: A.World<E>) => {
     props: PropsWithRef<EntityProps<T> & { ref?: ForwardedRef<T> }>
   ) => ReactElement
 
-  const useContainer = <T extends E>(container: A.EntityContainer<T>) => {
-    const [, setVersion] = useState(-1)
+  const Component = <C extends keyof E>({
+    name,
+    value,
+    children,
+  }: ComponentProps<E, C>) => {
+    const [childRef, setChildRef] = useState<E[C]>()
 
-    const rerender = () => {
-      setVersion((v) => v + 1)
-    }
+    const entity = useContext(entityContext)
 
     useIsomorphicLayoutEffect(() => {
-      container.onEntityAdded.add(rerender)
-      container.onEntityRemoved.add(rerender)
+      if (!entity) return
+
+      let componentData: E[C]
+
+      if (children !== undefined) {
+        // if a child is present, use their ref as the component's value
+        componentData = childRef as never
+      } else {
+        // otherwise, use the value prop
+        componentData = value!
+      }
+
+      // only add the component if it doesn't exist, otherwise change its value
+      if (entity[name] === undefined) {
+        world.add(entity, name, componentData!)
+      } else {
+        entity[name] = componentData
+      }
 
       return () => {
-        container.onEntityAdded.remove(rerender)
-        container.onEntityRemoved.remove(rerender)
-      }
-    }, [])
+        if (entity[name] === undefined) return
 
-    useIsomorphicLayoutEffect(rerender, [])
+        world.remove(entity, name)
+      }
+    }, [entity, name, value, childRef])
+
+    // capture ref of child
+    if (children) {
+      const child = React.Children.only(children) as ReactElement
+
+      return React.cloneElement(child, {
+        ref: setChildRef,
+      })
+    }
+
+    return null
+  }
+
+  const useContainer = <T extends E>(container: A.EntityContainer<T>) => {
+    const rerender = useRerender()
+
+    useOnEntityAdded(container, rerender)
+    useOnEntityRemoved(container, rerender)
 
     return container
   }
 
-  const useQuery = <T extends E>(
-    query: A.QueryDescription<E, T> | A.Query<T>
-  ) => {
-    const queryInstance = useMemo(() => {
-      if (query instanceof A.Query) {
-        return query
-      }
-
-      return world.query<T>(query)
-    }, [])
-
-    return useContainer(queryInstance)
+  const useQuery = <T extends E>(query: A.Query<T>) => {
+    return useContainer(query)
   }
 
   type EntitiesInListProps<T extends E> = {
@@ -191,98 +211,19 @@ export const createReactAPI = <E extends A.AnyEntity>(world: A.World<E>) => {
     )
   }
 
-  type EntitiesInQueryProps<T extends E, QueryResult> = {
-    queryDescription: A.QueryDescription<T, QueryResult>
-    children: Children | ((entity: QueryResult) => Children)
-  }
-
-  const EntitiesInQuery = <T extends E>({
-    queryDescription,
-    children,
-  }: EntitiesInQueryProps<E, T>) => {
-    const queryInstance = useQuery(queryDescription)
-
-    return (
-      <EntitiesInList
-        entities={[...queryInstance.entities]}
-        children={children}
-      />
-    )
-  }
-
   function Entities<T extends E>(props: {
-    in: T[] | A.EntityContainer<T> | A.Query<T>
+    in: T[] | A.EntityContainer<T>
     children: Children | ((entity: T) => Children)
-  }): ReactElement
-
-  function Entities<T extends E, QueryType>(props: {
-    where: A.QueryDescription<T, QueryType>
-    children: Children | ((entity: QueryType) => Children)
-  }): ReactElement
-
-  function Entities(props: any) {
-    if (props.in) {
-      if ('entities' in props.in) {
-        return (
-          <EntitiesInContainer container={props.in} children={props.children} />
-        )
-      } else {
-        return <EntitiesInList entities={props.in} children={props.children} />
-      }
-    } else if (props.where) {
+  }): ReactElement {
+    if (props.in instanceof A.EntityContainer) {
       return (
-        <EntitiesInQuery
-          queryDescription={props.where}
-          children={props.children}
-        />
+        <EntitiesInContainer container={props.in} children={props.children} />
       )
     }
 
-    return null
-  }
-
-  const Component = <C extends keyof E>({
-    name,
-    value,
-    children,
-  }: ComponentProps<E, C>) => {
-    const [childRef, setChildRef] = useState<never>(null!)
-
-    const entity = useContext(entityContext)
-
-    useIsomorphicLayoutEffect(() => {
-      if (!entity) {
-        return
-      }
-
-      let componentData: E[C]
-      if (children !== undefined) {
-        // if children are passed in, use them as the component's args
-        componentData = childRef as never
-      } else {
-        // otherwise, use the args prop
-        componentData = value!
-      }
-
-      world.add(entity, name, componentData!)
-
-      return () => {
-        if (entity[name]) {
-          world.remove(entity, name)
-        }
-      }
-    }, [entity, childRef, name, value])
-
-    // capture ref of child
-    if (children) {
-      const child = React.Children.only(children) as ReactElement
-
-      return React.cloneElement(child, {
-        ref: setChildRef,
-      })
-    }
-
-    return null
+    return (
+      <EntitiesInList entities={props.in as T[]} children={props.children} />
+    )
   }
 
   return {

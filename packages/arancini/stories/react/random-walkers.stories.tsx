@@ -37,6 +37,8 @@ const world = new World<EntityType>({
   components: ['object3D', 'walking'],
 })
 
+const walkingQuery = world.query((e) => e.is('walking'))
+
 const executor = new Executor(world)
 
 executor.add(WalkingSystem)
@@ -56,7 +58,7 @@ const App = () => {
         <Entity key={idx} walking />
       ))}
 
-      <Entities where={(e) => e.has('walking')}>
+      <Entities in={walkingQuery}>
         {() => (
           <Component name="object3D">
             <mesh
