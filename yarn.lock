@@ -58,7 +58,7 @@ __metadata:
     rollup: "npm:^4.4.0"
     rollup-plugin-copy: "npm:^3.5.0"
     rollup-plugin-filesize: "npm:^10.0.0"
-    typescript: "npm:^5.1.3"
+    typescript: "npm:^5.3.3"
     vitest: "npm:^0.34.3"
   languageName: unknown
   linkType: soft
@@ -90,7 +90,7 @@ __metadata:
     rollup: "npm:^4.4.0"
     rollup-plugin-copy: "npm:^3.5.0"
     rollup-plugin-filesize: "npm:^10.0.0"
-    typescript: "npm:^5.1.3"
+    typescript: "npm:^5.3.3"
     vitest: "npm:^0.34.3"
   languageName: unknown
   linkType: soft
@@ -122,7 +122,7 @@ __metadata:
     rollup: "npm:^4.4.0"
     rollup-plugin-copy: "npm:^3.5.0"
     rollup-plugin-filesize: "npm:^10.0.0"
-    typescript: "npm:^5.1.3"
+    typescript: "npm:^5.3.3"
     vitest: "npm:^0.34.3"
   languageName: unknown
   linkType: soft
@@ -148,7 +148,7 @@ __metadata:
     rollup: "npm:^4.4.0"
     rollup-plugin-copy: "npm:^3.5.0"
     rollup-plugin-filesize: "npm:^10.0.0"
-    typescript: "npm:^5.1.3"
+    typescript: "npm:^5.3.3"
     vitest: "npm:^0.34.3"
   peerDependencies:
     react: ^18.0.0
@@ -184,7 +184,7 @@ __metadata:
     rollup: "npm:^4.4.0"
     rollup-plugin-copy: "npm:^3.5.0"
     rollup-plugin-filesize: "npm:^10.0.0"
-    typescript: "npm:^5.1.3"
+    typescript: "npm:^5.3.3"
     vitest: "npm:^0.34.3"
   languageName: unknown
   linkType: soft
@@ -6298,7 +6298,7 @@ __metadata:
     storybook: "npm:^7.6.3"
     three: "npm:^0.159.0"
     timeline-composer: "npm:^0.1.5"
-    typescript: "npm:^5.1.3"
+    typescript: "npm:^5.3.3"
     vite: "npm:^4.4.12"
     vite-plugin-dts: "npm:^3.6.3"
   peerDependencies:
@@ -15007,13 +15007,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.1.3":
-  version: 5.1.6
-  resolution: "typescript@npm:5.1.6"
+"typescript@npm:^5.3.3":
+  version: 5.3.3
+  resolution: "typescript@npm:5.3.3"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: f347cde665cf43dc4c1c7d9821c7d9bbec3c3914f4bdd82ee490e9fb9f6d99036ed8666463b6a192dd005eeef333c5087d5931bdd51ec853436ff9a670a7417e
+  checksum: 6e4e6a14a50c222b3d14d4ea2f729e79f972fa536ac1522b91202a9a65af3605c2928c4a790a4a50aa13694d461c479ba92cedaeb1e7b190aadaa4e4b96b8e18
   languageName: node
   linkType: hard
 
@@ -15027,13 +15027,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.1.3#optional!builtin<compat/typescript>":
-  version: 5.1.6
-  resolution: "typescript@patch:typescript@npm%3A5.1.6#optional!builtin<compat/typescript>::version=5.1.6&hash=5da071"
+"typescript@patch:typescript@npm%3A^5.3.3#optional!builtin<compat/typescript>":
+  version: 5.3.3
+  resolution: "typescript@patch:typescript@npm%3A5.3.3#optional!builtin<compat/typescript>::version=5.3.3&hash=e012d7"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: f5481fa3ba0eee8970f46708d13c05650a865ad093b586fc9573f425c64c57ca97e3308e110bb528deb3ccebe83f6fd7b5a8ac90018038da96326a9ccdf8e77c
+  checksum: c93786fcc9a70718ba1e3819bab56064ead5817004d1b8186f8ca66165f3a2d0100fee91fa64c840dcd45f994ca5d615d8e1f566d39a7470fc1e014dbb4cf15d
   languageName: node
   linkType: hard
 
