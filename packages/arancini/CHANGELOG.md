@@ -1,5 +1,16 @@
 # arancini
 
+## 6.0.1
+
+### Patch Changes
+
+- 9612733: refactor(react): internal useContainers hook cleanup
+- Updated dependencies [9612733]
+  - @arancini/react@6.0.1
+  - @arancini/core@6.0.1
+  - @arancini/events@6.0.1
+  - @arancini/systems@6.0.1
+
 ## 6.0.0
 
 ### Major Changes
