@@ -1,5 +1,66 @@
 # arancini
 
+## 6.0.0
+
+### Major Changes
+
+- 840b2e5: feat(react)!: remove "where" prop from `<Entities />`
+
+  It was previously possible to pass a query description to `<Entities />`. This is no longer supported. Instead, you must create a query instance and pass that to `<Entities />`.
+
+  Before:
+
+  ```tsx
+  const Example = () => (
+    <Entities where={(e) => e.has("position", "velocity")}>
+      {/* ... */}
+    </Entities>
+  );
+  ```
+
+  After:
+
+  ```tsx
+  const query = world.query((e) => e.has("position", "velocity"));
+
+  const Example = () => <Entities where={query}>{/* ... */}</Entities>;
+  ```
+
+- 840b2e5: feat(react)!: `useQuery` now only supports query instances
+
+  It was previously possible to pass a query description to `useQuery`. This is no longer supported. Instead, you must create a query instance and pass that to `useQuery`.
+
+  Before:
+
+  ```ts
+  const Example = () => {
+    const entities = useQuery((e) => e.has("position", "velocity"));
+
+    // ...
+  };
+  ```
+
+  After:
+
+  ```ts
+  const query = world.query((e) => e.has("position", "velocity"));
+
+  const Example = () => {
+    const entities = useQuery(query);
+
+    // ...
+  };
+  ```
+
+### Patch Changes
+
+- Updated dependencies [840b2e5]
+- Updated dependencies [840b2e5]
+  - @arancini/react@6.0.0
+  - @arancini/core@6.0.0
+  - @arancini/events@6.0.0
+  - @arancini/systems@6.0.0
+
 ## 5.0.2
 
 ### Patch Changes
