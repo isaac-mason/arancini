@@ -113,7 +113,7 @@ const SimpleExample = () => (
 
 ### `useQuery`
 
-The `useQuery` hook queries the world for entities with given components and will re-render when the query results change.
+The `useQuery` hook queries the world for entities with given components and will re-render when entities are added to or removed from the query.
 
 ```tsx
 const Example = () => {
