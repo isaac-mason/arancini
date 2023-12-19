@@ -32,7 +32,7 @@ export const Setup = ({
           <pointLight intensity={1} position={[0, 6, 0]} />
         </>
       )}
-      {controls && <OrbitControls />}
+      {controls && <OrbitControls makeDefault />}
     </React.StrictMode>
   </Canvas>
 )

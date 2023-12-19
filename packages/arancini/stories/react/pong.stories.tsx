@@ -380,7 +380,7 @@ const App = () => {
         Use the up and down arrow keys or W and S to move!
       </Text>
 
-      <PerspectiveCamera makeDefault position={[0, 0, 20]} />
+      <PerspectiveCamera makeDefault position={[0, 0, 30]} />
     </>
   )
 }

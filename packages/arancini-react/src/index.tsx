@@ -10,15 +10,11 @@ import React, {
   useContext,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from 'react'
-import {
-  useIsomorphicLayoutEffect,
-  useOnEntityAdded,
-  useOnEntityRemoved,
-  useRerender,
-} from './hooks'
+import { useIsomorphicLayoutEffect, useRerender } from './hooks'
 
 type Children = ReactNode | JSX.Element
 
@@ -165,8 +161,21 @@ export const createReactAPI = <E extends A.AnyEntity>(world: A.World<E>) => {
   const useContainer = <T extends E>(container: A.EntityContainer<T>) => {
     const rerender = useRerender()
 
-    useOnEntityAdded(container, rerender)
-    useOnEntityRemoved(container, rerender)
+    const originalVersion = useMemo(() => container.version, [container])
+
+    useIsomorphicLayoutEffect(() => {
+      if (container.version !== originalVersion) rerender()
+    }, [container])
+
+    useIsomorphicLayoutEffect(
+      () => container.onEntityAdded.add(rerender),
+      [container, rerender]
+    )
+
+    useIsomorphicLayoutEffect(
+      () => container.onEntityRemoved.add(rerender),
+      [container, rerender]
+    )
 
     return container
   }
@@ -211,10 +220,10 @@ export const createReactAPI = <E extends A.AnyEntity>(world: A.World<E>) => {
     )
   }
 
-  function Entities<T extends E>(props: {
+  const Entities = <T extends E>(props: {
     in: T[] | A.EntityContainer<T>
     children: Children | ((entity: T) => Children)
-  }): ReactElement {
+  }): ReactElement => {
     if (props.in instanceof A.EntityContainer) {
       return (
         <EntitiesInContainer container={props.in} children={props.children} />

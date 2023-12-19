@@ -3792,9 +3792,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/drei@npm:^9.92.0":
-  version: 9.92.0
-  resolution: "@react-three/drei@npm:9.92.0"
+"@react-three/drei@npm:^9.92.5":
+  version: 9.92.5
+  resolution: "@react-three/drei@npm:9.92.5"
   dependencies:
     "@babel/runtime": "npm:^7.11.2"
     "@mediapipe/tasks-vision": "npm:0.10.8"
@@ -3807,7 +3807,7 @@ __metadata:
     lodash.clamp: "npm:^4.0.3"
     lodash.omit: "npm:^4.5.0"
     lodash.pick: "npm:^4.4.0"
-    maath: "npm:^0.9.0"
+    maath: "npm:^0.10.7"
     meshline: "npm:^3.1.6"
     react-composer: "npm:^5.0.3"
     react-merge-refs: "npm:^1.1.0"
@@ -3828,7 +3828,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: b1d6474df9ccd6d08a5f914b84e496aff5313294c802f24ab98edec7934552b3973b4de8f073243a42cb6f8b9246c51c99cb6bba2db6ffb19580cd5b05e1c187
+  checksum: a22e41c223f1a9670120dcfff2a59d5ae6b17b675d2077418c86f4026c7b3b3908d322e7b40382fbc9141e49b04f32e7ad9ac4fd8387799f023bab291dc6e30f
   languageName: node
   linkType: hard
 
@@ -6257,7 +6257,7 @@ __metadata:
     "@babel/preset-env": "npm:^7.23.5"
     "@babel/preset-react": "npm:^7.22.15"
     "@babel/preset-typescript": "npm:^7.23.3"
-    "@react-three/drei": "npm:^9.92.0"
+    "@react-three/drei": "npm:^9.92.5"
     "@react-three/fiber": "npm:^8.15.11"
     "@rollup/plugin-commonjs": "npm:^25.0.7"
     "@rollup/plugin-node-resolve": "npm:^15.0.1"
@@ -11153,13 +11153,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"maath@npm:^0.9.0":
-  version: 0.9.0
-  resolution: "maath@npm:0.9.0"
+"maath@npm:^0.10.7":
+  version: 0.10.7
+  resolution: "maath@npm:0.10.7"
   peerDependencies:
     "@types/three": ">=0.144.0"
     three: ">=0.144.0"
-  checksum: b55c9af6f38b8e44d25865d72d3df061e2aa00cf31728ec1c0190038a08b1c05fc68be7c6058906782dc88f51b79f066da493d3e7a54b5efdec1e98696baaf8f
+  checksum: b020c11507ccd314b4a0869d1039ee63f1bd773dbb40db68121468b50795fc377860104d4b99acd7080bfe911a3ffb1e820234d701b2f9a77a414f815b9ec86f
   languageName: node
   linkType: hard
 
