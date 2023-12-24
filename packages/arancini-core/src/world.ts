@@ -25,11 +25,11 @@ const DEFAULT_QUERY_HANDLE = 'standalone'
 
 export type ComponentRegistry = { [name: string]: number }
 
-export type WorldOptions<E extends {}> = {
+export type AnyEntity = Record<string, any>
+
+export type WorldOptions<E extends AnyEntity> = {
   components?: (keyof E)[]
 }
-
-export type AnyEntity = Record<string, any>
 
 export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   queries = new Map<string, Query<any>>()
@@ -158,7 +158,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
 
     delete (entity as never)[ARANCINI_SYMBOL]
 
-    let id = metadata.id
+    const id = metadata.id
     if (id !== undefined) {
       this.idToEntity.delete(id)
       metadata.id = undefined
@@ -352,7 +352,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
 
     const handle = options?.handle ?? DEFAULT_QUERY_HANDLE
 
-    let queryUsages = this.queryUsages.get(key)
+    const queryUsages = this.queryUsages.get(key)
 
     if (queryUsages) {
       queryUsages.push(handle)

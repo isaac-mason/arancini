@@ -16,11 +16,11 @@ describe('Queries', () => {
     let added = 0
     let removed = 0
 
-    query.onEntityAdded.add((e) => {
+    query.onEntityAdded.add(() => {
       added++
     })
 
-    query.onEntityRemoved.add((e) => {
+    query.onEntityRemoved.add(() => {
       removed++
     })
 
@@ -51,11 +51,11 @@ describe('Queries', () => {
     let added = 0
     let removed = 0
 
-    query.onEntityAdded.add((e) => {
+    query.onEntityAdded.add(() => {
       added++
     })
 
-    query.onEntityRemoved.add((e) => {
+    query.onEntityRemoved.add(() => {
       removed++
     })
 
@@ -118,11 +118,11 @@ describe('Queries', () => {
     let added = 0
     let removed = 0
 
-    query.onEntityAdded.add((e) => {
+    query.onEntityAdded.add(() => {
       added++
     })
 
-    query.onEntityRemoved.add((e) => {
+    query.onEntityRemoved.add(() => {
       removed++
     })
 

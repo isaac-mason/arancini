@@ -27,7 +27,7 @@ export type EntityProps<Entity extends A.AnyEntity> = {
   | {
       [C in keyof Entity]?: Entity[C]
     }
-  | {}
+  | object
 )
 
 export type ComponentProps<E, C extends keyof E> = {
@@ -146,13 +146,17 @@ export const createReactAPI = <E extends A.AnyEntity>(world: A.World<E>) => {
       }
     }, [entity, name, value, childRef])
 
+    const refCatpureProps = useMemo(() => {
+      return {
+        ref: setChildRef,
+      }
+    }, [])
+
     // capture ref of child
     if (children) {
       const child = React.Children.only(children) as ReactElement
 
-      return React.cloneElement(child, {
-        ref: setChildRef,
-      })
+      return React.cloneElement(child, refCatpureProps)
     }
 
     return null

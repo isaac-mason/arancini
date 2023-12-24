@@ -9,6 +9,7 @@
   "scripts": {
     "build": "yarn workspaces foreach -A -t run build",
     "test": "yarn workspaces foreach -A -t run test",
+    "lint": "yarn workspaces foreach -A -t run lint",
     "change": "yarn changeset",
     "bump": "yarn changeset version && yarn install --mode update-lockfile",
     "release": "yarn build && yarn test && yarn build-storybook && changeset publish",
