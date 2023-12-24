@@ -1,5 +1,14 @@
 # @arancini/core
 
+## 6.0.2
+
+### Patch Changes
+
+- 445c58a: feat: minor refactors addressing eslint issues
+- 445c58a: feat: minor non-breaking type changes addressing eslint issues
+  - @arancini/events@6.0.2
+  - @arancini/pool@6.0.2
+
 ## 6.0.1
 
 ### Patch Changes
