@@ -1,5 +1,18 @@
 # arancini
 
+## 6.0.2
+
+### Patch Changes
+
+- 445c58a: feat: minor refactors addressing eslint issues
+- 445c58a: feat: minor non-breaking type changes addressing eslint issues
+- Updated dependencies [445c58a]
+- Updated dependencies [445c58a]
+  - @arancini/core@6.0.2
+  - @arancini/systems@6.0.2
+  - @arancini/react@6.0.2
+  - @arancini/events@6.0.2
+
 ## 6.0.1
 
 ### Patch Changes
