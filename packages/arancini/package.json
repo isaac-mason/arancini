@@ -67,7 +67,7 @@
     "timeline-composer": "^0.1.5",
     "typescript": "^5.3.3",
     "vite": "^4.4.12",
-    "vite-plugin-dts": "^3.6.3"
+    "vite-plugin-dts": "^3.7.0"
   },
   "type": "module",
   "main": "./dist/index.js",
