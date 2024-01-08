@@ -37,7 +37,7 @@
     "@babel/preset-typescript": "^7.23.3",
     "@isaac-mason/eslint-config-typescript": "^0.0.2",
     "@react-three/drei": "^9.92.5",
-    "@react-three/fiber": "^8.15.11",
+    "@react-three/fiber": "^8.15.13",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-terser": "^0.4.4",
