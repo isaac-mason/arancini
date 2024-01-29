@@ -1,5 +1,16 @@
 # arancini
 
+## 6.0.3
+
+### Patch Changes
+
+- c69e2c6: fix: noop on trying to destroy an entity that isn't in the world
+- Updated dependencies [c69e2c6]
+  - @arancini/react@6.0.3
+  - @arancini/core@6.0.3
+  - @arancini/systems@6.0.3
+  - @arancini/events@6.0.3
+
 ## 6.0.2
 
 ### Patch Changes
