@@ -156,6 +156,8 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     /* remove and recycle entity metadata */
     const metadata = (entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL]
 
+    if (!metadata) return
+
     delete (entity as never)[ARANCINI_SYMBOL]
 
     const id = metadata.id

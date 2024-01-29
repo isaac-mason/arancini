@@ -67,7 +67,7 @@ export const createReactAPI = <E extends A.AnyEntity>(world: A.World<E>) => {
       setEntity(e)
 
       return () => {
-        if (existingEntity) return
+        if (existingEntity || !world.has(e)) return
 
         world.destroy(e)
       }
