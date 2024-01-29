@@ -1,5 +1,13 @@
 # @arancini/core
 
+## 6.0.3
+
+### Patch Changes
+
+- c69e2c6: fix: noop on trying to destroy an entity that isn't in the world
+  - @arancini/events@6.0.3
+  - @arancini/pool@6.0.3
+
 ## 6.0.2
 
 ### Patch Changes
