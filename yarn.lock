@@ -6350,7 +6350,7 @@ __metadata:
     timeline-composer: "npm:^0.1.5"
     typescript: "npm:^5.3.3"
     vite: "npm:^5.0.12"
-    vite-plugin-dts: "npm:^3.7.0"
+    vite-plugin-dts: "npm:^3.7.2"
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
@@ -15097,9 +15097,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-plugin-dts@npm:^3.7.0":
-  version: 3.7.0
-  resolution: "vite-plugin-dts@npm:3.7.0"
+"vite-plugin-dts@npm:^3.7.2":
+  version: 3.7.2
+  resolution: "vite-plugin-dts@npm:3.7.2"
   dependencies:
     "@microsoft/api-extractor": "npm:7.39.0"
     "@rollup/pluginutils": "npm:^5.1.0"
@@ -15113,7 +15113,7 @@ __metadata:
   peerDependenciesMeta:
     vite:
       optional: true
-  checksum: bb0cbe51b6aa96b7039d46242d4b4fb89522d0051e2712606e24bbb5cad72e28da675e7a02be9c07ad7dc7255c3091d315a8f234bf224812be22ef6416f78e15
+  checksum: 73c0a3fb1f0e65dd8baac07b18442537da3bf83bbed28f2598ee789d26dc9c0affd312719f6202682d878cdf4eeec8436aaeef9e92820de5340afecdbb8f673d
   languageName: node
   linkType: hard
 
