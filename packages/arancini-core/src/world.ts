@@ -124,6 +124,8 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
    * ```
    */
   create(entity: E): E {
+    if (this.has(entity)) return entity
+
     addEntityToContainer(this, entity)
 
     const metadata = this.entityMetadataPool.request()
@@ -186,10 +188,8 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
    * ```
    */
   add<C extends keyof E>(entity: E, component: C, value: E[C]): this {
-    if (entity[component] !== undefined) {
-      return this
-    }
-
+    if (entity[component] !== undefined) return this
+    
     entity[component] = value
 
     const metadata = (entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL]
