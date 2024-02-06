@@ -1,5 +1,13 @@
 # @arancini/core
 
+## 6.0.4
+
+### Patch Changes
+
+- 5580370: feat: early return on attempting to create an entity that already exists in the world
+  - @arancini/events@6.0.4
+  - @arancini/pool@6.0.4
+
 ## 6.0.3
 
 ### Patch Changes

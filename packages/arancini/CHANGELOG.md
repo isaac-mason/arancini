@@ -1,5 +1,16 @@
 # arancini
 
+## 6.0.4
+
+### Patch Changes
+
+- 5580370: feat: early return on attempting to create an entity that already exists in the world
+- Updated dependencies [5580370]
+  - @arancini/core@6.0.4
+  - @arancini/react@6.0.4
+  - @arancini/systems@6.0.4
+  - @arancini/events@6.0.4
+
 ## 6.0.3
 
 ### Patch Changes
