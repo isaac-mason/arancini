@@ -12,6 +12,7 @@ import {
 } from './entity-metadata'
 import {
   Query,
+  QueryCondition,
   QueryDescription,
   evaluateQueryBitSets,
   getFirstQueryResult,
@@ -367,6 +368,8 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     const queryConditions = getQueryConditions(queryDescription)
     const key = getQueryDedupeString(this.componentRegistry, queryConditions)
 
+    this.registerQueryDescriptionComponents(queryConditions)
+
     const handle = options?.handle ?? DEFAULT_QUERY_HANDLE
 
     const queryUsages = this.queryUsages.get(key)
@@ -437,6 +440,9 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     queryDescription: QueryDescription<E, ResultEntity>
   ): ResultEntity[] {
     const conditions = getQueryConditions(queryDescription)
+
+    this.registerQueryDescriptionComponents(conditions)
+
     const queryDedupe = getQueryDedupeString(this.componentRegistry, conditions)
 
     const query = this.queries.get(queryDedupe)
@@ -464,6 +470,9 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     queryDescription: QueryDescription<E, ResultEntity>
   ): ResultEntity | undefined {
     const conditions = getQueryConditions(queryDescription)
+
+    this.registerQueryDescriptionComponents(conditions)
+
     const queryDedupe = getQueryDedupeString(this.componentRegistry, conditions)
 
     const query = this.queries.get(queryDedupe)
@@ -505,6 +514,23 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     }
 
     return ids
+  }
+
+  private registerQueryDescriptionComponents(queryConditions: QueryCondition<E>[]) {
+    const queryComponents = new Set(
+      queryConditions.flatMap((condition) => condition.components)
+    )
+
+    const unregisteredComponents: string[] = []
+    for (const component of queryComponents) {
+      if (this.componentRegistry[component as string] === undefined) {
+        unregisteredComponents.push(component as string)
+      }
+    }
+
+    if (unregisteredComponents.length > 0) {
+      this.registerComponents(unregisteredComponents)
+    }
   }
 
   private index(entity: E) {
