@@ -1,5 +1,16 @@
 # @arancini/core
 
+## 6.1.0
+
+### Minor Changes
+
+- 66e0529: feat: remove requirement to register components before using them
+
+### Patch Changes
+
+- @arancini/events@6.1.0
+- @arancini/pool@6.1.0
+
 ## 6.0.4
 
 ### Patch Changes
