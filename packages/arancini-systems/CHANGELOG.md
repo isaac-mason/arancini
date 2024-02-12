@@ -1,5 +1,12 @@
 # @arancini/systems
 
+## 6.1.0
+
+### Patch Changes
+
+- Updated dependencies [66e0529]
+  - @arancini/core@6.1.0
+
 ## 6.0.4
 
 ### Patch Changes
