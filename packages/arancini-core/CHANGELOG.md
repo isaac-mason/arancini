@@ -1,5 +1,13 @@
 # @arancini/core
 
+## 6.1.2
+
+### Patch Changes
+
+- 695116f: fix: correctly dedupe queries for unregistered components
+  - @arancini/events@6.1.2
+  - @arancini/pool@6.1.2
+
 ## 6.1.1
 
 ### Patch Changes

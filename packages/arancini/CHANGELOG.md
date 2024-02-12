@@ -1,5 +1,16 @@
 # arancini
 
+## 6.1.2
+
+### Patch Changes
+
+- 695116f: fix: correctly dedupe queries for unregistered components
+- Updated dependencies [695116f]
+  - @arancini/core@6.1.2
+  - @arancini/react@6.1.2
+  - @arancini/systems@6.1.2
+  - @arancini/events@6.1.2
+
 ## 6.1.1
 
 ### Patch Changes
