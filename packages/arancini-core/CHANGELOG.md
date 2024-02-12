@@ -1,5 +1,13 @@
 # @arancini/core
 
+## 6.1.3
+
+### Patch Changes
+
+- d252eee: feat: refactor logic for creation of queries with unregistered components
+  - @arancini/events@6.1.3
+  - @arancini/pool@6.1.3
+
 ## 6.1.2
 
 ### Patch Changes
