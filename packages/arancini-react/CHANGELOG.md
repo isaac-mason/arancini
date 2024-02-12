@@ -1,5 +1,12 @@
 # @arancini/react
 
+## 6.1.3
+
+### Patch Changes
+
+- Updated dependencies [d252eee]
+  - @arancini/core@6.1.3
+
 ## 6.1.2
 
 ### Patch Changes

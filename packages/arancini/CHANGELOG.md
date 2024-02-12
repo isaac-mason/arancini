@@ -1,5 +1,16 @@
 # arancini
 
+## 6.1.3
+
+### Patch Changes
+
+- d252eee: feat: refactor logic for creation of queries with unregistered components
+- Updated dependencies [d252eee]
+  - @arancini/core@6.1.3
+  - @arancini/react@6.1.3
+  - @arancini/systems@6.1.3
+  - @arancini/events@6.1.3
+
 ## 6.1.2
 
 ### Patch Changes
