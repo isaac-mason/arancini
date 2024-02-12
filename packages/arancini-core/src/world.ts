@@ -365,11 +365,11 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     queryDescription: QueryDescription<E, ResultEntity>,
     options?: { handle: unknown }
   ): Query<ResultEntity> {
-    const queryConditions = getQueryConditions(queryDescription)
+    const conditions = getQueryConditions(queryDescription)
 
-    this.registerQueryDescriptionComponents(queryConditions)
+    this.registerQueryConditionComponents(conditions)
 
-    const key = getQueryDedupeString(this.componentRegistry, queryConditions)
+    const key = getQueryDedupeString(this.componentRegistry, conditions)
 
     const handle = options?.handle ?? DEFAULT_QUERY_HANDLE
 
@@ -390,8 +390,8 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     query = new Query(
       this,
       key,
-      queryConditions,
-      getQueryBitSets(this.componentRegistry, queryConditions)
+      conditions,
+      getQueryBitSets(this.componentRegistry, conditions)
     )
 
     const matches = getQueryResults(query.bitSets, this.entities.values())
@@ -442,7 +442,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   ): ResultEntity[] {
     const conditions = getQueryConditions(queryDescription)
 
-    this.registerQueryDescriptionComponents(conditions)
+    this.registerQueryConditionComponents(conditions)
 
     const queryDedupe = getQueryDedupeString(this.componentRegistry, conditions)
 
@@ -472,7 +472,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   ): ResultEntity | undefined {
     const conditions = getQueryConditions(queryDescription)
 
-    this.registerQueryDescriptionComponents(conditions)
+    this.registerQueryConditionComponents(conditions)
 
     const queryDedupe = getQueryDedupeString(this.componentRegistry, conditions)
 
@@ -517,15 +517,17 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     return ids
   }
 
-  private registerQueryDescriptionComponents(queryConditions: QueryCondition<E>[]) {
+  private registerQueryConditionComponents(
+    queryConditions: QueryCondition<E>[]
+  ) {
     const queryComponents = new Set(
       queryConditions.flatMap((condition) => condition.components)
-    )
+    ) as Set<string>
 
     const unregisteredComponents: string[] = []
     for (const component of queryComponents) {
-      if (this.componentRegistry[component as string] === undefined) {
-        unregisteredComponents.push(component as string)
+      if (this.componentRegistry[component] === undefined) {
+        unregisteredComponents.push(component)
       }
     }
 
