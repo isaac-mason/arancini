@@ -47,12 +47,10 @@ type Entity = {
 
 // create a world
 const world = new World<Entity>({
+  // (optional) register components upfront for the best performance
   components: ['position', 'health', 'velocity', 'inventory'],
 })
 ```
-
-> **Note:**
-> Components must be registered before they can be used. You can register components in an existing world using `world.registerComponents`, but doing so will cause a small performance hit as structures for existing entities need to be updated.
 
 ### 🍱 Creating Entities
 

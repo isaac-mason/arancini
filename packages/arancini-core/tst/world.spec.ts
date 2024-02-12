@@ -19,6 +19,18 @@ describe('World', () => {
     world.registerComponents(['foo', 'bar'])
   })
 
+  it('supports automatically registering components', () => {
+    const world = new World<Entity>({ components: ['foo'] })
+
+    const entity = { foo: 'test', bar: 1 }
+
+    world.create(entity)
+
+    const query = world.query((q) => q.has('bar'))
+
+    expect(query.entities.length).toBe(1)
+  })
+
   it('supports computing an id for an entity, then retrieving an entity by id later', () => {
     const world = new World<Entity>()
 

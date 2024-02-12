@@ -126,13 +126,22 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   create(entity: E): E {
     if (this.has(entity)) return entity
 
-    addEntityToContainer(this, entity)
+    const componentIds: number[] = []
+    for (const key of Object.keys(entity)) {
+      let index = this.componentRegistry[key]
+
+      if (!index) {
+        ;[index] = this.registerComponents([key])
+      }
+
+      componentIds.push(index)
+    }
 
     const metadata = this.entityMetadataPool.request()
-    metadata.bitset.add(
-      ...Object.keys(entity).map((c) => this.componentRegistry[c])
-    )
+    metadata.bitset.add(...componentIds)
     ;(entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL] = metadata
+
+    addEntityToContainer(this, entity)
 
     this.index(entity)
 
@@ -189,11 +198,17 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
    */
   add<C extends keyof E>(entity: E, component: C, value: E[C]): this {
     if (entity[component] !== undefined) return this
-    
+
     entity[component] = value
 
     const metadata = (entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL]
-    metadata.bitset.add(this.componentRegistry[component as string])
+
+    let index = this.componentRegistry[component as string]
+    if (index === undefined) {
+      ;[index] = this.registerComponents([component])
+    }
+
+    metadata.bitset.add(index)
 
     this.index(entity)
 
@@ -471,9 +486,12 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
    * @param names
    */
   registerComponents(components: (keyof E)[]) {
+    const ids: number[] = []
+
     for (const component of components) {
       if (this.componentRegistry[component as string] === undefined) {
         this.componentIndexCounter++
+        ids.push(this.componentIndexCounter)
         this.componentRegistry[component as string] = this.componentIndexCounter
       }
     }
@@ -485,6 +503,8 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
         metadata.bitset.resize(this.componentIndexCounter)
       }
     }
+
+    return ids
   }
 
   private index(entity: E) {

@@ -14,9 +14,14 @@ export class BitSet {
   }
 
   add(...indices: number[]): void {
+    const max = Math.max(...indices)
+
+    if (this.words.length << 5 <= max) {
+      this.resize(max, false)
+    }
+
     for (let i = 0; i < indices.length; i++) {
       const index = indices[i]
-      this.resize(index)
       this.words[index >>> 5] |= 1 << index
     }
   }
@@ -24,7 +29,6 @@ export class BitSet {
   remove(...indices: number[]): void {
     for (let i = 0; i < indices.length; i++) {
       const index = indices[i]
-      this.resize(index)
       this.words[index >>> 5] &= ~(1 << index)
     }
   }
@@ -33,8 +37,8 @@ export class BitSet {
     return (this.words[index >>> 5] & (1 << index)) !== 0
   }
 
-  resize(index: number): void {
-    if (this.words.length << 5 > index) {
+  resize(index: number, check = true): void {
+    if (check && this.words.length << 5 > index) {
       return
     }
 
