@@ -1,5 +1,13 @@
 # @arancini/core
 
+## 6.1.1
+
+### Patch Changes
+
+- 42a87c8: fix: register unregistered components on creating a query
+  - @arancini/events@6.1.1
+  - @arancini/pool@6.1.1
+
 ## 6.1.0
 
 ### Minor Changes

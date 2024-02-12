@@ -1,5 +1,16 @@
 # arancini
 
+## 6.1.1
+
+### Patch Changes
+
+- 42a87c8: fix: register unregistered components on creating a query
+- Updated dependencies [42a87c8]
+  - @arancini/core@6.1.1
+  - @arancini/react@6.1.1
+  - @arancini/systems@6.1.1
+  - @arancini/events@6.1.1
+
 ## 6.1.0
 
 ### Minor Changes
