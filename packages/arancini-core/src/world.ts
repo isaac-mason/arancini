@@ -127,7 +127,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   create(entity: E): E {
     if (this.has(entity)) return entity
 
-    const componentIds: number[] = []
+    const componentIndices: number[] = []
     for (const key of Object.keys(entity)) {
       let index = this.componentRegistry[key]
 
@@ -135,11 +135,11 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
         ;[index] = this.registerComponents([key])
       }
 
-      componentIds.push(index)
+      componentIndices.push(index)
     }
 
     const metadata = this.entityMetadataPool.request()
-    metadata.bitset.add(...componentIds)
+    metadata.bitset.add(...componentIndices)
     ;(entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL] = metadata
 
     addEntityToContainer(this, entity)
@@ -493,15 +493,15 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
 
   /**
    * Register components with the World
-   * @param names
+   * @param components
    */
   registerComponents(components: (keyof E)[]) {
-    const ids: number[] = []
+    const registered: number[] = []
 
     for (const component of components) {
       if (this.componentRegistry[component as string] === undefined) {
         this.componentIndexCounter++
-        ids.push(this.componentIndexCounter)
+        registered.push(this.componentIndexCounter)
         this.componentRegistry[component as string] = this.componentIndexCounter
       }
     }
@@ -514,7 +514,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
       }
     }
 
-    return ids
+    return registered
   }
 
   private registerQueryConditionComponents(
