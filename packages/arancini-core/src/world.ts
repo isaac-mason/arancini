@@ -366,9 +366,10 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     options?: { handle: unknown }
   ): Query<ResultEntity> {
     const queryConditions = getQueryConditions(queryDescription)
-    const key = getQueryDedupeString(this.componentRegistry, queryConditions)
 
     this.registerQueryDescriptionComponents(queryConditions)
+
+    const key = getQueryDedupeString(this.componentRegistry, queryConditions)
 
     const handle = options?.handle ?? DEFAULT_QUERY_HANDLE
 

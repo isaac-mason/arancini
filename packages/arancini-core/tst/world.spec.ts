@@ -4,6 +4,7 @@ import { World } from '../src/world'
 type Entity = {
   foo?: string
   bar?: number
+  car?: number
 }
 
 describe('World', () => {
@@ -26,13 +27,17 @@ describe('World', () => {
 
     world.create(entity)
 
-    const query = world.query((q) => q.has('bar'))
-
-    expect(query.entities.length).toBe(0)
+    const queryForBar = world.query((q) => q.has('bar'))
+    expect(queryForBar.entities.length).toBe(0)
 
     world.add(entity, 'bar', 1)
+    expect(queryForBar.entities.length).toBe(1)
 
-    expect(query.entities.length).toBe(1)
+    const queryForCar = world.query((q) => q.has('car'))
+    expect(queryForCar.entities.length).toBe(0)
+
+    world.add(entity, 'car', 1)
+    expect(queryForCar.entities.length).toBe(1)
   })
 
   it('supports computing an id for an entity, then retrieving an entity by id later', () => {
