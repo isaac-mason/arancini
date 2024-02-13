@@ -1,5 +1,16 @@
 # arancini
 
+## 6.3.1
+
+### Patch Changes
+
+- 56437fc: fix: when adding components with world.update add components before emitting events
+- Updated dependencies [56437fc]
+  - @arancini/core@6.3.1
+  - @arancini/react@6.3.1
+  - @arancini/systems@6.3.1
+  - @arancini/events@6.3.1
+
 ## 6.3.0
 
 ### Minor Changes
