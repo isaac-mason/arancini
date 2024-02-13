@@ -69,18 +69,6 @@ export const getFirstQueryResult = <E>(
 
   return undefined
 }
-// export const getFirstQueryResult = <E>(
-//   queryBitSets: QueryBitSets,
-//   entities: Iterable<E>
-// ): E | undefined => {
-//   for (const entity of entities) {
-//     if (evaluateQueryBitSets(queryBitSets, entity)) {
-//       return entity
-//     }
-//   }
-
-//   return undefined
-// }
 
 export const evaluateQueryConditions = <E>(
   conditions: QueryConditions<E>,
@@ -89,17 +77,17 @@ export const evaluateQueryConditions = <E>(
   for (const condition of conditions) {
     if (
       condition.type === 'all' &&
-      !condition.components.every((c) => entity[c])
+      !condition.components.every((c) => entity[c] !== undefined)
     ) {
       return false
     } else if (
       condition.type === 'any' &&
-      !condition.components.some((c) => entity[c])
+      !condition.components.some((c) => entity[c] !== undefined)
     ) {
       return false
     } else if (
       condition.type === 'not' &&
-      condition.components.some((c) => entity[c])
+      condition.components.some((c) => entity[c] !== undefined)
     ) {
       return false
     }
@@ -141,7 +129,6 @@ export const getQueryConditions = (
 }
 
 export const getQueryDedupeString = (
-  // componentRegistry: ComponentRegistry,
   queryConditions: QueryConditions<unknown>
 ): string => {
   return queryConditions

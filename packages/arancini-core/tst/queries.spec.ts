@@ -43,6 +43,64 @@ describe('Queries', () => {
     expect(removed).toBe(2)
   })
 
+  it('emits events when an entity is added to a query', () => {
+    const world = new World<Entity>()
+
+    const query = world.query((q) => q.has('foo'))
+
+    let added = 0
+
+    query.onEntityAdded.add(() => {
+      added++
+    })
+
+    const entity = { foo: 'test' }
+
+    world.create(entity)
+
+    expect(added).toBe(1)
+  })
+
+  it('emits events when an entity is removed from a query', () => {
+    const world = new World<Entity>()
+
+    const query = world.query((q) => q.has('foo'))
+
+    const events: Entity[] = []
+
+    query.onEntityRemoved.add((entity) => {
+      events.push({ ...entity })
+    })
+
+    const entity = {}
+    world.create(entity)
+
+    // add to query
+    world.add(entity, 'foo', '')
+
+    // remove from query
+    world.remove(entity, 'foo')
+
+    // add to query
+    world.update(entity, { foo: '' })
+
+    // remove from query
+    world.update(entity, { foo: undefined })
+
+    // add to query
+    world.update(entity, (e) => {
+      e.foo = ''
+    })
+
+    // remove from query
+    world.update(entity, {
+      foo: undefined,
+    })
+
+    expect(events.length).toBe(3)
+    expect(events.every((e) => e.foo !== undefined)).toBe(true)
+  })
+
   it('should update an entity in bulk when calling update', () => {
     const world = new World<Entity>()
 

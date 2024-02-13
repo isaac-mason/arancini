@@ -13,7 +13,7 @@ import {
   getQueryResults,
 } from './query'
 
-const DEFAULT_QUERY_HANDLE = 'standalone'
+const DEFAULT_QUERY_HANDLE = Symbol('standalone')
 
 export type ComponentRegistry = { [name: string]: number }
 
@@ -27,9 +27,6 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   private idToEntity = new Map<number, E>()
   private entityToId = new WeakMap<E, number>()
   private entityIdCounter = 0
-
-  private bulkUpdateInProgress = false
-  private bulkUpdateEntities: Set<E> = new Set()
 
   /**
    * Removes all entities from the world. Components remain registered, and queries are not destroyed.
@@ -192,78 +189,18 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     entity: E,
     updateFnOrPartial: ((entity: E) => void) | Partial<E>
   ): void {
+    const future = { ...entity }
+
     if (typeof updateFnOrPartial === 'function') {
       const updateFn = updateFnOrPartial
-
-      const proxy = new Proxy(entity, {
-        set: (_target, key, value) => {
-          const component = key as keyof E
-
-          const has = component in entity
-
-          if (has && value === undefined) {
-            this.remove(entity, component)
-          } else if (!has) {
-            this.add(entity, component, value)
-          } else {
-            Reflect.set(entity, key, value)
-          }
-
-          return true
-        },
-        deleteProperty: (_target, key) => {
-          this.remove(entity, key as keyof E)
-
-          return true
-        },
-      })
-
-      this.bulk(() => {
-        updateFn(proxy)
-      })
+      updateFn(future)
     } else {
-      const partial = updateFnOrPartial
-
-      this.bulk(() => {
-        for (const component in partial) {
-          const value = partial[component]
-
-          if (value !== undefined) {
-            this.add(entity, component as keyof E, value)
-          } else {
-            this.remove(entity, component as keyof E)
-          }
-        }
-      })
-    }
-  }
-
-  /**
-   * Utility method for adding and removing components from entities in bulk.
-   * @param updateFn callback to update entities in the World
-   *
-   * @example
-   * ```ts
-   * const entity = world.create({ health: 10, poisioned: true })
-   *
-   * world.bulk(() => {
-   *   world.add(entity, 'position', { x: 0, y: 0 })
-   *   world.remove(entity, 'poisioned')
-   * })
-   * ```
-   */
-  bulk(updateFn: () => void): void {
-    this.bulkUpdateInProgress = true
-
-    updateFn()
-
-    this.bulkUpdateInProgress = false
-
-    for (const entity of this.bulkUpdateEntities) {
-      this.index(entity)
+      Object.assign(future, updateFnOrPartial)
     }
 
-    this.bulkUpdateEntities.clear()
+    this.index(entity, future)
+
+    Object.assign(entity, future)
   }
 
   /**
@@ -400,11 +337,6 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
 
   private index(entity: E, future: E = entity) {
     if (!this.has(entity)) return
-
-    if (this.bulkUpdateInProgress) {
-      this.bulkUpdateEntities.add(entity)
-      return
-    }
 
     for (const query of this.queries.values()) {
       const matchesQuery = evaluateQueryConditions(query.conditions, future)
