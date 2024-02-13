@@ -1,5 +1,24 @@
 # arancini
 
+## 6.3.0
+
+### Minor Changes
+
+- a31e200: feat: remove `world.bulk` api
+
+  Adding and removing multiple components can be achieved with `world.update` instead.
+
+- a31e200: feat: change world.update to emit events with removed components, same as world.remove
+
+### Patch Changes
+
+- Updated dependencies [a31e200]
+- Updated dependencies [a31e200]
+  - @arancini/core@6.3.0
+  - @arancini/react@6.3.0
+  - @arancini/systems@6.3.0
+  - @arancini/events@6.3.0
+
 ## 6.2.0
 
 ### Minor Changes
