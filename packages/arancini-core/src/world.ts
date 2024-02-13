@@ -198,7 +198,20 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
       Object.assign(future, updateFnOrPartial)
     }
 
+    const added = Object.keys(future).filter((key) => entity[key] === undefined)
+    const removed = Object.keys(entity).filter((key) => future[key] === undefined)
+
+    // add components before indexing
+    for (const component of added) {
+      entity[component as keyof E] = future[component]
+    }
+
     this.index(entity, future)
+
+    // remove components after indexing
+    for (const component of removed) {
+      delete entity[component]
+    }
 
     Object.assign(entity, future)
   }

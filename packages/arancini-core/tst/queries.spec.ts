@@ -43,62 +43,70 @@ describe('Queries', () => {
     expect(removed).toBe(2)
   })
 
-  it('emits events when an entity is added to a query', () => {
+  it('emits events when entities are added or removed from a query', () => {
     const world = new World<Entity>()
 
     const query = world.query((q) => q.has('foo'))
 
-    let added = 0
+    const addEvents: Entity[] = []
+    const removeEvents: Entity[] = []
 
-    query.onEntityAdded.add(() => {
-      added++
+    query.onEntityAdded.add((entity) => {
+      addEvents.push({ ...entity })
     })
 
-    const entity = { foo: 'test' }
-
-    world.create(entity)
-
-    expect(added).toBe(1)
-  })
-
-  it('emits events when an entity is removed from a query', () => {
-    const world = new World<Entity>()
-
-    const query = world.query((q) => q.has('foo'))
-
-    const events: Entity[] = []
-
     query.onEntityRemoved.add((entity) => {
-      events.push({ ...entity })
+      removeEvents.push({ ...entity })
     })
 
     const entity = {}
     world.create(entity)
 
+    expect(query.entities).toHaveLength(0)
+
     // add to query
     world.add(entity, 'foo', '')
+
+    expect(query.first).toEqual({ foo: '' })
+    expect(query.entities).toHaveLength(1)
 
     // remove from query
     world.remove(entity, 'foo')
 
+    expect(query.entities).toHaveLength(0)
+
+
     // add to query
     world.update(entity, { foo: '' })
 
+    expect(query.first).toEqual({ foo: '' })
+    expect(query.entities).toHaveLength(1)
+
     // remove from query
     world.update(entity, { foo: undefined })
+
+    expect(query.entities).toHaveLength(0)
 
     // add to query
     world.update(entity, (e) => {
       e.foo = ''
     })
 
+    expect(query.first).toEqual({ foo: '' })
+    expect(query.entities).toHaveLength(1)
+
     // remove from query
     world.update(entity, {
       foo: undefined,
     })
 
-    expect(events.length).toBe(3)
-    expect(events.every((e) => e.foo !== undefined)).toBe(true)
+    expect(query.entities).toHaveLength(0)
+
+    expect(addEvents.length).toBe(3)
+    expect(addEvents.every((e) => e.foo === '')).toBe(true)
+
+    expect(removeEvents.length).toBe(3)
+    expect(removeEvents.every((e) => e.foo !== undefined)).toBe(true)
   })
 
   it('should update an entity in bulk when calling update', () => {
