@@ -1,5 +1,13 @@
 # @arancini/systems
 
+## 6.2.0
+
+### Patch Changes
+
+- Updated dependencies [9096041]
+- Updated dependencies [9096041]
+  - @arancini/core@6.2.0
+
 ## 6.1.3
 
 ### Patch Changes

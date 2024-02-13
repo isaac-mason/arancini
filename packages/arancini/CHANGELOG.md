@@ -1,5 +1,32 @@
 # arancini
 
+## 6.2.0
+
+### Minor Changes
+
+- 9096041: feat: stop using bitsets for query evaluation, evaluate queries using object keys
+
+  The bitset implementation as-is is slower than just checking object keys, even for large numbers of component types.
+
+  This may be revisited in the future, but for now, arancini will use object keys for query evaluation to improve performance and simplify the library.
+
+- 9096041: feat: remove World components constructor parameter and `registerComponents`
+
+  There is no longer any need to register components when creating a world.
+
+- 82289e4: feat: remove arancini/pool entrypoint
+
+  Object pools are no longer used internally, so @arancini/pool is no longer necessary.
+
+### Patch Changes
+
+- Updated dependencies [9096041]
+- Updated dependencies [9096041]
+  - @arancini/core@6.2.0
+  - @arancini/react@6.2.0
+  - @arancini/systems@6.2.0
+  - @arancini/events@6.2.0
+
 ## 6.1.3
 
 ### Patch Changes
