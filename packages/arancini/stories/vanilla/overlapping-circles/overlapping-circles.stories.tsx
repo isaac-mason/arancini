@@ -30,13 +30,13 @@ export class MovementSystem extends System<Entity> {
   context = this.singleton('canvas')!
 
   onUpdate(delta: number) {
-    let canvasWidth = this.context.width
-    let canvasHeight = this.context.height
-    let multiplier = 0.5
+    const canvasWidth = this.context.width
+    const canvasHeight = this.context.height
+    const multiplier = 0.5
 
-    let entities = this.movingCircles.entities
+    const entities = this.movingCircles.entities
     for (let i = 0; i < entities.length; i++) {
-      let { circle, movement } = entities[i]
+      const { circle, movement } = entities[i]
 
       circle.position.x +=
         movement.velocity.x * movement.acceleration.x * delta * multiplier
@@ -67,19 +67,19 @@ export class IntersectionSystem extends System<Entity> {
   circles = this.query((entities) => entities.with('circle'))
 
   onUpdate() {
-    let entities = this.circles.entities
+    const entities = this.circles.entities
 
     for (let i = 0; i < entities.length; i++) {
-      let entity = entities[i]
+      const entity = entities[i]
       if (entity.intersecting) {
         entity.intersecting.points.length = 0
       }
 
-      let { circle } = entity
+      const { circle } = entity
 
       for (let j = i + 1; j < entities.length; j++) {
-        let entityB = entities[j]
-        let { circle: circleB } = entityB
+        const entityB = entities[j]
+        const { circle: circleB } = entityB
 
         const intersect = intersection(circle, circleB)
 
@@ -101,10 +101,10 @@ export class IntersectionSystem extends System<Entity> {
 
   onDestroy() {
     // Clean up interesection when stopping
-    let entities = this.circles.entities
+    const entities = this.circles.entities
 
     for (let i = 0; i < entities.length; i++) {
-      let entity = entities[i]
+      const entity = entities[i]
       if (entity.intersecting) {
         entity.intersecting.points.length = 0
       }
@@ -123,9 +123,9 @@ export class Renderer extends System<Entity> {
     ctx.fillStyle = 'black'
     ctx.fillRect(0, 0, width, height)
 
-    let circles = this.circles.entities
+    const circles = this.circles.entities
     for (let i = 0; i < circles.length; i++) {
-      let { circle } = circles[i]
+      const { circle } = circles[i]
 
       ctx.beginPath()
       ctx.arc(
@@ -141,9 +141,9 @@ export class Renderer extends System<Entity> {
       ctx.stroke()
     }
 
-    let intersectingCircles = this.intersectingCircles.entities
+    const intersectingCircles = this.intersectingCircles.entities
     for (let i = 0; i < intersectingCircles.length; i++) {
-      let { intersecting } = intersectingCircles[i]
+      const { intersecting } = intersectingCircles[i]
       for (let j = 0; j < intersecting.points.length; j++) {
         const points = intersecting.points[j]
         ctx.lineWidth = 2
@@ -165,9 +165,7 @@ export class Renderer extends System<Entity> {
 
 export const OverlappingCircles = () => {
   useEffect(() => {
-    const world = new World<Entity>({
-      components: ['circle', 'movement', 'intersecting', 'canvas'],
-    })
+    const world = new World<Entity>()
 
     const executor = new Executor(world)
 

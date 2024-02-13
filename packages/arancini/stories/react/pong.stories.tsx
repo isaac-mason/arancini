@@ -28,19 +28,7 @@ type EntityType = {
   }
 }
 
-const world = new World<EntityType>({
-  components: [
-    'object3D',
-    'position',
-    'velocity',
-    'player',
-    'ai',
-    'ball',
-    'paddle',
-    'input',
-    'score',
-  ],
-})
+const world = new World<EntityType>()
 
 const { Entity, Component, Entities } = createReactAPI(world)
 

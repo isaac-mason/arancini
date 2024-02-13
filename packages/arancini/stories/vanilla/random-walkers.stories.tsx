@@ -113,9 +113,7 @@ class FlipSystem extends System<Entity> {
 
 export const RandomColorChangingWalkers = () => {
   useEffect(() => {
-    const world = new World<Entity>({
-      components: ['position', 'red', 'blue', 'canvasContext'],
-    })
+    const world = new World<Entity>()
 
     const executor = new Executor(world)
 

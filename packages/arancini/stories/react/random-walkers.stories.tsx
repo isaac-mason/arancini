@@ -33,9 +33,7 @@ class WalkingSystem extends System<EntityType> {
   }
 }
 
-const world = new World<EntityType>({
-  components: ['object3D', 'walking'],
-})
+const world = new World<EntityType>()
 
 const walkingQuery = world.query((e) => e.is('walking'))
 

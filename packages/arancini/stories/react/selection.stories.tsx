@@ -43,9 +43,7 @@ class CameraSystem extends System<EntityType> {
   }
 }
 
-const world = new World<EntityType>({
-  components: ['object3D', 'camera', 'selected'],
-})
+const world = new World<EntityType>()
 
 const executor = new Executor(world)
 

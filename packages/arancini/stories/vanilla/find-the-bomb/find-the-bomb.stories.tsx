@@ -164,15 +164,7 @@ class InteractionSystem extends System<Entity> {
 
 export const FindTheBomb = () => {
   useEffect(() => {
-    const world = new World<Entity>({
-      components: [
-        'position',
-        'emoji',
-        'distanceToTarget',
-        'target',
-        'gameState',
-      ]
-    })
+    const world = new World<Entity>()
 
     const executor = new Executor(world)
 
