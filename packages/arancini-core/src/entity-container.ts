@@ -47,7 +47,7 @@ export class EntityContainer<Entity> {
 
 export const addEntityToContainer = <E extends AnyEntity>(
   container: EntityContainer<E>,
-  entity: E
+  entity: E,
 ): void => {
   if (entity && !container.has(entity)) {
     container.entities.push(entity)
@@ -62,7 +62,7 @@ export const addEntityToContainer = <E extends AnyEntity>(
 
 export const removeEntityFromContainer = <E extends AnyEntity>(
   container: EntityContainer<E>,
-  entity: E
+  entity: E,
 ): void => {
   if (!container.has(entity)) {
     return

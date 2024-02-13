@@ -12,7 +12,6 @@
 ```
 
 - 🍱 ‎ Entities are regular objects, components are properties
-- 🔍 ‎ Fast reactive queries powered by bitsets
 - 🧩 ‎ Framework agnostic, plug arancini into whatever you like
 - 🧠 ‎ Define Systems with `arancini/systems`, or bring your own system logic
 - ⚛️ ‎ [Easy integration with React](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-react)
@@ -46,10 +45,7 @@ type Entity = {
 }
 
 // create a world
-const world = new World<Entity>({
-  // (optional) register components upfront for the best performance
-  components: ['position', 'health', 'velocity', 'inventory'],
-})
+const world = new World<Entity>()
 ```
 
 ### 🍱 Creating Entities
@@ -200,9 +196,7 @@ type Entity = {
 }
 
 // Create a World
-const world = new World<Entity>({
-  components: ['position', 'velocity'],
-})
+const world = new World<Entity>()
 
 // Create an Executor
 const executor = new Executor(world)
@@ -388,24 +382,4 @@ const unsubscribe = topic.inventoryEvents((item, quantity) => {
 inventoryEvents.emit('apple', 1)
 
 inventoryEvents.clear()
-```
-
-### [**`@arancini/pool`**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-pool)
-
-[![Version](https://img.shields.io/npm/v/@arancini/pool)](https://www.npmjs.com/package/@arancini/pool)
-
-Object pooling utilities.
-
-```bash
-> npm install @arancini/pool
-```
-
-```ts
-import { ObjectPool } from '@arancini/pool'
-
-const pool = new ObjectPool(() => new Float32Array(1000))
-
-const array = pool.request()
-
-pool.recycle(array)
 ```

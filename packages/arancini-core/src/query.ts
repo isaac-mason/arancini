@@ -1,7 +1,5 @@
-import { BitSet } from './bit-set'
 import { EntityContainer } from './entity-container'
-import { ARANCINI_SYMBOL, EntityWithMetadata } from './entity-metadata'
-import type { ComponentRegistry, World } from './world'
+import type { World } from './world'
 
 export type With<E, P extends keyof E> = E & Required<Pick<E, P>>
 
@@ -28,19 +26,13 @@ export type QueryCondition<E> = {
 
 export type QueryConditions<E> = QueryCondition<E>[]
 
-export type QueryBitSets = {
-  type: QueryConditionType
-  bitset: BitSet
-}[]
-
 export type QueryDescription<E, R> = (q: QueryBuilder<E>) => QueryBuilder<R>
 
 export class Query<E> extends EntityContainer<E> {
   constructor(
     public world: World,
     public key: string,
-    public conditions: QueryConditions<E>,
-    public bitSets: QueryBitSets
+    public conditions: QueryConditions<E>
   ) {
     super()
   }
@@ -51,13 +43,13 @@ export class Query<E> extends EntityContainer<E> {
 }
 
 export const getQueryResults = <E>(
-  queryBitSets: QueryBitSets,
+  queryConditions: QueryConditions<E>,
   entities: Iterable<E>
 ): E[] => {
   const matches: E[] = []
 
   for (const entity of entities) {
-    if (evaluateQueryBitSets(queryBitSets, entity)) {
+    if (evaluateQueryConditions(queryConditions, entity)) {
       matches.push(entity)
     }
   }
@@ -66,35 +58,48 @@ export const getQueryResults = <E>(
 }
 
 export const getFirstQueryResult = <E>(
-  queryBitSets: QueryBitSets,
+  queryConditions: QueryConditions<E>,
   entities: Iterable<E>
 ): E | undefined => {
   for (const entity of entities) {
-    if (evaluateQueryBitSets(queryBitSets, entity)) {
+    if (evaluateQueryConditions(queryConditions, entity)) {
       return entity
     }
   }
 
   return undefined
 }
+// export const getFirstQueryResult = <E>(
+//   queryBitSets: QueryBitSets,
+//   entities: Iterable<E>
+// ): E | undefined => {
+//   for (const entity of entities) {
+//     if (evaluateQueryBitSets(queryBitSets, entity)) {
+//       return entity
+//     }
+//   }
 
-export const evaluateQueryBitSets = <E>(
-  queryBitSets: QueryBitSets,
+//   return undefined
+// }
+
+export const evaluateQueryConditions = <E>(
+  conditions: QueryConditions<E>,
   entity: E
 ): boolean => {
-  const { bitset } = (entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL]
-
-  for (const queryPart of queryBitSets) {
-    if (queryPart.type === 'all' && !bitset.containsAll(queryPart.bitset)) {
-      return false
-    } else if (
-      queryPart.type === 'any' &&
-      !bitset.containsAny(queryPart.bitset)
+  for (const condition of conditions) {
+    if (
+      condition.type === 'all' &&
+      !condition.components.every((c) => entity[c])
     ) {
       return false
     } else if (
-      queryPart.type === 'not' &&
-      bitset.containsAny(queryPart.bitset)
+      condition.type === 'any' &&
+      !condition.components.some((c) => entity[c])
+    ) {
+      return false
+    } else if (
+      condition.type === 'not' &&
+      condition.components.some((c) => entity[c])
     ) {
       return false
     }
@@ -136,39 +141,19 @@ export const getQueryConditions = (
 }
 
 export const getQueryDedupeString = (
-  componentRegistry: ComponentRegistry,
+  // componentRegistry: ComponentRegistry,
   queryConditions: QueryConditions<unknown>
 ): string => {
   return queryConditions
     .map(({ type, components }) => {
       if (type === 'all') {
-        return components
-          .map((c) => componentRegistry[c])
-          .sort()
-          .join(',')
+        return components.sort().join(',')
       }
 
-      return [
-        `${type}:${components
-          .map((c) => componentRegistry[c])
-          .sort()
-          .join(',')}`,
-      ]
+      return [`${type}:${components.sort().join(',')}`]
     })
     .sort()
     .join('&')
-}
-
-export const getQueryBitSets = (
-  componentRegistry: ComponentRegistry,
-  conditions: QueryConditions<any>
-) => {
-  return conditions.map((condition) => ({
-    type: condition.type,
-    bitset: new BitSet(
-      condition.components.map((c) => componentRegistry[c as string])
-    ),
-  }))
 }
 
 export class QueryBuilder<E> {

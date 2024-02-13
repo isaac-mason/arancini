@@ -9,7 +9,7 @@ type Entity = {
 
 describe('Queries', () => {
   it('should update queries as entity composition changes', () => {
-    const world = new World<Entity>({ components: ['foo', 'bar'] })
+    const world = new World<Entity>()
 
     const query = world.query((q) => q.has('foo').but.not('bar'))
 
@@ -44,7 +44,7 @@ describe('Queries', () => {
   })
 
   it('should update an entity in bulk when calling update', () => {
-    const world = new World<Entity>({ components: ['foo', 'bar'] })
+    const world = new World<Entity>()
 
     const query = world.query((q) => q.has('foo').but.not('bar'))
 
@@ -111,7 +111,7 @@ describe('Queries', () => {
   })
 
   it('should update queries on removing entities from the world', () => {
-    const world = new World<Entity>({ components: ['foo', 'bar'] })
+    const world = new World<Entity>()
 
     const query = world.query((q) => q.has('foo').but.not('bar'))
 
@@ -140,7 +140,7 @@ describe('Queries', () => {
   })
 
   it('supports ad-hoc queries', () => {
-    const world = new World<Entity>({ components: ['foo', 'bar'] })
+    const world = new World<Entity>()
 
     const query = (e: QueryBuilder<Entity>) => e.has('foo').but.not('bar')
 
@@ -164,7 +164,7 @@ describe('Queries', () => {
   })
 
   it('should reuse existing equivalent queries for ad-hoc queries', () => {
-    const world = new World<Entity>({ components: ['foo', 'bar'] })
+    const world = new World<Entity>()
 
     const queryDescription = (e: QueryBuilder<Entity>) => e.has('foo', 'bar')
 
@@ -181,7 +181,7 @@ describe('Queries', () => {
   })
 
   it('supports iterating over query results in reverse order with Symbol.iterator', () => {
-    const world = new World<Entity>({ components: ['foo', 'bar'] })
+    const world = new World<Entity>()
 
     const entityOne = { foo: 'test' }
     const entityTwo = { foo: 'test' }
@@ -199,7 +199,7 @@ describe('Queries', () => {
   })
 
   it('should reuse existing equivalent queries', () => {
-    const world = new World<Entity>({ components: ['foo', 'bar'] })
+    const world = new World<Entity>()
 
     const queryOne = world.query((q) => q.has('foo', 'bar'))
     const queryTwo = world.query((q) => q.has('foo').and.has('bar'))
@@ -208,7 +208,7 @@ describe('Queries', () => {
   })
 
   it('supports the "any" condition type', () => {
-    const world = new World<Entity>({ components: ['foo', 'bar'] })
+    const world = new World<Entity>()
 
     const query = world.query((q) => q.any('foo', 'bar'))
 
@@ -235,7 +235,7 @@ describe('Queries', () => {
   })
 
   it('supports the "not" condition type', () => {
-    const world = new World<Entity>({ components: ['foo', 'bar'] })
+    const world = new World<Entity>()
 
     const query = world.query((q) => q.not('foo'))
 
@@ -257,9 +257,7 @@ describe('Queries', () => {
       four?: string
       five?: string
     }
-    const world = new World<EntityWithManyComponents>({
-      components: ['one', 'two', 'three', 'four', 'five'],
-    })
+    const world = new World<EntityWithManyComponents>()
 
     const query = world.query((q) =>
       q.all('one', 'two').any('three', 'four').not('five')

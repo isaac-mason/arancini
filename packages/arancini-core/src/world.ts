@@ -1,22 +1,13 @@
-import { ObjectPool } from '@arancini/pool'
-import { BitSet } from './bit-set'
 import {
   EntityContainer,
   addEntityToContainer,
   removeEntityFromContainer,
 } from './entity-container'
 import {
-  ARANCINI_SYMBOL,
-  EntityMetadata,
-  EntityWithMetadata,
-} from './entity-metadata'
-import {
   Query,
-  QueryCondition,
   QueryDescription,
-  evaluateQueryBitSets,
+  evaluateQueryConditions,
   getFirstQueryResult,
-  getQueryBitSets,
   getQueryConditions,
   getQueryDedupeString,
   getQueryResults,
@@ -28,40 +19,17 @@ export type ComponentRegistry = { [name: string]: number }
 
 export type AnyEntity = Record<string, any>
 
-export type WorldOptions<E extends AnyEntity> = {
-  components?: (keyof E)[]
-}
-
 export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   queries = new Map<string, Query<any>>()
 
   private queryUsages: Map<string, unknown[]> = new Map()
 
-  private componentIndexCounter = -1
-  private componentRegistry: ComponentRegistry = {}
-
   private idToEntity = new Map<number, E>()
+  private entityToId = new WeakMap<E, number>()
   private entityIdCounter = 0
 
   private bulkUpdateInProgress = false
   private bulkUpdateEntities: Set<E> = new Set()
-
-  private entityMetadataPool = new ObjectPool<EntityMetadata>(() => ({
-    bitset: new BitSet(),
-    id: undefined,
-  }))
-
-  private initialised = false
-
-  constructor(options?: WorldOptions<E>) {
-    super()
-
-    if (options?.components) {
-      this.registerComponents(options.components)
-    }
-
-    this.initialised = true
-  }
 
   /**
    * Removes all entities from the world. Components remain registered, and queries are not destroyed.
@@ -79,13 +47,11 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   id(entity: E) {
     if (!this.has(entity)) return undefined
 
-    const metadata = (entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL]
-
-    let id = metadata.id
+    let id = this.entityToId.get(entity)
 
     if (id === undefined) {
       id = this.entityIdCounter++
-      metadata.id = id
+      this.entityToId.set(entity, id)
       this.idToEntity.set(id, entity)
     }
 
@@ -127,21 +93,6 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   create(entity: E): E {
     if (this.has(entity)) return entity
 
-    const componentIndices: number[] = []
-    for (const key of Object.keys(entity)) {
-      let index = this.componentRegistry[key]
-
-      if (!index) {
-        ;[index] = this.registerComponents([key])
-      }
-
-      componentIndices.push(index)
-    }
-
-    const metadata = this.entityMetadataPool.request()
-    metadata.bitset.add(...componentIndices)
-    ;(entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL] = metadata
-
     addEntityToContainer(this, entity)
 
     this.index(entity)
@@ -164,23 +115,6 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
 
     /* remove entity from queries */
     this.queries.forEach((query) => removeEntityFromContainer(query, entity))
-
-    /* remove and recycle entity metadata */
-    const metadata = (entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL]
-
-    if (!metadata) return
-
-    delete (entity as never)[ARANCINI_SYMBOL]
-
-    const id = metadata.id
-    if (id !== undefined) {
-      this.idToEntity.delete(id)
-      metadata.id = undefined
-    }
-
-    metadata.bitset.reset()
-
-    this.entityMetadataPool.recycle(metadata)
   }
 
   /**
@@ -201,15 +135,6 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     if (entity[component] !== undefined) return this
 
     entity[component] = value
-
-    const metadata = (entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL]
-
-    let index = this.componentRegistry[component as string]
-    if (index === undefined) {
-      ;[index] = this.registerComponents([component])
-    }
-
-    metadata.bitset.add(index)
 
     this.index(entity)
 
@@ -234,10 +159,10 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     if (entity[component] === undefined) return
 
     if (this.has(entity)) {
-      const metadata = (entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL]
-      metadata.bitset.remove(this.componentRegistry[component as string])
+      const future = { ...entity }
+      delete future[component]
 
-      this.index(entity)
+      this.index(entity, future)
     }
 
     delete entity[component]
@@ -367,9 +292,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   ): Query<ResultEntity> {
     const conditions = getQueryConditions(queryDescription)
 
-    this.registerQueryConditionComponents(conditions)
-
-    const key = getQueryDedupeString(this.componentRegistry, conditions)
+    const key = getQueryDedupeString(conditions)
 
     const handle = options?.handle ?? DEFAULT_QUERY_HANDLE
 
@@ -387,14 +310,12 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
       return query
     }
 
-    query = new Query(
-      this,
-      key,
-      conditions,
-      getQueryBitSets(this.componentRegistry, conditions)
-    )
+    query = new Query(this, key, conditions)
 
-    const matches = getQueryResults(query.bitSets, this.entities.values())
+    const matches = getQueryResults(
+      query.conditions,
+      this.entities.values() as any
+    )
 
     for (const entity of matches) {
       addEntityToContainer(query, entity as ResultEntity)
@@ -442,22 +363,15 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   ): ResultEntity[] {
     const conditions = getQueryConditions(queryDescription)
 
-    this.registerQueryConditionComponents(conditions)
-
-    const queryDedupe = getQueryDedupeString(this.componentRegistry, conditions)
+    const queryDedupe = getQueryDedupeString(conditions)
 
     const query = this.queries.get(queryDedupe)
     if (query) {
       return query.entities as ResultEntity[]
     }
 
-    const conditionsBitSets = getQueryBitSets(
-      this.componentRegistry,
-      conditions
-    )
-
     return getQueryResults(
-      conditionsBitSets,
+      conditions,
       this.entities
     ) as unknown as ResultEntity[]
   }
@@ -472,71 +386,19 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   ): ResultEntity | undefined {
     const conditions = getQueryConditions(queryDescription)
 
-    this.registerQueryConditionComponents(conditions)
-
-    const queryDedupe = getQueryDedupeString(this.componentRegistry, conditions)
-
+    const queryDedupe = getQueryDedupeString(conditions)
     const query = this.queries.get(queryDedupe)
+
     if (query) {
       return query.first as ResultEntity | undefined
     }
 
-    const conditionsBitSets = getQueryBitSets(
-      this.componentRegistry,
-      conditions
-    )
-
-    return getFirstQueryResult(conditionsBitSets, this.entities) as unknown as
+    return getFirstQueryResult(conditions, this.entities) as unknown as
       | ResultEntity
       | undefined
   }
 
-  /**
-   * Register components with the World
-   * @param components
-   */
-  registerComponents(components: (keyof E)[]) {
-    const registered: number[] = []
-
-    for (const component of components) {
-      if (this.componentRegistry[component as string] === undefined) {
-        this.componentIndexCounter++
-        registered.push(this.componentIndexCounter)
-        this.componentRegistry[component as string] = this.componentIndexCounter
-      }
-    }
-
-    // if the world has already been initialised, resize all entity components bitsets
-    if (this.initialised) {
-      for (const entity of this.entities.values()) {
-        const metadata = (entity as EntityWithMetadata<E>)[ARANCINI_SYMBOL]
-        metadata.bitset.resize(this.componentIndexCounter)
-      }
-    }
-
-    return registered
-  }
-
-  private registerQueryConditionComponents(
-    queryConditions: QueryCondition<E>[]
-  ) {
-    const queryComponents = new Set(
-      queryConditions.flatMap((condition) => condition.components)
-    ) as Set<string>
-
-    const unregisteredComponents: string[] = []
-    for (const component of queryComponents) {
-      if (this.componentRegistry[component] === undefined) {
-        unregisteredComponents.push(component)
-      }
-    }
-
-    if (unregisteredComponents.length > 0) {
-      this.registerComponents(unregisteredComponents)
-    }
-  }
-
-  private index(entity: E) {
+  private index(entity: E, future: E = entity) {
     if (!this.has(entity)) return
 
     if (this.bulkUpdateInProgress) {
@@ -545,7 +407,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     }
 
     for (const query of this.queries.values()) {
-      const matchesQuery = evaluateQueryBitSets(query.bitSets, entity)
+      const matchesQuery = evaluateQueryConditions(query.conditions, future)
       const inQuery = query.has(entity)
 
       if (matchesQuery && !inQuery) {

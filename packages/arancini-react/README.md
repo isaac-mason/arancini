@@ -21,9 +21,7 @@ type EntityType = {
   position?: [number, number]
 }
 
-const world = new World<EntityType>({
-  components: ['position', 'health'],
-})
+const world = new World<EntityType>()
 
 const { Entity, Entities, Component, useQuery } = createReactAPI(world)
 ```
