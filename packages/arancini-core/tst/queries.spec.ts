@@ -75,7 +75,6 @@ describe('Queries', () => {
 
     expect(query.entities).toHaveLength(0)
 
-
     // add to query
     world.update(entity, { foo: '' })
 
@@ -96,8 +95,8 @@ describe('Queries', () => {
     expect(query.entities).toHaveLength(1)
 
     // remove from query
-    world.update(entity, {
-      foo: undefined,
+    world.update(entity, (e) => {
+      e.foo = undefined
     })
 
     expect(query.entities).toHaveLength(0)
@@ -326,7 +325,7 @@ describe('Queries', () => {
     const world = new World<EntityWithManyComponents>()
 
     const query = world.query((q) =>
-      q.all('one', 'two').any('three', 'four').not('five')
+      q.all('one', 'two').and.any('three', 'four').but.not('five')
     )
 
     const entity = {
