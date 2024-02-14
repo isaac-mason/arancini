@@ -1,5 +1,13 @@
 # @arancini/react
 
+## 6.3.2
+
+### Patch Changes
+
+- 48ae471: fix: unexpected behaviours when adding components via Entity props and imperatively
+- 501f7e2: fix: default to 'true' instead of 'undefined' for Component react api when 'value' prop is not provided
+  - @arancini/core@6.3.2
+
 ## 6.3.1
 
 ### Patch Changes
