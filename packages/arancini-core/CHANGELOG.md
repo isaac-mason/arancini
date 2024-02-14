@@ -1,5 +1,11 @@
 # @arancini/core
 
+## 6.3.2
+
+### Patch Changes
+
+- @arancini/events@6.3.2
+
 ## 6.3.1
 
 ### Patch Changes

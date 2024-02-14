@@ -1,5 +1,16 @@
 # arancini
 
+## 6.3.2
+
+### Patch Changes
+
+- Updated dependencies [48ae471]
+- Updated dependencies [501f7e2]
+  - @arancini/react@6.3.2
+  - @arancini/core@6.3.2
+  - @arancini/events@6.3.2
+  - @arancini/systems@6.3.2
+
 ## 6.3.1
 
 ### Patch Changes
