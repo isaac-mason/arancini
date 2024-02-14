@@ -44,9 +44,7 @@ export const createReactAPI = <E extends A.AnyEntity>(world: A.World<E>) => {
   const entityContext = createContext(null! as EntityProviderContext<E>)
 
   const useCurrentEntity = (): E | undefined => {
-    const entity = useContext(entityContext)
-
-    return entity
+    return useContext(entityContext)
   }
 
   const RawEntity = <T extends E>(
@@ -75,34 +73,14 @@ export const createReactAPI = <E extends A.AnyEntity>(world: A.World<E>) => {
 
     useImperativeHandle(ref, () => entity!, [entity])
 
-    const lastComponents = useRef<E>({} as E)
-
-    useEffect(() => {
-      if (!entity) return
-
-      if (!world.has(entity)) return
-
-      const components = propComponents as E
-
-      world.update(entity, (e) => {
-        for (const name in components) {
-          e[name] = components[name]
-        }
-
-        for (const name in lastComponents.current) {
-          if (components[name] === undefined) {
-            delete e[name]
-          }
-        }
-      })
-
-      return () => {
-        lastComponents.current = components
-      }
-    }, [entity, propComponents])
-
     return (
-      <entityContext.Provider value={entity}>{children}</entityContext.Provider>
+      <entityContext.Provider value={entity}>
+        {children}
+
+        {Object.entries(propComponents).map(([name, value]) => {
+          return <Component key={name} name={name as keyof E} value={value} />
+        })}
+      </entityContext.Provider>
     )
   }
 
@@ -129,7 +107,7 @@ export const createReactAPI = <E extends A.AnyEntity>(world: A.World<E>) => {
         componentData = childRef as never
       } else {
         // otherwise, use the value prop
-        componentData = value!
+        componentData = value ?? (true as never) // default to true if no value is provided
       }
 
       // only add the component if it doesn't exist, otherwise change its value
