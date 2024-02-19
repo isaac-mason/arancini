@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
-import { Topic } from '../src/topic'
+import { Topic } from '../src'
 
 describe('Topic', () => {
   test('should emit events to listeners', () => {

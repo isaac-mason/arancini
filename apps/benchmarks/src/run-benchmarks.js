@@ -22,6 +22,8 @@ export const runBenchmarks = (now, log) => {
       sum += now() - start
     }
 
+    arancini.cleanup()
+
     const average = sum / suite.iterations
     const updates = arancini.getMovementSystemUpdateCount()
 

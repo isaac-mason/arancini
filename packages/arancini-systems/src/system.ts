@@ -1,4 +1,4 @@
-import type { AnyEntity, Query, QueryDescription, World } from '@arancini/core'
+import type { AnyEntity, Query, QueryFn, World } from '@arancini/core'
 import { Executor, createSystemQuery } from './executor'
 
 export type SystemQueryOptions = {
@@ -131,18 +131,18 @@ export abstract class System<E extends AnyEntity = any> {
 
   /**
    * Creates and returns a query that gets updated every update.
-   * @param queryDescription the query description
+   * @param queryFn the query function
    * @param options optional options for the system query
    * @returns the query
    */
   protected query<ResultEntity extends E>(
-    queryDescription: QueryDescription<E, ResultEntity>,
+    queryFn: QueryFn<E, ResultEntity>,
     options?: SystemQueryOptions
   ): Query<ResultEntity> {
     return createSystemQuery(
       this.executor.world,
       this,
-      queryDescription,
+      queryFn,
       options
     )
   }

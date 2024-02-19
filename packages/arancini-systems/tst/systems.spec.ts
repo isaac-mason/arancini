@@ -58,7 +58,7 @@ describe('Systems', () => {
   })
 
   it('should support attaching queries to systems', () => {
-    const world = new World<Entity>({ components: ['foo', 'bar'] })
+    const world = new World<Entity>()
     const executor = new Executor(world)
 
     class ExampleSystem extends System<Entity> {
@@ -143,7 +143,7 @@ describe('Systems', () => {
   })
 
   it('should remove queries if they are no longer used by any systems', () => {
-    const world = new World<Entity>({ components: ['foo', 'bar'] })
+    const world = new World<Entity>()
     const executor = new Executor(world)
 
     class TestSystemWithQuery extends System<Entity> {
@@ -169,7 +169,7 @@ describe('Systems', () => {
   })
 
   it('should not remove queries used by systems if an equivalent standalone query is in use', () => {
-    const world = new World<Entity>({ components: ['foo', 'bar'] })
+    const world = new World<Entity>()
     const executor = new Executor(world)
 
     class TestSystemWithQuery extends System<Entity> {
@@ -190,7 +190,7 @@ describe('Systems', () => {
   })
 
   it('supports making queries required, preventing system updates if there are no results', () => {
-    const world = new World<Entity>({ components: ['foo', 'bar'] })
+    const world = new World<Entity>()
     const executor = new Executor(world)
 
     const onUpdateFn = vi.fn()

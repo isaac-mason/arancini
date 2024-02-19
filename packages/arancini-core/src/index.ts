@@ -1,9 +1,9 @@
-export { EntityContainer } from './entity-container'
+export { EntityCollection as EntityContainer } from './entity-collection'
 export {
   Query,
   QueryBuilder,
   type QueryConditions,
-  type QueryDescription,
+  type QueryFn,
   type With,
   type Without,
 } from './query'

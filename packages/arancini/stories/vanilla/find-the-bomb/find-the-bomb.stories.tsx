@@ -37,6 +37,11 @@ class EmojiRendererSystem extends System<Entity> {
       this.emojisDomElement.appendChild(emoji.domElement)
       emoji.dirty = true
     })
+
+    this.emojisToRender.onEntityRemoved.add((entity) => {
+      const { emoji } = entity
+      emoji.domElement.remove()
+    })
   }
 
   onDestroy(): void {
@@ -215,7 +220,7 @@ export const FindTheBomb = () => {
       }
 
       return () => {
-        world.reset()
+        world.clear()
       }
     }
 
@@ -255,7 +260,7 @@ export const FindTheBomb = () => {
 
     return () => {
       running = false
-      world.reset()
+      world.clear()
     }
   })
 

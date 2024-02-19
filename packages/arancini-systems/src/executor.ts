@@ -1,4 +1,4 @@
-import { AnyEntity, Query, QueryDescription, World } from '@arancini/core'
+import { AnyEntity, Query, QueryFn, World } from '@arancini/core'
 import {
   AttachedSystemPlaceholder,
   SingletonQueryPlaceholder,
@@ -176,13 +176,13 @@ export class Executor<E extends AnyEntity> {
           __internal: { component, options },
         } = field as SingletonQueryPlaceholder
 
-        const queryDescription: QueryDescription<any, any> = (e) =>
+        const queryFn: QueryFn<any, any> = (e) =>
           e.has(component)
 
         const query = createSystemQuery(
           this.world,
           system,
-          queryDescription,
+          queryFn,
           options
         )
 
@@ -251,10 +251,10 @@ export const createSystemQuery = <
 >(
   world: World<Entity>,
   system: System<Entity>,
-  queryDescription: QueryDescription<Entity, ResultEntity>,
+  queryFn: QueryFn<Entity, ResultEntity>,
   options?: SystemQueryOptions
 ): Query<ResultEntity> => {
-  const query = world.query(queryDescription, { handle: system })
+  const query = world.query(queryFn, { handle: system })
 
   system.__internal.queries.add(query)
 

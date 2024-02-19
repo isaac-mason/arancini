@@ -1,12 +1,12 @@
-import { EntityContainer } from './entity-container'
+import { EntityCollection } from './entity-collection'
 import type { World } from './world'
 
-export type With<E, P extends keyof E> = E & Required<Pick<E, P>>
+export type With<T, P extends keyof T> = T & Required<Pick<T, P>>
 
-export type Without<E, P extends keyof E> = Pick<E, Exclude<keyof E, P>> &
-  Partial<Pick<E, P>>
+export type Without<T, P extends keyof T> = Pick<T, Exclude<keyof T, P>> &
+  Partial<Pick<T, P>>
 
-export type Strict<E> = WithoutOptionalProperties<E>
+export type Strict<T> = WithoutOptionalProperties<T>
 
 type OptionalProperties<T> = {
   [P in keyof T]-?: undefined extends T[P] ? P : never
@@ -19,20 +19,20 @@ type WithoutOptionalProperties<T> = Pick<
 
 export type QueryConditionType = 'all' | 'any' | 'not'
 
-export type QueryCondition<E> = {
+export type QueryCondition<Entity> = {
   type: QueryConditionType
-  components: (keyof E)[]
+  components: (keyof Entity)[]
 }
 
-export type QueryConditions<E> = QueryCondition<E>[]
+export type QueryConditions<Entity> = QueryCondition<Entity>[]
 
-export type QueryDescription<E, R> = (q: QueryBuilder<E>) => QueryBuilder<R>
+export type QueryFn<Entity, ResultEntity> = (q: QueryBuilder<Entity>) => QueryBuilder<ResultEntity>
 
-export class Query<E> extends EntityContainer<E> {
+export class Query<Entity> extends EntityCollection<Entity> {
   constructor(
     public world: World,
     public key: string,
-    public conditions: QueryConditions<E>
+    public conditions: QueryConditions<Entity>
   ) {
     super()
   }
@@ -42,11 +42,11 @@ export class Query<E> extends EntityContainer<E> {
   }
 }
 
-export const getQueryResults = <E>(
-  queryConditions: QueryConditions<E>,
-  entities: Iterable<E>
-): E[] => {
-  const matches: E[] = []
+export const getQueryResults = <Entity>(
+  queryConditions: QueryConditions<Entity>,
+  entities: Iterable<Entity>
+): Entity[] => {
+  const matches: Entity[] = []
 
   for (const entity of entities) {
     if (evaluateQueryConditions(queryConditions, entity)) {
@@ -57,37 +57,20 @@ export const getQueryResults = <E>(
   return matches
 }
 
-export const getFirstQueryResult = <E>(
-  queryConditions: QueryConditions<E>,
-  entities: Iterable<E>
-): E | undefined => {
-  for (const entity of entities) {
-    if (evaluateQueryConditions(queryConditions, entity)) {
-      return entity
-    }
-  }
-
-  return undefined
-}
-
-export const evaluateQueryConditions = <E>(
-  conditions: QueryConditions<E>,
-  entity: E
+export const evaluateQueryConditions = <Entity>(
+  conditions: QueryConditions<Entity>,
+  entity: Entity
 ): boolean => {
-  for (const condition of conditions) {
+  for (let c = 0; c < conditions.length; c++) {
+    const condition = conditions[c]
+
     if (
-      condition.type === 'all' &&
-      !condition.components.every((c) => entity[c] !== undefined)
-    ) {
-      return false
-    } else if (
-      condition.type === 'any' &&
-      !condition.components.some((c) => entity[c] !== undefined)
-    ) {
-      return false
-    } else if (
-      condition.type === 'not' &&
-      condition.components.some((c) => entity[c] !== undefined)
+      (condition.type === 'all' &&
+        !condition.components.every((c) => entity[c] !== undefined)) ||
+      (condition.type === 'any' &&
+        !condition.components.some((c) => entity[c] !== undefined)) ||
+      (condition.type === 'not' &&
+        condition.components.some((c) => entity[c] !== undefined))
     ) {
       return false
     }
@@ -97,14 +80,14 @@ export const evaluateQueryConditions = <E>(
 }
 
 export const getQueryConditions = (
-  queryDescription: QueryDescription<any, any>
+  queryFn: QueryFn<any, any>
 ): QueryConditions<any> => {
   /* get conditions */
   const queryBuilder = new QueryBuilder()
-  queryDescription(queryBuilder)
+  queryFn(queryBuilder)
   const queryConditions = queryBuilder.conditions
 
-  /* validate */
+  /* validate conditions */
   if (queryConditions.length <= 0) {
     throw new Error('Query must have at least one condition')
   }
@@ -143,24 +126,24 @@ export const getQueryDedupeString = (
     .join('&')
 }
 
-export class QueryBuilder<E> {
-  T!: E
+export class QueryBuilder<Entity> {
+  T!: Entity
 
-  conditions: QueryConditions<E> = []
+  conditions: QueryConditions<Entity> = []
 
-  all = <C extends keyof E>(...components: C[]) => {
+  all = <C extends keyof Entity>(...components: C[]) => {
     this.conditions.push({ type: 'all', components })
-    return this as unknown as QueryBuilder<With<E, C>>
+    return this as unknown as QueryBuilder<With<Entity, C>>
   }
 
-  any = <C extends keyof E>(...components: C[]): QueryBuilder<E> => {
+  any = <C extends keyof Entity>(...components: C[]): QueryBuilder<Entity> => {
     this.conditions.push({ type: 'any', components })
     return this
   }
 
-  not = <C extends keyof E>(...components: C[]) => {
+  not = <C extends keyof Entity>(...components: C[]) => {
     this.conditions.push({ type: 'not', components })
-    return this as unknown as QueryBuilder<Without<E, C>>
+    return this as unknown as QueryBuilder<Without<Entity, C>>
   }
 
   with = this.all

@@ -1,13 +1,12 @@
 import {
-  EntityContainer,
-  addEntityToContainer,
-  removeEntityFromContainer,
-} from './entity-container'
+  EntityCollection,
+  addToCollection,
+  removeFromCollection,
+} from './entity-collection'
 import {
   Query,
-  QueryDescription,
+  QueryFn,
   evaluateQueryConditions,
-  getFirstQueryResult,
   getQueryConditions,
   getQueryDedupeString,
   getQueryResults,
@@ -15,25 +14,27 @@ import {
 
 const DEFAULT_QUERY_HANDLE = Symbol('standalone')
 
-export type ComponentRegistry = { [name: string]: number }
-
 export type AnyEntity = Record<string, any>
 
-export class World<E extends AnyEntity = any> extends EntityContainer<E> {
+export class World<E extends AnyEntity = any> extends EntityCollection<E> {
   queries = new Map<string, Query<any>>()
 
-  private queryUsages: Map<string, unknown[]> = new Map()
+  private queryReferences: Map<string, unknown[]> = new Map()
 
   private idToEntity = new Map<number, E>()
-  private entityToId = new WeakMap<E, number>()
+  private entityToId = new Map<E, number>()
   private entityIdCounter = 0
 
   /**
-   * Removes all entities from the world. Components remain registered, and queries are not destroyed.
+   * Removes all entities from the world.
    */
-  reset() {
-    this.entities.forEach((entity) => this.destroy(entity))
-    this.entityIdCounter = 0
+  clear() {
+    const entities = [...this.entities]
+
+    for (const entity of entities) {
+      this.destroy(entity)
+    }
+
     this.idToEntity.clear()
     this._entityPositions.clear()
   }
@@ -87,10 +88,10 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
    * })
    * ```
    */
-  create(entity: E): E {
+  create<Entity extends E>(entity: Entity): Entity {
     if (this.has(entity)) return entity
 
-    addEntityToContainer(this, entity)
+    addToCollection(this, entity)
 
     this.index(entity)
 
@@ -107,11 +108,17 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
    * world.destroy(entity)
    * ```
    */
-  destroy(entity: E) {
-    removeEntityFromContainer(this, entity)
+  destroy(entity: E): void {
+    if (!this.has(entity)) return
+
+    removeFromCollection(this, entity)
 
     /* remove entity from queries */
-    this.queries.forEach((query) => removeEntityFromContainer(query, entity))
+    this.queries.forEach((query) => {
+      if (query.has(entity)) {
+        removeFromCollection(query, entity)
+      }
+    })
   }
 
   /**
@@ -128,14 +135,12 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
    * world.add(entity, 'foo', 'bar')
    * ```
    */
-  add<C extends keyof E>(entity: E, component: C, value: E[C]): this {
-    if (entity[component] !== undefined) return this
+  add<C extends keyof E>(entity: E, component: C, value: E[C]): void {
+    if (entity[component] !== undefined) return
 
     entity[component] = value
 
     this.index(entity)
-
-    return this
   }
 
   /**
@@ -152,14 +157,14 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
    * world.remove(entity, 'foo')
    * ```
    */
-  remove(entity: E, component: keyof E) {
+  remove(entity: E, component: keyof E): void {
     if (entity[component] === undefined) return
 
     if (this.has(entity)) {
-      const future = { ...entity }
-      delete future[component]
+      const draft = { ...entity }
+      delete draft[component]
 
-      this.index(entity, future)
+      this.index(entity, draft)
     }
 
     delete entity[component]
@@ -189,37 +194,36 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     entity: E,
     updateFnOrPartial: ((entity: E) => void) | Partial<E>
   ): void {
-    const future = { ...entity }
+    const draft = { ...entity }
 
     if (typeof updateFnOrPartial === 'function') {
-      const updateFn = updateFnOrPartial
-      updateFn(future)
+      updateFnOrPartial(draft)
     } else {
-      Object.assign(future, updateFnOrPartial)
+      Object.assign(draft, updateFnOrPartial)
     }
 
-    const added = Object.keys(future).filter((key) => entity[key] === undefined)
-    const removed = Object.keys(entity).filter((key) => future[key] === undefined)
+    const added = Object.keys(draft).filter((key) => entity[key] === undefined)
+    const removed = Object.keys(entity).filter((key) => draft[key] === undefined)
 
-    // add components before indexing
+    // commit additions before indexing
     for (const component of added) {
-      entity[component as keyof E] = future[component]
+      entity[component as keyof E] = draft[component]
     }
 
-    this.index(entity, future)
+    this.index(entity, draft)
 
-    // remove components after indexing
+    // commit removals after indexing
     for (const component of removed) {
       delete entity[component]
     }
 
-    Object.assign(entity, future)
+    Object.assign(entity, draft)
   }
 
   /**
    * Creates a query that updates with entity composition changes.
-   * @param queryDescription the query description
-   * @returns the query
+   * @param queryFn the query function
+   * @returns the query instance
    *
    * @example
    * ```ts
@@ -237,21 +241,19 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
    * ```
    */
   query<ResultEntity extends E>(
-    queryDescription: QueryDescription<E, ResultEntity>,
+    queryFn: QueryFn<E, ResultEntity>,
     options?: { handle: unknown }
   ): Query<ResultEntity> {
-    const conditions = getQueryConditions(queryDescription)
-
+    const conditions = getQueryConditions(queryFn)
     const key = getQueryDedupeString(conditions)
 
     const handle = options?.handle ?? DEFAULT_QUERY_HANDLE
+    const queryReference = this.queryReferences.get(key)
 
-    const queryUsages = this.queryUsages.get(key)
-
-    if (queryUsages) {
-      queryUsages.push(handle)
+    if (queryReference) {
+      queryReference.push(handle)
     } else {
-      this.queryUsages.set(key, [handle])
+      this.queryReferences.set(key, [handle])
     }
 
     let query = this.queries.get(key) as Query<ResultEntity>
@@ -268,7 +270,7 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
     )
 
     for (const entity of matches) {
-      addEntityToContainer(query, entity as ResultEntity)
+      addToCollection(query, entity as ResultEntity)
     }
 
     this.queries.set(key, query)
@@ -288,36 +290,36 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
 
     const handle = options?.handle ?? DEFAULT_QUERY_HANDLE
 
-    let usages = this.queryUsages.get(query.key) ?? []
+    let references = this.queryReferences.get(query.key) ?? []
 
-    usages = usages.filter((usage) => usage !== handle)
+    references = references.filter((ref) => ref !== handle)
 
-    if (usages.length > 0) {
-      this.queryUsages.set(query.key, usages)
+    if (references.length > 0) {
+      this.queryReferences.set(query.key, references)
       return
     }
 
     this.queries.delete(query.key)
-    this.queryUsages.delete(query.key)
+    this.queryReferences.delete(query.key)
     query.onEntityAdded.clear()
     query.onEntityRemoved.clear()
   }
 
   /**
-   * Filters entities that match a given query description.
-   * @param queryDescription the query conditions to match
-   * @returns entities matching the query description
+   * Filters entities that match a given query.
+   * @param queryFn the query to match
+   * @returns entities matching the query
    */
   filter<ResultEntity>(
-    queryDescription: QueryDescription<E, ResultEntity>
+    queryFn: QueryFn<E, ResultEntity>
   ): ResultEntity[] {
-    const conditions = getQueryConditions(queryDescription)
+    const conditions = getQueryConditions(queryFn)
 
     const queryDedupe = getQueryDedupeString(conditions)
 
     const query = this.queries.get(queryDedupe)
     if (query) {
-      return query.entities as ResultEntity[]
+      return [...query.entities] as ResultEntity[]
     }
 
     return getQueryResults(
@@ -327,14 +329,14 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
   }
 
   /**
-   * Finds an entity that matches a given query description.
-   * @param queryDescription the query conditions to match
-   * @returns the first entity matching the query description
+   * Finds an entity that matches a given query
+   * @param queryFn the query to match
+   * @returns the first entity matching the query
    */
   find<ResultEntity>(
-    queryDescription: QueryDescription<E, ResultEntity>
+    queryFn: QueryFn<E, ResultEntity>
   ): ResultEntity | undefined {
-    const conditions = getQueryConditions(queryDescription)
+    const conditions = getQueryConditions(queryFn)
 
     const queryDedupe = getQueryDedupeString(conditions)
     const query = this.queries.get(queryDedupe)
@@ -343,22 +345,26 @@ export class World<E extends AnyEntity = any> extends EntityContainer<E> {
       return query.first as ResultEntity | undefined
     }
 
-    return getFirstQueryResult(conditions, this.entities) as unknown as
-      | ResultEntity
-      | undefined
+    for (const entity of this.entities) {
+      if (evaluateQueryConditions(conditions, entity)) {
+        return entity as ResultEntity | undefined
+      }
+    }
+
+    return undefined;
   }
 
-  private index(entity: E, future: E = entity) {
+  private index(entity: E, draft: E = entity) {
     if (!this.has(entity)) return
 
     for (const query of this.queries.values()) {
-      const matchesQuery = evaluateQueryConditions(query.conditions, future)
-      const inQuery = query.has(entity)
+      const match = evaluateQueryConditions(query.conditions, draft)
+      const has = query.has(entity)
 
-      if (matchesQuery && !inQuery) {
-        addEntityToContainer(query, entity)
-      } else if (!matchesQuery && inQuery) {
-        removeEntityFromContainer(query, entity)
+      if (match && !has) {
+        addToCollection(query, entity)
+      } else if (!match && has) {
+        removeFromCollection(query, entity)
       }
     }
   }

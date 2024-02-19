@@ -1,34 +1,24 @@
 import { World } from '@arancini/core'
-import { Executor, System } from '@arancini/systems'
 
 let updateCount = 0
 
-class MovementSystem extends System {
-  movement = this.query((e) => e.has('position', 'velocity'))
-
-  onUpdate() {
-    for (let i = 0; i < this.movement.entities.length; i++) {
-      const e = this.movement.entities[i]
-
-      const { position, velocity } = e
-
-      position.x += velocity.dx
-      position.y += velocity.dy
-
-      updateCount++
-    }
-  }
-}
-
 export const arancini = {
   setup() {
-    this.world = new World({ components: ['position', 'velocity'] })
+    this.world = new World()
 
-    this.executor = new Executor(this.world)
+    this.query = this.world.query((e) => e.has('position', 'velocity'))
 
-    this.executor.add(MovementSystem)
+    this.movementSystem = () => {
+      for (let i = 0; i < this.query.entities.length; i++) {
+        const { position, velocity } = this.query.entities[i]
 
-    this.executor.init()
+        position.x += velocity.x
+        position.y += velocity.y
+        position.z += velocity.z
+
+        updateCount++
+      }
+    }
 
     updateCount = 0
   },
@@ -38,12 +28,13 @@ export const arancini = {
     return entity
   },
   addPositionComponent(entity) {
-    this.world.add(entity, 'position', { x: 0, y: 0 })
+    this.world.add(entity, 'position', { x: 0, y: 0, z: 0 })
   },
   addVelocityComponent(entity) {
     this.world.add(entity, 'velocity', {
       dx: Math.random() - 0.5,
       dy: Math.random() - 0.5,
+      dz: Math.random() - 0.5,
     })
   },
   removePositionComponent(entity) {
@@ -56,10 +47,10 @@ export const arancini = {
     this.world.destroy(entity)
   },
   cleanup() {
-    this.world.reset()
+    this.world.clear()
   },
   updateMovementSystem() {
-    this.executor.update()
+    this.movementSystem()
   },
   getMovementSystemUpdateCount() {
     return updateCount
