@@ -1,5 +1,23 @@
 # arancini
 
+## 6.4.0
+
+### Minor Changes
+
+- b51f3be: feat: change world.add to return void, instead of world
+- b51f3be: feat: rename QueryDescription type to QueryFn
+- b51f3be: feat: rename world.reset to world.clear, fix implementation
+
+### Patch Changes
+
+- Updated dependencies [b51f3be]
+- Updated dependencies [b51f3be]
+- Updated dependencies [b51f3be]
+  - @arancini/core@6.4.0
+  - @arancini/react@6.4.0
+  - @arancini/systems@6.4.0
+  - @arancini/events@6.4.0
+
 ## 6.3.2
 
 ### Patch Changes
