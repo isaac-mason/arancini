@@ -22,13 +22,16 @@ An object-based entity component system for JavaScript.
 
 ## Introduction
 
-Arancini is a straightforward implementation of the Entity Component System pattern for JavaScript.
+Arancini is an implementation of the Entity Component System pattern for JavaScript. An Entity Component System is a data-oriented approach for structuring applications.
 
-If you aren't familiar with Entity Component Systems, this is a good read: https://github.com/SanderMertens/ecs-faq
+Arancini has a few key features/differentiators:
+- Entities are regular objects, and components are properties on objects.
+- Queries update reactively as components are added and removed from entities.
+- The core library has no concept of "Systems", it's easy to plug arancini into your existing gameloop.
+- Strong TypeScript support for queries
+- A silly name that doesn't contain "ecs"
 
-TL;DR - Entity Component Systems are a data-oriented approach to structuring applications.
-
-In this library, entities are regular objects, and components are properties on those objects.
+To learn more about the different types of Entity Component Systems, see: https://github.com/SanderMertens/ecs-faq
 
 ## Overview
 
