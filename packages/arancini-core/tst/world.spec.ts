@@ -8,20 +8,6 @@ type Entity = {
 }
 
 describe('World', () => {
-  describe('world.id', () => {
-    test('ids can be computed for entities, entities can be retrieved by id later', () => {
-      const world = new World<Entity>()
-  
-      const entityOne = {}
-  
-      world.create(entityOne)
-  
-      const id = world.id(entityOne)!
-  
-      expect(world.entity(id)).toBe(entityOne)
-    })
-  })
-
   describe('iteration', () => {
     test('world Symbol.iterator', () => {
       const world = new World<Entity>()
@@ -83,25 +69,30 @@ describe('World', () => {
     test('reuses existing equivalent queries', () => {
       const world = new World<Entity>()
 
-      const queryOne = world.query((q) => q.has('foo', 'bar'))
-      const queryTwo = world.query((q) => q.has('foo').and.has('bar'))
+      const allQueryOne = world.query((q) => q.has('foo', 'bar'))
+      const allQueryTwo = world.query((q) => q.has('foo').and.has('bar'))
 
-      expect(queryOne).toBe(queryTwo)
+      expect(allQueryOne).toBe(allQueryTwo)
+
+      const notQueryOne = world.query((q) => q.has('foo').but.not('bar', 'car'))
+      const notQueryTwo = world.query((q) => q.has('foo').but.not('bar').and.not('car'))
+
+      expect(notQueryOne).toBe(notQueryTwo)
     })
 
-    test('queries should be removed if there are no remaining usages', () => {
+    test('queries should be removed if there are no remaining references', () => {
       const world = new World<Entity>()
 
       const query = world.query((q) => q.has('foo'))
 
-      expect(world.queries.size).toBe(1)
+      expect(world.queries.length).toBe(1)
 
-      query.destroy()
+      world.destroyQuery(query)
 
-      expect(world.queries.size).toBe(0)
+      expect(world.queries.length).toBe(0)
     })
 
-    test('queries should not be destroyed if there are remaining usages', () => {
+    test('queries should not be destroyed if there are remaining references', () => {
       const world = new World<Entity>()
 
       const queryHandle = 'test'
@@ -110,15 +101,15 @@ describe('World', () => {
 
       const queryTwo = world.query((q) => q.has('foo'))
 
-      expect(world.queries.size).toBe(1)
+      expect(world.queries.length).toBe(1)
 
       world.destroyQuery(queryTwo)
 
-      expect(world.queries.size).toBe(1)
+      expect(world.queries.length).toBe(1)
 
       world.destroyQuery(queryOne, { handle: queryHandle })
 
-      expect(world.queries.size).toBe(0)
+      expect(world.queries.length).toBe(0)
     })
 
     test('destroying a query not in the world should noop', () => {
@@ -130,7 +121,7 @@ describe('World', () => {
 
       otherWorld.destroyQuery(query)
 
-      expect(world.queries.size).toBe(1)
+      expect(world.queries.length).toBe(1)
     })
 
     test('supports noop grammar', () => {
@@ -449,7 +440,7 @@ describe('World', () => {
 
       expect(world.entities.length).toBe(2)
       expect(query.entities.length).toBe(2)
-      expect(world.queries.size).toBe(1)
+      expect(world.queries.length).toBe(1)
 
       world.clear()
 
@@ -457,7 +448,7 @@ describe('World', () => {
 
       expect(world.entities.length).toBe(0)
       expect(query.entities.length).toBe(0)
-      expect(world.queries.size).toBe(1)
+      expect(world.queries.length).toBe(1)
     })
   })
 })

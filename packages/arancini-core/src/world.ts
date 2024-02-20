@@ -3,67 +3,14 @@ import {
   addToCollection,
   removeFromCollection,
 } from './entity-collection'
-import {
-  Query,
-  QueryFn,
-  evaluateQueryConditions,
-  getQueryConditions,
-  getQueryDedupeString,
-  getQueryResults,
-} from './query'
+import { Query, QueryFn, evaluateQueryConditions, prepareQuery } from './query'
 
 const DEFAULT_QUERY_HANDLE = Symbol('standalone')
 
 export type AnyEntity = Record<string, any>
 
 export class World<E extends AnyEntity = any> extends EntityCollection<E> {
-  queries = new Map<string, Query<any>>()
-
-  private queryReferences: Map<string, unknown[]> = new Map()
-
-  private idToEntity = new Map<number, E>()
-  private entityToId = new Map<E, number>()
-  private entityIdCounter = 0
-
-  /**
-   * Removes all entities from the world.
-   */
-  clear() {
-    const entities = [...this.entities]
-
-    for (const entity of entities) {
-      this.destroy(entity)
-    }
-
-    this.idToEntity.clear()
-    this._entityPositions.clear()
-  }
-
-  /**
-   * Creates and returns an id for an entity
-   */
-  id(entity: E) {
-    if (!this.has(entity)) return undefined
-
-    let id = this.entityToId.get(entity)
-
-    if (id === undefined) {
-      id = this.entityIdCounter++
-      this.entityToId.set(entity, id)
-      this.idToEntity.set(id, entity)
-    }
-
-    return id
-  }
-
-  /**
-   * Returns an entity for an id
-   * @param id
-   * @returns
-   */
-  entity(id: number) {
-    return this.idToEntity.get(id)
-  }
+  queries: Query<any>[] = []
 
   /**
    * Creates a new entity
@@ -88,7 +35,7 @@ export class World<E extends AnyEntity = any> extends EntityCollection<E> {
    * })
    * ```
    */
-  create<Entity extends E>(entity: Entity): Entity {
+  create<Entity extends E>(entity: Entity): E & Entity {
     if (this.has(entity)) return entity
 
     addToCollection(this, entity)
@@ -160,12 +107,10 @@ export class World<E extends AnyEntity = any> extends EntityCollection<E> {
   remove(entity: E, component: keyof E): void {
     if (entity[component] === undefined) return
 
-    if (this.has(entity)) {
-      const draft = { ...entity }
-      delete draft[component]
+    const draft = { ...entity }
+    delete draft[component]
 
-      this.index(entity, draft)
-    }
+    this.index(entity, draft)
 
     delete entity[component]
   }
@@ -203,7 +148,9 @@ export class World<E extends AnyEntity = any> extends EntityCollection<E> {
     }
 
     const added = Object.keys(draft).filter((key) => entity[key] === undefined)
-    const removed = Object.keys(entity).filter((key) => draft[key] === undefined)
+    const removed = Object.keys(entity).filter(
+      (key) => draft[key] === undefined
+    )
 
     // commit additions before indexing
     for (const component of added) {
@@ -244,36 +191,36 @@ export class World<E extends AnyEntity = any> extends EntityCollection<E> {
     queryFn: QueryFn<E, ResultEntity>,
     options?: { handle: unknown }
   ): Query<ResultEntity> {
-    const conditions = getQueryConditions(queryFn)
-    const key = getQueryDedupeString(conditions)
+    const { conditions, dedupe } = prepareQuery(queryFn)
 
     const handle = options?.handle ?? DEFAULT_QUERY_HANDLE
-    const queryReference = this.queryReferences.get(key)
 
-    if (queryReference) {
-      queryReference.push(handle)
-    } else {
-      this.queryReferences.set(key, [handle])
-    }
-
-    let query = this.queries.get(key) as Query<ResultEntity>
+    let query = this.queries.find((query) => query.dedupe === dedupe)
 
     if (query) {
+      query.references.add(handle)
       return query
     }
 
-    query = new Query(this, key, conditions)
+    query = new Query(dedupe, conditions)
+    query.references.add(handle)
 
-    const matches = getQueryResults(
-      query.conditions,
-      this.entities.values() as any
-    )
+    this.queries.push(query)
 
-    for (const entity of matches) {
-      addToCollection(query, entity as ResultEntity)
+    /* populate query with existing entities */
+    const matches: E[] = []
+
+    for (let i = 0; i < this.entities.length; i++) {
+      const entity = this.entities[i]
+
+      if (evaluateQueryConditions(query.conditions, entity)) {
+        matches.push(entity)
+      }
     }
 
-    this.queries.set(key, query)
+    for (let i = 0; i < matches.length; i++) {
+      addToCollection(query, matches[i])
+    }
 
     return query
   }
@@ -284,23 +231,17 @@ export class World<E extends AnyEntity = any> extends EntityCollection<E> {
    * @returns
    */
   destroyQuery(query: Query<any>, options?: { handle: unknown }): void {
-    if (!this.queries.has(query.key)) {
-      return
-    }
+    if (!this.queries.includes(query)) return
 
     const handle = options?.handle ?? DEFAULT_QUERY_HANDLE
 
-    let references = this.queryReferences.get(query.key) ?? []
+    query.references.delete(handle)
 
-    references = references.filter((ref) => ref !== handle)
+    if (query.references.size > 0) return
 
-    if (references.length > 0) {
-      this.queryReferences.set(query.key, references)
-      return
-    }
+    const queryIndex = this.queries.indexOf(query)
+    this.queries.splice(queryIndex, 1)
 
-    this.queries.delete(query.key)
-    this.queryReferences.delete(query.key)
     query.onEntityAdded.clear()
     query.onEntityRemoved.clear()
   }
@@ -310,22 +251,25 @@ export class World<E extends AnyEntity = any> extends EntityCollection<E> {
    * @param queryFn the query to match
    * @returns entities matching the query
    */
-  filter<ResultEntity>(
-    queryFn: QueryFn<E, ResultEntity>
-  ): ResultEntity[] {
-    const conditions = getQueryConditions(queryFn)
+  filter<ResultEntity>(queryFn: QueryFn<E, ResultEntity>): ResultEntity[] {
+    const { conditions, dedupe } = prepareQuery(queryFn)
 
-    const queryDedupe = getQueryDedupeString(conditions)
-
-    const query = this.queries.get(queryDedupe)
+    const query = this.queries.find((query) => query.dedupe === dedupe)
     if (query) {
       return [...query.entities] as ResultEntity[]
     }
 
-    return getQueryResults(
-      conditions,
-      this.entities
-    ) as unknown as ResultEntity[]
+    const matches: E[] = []
+
+    for (let i = 0; i < this.entities.length; i++) {
+      const entity = this.entities[i]
+
+      if (evaluateQueryConditions(conditions, entity)) {
+        matches.push(entity)
+      }
+    }
+
+    return matches as unknown as ResultEntity[]
   }
 
   /**
@@ -336,10 +280,9 @@ export class World<E extends AnyEntity = any> extends EntityCollection<E> {
   find<ResultEntity>(
     queryFn: QueryFn<E, ResultEntity>
   ): ResultEntity | undefined {
-    const conditions = getQueryConditions(queryFn)
+    const { conditions, dedupe } = prepareQuery(queryFn)
 
-    const queryDedupe = getQueryDedupeString(conditions)
-    const query = this.queries.get(queryDedupe)
+    const query = this.queries.find((query) => query.dedupe === dedupe)
 
     if (query) {
       return query.first as ResultEntity | undefined
@@ -351,13 +294,42 @@ export class World<E extends AnyEntity = any> extends EntityCollection<E> {
       }
     }
 
-    return undefined;
+    return undefined
   }
 
-  private index(entity: E, draft: E = entity) {
+  /**
+   * Removes all entities from the world.
+   */
+  clear() {
+    const entities = [...this.entities]
+
+    for (let i = 0; i < entities.length; i++) {
+      this.destroy(entities[i])
+    }
+
+    this._entityPositions.clear()
+  }
+
+  /**
+   * Indexes an entity.
+   * 
+   * Avoid calling this method directly unless you know what you're doing.
+   *
+   * This is called automatically when:
+   * - an entity is created
+   * - a component is added or removed from an entity
+   * - an entity is destroyed
+   *
+   * @param entity the entity to index
+   * @param draft the draft entity that queries are evaluated against, defaults to entity
+   * @returns
+   */
+  index(entity: E, draft: E = entity) {
     if (!this.has(entity)) return
 
-    for (const query of this.queries.values()) {
+    for (let q = 0; q < this.queries.length; q++) {
+      const query = this.queries[q]
+
       const match = evaluateQueryConditions(query.conditions, draft)
       const has = query.has(entity)
 

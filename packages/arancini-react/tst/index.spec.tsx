@@ -7,7 +7,7 @@ import React, {
   useImperativeHandle,
   useState,
 } from 'react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, test } from 'vitest'
 import { createReactAPI } from '../src'
 
 type Entity = {
@@ -17,7 +17,7 @@ type Entity = {
 
 describe('createReactAPI', () => {
   describe('<Entity />', () => {
-    it('creates an entity', () => {
+    test('creates an entity', () => {
       const world = new World<Entity>()
 
       const reactAPI = createReactAPI(world)
@@ -27,7 +27,7 @@ describe('createReactAPI', () => {
       expect(world.entities.length).toBe(1)
     })
 
-    it('supports taking an existing entity via props', () => {
+    test('can take an existing entity via props', () => {
       const world = new World<Entity>()
 
       const reactAPI = createReactAPI(world)
@@ -40,7 +40,24 @@ describe('createReactAPI', () => {
       expect(world.has(entity)).toBe(true)
     })
 
-    it('supports refs', () => {
+    test('creates components from props', () => {
+      const world = new World<Entity>()
+
+      const reactAPI = createReactAPI(world)
+
+      render(
+        <reactAPI.Entity foo={true}>
+          <reactAPI.Component name="bar" value="123" />
+        </reactAPI.Entity>
+      )
+
+      const entity = world.entities[0]
+
+      expect(entity.foo).toBe(true)
+      expect(entity.bar).toBe('123')
+    })
+
+    test('supports forwarding ref', () => {
       const world = new World<Entity>()
 
       const reactAPI = createReactAPI(world)
@@ -50,13 +67,12 @@ describe('createReactAPI', () => {
 
       render(<reactAPI.Entity ref={ref} entity={entity} />)
 
-      expect(ref.current).not.toBeNull()
       expect(ref.current).toBe(entity)
     })
   })
 
   describe('<Entities />', () => {
-    it('adds components to entities', () => {
+    test('adds components to entities', () => {
       const world = new World<Entity>()
 
       const reactAPI = createReactAPI(world)
@@ -72,7 +88,7 @@ describe('createReactAPI', () => {
       expect(entities.every((entity) => !!entity.foo)).toBe(true)
     })
 
-    it('supports query instances', () => {
+    test('supports query instances', () => {
       const world = new World<Entity>()
 
       const reactAPI = createReactAPI(world)
@@ -102,7 +118,7 @@ describe('createReactAPI', () => {
   })
 
   describe('<Component />', () => {
-    it('adds and removes the given component to an entity', () => {
+    test('adds and removes the given component to an entity', () => {
       const world = new World<Entity>()
 
       const reactAPI = createReactAPI(world)
@@ -124,7 +140,51 @@ describe('createReactAPI', () => {
       expect(!!entity.foo).toBe(false)
     })
 
-    it('captures child ref and use it as a component arg', () => {
+    test('prop changes after the initial render update the component', () => {
+      const world = new World<Entity>()
+
+      const reactAPI = createReactAPI(world)
+
+      const entity = world.create({})
+
+      const { rerender, unmount } = render(
+        <reactAPI.Entity entity={entity}>
+          <reactAPI.Component name="bar" value="123" />
+        </reactAPI.Entity>
+      )
+
+      expect(entity.bar).toBe('123')
+
+      rerender(
+        <reactAPI.Entity entity={entity}>
+          <reactAPI.Component name="bar" value="456" />
+        </reactAPI.Entity>
+      )
+
+      expect(entity.bar).toBe('456')
+
+      unmount()
+
+      expect(entity.bar).toBe(undefined)
+    })
+
+    test('value defaults to true if no "value" prop provided and no child', () => {
+      const world = new World<Entity>()
+
+      const reactAPI = createReactAPI(world)
+
+      const entity = world.create({})
+
+      render(
+        <reactAPI.Entity entity={entity}>
+          <reactAPI.Component name="foo" />
+        </reactAPI.Entity>
+      )
+
+      expect(entity.foo).toBe(true)
+    })
+
+    test('captures child ref and use it as a component arg', () => {
       const world = new World<Entity>()
 
       const reactAPI = createReactAPI(world)
@@ -155,7 +215,6 @@ describe('createReactAPI', () => {
           }
         }, [])
 
-
         return null
       })
 
@@ -177,10 +236,20 @@ describe('createReactAPI', () => {
 
       expect(entity.bar).toBe(1)
     })
+
+    test('throws an error when not used within an Entity component', () => {
+      const world = new World<Entity>()
+
+      const reactAPI = createReactAPI(world)
+
+      expect(() => {
+        render(<reactAPI.Component name="foo" value={true} />)
+      }).toThrow()
+    })
   })
 
   describe('useQuery', () => {
-    it('rerenders when entities are added to or removed from the query', () => {
+    test('rerenders when entities are added to or removed from the query', () => {
       const world = new World<Entity>()
 
       const reactAPI = createReactAPI(world)
@@ -206,7 +275,7 @@ describe('createReactAPI', () => {
   })
 
   describe('useCurrentEntity', () => {
-    it('returns the current entity', () => {
+    test('returns the current entity', () => {
       const world = new World<Entity>()
 
       const reactAPI = createReactAPI(world)
@@ -220,6 +289,16 @@ describe('createReactAPI', () => {
       })
 
       expect(result.current).toBe(entity)
+    })
+
+    test('throws an error when not used within an Entity component', () => {
+      const world = new World<Entity>()
+
+      const reactAPI = createReactAPI(world)
+
+      expect(() => {
+        renderHook(() => reactAPI.useCurrentEntity())
+      }).toThrow()
     })
   })
 })

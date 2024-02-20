@@ -4,7 +4,6 @@ import React, {
   ForwardedRef,
   forwardRef,
   memo,
-  PropsWithRef,
   ReactElement,
   ReactNode,
   useContext,
@@ -18,11 +17,12 @@ import { useIsomorphicLayoutEffect, useRerender } from './hooks'
 
 type Children = ReactNode | JSX.Element
 
-type EntityProviderContext<Entity extends A.AnyEntity> = Entity | undefined
+type EntityProviderContext<Entity extends A.AnyEntity> = Entity
 
 export type EntityProps<Entity extends A.AnyEntity> = {
   entity?: Entity
   children?: Children
+  ref?: ForwardedRef<Entity>
 } & (
   | {
       [C in keyof Entity]?: Entity[C]
@@ -43,31 +43,46 @@ export type ReactAPI<E extends A.AnyEntity> = ReturnType<
 export const createReactAPI = <E extends A.AnyEntity>(world: A.World<E>) => {
   const entityContext = createContext(null! as EntityProviderContext<E>)
 
+  let entityIdCounter = 0
+  const entityToId = new WeakMap<E, number>()
+
+  const entityId = (entity: E) => {
+    let id = entityToId.get(entity)
+
+    if (id === undefined) {
+      id = entityIdCounter++
+      entityToId.set(entity, id)
+    }
+
+    return id
+  }
+
   const useCurrentEntity = (): E | undefined => {
-    return useContext(entityContext)
+    const entity = useContext(entityContext)
+
+    if (!entity) {
+      throw new Error(
+        'useCurrentEntity must be used within an <Entity /> component'
+      )
+    }
+
+    return entity
   }
 
   const RawEntity = <T extends E>(
-    {
-      children,
-      entity: existingEntity,
-      ...propComponents
-    }: EntityProps<T> & { ref?: ForwardedRef<T> },
+    { children, entity: existingEntity, ...propComponents }: EntityProps<T>,
     ref: ForwardedRef<E>
   ) => {
     const newEntity = useRef({})
-
-    const [entity, setEntity] = useState<E>()
+    const entity = existingEntity || (newEntity.current as T)
 
     useEffect(() => {
-      const e = existingEntity || world.create(newEntity.current as T)
+      if (world.has(entity)) return
 
-      setEntity(e)
+      world.create(entity)
 
       return () => {
-        if (existingEntity || !world.has(e)) return
-
-        world.destroy(e)
+        world.destroy(entity)
       }
     }, [])
 
@@ -85,7 +100,7 @@ export const createReactAPI = <E extends A.AnyEntity>(world: A.World<E>) => {
   }
 
   const Entity = memo(forwardRef(RawEntity)) as <T extends E>(
-    props: PropsWithRef<EntityProps<T> & { ref?: ForwardedRef<T> }>
+    props: EntityProps<T>
   ) => ReactElement
 
   const Component = <C extends keyof E>({
@@ -97,29 +112,27 @@ export const createReactAPI = <E extends A.AnyEntity>(world: A.World<E>) => {
 
     const entity = useContext(entityContext)
 
-    useIsomorphicLayoutEffect(() => {
-      if (!entity) return
+    if (!entity) {
+      throw new Error(
+        '<Component /> must within an <Entity /> or <Entities /> component'
+      )
+    }
 
-      let componentData: E[C]
+    useIsomorphicLayoutEffect(() => {
+      let componentValue: E[C]
 
       if (children !== undefined) {
-        // if a child is present, use their ref as the component's value
-        componentData = childRef as never
+        componentValue = childRef as never
+      } else if (value !== undefined) {
+        componentValue = value
       } else {
-        // otherwise, use the value prop
-        componentData = value ?? (true as never) // default to true if no value is provided
+        // default to true if no value is provided
+        componentValue = true as never
       }
 
-      // only add the component if it doesn't exist, otherwise change its value
-      if (entity[name] === undefined) {
-        world.add(entity, name, componentData!)
-      } else {
-        entity[name] = componentData
-      }
+      world.add(entity, name, componentValue!)
 
       return () => {
-        if (entity[name] === undefined) return
-
         world.remove(entity, name)
       }
     }, [entity, name, value, childRef])
@@ -178,7 +191,7 @@ export const createReactAPI = <E extends A.AnyEntity>(world: A.World<E>) => {
     return (
       <>
         {entities.map((entity) => (
-          <Entity key={world.id(entity)} entity={entity}>
+          <Entity key={entityId(entity)} entity={entity}>
             {typeof children === 'function' ? children(entity) : children}
           </Entity>
         ))}

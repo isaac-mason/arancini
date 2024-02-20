@@ -14,7 +14,11 @@ export class EntityCollection<Entity> {
   _entityPositions = new Map<Entity, number>()
 
   get first(): Entity | undefined {
-    return this.entities[0] || undefined
+    return this.entities[0]
+  }
+
+  get size() {
+    return this.entities.length
   }
 
   [Symbol.iterator]() {
@@ -70,7 +74,6 @@ export const removeFromCollection = <E extends AnyEntity>(
     collection.entities[index] = other
     collection._entityPositions.set(other, index)
   }
-
   collection.entities.pop()
 
   collection.version++

@@ -1,5 +1,4 @@
 import { EntityCollection } from './entity-collection'
-import type { World } from './world'
 
 export type With<T, P extends keyof T> = T & Required<Pick<T, P>>
 
@@ -26,35 +25,73 @@ export type QueryCondition<Entity> = {
 
 export type QueryConditions<Entity> = QueryCondition<Entity>[]
 
-export type QueryFn<Entity, ResultEntity> = (q: QueryBuilder<Entity>) => QueryBuilder<ResultEntity>
+export type QueryFn<Entity, ResultEntity> = (
+  q: QueryBuilder<Entity>
+) => QueryBuilder<ResultEntity>
 
 export class Query<Entity> extends EntityCollection<Entity> {
+  references = new Set<unknown>()
+
   constructor(
-    public world: World,
-    public key: string,
-    public conditions: QueryConditions<Entity>
+    public dedupe: string,
+    public conditions: QueryConditions<Entity>,
   ) {
     super()
   }
-
-  destroy() {
-    this.world.destroyQuery(this)
-  }
 }
 
-export const getQueryResults = <Entity>(
-  queryConditions: QueryConditions<Entity>,
-  entities: Iterable<Entity>
-): Entity[] => {
-  const matches: Entity[] = []
+export const prepareQuery = (
+  queryFn: QueryFn<any, any>
+): { conditions: QueryConditions<any>; dedupe: string } => {
+  /* evaluate queryFn */
+  const queryBuilder = new QueryBuilder()
+  queryFn(queryBuilder)
+  const queryBuilderConditions = queryBuilder.conditions
 
-  for (const entity of entities) {
-    if (evaluateQueryConditions(queryConditions, entity)) {
-      matches.push(entity)
+  /* validate conditions */
+  if (queryBuilderConditions.length <= 0) {
+    throw new Error('Query must have at least one condition')
+  }
+
+  if (queryBuilderConditions.some((condition) => condition.components.length <= 0)) {
+    throw new Error('Query conditions must have at least one component')
+  }
+
+  /* normalize conditions */
+  const normalisedConditions: QueryConditions<any> = []
+
+  const combinedAllCondition: QueryCondition<any> = { type: 'all', components: [] }
+  const combinedNotCondition: QueryCondition<any> = { type: 'not', components: [] }
+
+  for (const condition of queryBuilderConditions) {
+    if (condition.type === 'all') {
+      combinedAllCondition.components.push(...condition.components)
+    } else if (condition.type === 'not') {
+      combinedNotCondition.components.push(...condition.components)
+    } else {
+      normalisedConditions.push(condition)
     }
   }
 
-  return matches
+  if (combinedAllCondition.components.length > 0) {
+    normalisedConditions.push(combinedAllCondition)
+  }
+  if (combinedNotCondition.components.length > 0) {
+    normalisedConditions.push(combinedNotCondition)
+  }
+
+  /* create query dedupe string */
+  const dedupe = normalisedConditions
+    .map(({ type, components }) => {
+      return `${type}(${components.sort().join(', ')})`
+    })
+    .sort()
+    .join(' && ')
+
+  return {
+    conditions: normalisedConditions,
+    dedupe,
+  }
 }
 
 export const evaluateQueryConditions = <Entity>(
@@ -79,58 +116,12 @@ export const evaluateQueryConditions = <Entity>(
   return true
 }
 
-export const getQueryConditions = (
-  queryFn: QueryFn<any, any>
-): QueryConditions<any> => {
-  /* get conditions */
-  const queryBuilder = new QueryBuilder()
-  queryFn(queryBuilder)
-  const queryConditions = queryBuilder.conditions
-
-  /* validate conditions */
-  if (queryConditions.length <= 0) {
-    throw new Error('Query must have at least one condition')
-  }
-
-  if (queryConditions.some((condition) => condition.components.length <= 0)) {
-    throw new Error('Query conditions must have at least one component')
-  }
-
-  /* combine the 'all' conditions */
-  const allCondition: QueryCondition<any> = { type: 'all', components: [] }
-  const others: QueryConditions<any> = []
-
-  for (const condition of queryConditions) {
-    if (condition.type === 'all') {
-      allCondition.components.push(...condition.components)
-    } else {
-      others.push(condition)
-    }
-  }
-
-  return [allCondition, ...others]
-}
-
-export const getQueryDedupeString = (
-  queryConditions: QueryConditions<unknown>
-): string => {
-  return queryConditions
-    .map(({ type, components }) => {
-      if (type === 'all') {
-        return components.sort().join(',')
-      }
-
-      return [`${type}:${components.sort().join(',')}`]
-    })
-    .sort()
-    .join('&')
-}
-
 export class QueryBuilder<Entity> {
   T!: Entity
 
   conditions: QueryConditions<Entity> = []
 
+  /* conditions */
   all = <C extends keyof Entity>(...components: C[]) => {
     this.conditions.push({ type: 'all', components })
     return this as unknown as QueryBuilder<With<Entity, C>>
@@ -146,6 +137,7 @@ export class QueryBuilder<Entity> {
     return this as unknown as QueryBuilder<Without<Entity, C>>
   }
 
+  /* condition aliases */
   with = this.all
   have = this.all
   has = this.all
@@ -158,6 +150,7 @@ export class QueryBuilder<Entity> {
   none = this.not
   without = this.not
 
+  /* no-op grammar */
   get and() {
     return this
   }
