@@ -1,5 +1,21 @@
 # @arancini/react
 
+## 6.5.0
+
+### Minor Changes
+
+- 68cb2b8: feat: throw meaningful errors when using hooks and components outside of required contexts
+
+### Patch Changes
+
+- 68cb2b8: feat: improve performance by removing a state update and rerender when initially adding components
+- Updated dependencies [68cb2b8]
+- Updated dependencies [68cb2b8]
+- Updated dependencies [68cb2b8]
+- Updated dependencies [68cb2b8]
+- Updated dependencies [68cb2b8]
+  - @arancini/core@6.5.0
+
 ## 6.4.0
 
 ### Patch Changes

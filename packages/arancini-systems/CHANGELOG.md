@@ -1,5 +1,16 @@
 # @arancini/systems
 
+## 6.5.0
+
+### Patch Changes
+
+- Updated dependencies [68cb2b8]
+- Updated dependencies [68cb2b8]
+- Updated dependencies [68cb2b8]
+- Updated dependencies [68cb2b8]
+- Updated dependencies [68cb2b8]
+  - @arancini/core@6.5.0
+
 ## 6.4.0
 
 ### Patch Changes
