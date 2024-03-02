@@ -85,10 +85,6 @@
       "types": "./dist/events.d.ts",
       "import": "./dist/events.js"
     },
-    "./pool": {
-      "types": "./dist/pool.d.ts",
-      "import": "./dist/pool.js"
-    },
     "./systems": {
       "types": "./dist/systems.d.ts",
       "import": "./dist/systems.js"
