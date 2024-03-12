@@ -3661,9 +3661,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/drei@npm:^9.97.0":
-  version: 9.97.0
-  resolution: "@react-three/drei@npm:9.97.0"
+"@react-three/drei@npm:^9.101.0":
+  version: 9.101.0
+  resolution: "@react-three/drei@npm:9.101.0"
   dependencies:
     "@babel/runtime": "npm:^7.11.2"
     "@mediapipe/tasks-vision": "npm:0.10.8"
@@ -3676,13 +3676,12 @@ __metadata:
     maath: "npm:^0.10.7"
     meshline: "npm:^3.1.6"
     react-composer: "npm:^5.0.3"
-    react-merge-refs: "npm:^1.1.0"
     stats-gl: "npm:^2.0.0"
     stats.js: "npm:^0.17.0"
     suspend-react: "npm:^0.1.3"
     three-mesh-bvh: "npm:^0.7.0"
     three-stdlib: "npm:^2.29.4"
-    troika-three-text: "npm:^0.47.2"
+    troika-three-text: "npm:^0.49.0"
     tunnel-rat: "npm:^0.1.2"
     utility-types: "npm:^3.10.0"
     uuid: "npm:^9.0.1"
@@ -3695,7 +3694,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: b01900c099348e85a901ca57e67df6da403fb49dcceeb06acb904bdb436b208df42e943ed9b97e11b73fbe5cfa6f154b10dff270bbf05746a555b9e96a9f8131
+  checksum: b5a3e5fedf31834ca415315e6e33bfe43390ebf117fa3c1d639b18cd0011b3ea631f17c9ad6c80723f9e784f12cc9a7ffed7202a0a289c213edfb1fdc68d1b8c
   languageName: node
   linkType: hard
 
@@ -6305,7 +6304,7 @@ __metadata:
     "@babel/preset-react": "npm:^7.22.15"
     "@babel/preset-typescript": "npm:^7.23.3"
     "@isaac-mason/eslint-config-typescript": "npm:^0.0.5"
-    "@react-three/drei": "npm:^9.97.0"
+    "@react-three/drei": "npm:^9.101.0"
     "@react-three/fiber": "npm:^8.15.13"
     "@rollup/plugin-commonjs": "npm:^25.0.7"
     "@rollup/plugin-node-resolve": "npm:^15.0.1"
@@ -12746,13 +12745,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-merge-refs@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "react-merge-refs@npm:1.1.0"
-  checksum: 5c12a6092036336a5d04c6259e1e9dc8f554171cdf737f43fa7611ac49bcff30a6127f0ddfe67803c8539dc5e3ff35be3a0c723c6823841142b3c0cd5c19c2a0
-  languageName: node
-  linkType: hard
-
 "react-reconciler@npm:^0.27.0":
   version: 0.27.0
   resolution: "react-reconciler@npm:0.27.0"
@@ -14445,33 +14437,33 @@ __metadata:
   languageName: node
   linkType: hard
 
-"troika-three-text@npm:^0.47.2":
-  version: 0.47.2
-  resolution: "troika-three-text@npm:0.47.2"
+"troika-three-text@npm:^0.49.0":
+  version: 0.49.0
+  resolution: "troika-three-text@npm:0.49.0"
   dependencies:
     bidi-js: "npm:^1.0.2"
-    troika-three-utils: "npm:^0.47.2"
-    troika-worker-utils: "npm:^0.47.2"
+    troika-three-utils: "npm:^0.49.0"
+    troika-worker-utils: "npm:^0.49.0"
     webgl-sdf-generator: "npm:1.1.1"
   peerDependencies:
     three: ">=0.125.0"
-  checksum: 5465377c09c578a66976088263350df1936b49438505e2f582d8610ed0c483cfc2dde33a0cd085c188b0a75d619c3243935f74118866e8ac6128d438dd213457
+  checksum: 01386215125628d1bab8b68fa362cb330796b2fe932a35541ffd5ecee751b85c4b0525a0dc5b757a668cb31a983f62325cd2974cdba4bbd5bc077f731d473ccd
   languageName: node
   linkType: hard
 
-"troika-three-utils@npm:^0.47.2":
-  version: 0.47.2
-  resolution: "troika-three-utils@npm:0.47.2"
+"troika-three-utils@npm:^0.49.0":
+  version: 0.49.0
+  resolution: "troika-three-utils@npm:0.49.0"
   peerDependencies:
     three: ">=0.125.0"
-  checksum: 70255428e6bd5dc63a8a37118dcf1dbe40a0ee122f03fd04c69070e879ac72ba623a48586aac721c50b7fa35a18e9aa6f474779709a5a1a8647bb7433d5a1187
+  checksum: 29c9a44d75ec1a5fdd37ef680ff9febf9ff91b3afeb2a5033af361ddd2fe9cef35ab119d898d38bc0ea94908f1c77c87f8fe452534e24eed89423429ac1ab8c4
   languageName: node
   linkType: hard
 
-"troika-worker-utils@npm:^0.47.2":
-  version: 0.47.2
-  resolution: "troika-worker-utils@npm:0.47.2"
-  checksum: c640b051906ea5988758a9ba367b66dcf767e6d71c7523c9c19175618b141c29618474ba14057b3332f4598bfb31126c7f40c59135f534df02e1e5c766144b5a
+"troika-worker-utils@npm:^0.49.0":
+  version: 0.49.0
+  resolution: "troika-worker-utils@npm:0.49.0"
+  checksum: d812060df83d78a0744cb32ca521ecc407be9ab26b8489dc2f8a4a7dffb07182f0aeb326701c15002e24fbbeab2e365eae422cd4e9b17ea058d1db982bcfa375
   languageName: node
   linkType: hard
 
