@@ -100,7 +100,9 @@ class DistanceSystem extends System<Entity> {
 
   onInit(): void {
     this.emojis.onEntityAdded.add((entity) => {
-      const { position: { x, y } } = entity
+      const {
+        position: { x, y },
+      } = entity
 
       const { position } = this.target.first!
 
@@ -173,10 +175,7 @@ export const FindTheBomb = () => {
 
     const executor = new Executor(world)
 
-    executor
-      .add(DistanceSystem)
-      .add(EmojiRendererSystem)
-      .add(InteractionSystem)
+    executor.add(DistanceSystem).add(EmojiRendererSystem).add(InteractionSystem)
 
     executor.init()
 
