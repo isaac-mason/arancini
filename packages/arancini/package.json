@@ -26,7 +26,7 @@
     "@arancini/events": "6.5.0",
     "@arancini/react": "6.5.0",
     "@arancini/systems": "6.5.0",
-    "@storybook/test": "^8.0.1"
+    "@storybook/test": "^8.0.5"
   },
   "peerDependencies": {
     "react": "^18.0.0",
