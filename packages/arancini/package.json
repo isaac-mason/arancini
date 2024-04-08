@@ -43,7 +43,7 @@
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
-    "@storybook/addon-essentials": "^8.0.1",
+    "@storybook/addon-essentials": "^8.0.6",
     "@storybook/addon-interactions": "^8.0.1",
     "@storybook/addon-links": "^8.0.1",
     "@storybook/addon-onboarding": "^8.0.1",
