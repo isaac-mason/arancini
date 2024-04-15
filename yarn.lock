@@ -4151,10 +4151,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-onboarding@npm:^8.0.1":
-  version: 8.0.1
-  resolution: "@storybook/addon-onboarding@npm:8.0.1"
-  checksum: e4f16c9e161f692130a562bec08e1d63c0df561b7b590fe66882e0a3e13cb4a83c97473d9169cb7ba0ef1c7dcae6a6574caca6e3a962de062a31dfccd737578d
+"@storybook/addon-onboarding@npm:^8.0.8":
+  version: 8.0.8
+  resolution: "@storybook/addon-onboarding@npm:8.0.8"
+  checksum: 1fedfae99474ac170b67dfa54819c6d9ed84e94c21157f73b271495a3af1766a1f3fb8c83b51b25f6ed077e0541995a71f98a59df7c19e3a8b5097cc7d91dc0c
   languageName: node
   linkType: hard
 
@@ -6162,7 +6162,7 @@ __metadata:
     "@storybook/addon-essentials": "npm:^8.0.1"
     "@storybook/addon-interactions": "npm:^8.0.1"
     "@storybook/addon-links": "npm:^8.0.1"
-    "@storybook/addon-onboarding": "npm:^8.0.1"
+    "@storybook/addon-onboarding": "npm:^8.0.8"
     "@storybook/blocks": "npm:^8.0.1"
     "@storybook/react": "npm:^8.0.1"
     "@storybook/react-vite": "npm:^8.0.1"
