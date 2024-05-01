@@ -28,7 +28,7 @@ const babelOptions = {
 export default [
   {
     input: `./src/index.tsx`,
-    external: ['@arancini/core', 'react', 'react-dom'],
+    external: ['@arancini/core', 'react', 'react-dom', 'react/jsx-runtime'],
     output: [
       {
         file: `dist/index.mjs`,
