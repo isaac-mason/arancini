@@ -8,7 +8,7 @@
   ],
   "author": "Isaac Mason <isaac@isaacmason.com>",
   "license": "MIT",
-  "version": "6.6.0",
+  "version": "6.6.1",
   "homepage": "https://github.com/isaac-mason/arancini",
   "bugs": {
     "url": "https://github.com/isaac-mason/arancini/issues"
@@ -21,10 +21,10 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@arancini/core": "6.6.0",
-    "@arancini/events": "6.6.0",
-    "@arancini/react": "6.6.0",
-    "@arancini/systems": "6.6.0",
+    "@arancini/core": "6.6.1",
+    "@arancini/events": "6.6.1",
+    "@arancini/react": "6.6.1",
+    "@arancini/systems": "6.6.1",
     "@storybook/test": "^8.0.5"
   },
   "peerDependencies": {

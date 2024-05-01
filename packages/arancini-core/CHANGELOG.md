@@ -1,5 +1,11 @@
 # @arancini/core
 
+## 6.6.1
+
+### Patch Changes
+
+- @arancini/events@6.6.1
+
 ## 6.6.0
 
 ### Minor Changes

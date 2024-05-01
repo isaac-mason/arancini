@@ -1,5 +1,13 @@
 # @arancini/react
 
+## 6.6.1
+
+### Patch Changes
+
+- 1d7fa8c: fix: don't include react/jsx-runtime in bundle
+- 6c28156: fix: add babel preset @babel/preset-react
+  - @arancini/core@6.6.1
+
 ## 6.6.0
 
 ### Minor Changes
