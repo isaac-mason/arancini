@@ -1,5 +1,19 @@
 # arancini
 
+## 6.6.0
+
+### Minor Changes
+
+- d82e4aa: feat: bundle with babel
+
+### Patch Changes
+
+- Updated dependencies [d82e4aa]
+  - @arancini/systems@6.6.0
+  - @arancini/events@6.6.0
+  - @arancini/react@6.6.0
+  - @arancini/core@6.6.0
+
 ## 6.5.0
 
 ### Minor Changes

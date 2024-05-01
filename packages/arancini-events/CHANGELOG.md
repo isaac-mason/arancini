@@ -1,5 +1,11 @@
 # @arancini/events
 
+## 6.6.0
+
+### Minor Changes
+
+- d82e4aa: feat: bundle with babel
+
 ## 6.5.0
 
 ## 6.4.0

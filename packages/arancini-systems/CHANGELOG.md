@@ -1,5 +1,16 @@
 # @arancini/systems
 
+## 6.6.0
+
+### Minor Changes
+
+- d82e4aa: feat: bundle with babel
+
+### Patch Changes
+
+- Updated dependencies [d82e4aa]
+  - @arancini/core@6.6.0
+
 ## 6.5.0
 
 ### Patch Changes
