@@ -9,7 +9,7 @@
   ],
   "author": "Isaac Mason <isaac@isaacmason.com>",
   "license": "MIT",
-  "version": "6.5.0",
+  "version": "6.6.0",
   "scripts": {
     "test": "tsc && vitest run --coverage",
     "test:watch": "vitest",
@@ -18,7 +18,7 @@
     "build:before": "rm -rf dist"
   },
   "dependencies": {
-    "@arancini/core": "6.5.0"
+    "@arancini/core": "6.6.0"
   },
   "peerDependencies": {
     "react": "^18.0.0",
