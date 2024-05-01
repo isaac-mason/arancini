@@ -1,5 +1,17 @@
 # arancini
 
+## 6.6.1
+
+### Patch Changes
+
+- 6c28156: fix: add babel preset @babel/preset-react
+- Updated dependencies [1d7fa8c]
+- Updated dependencies [6c28156]
+  - @arancini/react@6.6.1
+  - @arancini/core@6.6.1
+  - @arancini/events@6.6.1
+  - @arancini/systems@6.6.1
+
 ## 6.6.0
 
 ### Minor Changes
