@@ -7,7 +7,6 @@
     "ecs",
     "entity-component-system"
   ],
-  "packageManager": "yarn@3.2.1",
   "author": "Isaac Mason <isaac@isaacmason.com>",
   "license": "MIT",
   "version": "6.5.0",
@@ -26,7 +25,11 @@
     "react-dom": "^18.0.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.24.5",
+    "@babel/preset-env": "^7.24.5",
+    "@babel/preset-typescript": "^7.24.1",
     "@isaac-mason/eslint-config-typescript": "^0.0.5",
+    "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-terser": "^0.4.4",
@@ -45,6 +48,7 @@
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-filesize": "^10.0.0",
     "typescript": "^5.3.3",
+    "vite": "^5.2.10",
     "vitest": "^1.5.2"
   },
   "files": [
@@ -53,6 +57,6 @@
     "README.md"
   ],
   "type": "module",
-  "main": "dist/index.es.js",
+  "main": "dist/index.mjs",
   "types": "dist/index.d.ts"
 }
