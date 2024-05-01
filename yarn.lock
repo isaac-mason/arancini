@@ -89,6 +89,7 @@ __metadata:
     "@arancini/core": "npm:6.6.0"
     "@babel/core": "npm:^7.24.5"
     "@babel/preset-env": "npm:^7.24.5"
+    "@babel/preset-react": "npm:^7.24.1"
     "@babel/preset-typescript": "npm:^7.24.1"
     "@isaac-mason/eslint-config-typescript": "npm:^0.0.5"
     "@rollup/plugin-babel": "npm:^6.0.4"
