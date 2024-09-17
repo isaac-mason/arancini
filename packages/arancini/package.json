@@ -67,7 +67,7 @@
     "three": "^0.160.1",
     "timeline-composer": "^0.1.5",
     "typescript": "^5.3.3",
-    "vite": "^5.0.13",
+    "vite": "^5.2.14",
     "vite-plugin-dts": "^3.8.1"
   },
   "type": "module",
