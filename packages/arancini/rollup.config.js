@@ -53,8 +53,4 @@ export default [
     external: ['@arancini/core', '@arancini/react', 'react', 'react-dom'],
   }),
   entrypoint({ name: 'events', external: ['@arancini/events'] }),
-  entrypoint({
-    name: 'systems',
-    external: ['@arancini/core'],
-  }),
 ]
