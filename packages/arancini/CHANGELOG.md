@@ -1,5 +1,19 @@
 # arancini
 
+## 7.0.0
+
+### Major Changes
+
+- 0e028b8: feat: remove arancini/systems
+
+### Patch Changes
+
+- 0f7f882: feat: remove terser, ship readable javascript to npm
+- Updated dependencies [0f7f882]
+  - @arancini/core@7.0.0
+  - @arancini/events@7.0.0
+  - @arancini/react@7.0.0
+
 ## 6.6.1
 
 ### Patch Changes
