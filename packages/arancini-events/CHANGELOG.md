@@ -1,5 +1,11 @@
 # @arancini/events
 
+## 7.0.0
+
+### Patch Changes
+
+- 0f7f882: feat: remove terser, ship readable javascript to npm
+
 ## 6.6.1
 
 ## 6.6.0
