@@ -1,10 +1,10 @@
 {
   "name": "arancini",
-  "description": "An object based Entity Component System",
+  "description": "An entity manager for JavaScript.",
   "keywords": [
     "gamedev",
-    "ecs",
-    "entity-component-system"
+    "entity-manager",
+    "entity"
   ],
   "author": "Isaac Mason <isaac@isaacmason.com>",
   "license": "MIT",
