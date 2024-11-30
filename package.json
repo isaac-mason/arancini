@@ -12,9 +12,7 @@
     "lint": "yarn workspaces foreach -A -t run lint",
     "change": "yarn changeset",
     "bump": "yarn changeset version && yarn install --mode update-lockfile",
-    "release": "yarn build && yarn test && yarn build-storybook && changeset publish",
-    "build-storybook": "(cd ./packages/arancini && yarn build-storybook)",
-    "storybook": "(cd ./packages/arancini && yarn storybook)"
+    "release": "yarn build && yarn test && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.1",

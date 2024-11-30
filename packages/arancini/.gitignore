@@ -26,8 +26,6 @@ dist-ssr
 # jest coverage
 coverage
 
-storybook-static
-
 index.js
 index.js.map
 index.d.ts

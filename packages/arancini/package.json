@@ -16,16 +16,12 @@
   "scripts": {
     "build": "yarn build:before && rollup --config rollup.config.js --bundleConfigAsCjs",
     "build:before": "rm -rf dist",
-    "lint": "eslint --ext .ts src",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "lint": "eslint --ext .ts src"
   },
   "dependencies": {
     "@arancini/core": "6.6.1",
     "@arancini/events": "6.6.1",
-    "@arancini/react": "6.6.1",
-    "@arancini/systems": "6.6.1",
-    "@storybook/test": "^8.0.5"
+    "@arancini/react": "6.6.1"
   },
   "peerDependencies": {
     "react": "^18.0.0",
@@ -37,36 +33,18 @@
     "@babel/preset-react": "^7.24.1",
     "@babel/preset-typescript": "^7.24.1",
     "@isaac-mason/eslint-config-typescript": "^0.0.5",
-    "@react-three/drei": "^9.105.2",
-    "@react-three/fiber": "^8.15.13",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-typescript": "^11.1.6",
-    "@storybook/addon-essentials": "^8.0.1",
-    "@storybook/addon-interactions": "^8.0.1",
-    "@storybook/addon-links": "^8.0.1",
-    "@storybook/addon-onboarding": "^8.0.1",
-    "@storybook/blocks": "^8.0.1",
-    "@storybook/react": "^8.0.1",
-    "@storybook/react-vite": "^8.0.1",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.2.19",
     "@types/three": "^0.160.0",
     "eslint": "^8.56.0",
-    "leva": "^0.9.35",
-    "p2-es": "^1.2.3",
     "prettier": "^3.2.5",
-    "react": "^18.3.1",
-    "react-dom": "^18.2.0",
     "rollup": "^4.9.4",
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-filesize": "^10.0.0",
-    "storybook": "^8.0.1",
-    "three": "^0.160.1",
-    "timeline-composer": "^0.1.5",
-    "typescript": "^5.3.3",
-    "vite": "^5.0.13",
-    "vite-plugin-dts": "^3.8.1"
+    "typescript": "^5.3.3"
   },
   "type": "module",
   "main": "./dist/index.mjs",
@@ -83,10 +61,6 @@
     "./events": {
       "types": "./dist/events.d.ts",
       "import": "./dist/events.mjs"
-    },
-    "./systems": {
-      "types": "./dist/systems.d.ts",
-      "import": "./dist/systems.mjs"
     }
   },
   "files": [

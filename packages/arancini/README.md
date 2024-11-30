@@ -7,13 +7,13 @@
 
 # arancini
 
-An object-based entity component system for JavaScript.
+An entity manager for JavaScript.
 
 ```
 > npm i arancini
 ```
 
-- 👾 ‎ Manage game or simulation entities with the Entity Component System pattern
+- 👾 ‎ Manage game or simulation entities
 - 🛹 ‎ Strikes a balance between ease of use and performance
 - 🍱 ‎ Entities are regular objects, components are properties on objects
 - 🧩 ‎ Framework agnostic, plug arancini into anything
@@ -22,16 +22,13 @@ An object-based entity component system for JavaScript.
 
 ## Introduction
 
-Arancini is an implementation of the Entity Component System pattern for JavaScript. An Entity Component System is a data-oriented approach for structuring applications.
+Arancini is an entity manager for JavaScript that helps you write data-oriented code for games, simulations, and other applications.
 
 Arancini has a few key features/differentiators:
 - Entities are regular objects, and components are properties on objects.
 - Queries update reactively as components are added and removed from entities.
 - The core library has no concept of "Systems", it's easy to plug arancini into your existing gameloop.
 - Strong TypeScript support for queries
-- A silly name that doesn't contain "ecs"
-
-To learn more about the different types of Entity Component Systems, see: https://github.com/SanderMertens/ecs-faq
 
 ## Overview
 
@@ -208,10 +205,6 @@ The core library (`@arancini/core`) does not have a built-in concept of systems.
 
 A "System" can be anything that operates on the world. You can write simple functions and call them however you like, e.g. inside setInterval, requestAnimationFrame, or in your existing game loop.
 
-If you're not sure where to start, some optional utilities for organising logic are provided in the `arancini/systems` package.
-
-See the [**@arancini/systems README**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-systems) for more information.
-
 ## Packages
 
 You can install all of arancini with the umbrella `arancini` package, or you can install individual packages under the `@arancini/*` scope.
@@ -232,7 +225,6 @@ The umbrella package for `arancini`.
 
 ```ts
 import { World } from "arancini";
-import { Executor, System } from "arancini/systems";
 import { createReactAPI } from "arancini/react";
 ```
 
@@ -249,22 +241,6 @@ The core library!
 ```ts
 import { World } from "@arancini/core";
 ```
-
-### [**`@arancini/systems`**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-systems)
-
-[![Version](https://img.shields.io/npm/v/@arancini/systems)](https://www.npmjs.com/package/@arancini/systems)
-
-Systems for arancini.
-
-```bash
-> npm install @arancini/systems
-```
-
-```ts
-import { Executor, System } from "@arancini/systems";
-```
-
-See the [**@arancini/systems README**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-systems) for docs.
 
 ### [**`@arancini/react`**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-react)
 
