@@ -257,27 +257,3 @@ See the [**@arancini/react README**](https://github.com/isaac-mason/arancini/tre
 ```ts
 import { createReactAPI } from "@arancini/react";
 ```
-
-### [**`@arancini/events`**](https://github.com/isaac-mason/arancini/tree/main/packages/arancini-events)
-
-[![Version](https://img.shields.io/npm/v/@arancini/events)](https://www.npmjs.com/package/@arancini/events)
-
-Eventing utilities.
-
-```bash
-> npm install @arancini/events
-```
-
-```ts
-import { Topic } from "@arancini/events";
-
-const inventoryEvents = new Topic<[item: string, quantity: number]>();
-
-const unsubscribe = topic.inventoryEvents((item, quantity) => {
-  console.log(item, quantity);
-});
-
-inventoryEvents.emit("apple", 1);
-
-inventoryEvents.clear();
-```

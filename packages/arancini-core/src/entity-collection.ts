@@ -1,4 +1,4 @@
-import { Topic } from '@arancini/events'
+import { Topic } from './topic'
 import type { AnyEntity } from './world'
 
 export class EntityCollection<Entity> {
@@ -48,7 +48,7 @@ export class EntityCollection<Entity> {
 
 export const addToCollection = <E extends AnyEntity>(
   collection: EntityCollection<E>,
-  entity: E,
+  entity: E
 ): void => {
   // assumes the entity is not already in the collection
 
@@ -62,7 +62,7 @@ export const addToCollection = <E extends AnyEntity>(
 
 export const removeFromCollection = <E extends AnyEntity>(
   collection: EntityCollection<E>,
-  entity: E,
+  entity: E
 ): void => {
   // assumes the entity is in the collection
 

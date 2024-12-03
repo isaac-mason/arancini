@@ -20,9 +20,6 @@
     "build": "yarn build:before && rollup --config rollup.config.js --bundleConfigAsCjs",
     "build:before": "rm -rf dist"
   },
-  "dependencies": {
-    "@arancini/events": "7.0.0"
-  },
   "devDependencies": {
     "@babel/core": "^7.24.5",
     "@babel/preset-env": "^7.24.5",
@@ -34,8 +31,6 @@
     "@vitest/coverage-v8": "^1.2.1",
     "eslint": "^8.56.0",
     "prettier": "^3.2.5",
-    "react": "^18.3.1",
-    "react-dom": "^18.2.0",
     "rollup": "^4.9.4",
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-filesize": "^10.0.0",

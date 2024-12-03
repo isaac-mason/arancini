@@ -20,7 +20,6 @@
   },
   "dependencies": {
     "@arancini/core": "7.0.0",
-    "@arancini/events": "7.0.0",
     "@arancini/react": "7.0.0"
   },
   "peerDependencies": {
@@ -38,7 +37,6 @@
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.2.19",
-    "@types/three": "^0.160.0",
     "eslint": "^8.56.0",
     "prettier": "^3.2.5",
     "rollup": "^4.9.4",
@@ -57,10 +55,6 @@
     "./react": {
       "types": "./dist/react.d.ts",
       "import": "./dist/react.mjs"
-    },
-    "./events": {
-      "types": "./dist/events.d.ts",
-      "import": "./dist/events.mjs"
     }
   },
   "files": [

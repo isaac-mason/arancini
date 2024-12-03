@@ -7,4 +7,5 @@ export {
   type With,
   type Without,
 } from './query'
+export { Topic } from './topic'
 export { World, type AnyEntity } from './world'

@@ -1,11 +1,11 @@
 {
   "name": "@arancini/react",
-  "description": "React glue for the 'arancini' object based Entity Component System",
+  "description": "React glue for the 'arancini' entity manager",
   "keywords": [
     "react",
     "gamedev",
-    "ecs",
-    "entity-component-system"
+    "entity-manager",
+    "entity"
   ],
   "author": "Isaac Mason <isaac@isaacmason.com>",
   "license": "MIT",

@@ -33,7 +33,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@arancini/core@workspace:packages/arancini-core"
   dependencies:
-    "@arancini/events": "npm:7.0.0"
     "@babel/core": "npm:^7.24.5"
     "@babel/preset-env": "npm:^7.24.5"
     "@babel/preset-typescript": "npm:^7.24.1"
@@ -44,32 +43,6 @@ __metadata:
     "@vitest/coverage-v8": "npm:^1.2.1"
     eslint: "npm:^8.56.0"
     prettier: "npm:^3.2.5"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.2.0"
-    rollup: "npm:^4.9.4"
-    rollup-plugin-copy: "npm:^3.5.0"
-    rollup-plugin-filesize: "npm:^10.0.0"
-    typescript: "npm:^5.3.3"
-    vitest: "npm:^1.5.2"
-  languageName: unknown
-  linkType: soft
-
-"@arancini/events@npm:7.0.0, @arancini/events@workspace:packages/arancini-events":
-  version: 0.0.0-use.local
-  resolution: "@arancini/events@workspace:packages/arancini-events"
-  dependencies:
-    "@babel/core": "npm:^7.24.5"
-    "@babel/preset-env": "npm:^7.24.5"
-    "@babel/preset-typescript": "npm:^7.24.1"
-    "@isaac-mason/eslint-config-typescript": "npm:^0.0.5"
-    "@rollup/plugin-babel": "npm:^6.0.4"
-    "@rollup/plugin-node-resolve": "npm:^15.0.1"
-    "@rollup/plugin-typescript": "npm:^11.1.6"
-    "@vitest/coverage-v8": "npm:^1.2.1"
-    eslint: "npm:^8.56.0"
-    prettier: "npm:^3.2.5"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.2.0"
     rollup: "npm:^4.9.4"
     rollup-plugin-copy: "npm:^3.5.0"
     rollup-plugin-filesize: "npm:^10.0.0"
@@ -3428,32 +3401,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/stats.js@npm:*":
-  version: 0.17.3
-  resolution: "@types/stats.js@npm:0.17.3"
-  checksum: 4f84a012f630532877f62959b6335d3fa081ccaac15ce3f1f916741db265bda22b9c927d7efc9cc3389ffd60919a370673cb0b4e7221d580c571031e94b689fd
-  languageName: node
-  linkType: hard
-
-"@types/three@npm:^0.160.0":
-  version: 0.160.0
-  resolution: "@types/three@npm:0.160.0"
-  dependencies:
-    "@types/stats.js": "npm:*"
-    "@types/webxr": "npm:*"
-    fflate: "npm:~0.6.10"
-    meshoptimizer: "npm:~0.18.1"
-  checksum: cb65496c7592988d6d1e0df563e42435c60fd113136ef362edf9861c384c957bb376acd1bea163cf9ae81caea116a5c297e334f9a66e7ffe25b413742bf003c3
-  languageName: node
-  linkType: hard
-
-"@types/webxr@npm:*":
-  version: 0.5.10
-  resolution: "@types/webxr@npm:0.5.10"
-  checksum: 6e83767c757cde6b7e7155755380375889279d7aee30a54da4cd6264d8141700d0d2ded842d8ebe92468c75daabd20cc01fa29c73eb1c2f442871f56fecbec8e
-  languageName: node
-  linkType: hard
-
 "@typescript-eslint/eslint-plugin@npm:^7.1.1":
   version: 7.1.1
   resolution: "@typescript-eslint/eslint-plugin@npm:7.1.1"
@@ -3838,7 +3785,6 @@ __metadata:
   resolution: "arancini@workspace:packages/arancini"
   dependencies:
     "@arancini/core": "npm:7.0.0"
-    "@arancini/events": "npm:7.0.0"
     "@arancini/react": "npm:7.0.0"
     "@babel/core": "npm:^7.24.5"
     "@babel/preset-env": "npm:^7.24.5"
@@ -3850,7 +3796,6 @@ __metadata:
     "@rollup/plugin-typescript": "npm:^11.1.6"
     "@types/react": "npm:^18.3.1"
     "@types/react-dom": "npm:^18.2.19"
-    "@types/three": "npm:^0.160.0"
     eslint: "npm:^8.56.0"
     prettier: "npm:^3.2.5"
     rollup: "npm:^4.9.4"
@@ -5512,13 +5457,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fflate@npm:~0.6.10":
-  version: 0.6.10
-  resolution: "fflate@npm:0.6.10"
-  checksum: 9f2fd7224bccdb28102adc7c55c262b584571426eb9e0b91b13088884f45700232b51e034e300b74abf64e5449596d5c37d0a802673e25edb17c6742e4a4a0bd
-  languageName: node
-  linkType: hard
-
 "file-entry-cache@npm:^6.0.1":
   version: 6.0.1
   resolution: "file-entry-cache@npm:6.0.1"
@@ -7052,13 +6990,6 @@ __metadata:
   version: 1.4.1
   resolution: "merge2@npm:1.4.1"
   checksum: 7268db63ed5169466540b6fb947aec313200bcf6d40c5ab722c22e242f651994619bcd85601602972d3c85bd2cc45a358a4c61937e9f11a061919a1da569b0c2
-  languageName: node
-  linkType: hard
-
-"meshoptimizer@npm:~0.18.1":
-  version: 0.18.1
-  resolution: "meshoptimizer@npm:0.18.1"
-  checksum: 5cfef6918562b8363a51e92b6eafe81a684fe7b9e31de1c19a6e2068ca8edab745b3e8ef2f0190ecbcc2065134b5dc1de97e4514eb2157914762356c07f93b9f
   languageName: node
   linkType: hard
 
