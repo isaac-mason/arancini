@@ -1,5 +1,16 @@
 # arancini
 
+## 8.0.0
+
+### Major Changes
+
+- c059725: feat: remove @arancini/topic package, move Topic to @arancini/core
+
+### Patch Changes
+
+- @arancini/core@8.0.0
+- @arancini/react@8.0.0
+
 ## 7.0.0
 
 ### Major Changes
