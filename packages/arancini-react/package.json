@@ -48,7 +48,7 @@
     "rollup-plugin-filesize": "^10.0.0",
     "typescript": "^5.3.3",
     "vite": "^5.2.10",
-    "vitest": "^1.5.2"
+    "vitest": "^2.1.8"
   },
   "files": [
     "dist",
