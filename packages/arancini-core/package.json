@@ -16,20 +16,17 @@
   "scripts": {
     "test": "tsc && vitest run --coverage",
     "test:watch": "vitest",
-    "lint": "eslint --ext .ts src",
     "build": "yarn build:before && rollup --config rollup.config.js --bundleConfigAsCjs",
     "build:before": "rm -rf dist"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.5",
+    "@babel/core": "^7.27.7",
     "@babel/preset-env": "^7.24.5",
     "@babel/preset-typescript": "^7.24.1",
-    "@isaac-mason/eslint-config-typescript": "^0.0.5",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-typescript": "^11.1.6",
     "@vitest/coverage-v8": "^2.1.8",
-    "eslint": "^8.56.0",
     "prettier": "^3.2.5",
     "rollup": "^4.22.4",
     "rollup-plugin-copy": "^3.5.0",
