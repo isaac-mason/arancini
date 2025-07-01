@@ -1,1 +1,1 @@
-export * from '@arancini/core'
+export * from '@arancini/core';

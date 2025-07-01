@@ -12,8 +12,8 @@
     "change": "yarn changeset",
     "bump": "yarn changeset version && yarn install --mode update-lockfile",
     "release": "yarn build && yarn test && changeset publish",
-    "format": "yarn biome format --write **/src",
-    "lint": "yarn biome lint --write **/src"
+    "format": "yarn biome format --write packages/**/src",
+    "lint": "yarn biome lint --write packages/**/src"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.0.6",

@@ -1,1 +1,1 @@
-export * from '@arancini/react'
+export * from '@arancini/react';
