@@ -30,8 +30,6 @@ export type QueryFn<Entity, ResultEntity> = (
 ) => QueryBuilder<ResultEntity>
 
 export class Query<Entity> extends EntityCollection<Entity> {
-  references = new Set<unknown>()
-
   constructor(
     public dedupe: string,
     public conditions: QueryConditions<Entity>,

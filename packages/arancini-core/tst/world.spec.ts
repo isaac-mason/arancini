@@ -80,7 +80,7 @@ describe('World', () => {
       expect(notQueryOne).toBe(notQueryTwo)
     })
 
-    test('queries should be removed if there are no remaining references', () => {
+    test('queries can be destroyed', () => {
       const world = new World<Entity>()
 
       const query = world.query((q) => q.has('foo'))
@@ -88,26 +88,6 @@ describe('World', () => {
       expect(world.queries.length).toBe(1)
 
       world.destroyQuery(query)
-
-      expect(world.queries.length).toBe(0)
-    })
-
-    test('queries should not be destroyed if there are remaining references', () => {
-      const world = new World<Entity>()
-
-      const queryHandle = 'test'
-
-      const queryOne = world.query((q) => q.has('foo'), { handle: queryHandle })
-
-      const queryTwo = world.query((q) => q.has('foo'))
-
-      expect(world.queries.length).toBe(1)
-
-      world.destroyQuery(queryTwo)
-
-      expect(world.queries.length).toBe(1)
-
-      world.destroyQuery(queryOne, { handle: queryHandle })
 
       expect(world.queries.length).toBe(0)
     })

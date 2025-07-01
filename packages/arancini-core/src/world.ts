@@ -5,8 +5,6 @@ import {
 } from './entity-collection'
 import { Query, QueryFn, evaluateQueryConditions, prepareQuery } from './query'
 
-const DEFAULT_QUERY_HANDLE = Symbol('standalone')
-
 export type AnyEntity = Record<string, any>
 
 export class World<E extends AnyEntity = any> extends EntityCollection<E> {
@@ -189,21 +187,16 @@ export class World<E extends AnyEntity = any> extends EntityCollection<E> {
    */
   query<ResultEntity extends E>(
     queryFn: QueryFn<E, ResultEntity>,
-    options?: { handle: unknown }
   ): Query<ResultEntity> {
     const { conditions, dedupe } = prepareQuery(queryFn)
-
-    const handle = options?.handle ?? DEFAULT_QUERY_HANDLE
 
     let query = this.queries.find((query) => query.dedupe === dedupe)
 
     if (query) {
-      query.references.add(handle)
       return query
     }
 
     query = new Query(dedupe, conditions)
-    query.references.add(handle)
 
     this.queries.push(query)
 
@@ -230,14 +223,8 @@ export class World<E extends AnyEntity = any> extends EntityCollection<E> {
    * @param query the Query to remove
    * @returns
    */
-  destroyQuery(query: Query<any>, options?: { handle: unknown }): void {
+  destroyQuery(query: Query<any>): void {
     if (!this.queries.includes(query)) return
-
-    const handle = options?.handle ?? DEFAULT_QUERY_HANDLE
-
-    query.references.delete(handle)
-
-    if (query.references.size > 0) return
 
     const queryIndex = this.queries.indexOf(query)
     this.queries.splice(queryIndex, 1)
