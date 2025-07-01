@@ -1,5 +1,16 @@
 # @arancini/react
 
+## 8.1.0
+
+### Minor Changes
+
+- 075cc1a: feat: bump react peer dependency from v18 to v19
+
+### Patch Changes
+
+- Updated dependencies [67284b2]
+  - @arancini/core@8.1.0
+
 ## 8.0.0
 
 ### Patch Changes
