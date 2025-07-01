@@ -1,5 +1,5 @@
 import { World } from '@arancini/core'
-import '@testing-library/jest-dom'
+import '@testing-library/dom'
 import { act, render, renderHook } from '@testing-library/react'
 import React, {
   forwardRef,

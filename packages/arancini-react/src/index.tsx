@@ -3,6 +3,7 @@ import React, {
   createContext,
   type ForwardedRef,
   forwardRef,
+  type JSX,
   memo,
   type ReactElement,
   type ReactNode,
