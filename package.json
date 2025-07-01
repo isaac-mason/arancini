@@ -9,12 +9,14 @@
   "scripts": {
     "build": "yarn workspaces foreach -A -t run build",
     "test": "yarn workspaces foreach -A -t run test",
-    "lint": "yarn workspaces foreach -A -t run lint",
     "change": "yarn changeset",
     "bump": "yarn changeset version && yarn install --mode update-lockfile",
-    "release": "yarn build && yarn test && changeset publish"
+    "release": "yarn build && yarn test && changeset publish",
+    "format": "yarn biome format --write **/src",
+    "lint": "yarn biome lint --write **/src"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.0.6",
     "@changesets/cli": "^2.26.1",
     "concurrently": "^8.2.1"
   }
