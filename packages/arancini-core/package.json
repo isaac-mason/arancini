@@ -32,7 +32,7 @@
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-filesize": "^10.0.0",
     "typescript": "^5.8.2",
-    "vitest": "^2.1.8"
+    "vitest": "^3.2.4"
   },
   "files": [
     "dist",
