@@ -13,7 +13,7 @@
     "arancini": "workspace:^"
   },
   "devDependencies": {
-    "prettier": "^3.2.5",
+    "prettier": "^3.6.2",
     "vite": "^6.2.0"
   }
 }
